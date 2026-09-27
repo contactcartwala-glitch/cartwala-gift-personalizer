@@ -1,8 +1,8 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "ce0ab02aa2c699519934f02e1811a8f2"
+client_id = "3879fe641910f37451baf743e76059ee"
 name = "Cartwala Gift Personalizer"
-application_url = "https://cartwala-gift-personalizer.fly.dev"
+application_url = "https://cartwala-gift-personalizer-1.onrender.com"
 embedded = true
 
 [build]
@@ -29,7 +29,7 @@ prefix = "apps"
 subpath = "cartwala-signature-day"
 
 [auth]
-redirect_urls = [ "https://cartwala-gift-personalizer.fly.dev/auth/callback" ]
+redirect_urls = [ "https://cartwala-gift-personalizer-1.onrender.com/auth/callback" ]
 
 [pos]
 embedded = false
