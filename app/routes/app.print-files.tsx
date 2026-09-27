@@ -62,11 +62,35 @@ type PhotoLayer = {
   left: number;
   top: number;
 };
+const orderLookupMessage = (error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error);
+  if (/read_orders|write_orders|access denied|access scope|permission/i.test(message))
+    return "Order access is missing. Add read_orders to Render SCOPES, deploy the Shopify app configuration, then reopen the app and approve the updated permissions.";
+  return "Could not load orders for Print Files. Check the Render logs for the order lookup error.";
+};
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { admin, session } = await authenticate.admin(request);
-  const response = await admin.graphql(`#graphql
+  let loadError: string | null = null;
+  let payload: any = null;
+  try {
+    const scopesResponse = await admin.graphql(`#graphql
+      query CartwalaGrantedScopes { currentAppInstallation { accessScopes { handle } } }`);
+    const scopesPayload = (await scopesResponse.json()) as any;
+    if (scopesPayload.errors?.length) throw new Error(scopesPayload.errors[0].message);
+    const granted = (scopesPayload.data?.currentAppInstallation?.accessScopes || [])
+      .map((scope: { handle: string }) => scope.handle);
+    if (!granted.includes("read_orders") && !granted.includes("write_orders")) {
+      loadError = "The app has not been granted read_orders. Deploy the Shopify app configuration, then reopen the app and approve the updated permissions.";
+    } else {
+      const response = await admin.graphql(`#graphql
  query CartwalaPrintOrders($after: String) { orders(first: 50, after: $after, reverse: true, sortKey: CREATED_AT) { nodes { id name createdAt displayFinancialStatus lineItems(first: 100) { nodes { id name title quantity customAttributes { key value } product { id title metafield(namespace: "$app", key: "personalizer_config") { jsonValue } } } } } pageInfo { hasNextPage endCursor } } }`);
-  const payload = (await response.json()) as any;
+      payload = (await response.json()) as any;
+      if (payload.errors?.length) throw new Error(payload.errors[0].message);
+    }
+  } catch (error) {
+    console.error("Print Files order lookup failed", error);
+    loadError = orderLookupMessage(error);
+  }
   const items: PrintItem[] = [];
   const signatureOrders: Array<{ orderName: string; createdAt: string; financialStatus: string;
     productTitle: string; designId: string }> = [];
@@ -108,16 +132,22 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }
   const uniqueSignatureOrders = [...new Map(signatureOrders.map((order) =>
     [`${order.orderName}:${order.designId}`, order])).values()];
-  const saved = await prisma.signatureDayDesign.findMany({
-    where: { shop: session.shop, id: { in: signatureOrders.map((o) => o.designId) } },
-  });
+  let saved: Awaited<ReturnType<typeof prisma.signatureDayDesign.findMany>> = [];
+  if (signatureOrders.length) try {
+    saved = await prisma.signatureDayDesign.findMany({
+      where: { shop: session.shop, id: { in: signatureOrders.map((o) => o.designId) } },
+    });
+  } catch (error) {
+    console.error("Print Files design lookup failed", error);
+    loadError = "Orders loaded, but saved designs could not be read. Check the app database and migration log.";
+  }
   const designs = Object.fromEntries(saved.map((design) => [design.id, {
     previewUrls: design.previewUrls as Array<{ front: string; back?: string }>,
     printUrls: design.printUrls as Array<{ front: string; back?: string }>,
     sourceUrls: design.sourceUrls as string[],
     shirtSizes: design.shirtSizes as string[],
   }]));
-  return { items, signatureOrders: uniqueSignatureOrders, designs };
+  return { items, signatureOrders: uniqueSignatureOrders, designs, loadError };
 };
 const attrMap = (a: Attribute[]) =>
   Object.fromEntries(a.map((x) => [x.key, x.value]));
@@ -637,7 +667,7 @@ async function downloadPsd(item: PrintItem) {
   );
 }
 export default function PrintFilesPage() {
-  const { items, signatureOrders, designs } = useLoaderData<typeof loader>();
+  const { items, signatureOrders, designs, loadError } = useLoaderData<typeof loader>();
   const [working, setWorking] = useState("");
   const grouped = useMemo(() => {
     const m = new Map<string, PrintItem[]>();
@@ -671,6 +701,7 @@ export default function PrintFilesPage() {
   };
   return (
     <s-page heading="Print Files">
+      {loadError && <s-section heading="Print Files needs attention"><s-paragraph>{loadError}</s-paragraph></s-section>}
       <s-section heading="Signature Day T-shirts">
         {signatureOrders.length === 0 ? <s-paragraph>No Signature Day orders yet.</s-paragraph> :
           signatureOrders.map((order) => {

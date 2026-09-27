@@ -22,7 +22,7 @@
     assign personalizer_enabled = true
     assign heart_magic_mirror_fallback = true
   endif
-  if product.id == 8632711381177
+  if product.id == 8632711381177 and personalizer_config == blank
     assign personalizer_enabled = true
     assign round_magic_mirror_fallback = true
   endif
