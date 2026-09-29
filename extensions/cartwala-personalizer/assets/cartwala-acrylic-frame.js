@@ -27,6 +27,7 @@
     const gallery = document.querySelector("[data-gallery-main]");
     const galleryImage = gallery?.querySelector("img");
     gallery?.classList.add("cw-acrylic__gallery");
+    gallery?.parentElement?.classList.add("cw-acrylic__gallery-container");
     const preview = document.createElement("div");
     preview.className = "cw-acrylic__gallery-preview";
     preview.hidden = true;

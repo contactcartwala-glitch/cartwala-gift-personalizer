@@ -2,6 +2,8 @@
 .cw-acrylic h2{font-size:21px;margin:0 0 6px}.cw-acrylic>p{margin:0 0 20px;color:#586272;line-height:1.5}
 .cw-acrylic__layout{display:block}
 .cw-acrylic__choices{width:100%}
+.cw-acrylic__gallery-container{min-width:0;max-width:100%;overflow:hidden}
+.cw-acrylic__gallery-container .product-gallery__thumbs{overflow-x:auto}
 .cw-acrylic__gallery{position:relative!important}
 .cw-acrylic__gallery-preview{position:absolute;inset:0;z-index:2;display:grid;place-items:center;background:#f3f0e9;overflow:hidden}
 .cw-acrylic__gallery-preview[hidden]{display:none}
