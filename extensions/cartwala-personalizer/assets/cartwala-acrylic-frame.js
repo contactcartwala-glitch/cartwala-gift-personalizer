@@ -49,6 +49,7 @@
       const height = orientation === "Landscape" ? short : long;
       frame.style.width = `${(width / 36) * 270}px`;
       frame.style.height = `${(height / 36) * 270}px`;
+      frame.classList.toggle("cw-acrylic__frame--studs", choice(selected, 1) === "5mm with studs");
       panel.querySelector("[data-cw-acrylic-width]").textContent = `← ${width}″ width →`;
       panel.querySelector("[data-cw-acrylic-height]").textContent = `${height}″ height`;
       panel.querySelector("[data-cw-acrylic-caption]").textContent = `${size.replace(" inches", "")}, ${orientation}`;
