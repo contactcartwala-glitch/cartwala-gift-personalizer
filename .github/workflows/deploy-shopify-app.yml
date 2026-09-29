@@ -30,7 +30,7 @@ jobs:
           SHOPIFY_APP_AUTOMATION_TOKEN: ${{ secrets.SHOPIFY_APP_AUTOMATION_TOKEN }}
         run: |
           if [ -z "$SHOPIFY_APP_AUTOMATION_TOKEN" ]; then
-            echo "::error::Add SHOPIFY_APP_AUTOMATION_TOKEN for the Render Shopify app to this repository's Actions secrets."
+            echo "::error::Add SHOPIFY_APP_AUTOMATION_TOKEN for the active Cartwala Gift Personalizer app to this repository's Actions secrets."
             exit 1
           fi
 
@@ -65,6 +65,6 @@ jobs:
         if: steps.latest.outputs.skip == 'false'
         env:
           SHOPIFY_APP_AUTOMATION_TOKEN: ${{ secrets.SHOPIFY_APP_AUTOMATION_TOKEN }}
-          SHOPIFY_FLAG_CLIENT_ID: '3879fe641910f37451baf743e76059ee'
+          SHOPIFY_FLAG_CLIENT_ID: 'ce0ab02aa2c699519934f02e1811a8f2'
           COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
-        run: shopify app deploy --client-id 3879fe641910f37451baf743e76059ee --allow-updates --source-control-url "$COMMIT_URL"
+        run: shopify app deploy --config live --client-id ce0ab02aa2c699519934f02e1811a8f2 --allow-updates --source-control-url "$COMMIT_URL"
