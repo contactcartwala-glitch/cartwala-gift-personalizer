@@ -2090,8 +2090,8 @@
         let lastStageWidth = 0;
         let lastStageHeight = 0;
         const photoOffset = (state) => ({
-          x: state.relativeX !== undefined ? state.relativeX : state.x / (stage.clientWidth || lastStageWidth || 1),
-          y: state.relativeY !== undefined ? state.relativeY : state.y / (stage.clientHeight || lastStageHeight || 1),
+          x: Number.isFinite(state.relativeX) ? state.relativeX : (Number(state.x) || 0) / (stage.clientWidth || lastStageWidth || 1),
+          y: Number.isFinite(state.relativeY) ? state.relativeY : (Number(state.y) || 0) / (stage.clientHeight || lastStageHeight || 1),
         });
         const attach = async () => {
           if (!productForm || !isReady() || busy) return;
@@ -2622,8 +2622,8 @@
         root.querySelector("[data-cw-open]").addEventListener("click", () => {
           photoStates.forEach((s) => {
             if (s.relativeX !== undefined) {
-              s.x = s.relativeX * stage.clientWidth;
-              s.y = s.relativeY * stage.clientHeight;
+              s.x = Number.isFinite(s.relativeX) ? s.relativeX * stage.clientWidth : 0;
+              s.y = Number.isFinite(s.relativeY) ? s.relativeY * stage.clientHeight : 0;
               delete s.relativeX;
               delete s.relativeY;
               apply(s);
