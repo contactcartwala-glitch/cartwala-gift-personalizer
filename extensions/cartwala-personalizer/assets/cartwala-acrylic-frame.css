@@ -14,7 +14,7 @@
 .cw-acrylic__room-plant{position:absolute;right:4%;top:67%;width:9%;height:24%;background:radial-gradient(ellipse at 24% 35%,#7d987b 0 13%,transparent 14%),radial-gradient(ellipse at 78% 20%,#91a88b 0 15%,transparent 16%),radial-gradient(ellipse at 65% 48%,#607d66 0 17%,transparent 18%),linear-gradient(90deg,transparent 48%,#687b62 49% 51%,transparent 52%)}
 .cw-acrylic__room-plant:after{content:"";position:absolute;left:22%;right:22%;bottom:0;height:34%;background:linear-gradient(#cfb9a0,#ad9378);clip-path:polygon(0 0,100% 0,85% 100%,15% 100%)}
 .cw-acrylic__room-scale{position:absolute;left:0;right:0;bottom:2%;text-align:center;font:600 11px/1.2 sans-serif;color:#564d43}
-.cw-acrylic__gallery-guide{position:relative;z-index:1;width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;padding:5% 8% 22%;box-sizing:border-box;text-align:center}
+.cw-acrylic__gallery-guide{position:relative;z-index:1;width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;padding:0;box-sizing:border-box;text-align:center;transform:translateY(-10%)}
 .cw-acrylic__gallery-guide .cw-acrylic__frame{width:48%;height:72%;max-width:none;max-height:none;flex:none}
 .cw-acrylic__gallery-guide strong{font-size:14px;color:#293646}
 .cw-acrylic__frame{position:relative;flex:none;max-width:270px;max-height:270px;border:1px solid #b7c2c8;background:#e7e8ea;box-shadow:0 4px 15px #0003;transition:width .25s ease,height .25s ease;box-sizing:border-box}
