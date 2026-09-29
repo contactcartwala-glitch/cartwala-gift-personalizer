@@ -143,6 +143,7 @@ export default function App() {
       <s-app-nav>
         <s-link href="/app">Personalizer</s-link>
         <s-link href="/app/print-files">Print Files</s-link>
+        <s-link href="/app/acrylic-prices">Acrylic Frame Prices</s-link>
       </s-app-nav>
       <Outlet />
     </AppProvider>
