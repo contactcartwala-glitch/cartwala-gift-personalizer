@@ -1,10 +1,20 @@
 .cw-acrylic__gallery-container{min-width:0;max-width:100%;overflow:hidden}
 .cw-acrylic__gallery-container .product-gallery__thumbs{overflow-x:auto}
 .cw-acrylic__gallery{position:relative!important}
-.cw-acrylic__gallery-preview{position:absolute;inset:0;z-index:2;display:grid;place-items:center;background:#f3f0e9;overflow:hidden}
+.cw-acrylic__gallery-preview{position:absolute;inset:0;z-index:2;display:grid;place-items:center;overflow:hidden}
 .cw-acrylic__gallery-preview[hidden]{display:none}
 .cw-acrylic__gallery-original--hidden{visibility:hidden}
-.cw-acrylic__gallery-guide{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;padding:6% 8%;box-sizing:border-box;text-align:center}
+.cw-acrylic__room{position:absolute;inset:0;background:linear-gradient(110deg,#f8f5f0,#eee9e1 65%,#e9e3da);box-shadow:inset 0 0 45px #806d5114}
+.cw-acrylic__room-floor{position:absolute;inset:84% 0 0;background:linear-gradient(#dfd1bf,#cdb89f);border-top:3px solid #f9f7f2}
+.cw-acrylic__room-sofa{position:absolute;left:11%;top:75%;width:78%;height:16%;border-radius:22% 22% 8% 8%/38% 38% 12% 12%;background:linear-gradient(#c6b9a7 0 55%,#b4a28e 56% 100%);box-shadow:0 7px 15px #493b2933,0 2px 0 #9b8874;box-sizing:border-box;border:1px solid #ad9d89}
+.cw-acrylic__room-sofa:after{content:"";position:absolute;left:4%;right:4%;bottom:15%;height:2px;background:#9d8a7570}
+.cw-acrylic__room-sofa span{position:absolute;top:24%;width:18%;height:38%;border-radius:16%;background:#a66c59;box-shadow:1px 2px 5px #68544540;transform:rotate(-8deg)}
+.cw-acrylic__room-sofa span:first-child{left:13%}.cw-acrylic__room-sofa span:last-child{right:13%;background:#ded1bb;transform:rotate(8deg)}
+.cw-acrylic__room-table{position:absolute;left:4%;top:79%;width:9%;height:13%;border-radius:45% 45% 5% 5%;background:linear-gradient(#ab9172 0 12%,#e8dfd0 13% 90%,#ad987e);box-shadow:1px 5px 9px #493b2929}
+.cw-acrylic__room-plant{position:absolute;right:4%;top:67%;width:9%;height:24%;background:radial-gradient(ellipse at 24% 35%,#7d987b 0 13%,transparent 14%),radial-gradient(ellipse at 78% 20%,#91a88b 0 15%,transparent 16%),radial-gradient(ellipse at 65% 48%,#607d66 0 17%,transparent 18%),linear-gradient(90deg,transparent 48%,#687b62 49% 51%,transparent 52%)}
+.cw-acrylic__room-plant:after{content:"";position:absolute;left:22%;right:22%;bottom:0;height:34%;background:linear-gradient(#cfb9a0,#ad9378);clip-path:polygon(0 0,100% 0,85% 100%,15% 100%)}
+.cw-acrylic__room-scale{position:absolute;left:0;right:0;bottom:2%;text-align:center;font:600 11px/1.2 sans-serif;color:#564d43}
+.cw-acrylic__gallery-guide{position:relative;z-index:1;width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;padding:5% 8% 22%;box-sizing:border-box;text-align:center}
 .cw-acrylic__gallery-guide .cw-acrylic__frame{width:48%;height:72%;max-width:none;max-height:none;flex:none}
 .cw-acrylic__gallery-guide strong{font-size:14px;color:#293646}
 .cw-acrylic__frame{position:relative;flex:none;max-width:270px;max-height:270px;border:1px solid #b7c2c8;background:#e7e8ea;box-shadow:0 4px 15px #0003;transition:width .25s ease,height .25s ease;box-sizing:border-box}
@@ -12,4 +22,4 @@
 .cw-acrylic__frame--studs::after{content:"";position:absolute;inset:4px;pointer-events:none;background:radial-gradient(circle at 0 0,#d9dee1 0 4px,#6e767b 5px,#fff 6px,transparent 7px),radial-gradient(circle at 100% 0,#d9dee1 0 4px,#6e767b 5px,#fff 6px,transparent 7px),radial-gradient(circle at 0 100%,#d9dee1 0 4px,#6e767b 5px,#fff 6px,transparent 7px),radial-gradient(circle at 100% 100%,#d9dee1 0 4px,#6e767b 5px,#fff 6px,transparent 7px)}
 .cw-acrylic__photo{width:100%;height:100%;display:block;object-fit:cover;background:#e7e8ea}
 .cw-acrylic__width,.cw-acrylic__height{font-size:13px;font-weight:700;color:#293646}.cw-acrylic__width{height:24px;padding-top:5px}.cw-acrylic__height{height:22px}
-@media(max-width:700px){.cw-acrylic__gallery-guide{gap:3px}.cw-acrylic__gallery-guide strong{font-size:12px}}
+@media(max-width:700px){.cw-acrylic__gallery-guide{gap:3px}.cw-acrylic__gallery-guide strong{font-size:11px}.cw-acrylic__width,.cw-acrylic__height{font-size:11px}.cw-acrylic__room-scale{font-size:9px}}

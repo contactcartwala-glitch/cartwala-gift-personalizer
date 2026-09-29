@@ -24,7 +24,7 @@
     const preview = document.createElement("div");
     preview.className = "cw-acrylic__gallery-preview";
     preview.hidden = true;
-    preview.innerHTML = '<div class="cw-acrylic__gallery-guide"><span data-cw-acrylic-height></span><div class="cw-acrylic__frame" data-cw-acrylic-frame><img class="cw-acrylic__photo" data-cw-acrylic-photo alt="Your acrylic frame design"></div><span data-cw-acrylic-width></span><strong data-cw-acrylic-caption></strong></div>';
+    preview.innerHTML = '<div class="cw-acrylic__room" aria-hidden="true"><div class="cw-acrylic__room-floor"></div><div class="cw-acrylic__room-sofa"><span></span><span></span></div><div class="cw-acrylic__room-table"></div><div class="cw-acrylic__room-plant"></div><div class="cw-acrylic__room-scale">Approx. 5 ft sofa for scale</div></div><div class="cw-acrylic__gallery-guide"><span data-cw-acrylic-height></span><div class="cw-acrylic__frame" data-cw-acrylic-frame><img class="cw-acrylic__photo" data-cw-acrylic-photo alt="Your acrylic frame design"></div><span data-cw-acrylic-width></span><strong data-cw-acrylic-caption></strong></div>';
     gallery?.appendChild(preview);
     let designUrl = "";
     const showPreview = () => {
@@ -54,8 +54,9 @@
       if (!Number.isFinite(short) || !Number.isFinite(long)) return;
       const width = orientation === "Landscape" ? long : short;
       const height = orientation === "Landscape" ? short : long;
-      frame.style.width = `${(width / 36) * 72}%`;
-      frame.style.height = `${(height / 36) * 72}%`;
+      // Keep the room reference fixed: the 78%-wide sofa represents roughly 60 inches.
+      frame.style.width = `${(width / 60) * 78}%`;
+      frame.style.height = `${(height / 60) * 78}%`;
       frame.classList.toggle("cw-acrylic__frame--studs", choice(selected, 1) === "5mm with studs");
       if (!designUrl) selectGalleryMedia();
       preview.querySelector("[data-cw-acrylic-width]").textContent = `← ${width}″ width →`;
