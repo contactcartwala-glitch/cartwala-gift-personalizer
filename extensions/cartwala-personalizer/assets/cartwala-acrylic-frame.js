@@ -19,7 +19,6 @@
       .forEach((input) => {
         if (input.value === String(selected.id)) return;
         input.value = String(selected.id);
-        input.dispatchEvent(new Event("change", { bubbles: true }));
       });
     const slots = [panel.querySelector("[data-cw-acrylic-sizes]"),
       panel.querySelector("[data-cw-acrylic-orientations]"), panel.querySelector("[data-cw-acrylic-materials]")];
@@ -108,6 +107,7 @@
     // The theme's deferred gallery script can bind after this app block runs.
     if (document.readyState !== "complete") window.addEventListener("load", () => {
       if (!designUrl) selectGalleryMedia();
+      syncCartVariant();
     }, { once: true });
     // Keep the guide aligned when a theme variant picker is used instead.
     document.addEventListener("change", (event) => {

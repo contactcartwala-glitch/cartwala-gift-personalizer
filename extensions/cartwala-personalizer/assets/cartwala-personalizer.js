@@ -1229,8 +1229,8 @@
           setPurchaseReady(false);
           result.hidden = true;
         };
+        let selectedVariantId = root.querySelector("[data-cw-acrylic]")?.dataset.selectedVariant;
         if (root.dataset.cwAcrylicProduct === "true") {
-          let selectedVariantId = root.querySelector("[data-cw-acrylic]")?.dataset.selectedVariant;
           let acrylicPreviewTimer;
           root.addEventListener("cw:acrylic-selection", (event) => {
             const ratio = event.detail?.ratio;
@@ -1255,6 +1255,10 @@
           async (event) => {
             event.preventDefault();
             event.stopImmediatePropagation();
+            if (root.dataset.cwAcrylicProduct === "true") {
+              const variantInput = productForm.querySelector('input[name="id"]');
+              if (variantInput && selectedVariantId) variantInput.value = selectedVariantId;
+            }
             if (!saved || busy) {
               dialog.showModal();
               return;
