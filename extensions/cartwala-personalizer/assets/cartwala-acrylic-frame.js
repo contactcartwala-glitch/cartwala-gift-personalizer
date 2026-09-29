@@ -50,6 +50,9 @@
       frame.style.width = `${(width / 36) * 270}px`;
       frame.style.height = `${(height / 36) * 270}px`;
       frame.classList.toggle("cw-acrylic__frame--studs", choice(selected, 1) === "5mm with studs");
+      const mediaId = selected.featured_media?.id;
+      const thumbnail = mediaId && document.querySelector(`[data-gallery-thumb][data-media-id="${mediaId}"]`);
+      if (thumbnail && !thumbnail.classList.contains("is-active")) thumbnail.click();
       panel.querySelector("[data-cw-acrylic-width]").textContent = `← ${width}″ width →`;
       panel.querySelector("[data-cw-acrylic-height]").textContent = `${height}″ height`;
       panel.querySelector("[data-cw-acrylic-caption]").textContent = `${size.replace(" inches", "")}, ${orientation}`;
