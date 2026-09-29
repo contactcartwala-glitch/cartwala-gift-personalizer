@@ -40,6 +40,14 @@
       return button;
     }));
     const frame = panel.querySelector("[data-cw-acrylic-frame]");
+    const selectGalleryMedia = () => {
+      const media = selected.featured_media;
+      const thumbnail = media?.id && document.querySelector(`[data-gallery-thumb][data-media-id="${media.id}"]`);
+      if (!thumbnail) return;
+      if (!thumbnail.classList.contains("is-active")) thumbnail.click();
+      const mainImage = document.querySelector("[data-gallery-main] img");
+      if (mainImage && media.alt) mainImage.alt = media.alt;
+    };
     const render = () => {
       const size = choice(selected, 0);
       const orientation = choice(selected, 2);
@@ -50,9 +58,7 @@
       frame.style.width = `${(width / 36) * 270}px`;
       frame.style.height = `${(height / 36) * 270}px`;
       frame.classList.toggle("cw-acrylic__frame--studs", choice(selected, 1) === "5mm with studs");
-      const mediaId = selected.featured_media?.id;
-      const thumbnail = mediaId && document.querySelector(`[data-gallery-thumb][data-media-id="${mediaId}"]`);
-      if (thumbnail && !thumbnail.classList.contains("is-active")) thumbnail.click();
+      selectGalleryMedia();
       panel.querySelector("[data-cw-acrylic-width]").textContent = `← ${width}″ width →`;
       panel.querySelector("[data-cw-acrylic-height]").textContent = `${height}″ height`;
       panel.querySelector("[data-cw-acrylic-caption]").textContent = `${size.replace(" inches", "")}, ${orientation}`;
@@ -67,6 +73,8 @@
       }));
     };
     render();
+    // The theme's deferred gallery script can bind after this app block runs.
+    if (document.readyState !== "complete") window.addEventListener("load", selectGalleryMedia, { once: true });
     // Keep the guide aligned when a theme variant picker is used instead.
     document.addEventListener("change", (event) => {
       if (event.target?.name !== "id") return;
