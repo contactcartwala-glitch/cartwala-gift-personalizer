@@ -2087,8 +2087,16 @@
                 height: longest,
               };
         };
+        let lastStageWidth = 0;
+        let lastStageHeight = 0;
+        const photoOffset = (state) => ({
+          x: state.relativeX !== undefined ? state.relativeX : state.x / (stage.clientWidth || lastStageWidth || 1),
+          y: state.relativeY !== undefined ? state.relativeY : state.y / (stage.clientHeight || lastStageHeight || 1),
+        });
         const attach = async () => {
           if (!productForm || !isReady() || busy) return;
+          if (stage.clientWidth) lastStageWidth = stage.clientWidth;
+          if (stage.clientHeight) lastStageHeight = stage.clientHeight;
           busy = true;
           saved = false;
           lockButtons();
@@ -2138,9 +2146,10 @@
                 slotH,
               );
               layerContext.clip();
+              const offset = photoOffset(state);
               layerContext.translate(
-                slotX + (state.x * dimensions.width) / stage.clientWidth,
-                slotY + (state.y * dimensions.height) / stage.clientHeight,
+                slotX + offset.x * dimensions.width,
+                slotY + offset.y * dimensions.height,
               );
               layerContext.rotate((state.angle * Math.PI) / 180);
               layerContext.scale(state.scale, state.scale);
@@ -2306,8 +2315,8 @@
                   w: s.field.width,
                   h: s.field.height,
                   m: s.field.maskUrl,
-                  ox: s.x / stage.clientWidth,
-                  oy: s.y / stage.clientHeight,
+                  ox: photoOffset(s).x,
+                  oy: photoOffset(s).y,
                   s: s.scale,
                   a: s.angle,
                 })),
@@ -2408,8 +2417,8 @@
             printDesign,
             photos: photoStates.map((s) => ({
               file: s.file,
-              x: s.x / stage.clientWidth,
-              y: s.y / stage.clientHeight,
+              x: photoOffset(s).x,
+              y: photoOffset(s).y,
               scale: s.scale,
               angle: s.angle,
             })),
