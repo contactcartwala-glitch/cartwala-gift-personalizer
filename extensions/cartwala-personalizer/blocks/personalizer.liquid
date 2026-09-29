@@ -42,18 +42,7 @@
       <div data-cw-config="{{ personalizer_config | json | escape }}" hidden></div>
     {% endif %}
     {% if acrylic_product %}
-      <section class="cw-acrylic" data-cw-acrylic data-variants="{{ product.variants | json | escape }}" data-selected-variant="{{ product.selected_or_first_available_variant.id }}">
-        <h2>Choose your frame</h2>
-        <p>Choose a size and direction, then upload your photo. Your design appears in the main product image and follows your size changes.</p>
-        <div class="cw-acrylic__layout">
-          <div class="cw-acrylic__choices">
-            <fieldset><legend>Size</legend><div class="cw-acrylic__options" data-cw-acrylic-sizes></div></fieldset>
-            <fieldset><legend>Direction</legend><div class="cw-acrylic__options" data-cw-acrylic-orientations></div></fieldset>
-            <fieldset><legend>Acrylic</legend><div class="cw-acrylic__options" data-cw-acrylic-materials></div></fieldset>
-            <p class="cw-acrylic__price" data-cw-acrylic-price></p>
-          </div>
-        </div>
-      </section>
+      <div data-cw-acrylic data-variants="{{ product.variants | json | escape }}" data-selected-variant="{{ product.selected_or_first_available_variant.id }}" hidden></div>
       <script src="{{ 'cartwala-acrylic-frame.js' | asset_url }}" defer></script>
       {{ 'cartwala-acrylic-frame.css' | asset_url | stylesheet_tag }}
     {% endif %}
