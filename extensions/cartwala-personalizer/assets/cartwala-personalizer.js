@@ -1229,6 +1229,20 @@
           setPurchaseReady(false);
           result.hidden = true;
         };
+        if (root.dataset.cwAcrylicProduct === "true") {
+          let selectedVariantId = root.querySelector("[data-cw-acrylic]")?.dataset.selectedVariant;
+          root.addEventListener("cw:acrylic-selection", (event) => {
+            const ratio = event.detail?.ratio;
+            const variantId = event.detail?.variantId;
+            if (!/^\d{1,3}:\d{1,3}$/.test(ratio || "")) return;
+            if (ratio !== config.ratio || variantId !== selectedVariantId) invalidate();
+            selectedVariantId = variantId;
+            config.ratio = ratio;
+            const [width, height] = ratio.split(":").map(Number);
+            root.style.setProperty("--cw-ratio", `${width}/${height}`);
+            root.style.setProperty("--cw-stage-ratio", String(width / height));
+          });
+        }
         let cartSubmitting = false;
         productForm?.addEventListener(
           "submit",
