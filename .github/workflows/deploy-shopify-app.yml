@@ -65,6 +65,5 @@ jobs:
         if: steps.latest.outputs.skip == 'false'
         env:
           SHOPIFY_APP_AUTOMATION_TOKEN: ${{ secrets.SHOPIFY_APP_AUTOMATION_TOKEN }}
-          SHOPIFY_FLAG_CLIENT_ID: 'ce0ab02aa2c699519934f02e1811a8f2'
           COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
-        run: shopify app deploy --config live --client-id ce0ab02aa2c699519934f02e1811a8f2 --allow-updates --source-control-url "$COMMIT_URL"
+        run: shopify app deploy --config live --allow-updates --source-control-url "$COMMIT_URL"
