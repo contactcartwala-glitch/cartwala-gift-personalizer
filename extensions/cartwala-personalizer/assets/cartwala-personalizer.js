@@ -1231,16 +1231,22 @@
         };
         if (root.dataset.cwAcrylicProduct === "true") {
           let selectedVariantId = root.querySelector("[data-cw-acrylic]")?.dataset.selectedVariant;
+          let acrylicPreviewTimer;
           root.addEventListener("cw:acrylic-selection", (event) => {
             const ratio = event.detail?.ratio;
             const variantId = event.detail?.variantId;
             if (!/^\d{1,3}:\d{1,3}$/.test(ratio || "")) return;
-            if (ratio !== config.ratio || variantId !== selectedVariantId) invalidate();
+            const changed = ratio !== config.ratio || variantId !== selectedVariantId;
+            if (changed) invalidate();
             selectedVariantId = variantId;
             config.ratio = ratio;
             const [width, height] = ratio.split(":").map(Number);
             root.style.setProperty("--cw-ratio", `${width}/${height}`);
             root.style.setProperty("--cw-stage-ratio", String(width / height));
+            if (changed && photoStates.some((state) => state.file)) {
+              clearTimeout(acrylicPreviewTimer);
+              acrylicPreviewTimer = setTimeout(() => attach(), 350);
+            }
           });
         }
         let cartSubmitting = false;
@@ -2354,6 +2360,9 @@
 
         const showProductPreview = (url) => {
           if (root.dataset.productKind === "mug") return;
+          // Acrylic designs are mounted inside the main product gallery by the
+          // frame selector, which also supplies the selected size and studs.
+          if (root.dataset.cwAcrylicProduct === "true") return;
           const scope = root.closest(".shopify-section") || document;
           const main =
             scope.querySelector(
@@ -2372,12 +2381,9 @@
             main.alt = root.dataset.labelSaved || "Your personalized design";
           }
         };
-        const draftKey =
-          location.pathname +
-          ":" +
-          root.dataset.productId +
-          ":" +
-          JSON.stringify(raw);
+        const draftKey = root.dataset.cwAcrylicProduct === "true"
+          ? location.pathname + ":" + root.dataset.productId + ":acrylic"
+          : location.pathname + ":" + root.dataset.productId + ":" + JSON.stringify(raw);
         const database = new Promise((resolve, reject) => {
           try {
             const request = indexedDB.open("cartwala-designs", 1);

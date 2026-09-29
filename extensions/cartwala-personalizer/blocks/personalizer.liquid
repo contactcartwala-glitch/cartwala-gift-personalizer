@@ -44,12 +44,8 @@
     {% if acrylic_product %}
       <section class="cw-acrylic" data-cw-acrylic data-variants="{{ product.variants | json | escape }}" data-selected-variant="{{ product.selected_or_first_available_variant.id }}">
         <h2>Choose your frame</h2>
-        <p>Select the size and direction before adding your photo. The frame preview changes in proportion to the size you choose.</p>
+        <p>Choose a size and direction, then upload your photo. Your design appears in the main product image and follows your size changes.</p>
         <div class="cw-acrylic__layout">
-          <div class="cw-acrylic__preview" aria-live="polite">
-            <div class="cw-acrylic__preview-area"><div class="cw-acrylic__height" data-cw-acrylic-height></div><div class="cw-acrylic__frame" data-cw-acrylic-frame><div class="cw-acrylic__photo" data-cw-acrylic-photo>YOUR PHOTO</div></div><div class="cw-acrylic__width" data-cw-acrylic-width></div></div>
-            <strong data-cw-acrylic-caption></strong><small>Dimensions in inches · proportional size guide</small>
-          </div>
           <div class="cw-acrylic__choices">
             <fieldset><legend>Size</legend><div class="cw-acrylic__options" data-cw-acrylic-sizes></div></fieldset>
             <fieldset><legend>Direction</legend><div class="cw-acrylic__options" data-cw-acrylic-orientations></div></fieldset>
