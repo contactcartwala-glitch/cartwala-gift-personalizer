@@ -1,6 +1,6 @@
 import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';import ts from 'typescript';
 const compile=p=>ts.transpileModule(fs.readFileSync(p,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
-const core={};vm.runInNewContext(compile('app/lib/product-groups.ts'),{exports:core});
+const core={};vm.runInNewContext(compile('app/lib/product-groups.ts'),{exports:core,structuredClone});
 let record=null,writes=0;const db={productGroupSettings:{findUnique:async()=>record,create:async({data})=>{record=data;writes++;},updateMany:async({data})=>{record={...record,state:data.state,revision:record.revision+1};writes++;return {count:1};}}};const server={};vm.runInNewContext(compile('app/lib/product-groups.server.ts'),{exports:server,require:p=>p.includes('db.server')?{default:db}:p.endsWith('shop-setup-imports.json')?{default:JSON.parse(fs.readFileSync('app/data/shop-setup-imports.json','utf8'))}:core,Response,Buffer,structuredClone,Date});
 const group=core.emptyGroup('shared');group.tags=['shared'];group.previewMode='png';group.rows=[{id:'8',values:['8x12','Standard'],price:750,compare:1050,width:8,height:12,templates:{Portrait:core.emptyTemplate(),Landscape:core.emptyTemplate()}}];
 const product={id:'gid://shopify/Product/1',title:'Photo',handle:'photo',tags:['shared'],collectionIds:[],image:'',config:null,variants:[{id:'gid://shopify/ProductVariant/1',price:'300',compareAtPrice:null,selectedOptions:[{name:'Size',value:'8x12'},{name:'Material',value:'Standard'}]}],truncated:false,collectionsTruncated:false};
@@ -103,7 +103,7 @@ console.log('Add-size input passed: common size formats and invalid dimensions.'
 
 // Exercise the actual Add size handler: an empty price must not block the row or PNG slots.
 const routeSource=fs.readFileSync('app/routes/app.product-groups.tsx','utf8');
-const handlerSource=ts.transpileModule(routeSource.slice(routeSource.indexOf(' const addSize=()=>{'),routeSource.indexOf('\n if(index){')).replace('const addSize=','var addSize='),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+const handlerSource=ts.transpileModule(routeSource.slice(routeSource.indexOf(' const addSize=()=>{'),routeSource.indexOf('\n const uploadPNG=')).replace('const addSize=','var addSize='),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
 let inlineError='',focused='',selectedRow='';
 const sizeContext={parseSizeInput:core.parseSizeInput,emptyTemplate:core.emptyTemplate,crypto:globalThis.crypto,group:core.createTagSetup('test','test','',[]),newSize:'10x15',newType:'',newPrice:'',newOldPrice:'',document:{getElementById:id=>({focus:()=>{focused=id;}})},setSizeError:v=>{inlineError=v;},setCopyMessage:()=>{},setRowId:v=>{selectedRow=v;},setNewSize:()=>{},setNewPrice:()=>{},setNewOldPrice:()=>{},change:patch=>Object.assign(sizeContext.group,patch)};
 vm.runInNewContext(handlerSource+'\naddSize();',sizeContext);
@@ -117,3 +117,30 @@ assert.equal(sizeContext.group.rows.length,2);
 vm.runInNewContext(handlerSource+'\naddSize();',sizeContext);
 assert.equal(sizeContext.group.rows.length,2);assert.match(inlineError,/already exists/);assert.equal(focused,'pg-new-size');
 console.log('Add-size handler passed: blank-price rows, independent multiple sizes, PNG availability and duplicate focus.');
+
+const copySource=core.createTagSetup('copies','copies','',[]);
+copySource.rows=[{id:'original',values:['10×15 inches'],width:10,height:15,price:750,compare:1000,templates:{Portrait:{...core.emptyTemplate(),mockup:'https://example.com/portrait.png',mockupAspect:1},Landscape:core.emptyTemplate()}}];
+const copied=core.duplicateSizeRow(copySource,'original','copy');
+assert.equal(copySource.options.length,1);assert.equal(copySource.rows.length,1);
+assert.equal(copied.options.length,2);assert.equal(copied.rows[1].price,750);
+assert.equal(copied.rows[0].templates.Portrait.mockup,'https://example.com/portrait.png');
+assert.equal(copied.rows[1].templates.Portrait.mockup,undefined);
+assert.equal(copied.rows[1].previousValues,undefined);
+const twice=core.duplicateSizeRow(copied,'original','copy-2');
+assert.notEqual(twice.rows[1].values[1],twice.rows[2].values[1]);
+core.validateGroup(structuredClone(twice));
+console.log('Duplicate size passed: unique options, preserved prices, empty new PNGs and original unchanged.');
+
+// Render the real editor and ensure uploads are visible without opening tabs.
+const React=await import('react'), ReactDOM=await import('react-dom/server'), jsx=await import('react/jsx-runtime');
+const editorModule={};
+const editorData={settings:{state:{groups:[copied],published:[]},currency:'INR'},catalog:[],selected:copied,index:false,selectedTab:'sizes'};
+vm.runInNewContext(ts.transpileModule(routeSource,{fileName:'app.product-groups.tsx',compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText,{
+ exports:editorModule,crypto:globalThis.crypto,structuredClone,
+ require:p=>p==='react'?React:p==='react/jsx-runtime'?jsx:p==='react-router'?{useLoaderData:()=>editorData,useActionData:()=>undefined,useNavigation:()=>({state:'idle'}),useFetcher:()=>({state:'idle'}),Form:({children,...props})=>React.createElement('form',props,children),Link:({children,to,...props})=>React.createElement('a',{...props,href:to},children)}:p.endsWith('/product-groups')?core:{},
+});
+const editorHTML=ReactDOM.renderToStaticMarkup(React.createElement(editorModule.default));
+assert.equal((editorHTML.match(/type="file"/g)||[]).length,copied.rows.length*2);
+assert.match(editorHTML,/Selling price/);assert.match(editorHTML,/Upload PNG/);assert.match(editorHTML,/Duplicate/);
+assert.doesNotMatch(editorHTML,/Next: setup tag/);
+console.log('Editor render passed: every size has visible prices, two PNG upload buttons and Duplicate without tab navigation.');

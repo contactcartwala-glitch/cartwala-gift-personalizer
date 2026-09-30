@@ -5,7 +5,7 @@ export type ProductGroup = { id: string; name: string; description?: string; tag
 export type GroupState = { version: 1; appliedImportId?: string; optionNamesVersion?: number; groups: ProductGroup[]; published: ProductGroup[]; history: Array<{ at: string; name: string; groups: ProductGroup[]; published: ProductGroup[] }> };
 export const emptyTemplate = (): PreviewTemplate => ({ image: "", background: "", overlay: "", x: 50, y: 34, width: 30, height: 45, studs: false });
 export const emptyGroup = (id: string): ProductGroup => ({ id, name: "New Product Group", tags: [], collectionIds: [], productIds: [], excludedIds: [], keepPriceIds: [], options: ["Size", "Material"], rows: [], compareMode: "manual", percentage: 0, previewMode: "png", customization: "plain", direction: "customer", orientationOption: "Orientation", portraitTag: "", landscapeTag: "", background: "", createVariants: true });
-export const normalizeValue = (value: string) => value.trim().toLowerCase().replace(/\s*(inches|inch|in|\")\s*$/i, "").replace(/\s*[x×]\s*/g, "×");
+export const normalizeValue = (value: string) => value.trim().toLowerCase().replace(/\s*(inches|inch|in|")\s*$/i, "").replace(/\s*[x×]\s*/g, "×");
 export const rowKey = (values: string[]) => values.map(normalizeValue).join("|");
 /** Editing a row never renames the same value in another size. */
 export function renameRowValue(group:ProductGroup,id:string,index:number,name:string):GroupRow[] {
@@ -117,4 +117,19 @@ export function parseSizeInput(value:string):{width:number;height:number}|null {
  if(!dims)return null;
  const width=Math.min(Number(dims[1]),Number(dims[2])),height=Math.max(Number(dims[1]),Number(dims[2]));
  return width>0&&height<=1000?{width,height}:null;
+}
+
+export function duplicateSizeRow(group:ProductGroup,id:string,newId:string):ProductGroup {
+ const original=group.rows.find(r=>r.id===id);
+ if(!original)throw new Error("Size not found.");
+ const next=structuredClone(group);
+ if(next.options.length===1){
+  next.options.push("Type");
+  next.rows=next.rows.map(r=>({...r,values:[...r.values,"Standard"],previousValues:r.previousValues?.map(values=>[...values,"Standard"])}));
+ }
+ const source=next.rows.find(r=>r.id===id)!;
+ let number=1,values=[...source.values];
+ do{values=[...source.values];values[values.length-1]=source.values[values.length-1]+" copy"+(number>1?" "+number:"");number++;}while(next.rows.some(r=>rowKey(r.values)===rowKey(values)));
+ next.rows.push({...structuredClone(source),id:newId,values,previousValues:undefined,templates:{Portrait:emptyTemplate(),Landscape:emptyTemplate()}});
+ return next;
 }
