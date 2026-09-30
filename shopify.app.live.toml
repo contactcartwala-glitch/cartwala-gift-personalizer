@@ -46,3 +46,11 @@ description = "Controls the Cartwala photo personalizer for this product"
   [product.metafields.app.personalizer_config.access]
   admin = "merchant_read_write"
   storefront = "public_read"
+
+[collection.metafields.app.acrylic_room]
+type = "file_reference"
+name = "Acrylic room background"
+description = "Shared sofa background for every acrylic frame design"
+access.admin = "merchant_read_write"
+access.storefront = "public_read"
+validations.file_type_options = ["Image"]

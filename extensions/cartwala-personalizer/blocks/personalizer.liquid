@@ -1,4 +1,5 @@
 {% liquid
+  assign acrylic_room = collections['acrylic-photo-frames'].metafields['app--340764327937'].acrylic_room.value
   assign personalizer_config = product.metafields.cartwala_personalizer.personalizer_config.value
   if personalizer_config == blank
     assign personalizer_config = product.metafields['app--340764327937'].personalizer_config.value
@@ -52,7 +53,7 @@
       <div data-cw-config="{{ personalizer_config | json | escape }}" hidden></div>
     {% endif %}
     {% if acrylic_product %}
-      <div data-cw-acrylic data-option-names="{{ product.options | json | escape }}" data-design-ratio="{{ personalizer_config.canvasRatio | escape }}" data-fixed-orientation="{{ acrylic_fixed_orientation }}" data-design-image="{% if acrylic_fixed_orientation != blank and product.featured_image != blank %}{{ product.featured_image | image_url: width: 2400 }}{% endif %}" data-variants="{{ product.variants | json | escape }}" data-selected-variant="{{ product.selected_or_first_available_variant.id }}" data-room-image="{{ 'cartwala-acrylic-room.jpg' | asset_url }}" data-stud-image="{{ 'cartwala-acrylic-stud.png' | asset_url }}" hidden></div>
+      <div data-cw-acrylic data-option-names="{{ product.options | json | escape }}" data-design-ratio="{{ personalizer_config.canvasRatio | escape }}" data-fixed-orientation="{{ acrylic_fixed_orientation }}" data-design-image="{% if acrylic_fixed_orientation != blank and product.featured_image != blank %}{{ product.featured_image | image_url: width: 2400 }}{% endif %}" data-variants="{{ product.variants | json | escape }}" data-selected-variant="{{ product.selected_or_first_available_variant.id }}" data-room-image="{% if acrylic_room != blank %}{{ acrylic_room | image_url: width: 2000 }}{% else %}{{ 'cartwala-acrylic-room.jpg' | asset_url }}{% endif %}" data-stud-image="{{ 'cartwala-acrylic-stud.png' | asset_url }}" hidden></div>
       <script src="{{ 'cartwala-acrylic-frame.js' | asset_url }}" defer></script>
       {{ 'cartwala-acrylic-frame.css' | asset_url | stylesheet_tag }}
     {% endif %}

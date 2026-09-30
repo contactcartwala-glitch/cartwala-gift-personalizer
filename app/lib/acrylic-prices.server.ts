@@ -213,3 +213,24 @@ export async function syncAcrylicCollection(admin: { graphql: Graphql }, matrix:
   } while (cursor);
   return report;
 }
+
+export async function loadAcrylicRoom(admin: { graphql: Graphql }): Promise<string | null> {
+  const data = await graphql<{ collection: { room: { reference: { image?: { url: string } } | null } | null } | null }>(admin,
+    `#graphql
+    query AcrylicRoom($id: ID!) {
+      collection(id: $id) { room: metafield(namespace: "$app", key: "acrylic_room") {
+        reference { ... on MediaImage { id image { url } } }
+      } }
+    }`, { id: ACRYLIC_COLLECTION_ID });
+  return data.collection?.room?.reference?.image?.url || null;
+}
+
+export async function saveAcrylicRoom(admin: { graphql: Graphql }, fileId: string) {
+  const data = await graphql<{ metafieldsSet: { userErrors: Array<{ message: string }> } }>(admin,
+    `#graphql
+    mutation SaveAcrylicRoom($metafields: [MetafieldsSetInput!]!) {
+      metafieldsSet(metafields: $metafields) { userErrors { message } }
+    }`, { metafields: [{ ownerId: ACRYLIC_COLLECTION_ID, namespace: "$app",
+      key: "acrylic_room", type: "file_reference", value: fileId }] });
+  if (data.metafieldsSet.userErrors.length) throw new Error(data.metafieldsSet.userErrors[0].message);
+}
