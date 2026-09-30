@@ -66,7 +66,8 @@
       frame.style.width = `${(width / 60) * 78}%`;
       frame.style.height = `${(height / 60) * 78}%`;
       frame.style.setProperty("--cw-acrylic-stud-size", `${Math.max(4, Math.min(12, Math.round(short / 2)))}px`);
-      frame.classList.toggle("cw-acrylic__frame--studs", option(selected, "Acrylic") === "5mm with studs");
+      frame.classList.toggle("cw-acrylic__frame--studs",
+        (option(selected, "Thickness") || option(selected, "Acrylic")) === "5mm with studs");
       if (!designUrl) selectGalleryMedia();
       preview.querySelector("[data-cw-acrylic-width]").textContent = `← ${width}″ width →`;
       preview.querySelector("[data-cw-acrylic-height]").textContent = `${height}″ height`;

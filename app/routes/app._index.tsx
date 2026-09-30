@@ -1574,6 +1574,9 @@ export default function PersonalizerHome() {
               <s-text type="strong">{selected.title}</s-text>
             </s-box>
           )}
+          {selected?.id === "gid://shopify/Product/15402886135993" && (
+            <s-button href="/app/acrylic-prices">Acrylic sizes and prices</s-button>
+          )}
           <s-switch
             label="Enable personalization"
             checked={config.enabled}
