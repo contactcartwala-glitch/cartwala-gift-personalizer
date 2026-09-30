@@ -41,7 +41,7 @@
     {% if heart_magic_mirror_fallback %}
       <div data-cw-config='{"enabled":true,"overlayUrl":"https://cdn.shopify.com/s/files/1/0803/7931/4361/files/love_shape-overlay_019e41fb-91c2-47b6-8017-ffcfa79af20c.png?v=1789700102","canvasRatio":"1254:1254","photoFields":[{"id":"photo-1","label":"1 MASK","maskUrl":"https://cdn.shopify.com/s/files/1/0803/7931/4361/files/psd-photo-mask-1_0cf43e8b-95f1-477d-ba79-84c22c4314bb.png?v=1789700105","x":49.68102073365231,"y":40.82934609250399,"width":63.31738437001595,"height":55.18341307814992,"rotationEnabled":false,"required":true}],"textFields":[],"fileFields":[],"linkFields":[],"customFonts":[]}' hidden></div>
     {% elsif acrylic_plain_photo %}
-      <div data-cw-config='{"enabled":true,"canvasRatio":"{% if product.selected_or_first_available_variant.option3 == 'Landscape' %}12:8{% else %}8:12{% endif %}","photoFields":[{"id":"acrylic-photo","label":"Your Photo","x":50,"y":50,"width":100,"height":100,"required":true}],"textFields":[],"fileFields":[],"linkFields":[],"customFonts":[]}' hidden></div>
+      <div data-cw-config='{"enabled":true,"canvasRatio":"{% if product.selected_or_first_available_variant.option3 == 'Landscape' or product.tags contains 'cw-frame-landscape' %}12:8{% else %}8:12{% endif %}","photoFields":[{"id":"acrylic-photo","label":"Your Photo","x":50,"y":50,"width":100,"height":100,"required":true}],"textFields":[],"fileFields":[],"linkFields":[],"customFonts":[]}' hidden></div>
     {% else %}
       <div data-cw-config="{{ personalizer_config | json | escape }}" hidden></div>
     {% endif %}
