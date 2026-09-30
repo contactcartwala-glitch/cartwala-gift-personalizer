@@ -3,8 +3,6 @@ import { Outlet, useLoaderData, useNavigation, useRouteError } from "react-route
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { AppProvider } from "@shopify/shopify-app-react-router/react";
 
-import { loadGroupSettings } from "../lib/product-groups.server";
-import { setupTags } from "../lib/product-groups";
 
 import { authenticate } from "../shopify.server";
 
@@ -84,7 +82,7 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({ currentUrl, nextUrl
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { admin } = await authenticate.admin(request);
   if (!isDesignPage(new URL(request.url).pathname)) {
-    return { apiKey: process.env.SHOPIFY_API_KEY || "", products: [] as Product[], setupTags: [] as ReturnType<typeof setupTags> };
+    return { apiKey: process.env.SHOPIFY_API_KEY || "", products: [] as Product[] };
   }
   const products: Product[] = [];
   let cursor: string | null = null;
@@ -139,9 +137,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     if (hasNextPage && !cursor) hasNextPage = false;
   }
 
-  const settings = await loadGroupSettings(admin);
   return {
-    setupTags: setupTags(settings.state.groups),
     apiKey: process.env.SHOPIFY_API_KEY || "",
     products,
   };
@@ -154,9 +150,8 @@ export default function App() {
   return (
     <AppProvider embedded apiKey={apiKey}>
       <s-app-nav>
-        <s-link href="/app">Product designs</s-link>
+        <s-link href="/app">Personalizer</s-link>
         <s-link href="/app/print-files">Print Files</s-link>
-        <s-link href="/app/product-groups">Tags & mockups</s-link>
       </s-app-nav>
       {navigation.state === "loading" ? <s-page heading="Loading"><s-spinner accessibilityLabel="Loading page" /></s-page> : <Outlet />}
     </AppProvider>

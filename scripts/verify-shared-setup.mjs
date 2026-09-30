@@ -78,45 +78,12 @@ assert.throws(()=>core.createTagSetup('empty','','',[]),/Enter a tag name/);
 assert.throws(()=>core.createTagSetup('comma','one,two','',[]),/without commas/);
 console.log('Tag registry passed: one-time creation, optional description/images, instant availability and duplicate protection.');
 
-// Creating a tag persists only the registry; no products, variants or uploads change.
-const registryState={state:{groups:[],published:[],history:[]},digest:'1'};
-let registrySaves=0,summaryReads=0;
-const registryRoute={};
-vm.runInNewContext(ts.transpileModule(fs.readFileSync('app/routes/app.product-groups.tsx','utf8'),{fileName:'app.product-groups.tsx',compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText,{
- exports:registryRoute,crypto:globalThis.crypto,URL,FormData,File,structuredClone,
- require:p=>p.includes('shopify.server')?{authenticate:{admin:async()=>({admin:{}})}}:p.includes('product-groups.server')?{loadCatalogSummary:async()=>{summaryReads++;return [];},loadCatalog:async()=>{throw new Error('Full catalog must not load for tag creation');},loadGroupSettings:async()=>registryState,saveGroupSettings:async()=>{registrySaves++;}}:p.endsWith('/product-groups')?core:{},
-});
-const createRequest=(name)=>{const form=new FormData();form.set('intent','create-tag');form.set('tagName',name);return {request:{formData:async()=>form}};};
-assert.equal((await registryRoute.action(createRequest('test-frame-tag'))).ok,true);
-assert.equal(registrySaves,1);assert.equal(summaryReads,1);
-assert.equal(registryState.state.groups.length,1);assert.equal(registryState.state.published.length,0);
-assert.equal((await registryRoute.action(createRequest(' TEST-FRAME-TAG '))).ok,false);
-assert.equal(registrySaves,1);
-console.log('Create-tag action passed: explicit persistence, duplicate prevention and no product changes.');
-
 for(const input of ['10x15','10 × 15','10 by 15','10*15','10 inch x 15 inch','10" x 15"']){
  const dims=core.parseSizeInput(input);assert.equal(dims.width,10);assert.equal(dims.height,15);
 }
 assert.equal(core.parseSizeInput('15x10').width,10);
 assert.equal(core.parseSizeInput('0x12'),null);assert.equal(core.parseSizeInput('sizes'),null);
 console.log('Add-size input passed: common size formats and invalid dimensions.');
-
-// Exercise the actual Add size handler: an empty price must not block the row or PNG slots.
-const routeSource=fs.readFileSync('app/routes/app.product-groups.tsx','utf8');
-const handlerSource=ts.transpileModule(routeSource.slice(routeSource.indexOf(' const addSize=()=>{'),routeSource.indexOf('\n const uploadPNG=')).replace('const addSize=','var addSize='),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
-let inlineError='',focused='',selectedRow='';
-const sizeContext={parseSizeInput:core.parseSizeInput,emptyTemplate:core.emptyTemplate,crypto:globalThis.crypto,group:core.createTagSetup('test','test','',[]),newSize:'10x15',newType:'',newPrice:'',newOldPrice:'',document:{getElementById:id=>({focus:()=>{focused=id;}})},setSizeError:v=>{inlineError=v;},setCopyMessage:()=>{},setRowId:v=>{selectedRow=v;},setNewSize:()=>{},setNewPrice:()=>{},setNewOldPrice:()=>{},change:patch=>Object.assign(sizeContext.group,patch)};
-vm.runInNewContext(handlerSource+'\naddSize();',sizeContext);
-assert.equal(sizeContext.group.rows.length,1);assert.equal(sizeContext.group.rows[0].price,0);
-assert.equal(sizeContext.group.rows[0].templates.Portrait.mockup,undefined);
-assert.equal(selectedRow,sizeContext.group.rows[0].id);
-assert.throws(()=>core.validateGroup(structuredClone(sizeContext.group)),/Prices must be positive/);
-sizeContext.group.rows[0].price=750;core.validateGroup(structuredClone(sizeContext.group));
-sizeContext.newSize='12 by 18';vm.runInNewContext(handlerSource+'\naddSize();',sizeContext);
-assert.equal(sizeContext.group.rows.length,2);
-vm.runInNewContext(handlerSource+'\naddSize();',sizeContext);
-assert.equal(sizeContext.group.rows.length,2);assert.match(inlineError,/already exists/);assert.equal(focused,'pg-new-size');
-console.log('Add-size handler passed: blank-price rows, independent multiple sizes, PNG availability and duplicate focus.');
 
 const copySource=core.createTagSetup('copies','copies','',[]);
 copySource.rows=[{id:'original',values:['10×15 inches'],width:10,height:15,price:750,compare:1000,templates:{Portrait:{...core.emptyTemplate(),mockup:'https://example.com/portrait.png',mockupAspect:1},Landscape:core.emptyTemplate()}}];
@@ -131,16 +98,15 @@ assert.notEqual(twice.rows[1].values[1],twice.rows[2].values[1]);
 core.validateGroup(structuredClone(twice));
 console.log('Duplicate size passed: unique options, preserved prices, empty new PNGs and original unchanged.');
 
-// Render the real editor and ensure uploads are visible without opening tabs.
-const React=await import('react'), ReactDOM=await import('react-dom/server'), jsx=await import('react/jsx-runtime');
-const editorModule={};
-const editorData={settings:{state:{groups:[copied],published:[]},currency:'INR'},catalog:[],selected:copied,index:false,selectedTab:'sizes'};
-vm.runInNewContext(ts.transpileModule(routeSource,{fileName:'app.product-groups.tsx',compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText,{
- exports:editorModule,crypto:globalThis.crypto,structuredClone,
- require:p=>p==='react'?React:p==='react/jsx-runtime'?jsx:p==='react-router'?{useLoaderData:()=>editorData,useActionData:()=>undefined,useNavigation:()=>({state:'idle'}),useFetcher:()=>({state:'idle'}),Form:({children,...props})=>React.createElement('form',props,children),Link:({children,to,...props})=>React.createElement('a',{...props,href:to},children)}:p.endsWith('/product-groups')?core:{},
-});
-const editorHTML=ReactDOM.renderToStaticMarkup(React.createElement(editorModule.default));
-assert.equal((editorHTML.match(/type="file"/g)||[]).length,copied.rows.length*2);
-assert.match(editorHTML,/Selling price/);assert.match(editorHTML,/Upload PNG/);assert.match(editorHTML,/Duplicate/);
-assert.doesNotMatch(editorHTML,/Next: setup tag/);
-console.log('Editor render passed: every size has visible prices, two PNG upload buttons and Duplicate without tab navigation.');
+// Removed admin pages redirect to the original editor and expose no write action.
+for(const path of ['app/routes/app.product-groups.tsx','app/routes/app.acrylic-prices.tsx']){
+ const source=fs.readFileSync(path,'utf8');
+ assert.match(source,/return redirect\("\/app"\)/);
+ assert.doesNotMatch(source,/export const action|saveGroupSettings|deleteMany/);
+}
+const editor=fs.readFileSync('app/routes/app._index.tsx','utf8');
+assert.match(editor,/<s-button onClick={chooseProduct}>Choose product<\/s-button>/);
+assert.match(editor,/shopify.resourcePicker/);
+assert.doesNotMatch(editor,/Find a design|Saved setup tags|form.set\("setupTag"/);
+assert.doesNotMatch(fs.readFileSync('app/routes/app.tsx','utf8'),/Tags & mockups|href="\/app\/product-groups"/);
+console.log('Admin rollback passed: original product picker, removed setup UI and no data deletion.');

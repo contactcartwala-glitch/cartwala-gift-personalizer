@@ -821,7 +821,7 @@ async function handleSave(
 type FieldKind = "photoFields" | "textFields" | "fileFields" | "linkFields";
 
 export default function PersonalizerHome() {
-  const { products, setupTags: savedTags } = useRouteLoaderData<typeof appLoader>("routes/app")!;
+  const { products } = useRouteLoaderData<typeof appLoader>("routes/app")!;
   const saveFetcher = useFetcher<typeof action>();
   const fontFetcher = useFetcher<typeof action>();
   const imageFetcher = useFetcher<typeof action>();
@@ -831,12 +831,7 @@ export default function PersonalizerHome() {
   const shopify = useAppBridge();
   const [searchParams] = useSearchParams();
   const requestedProduct = products.find(p => p.id === searchParams.get("product")) ?? products[0] ?? null;
-  const [productSearch,setProductSearch]=useState("");
-  const [tagSearch,setTagSearch]=useState("");
-  const [tagsOpen,setTagsOpen]=useState(false);
   const [selected, setSelected] = useState<Product | null>(requestedProduct);
-  const tagFor=(product:Product|null)=>savedTags.find(item=>product?.tags.includes(item.tag))?.tag||"";
-  const [setupTag,setSetupTag]=useState(()=>tagFor(requestedProduct));
   const [mugSetup, setMugSetup] = useState<MugSetup>(() =>
     mugSetupForProduct(requestedProduct),
   );
@@ -1008,20 +1003,37 @@ export default function PersonalizerHome() {
   const confirmDiscardIfDirty = (message: string) =>
     !dirty || window.confirm(message);
 
-  const openDesign = (product:Product) => {
-    if (!confirmDiscardIfDirty("You have unsaved changes. Open another design and discard them?")) return;
-    const next=normalizeConfig(product.personalizer?.jsonValue??emptyConfig);
-    skipNextDirtyCheck.current=true;
-    setSelected(product);setConfig(next);setMugSetup(mugSetupForProduct(product));
-    setSetupTag(tagFor(product));setTagSearch("");setTagsOpen(false);
-    setActiveSlot(next.photoFields[0]?.id??null);setDirty(false);setProductSearch("");
+  const chooseProduct = async () => {
+    if (
+      !confirmDiscardIfDirty(
+        "You have unsaved changes for this product. Switch products and discard them?",
+      )
+    )
+      return;
+    const selection = await shopify.resourcePicker({
+      type: "product",
+      multiple: false,
+      action: "select",
+    });
+    const product =
+      products.find((item) => item.id === selection?.[0]?.id) ?? null;
+    if (product) {
+      const next = normalizeConfig(
+        product.personalizer?.jsonValue ?? emptyConfig,
+      );
+      skipNextDirtyCheck.current = true;
+      setSelected(product);
+      setConfig(next);
+      setMugSetup(mugSetupForProduct(product));
+      setActiveSlot(next.photoFields[0]?.id ?? null);
+      setDirty(false);
+    }
   };
 
   const save = () => {
     if (!selected) return;
     const form = new FormData();
     form.set("productId", selected.id);
-    form.set("setupTag", setupTag);
     form.set("config", JSON.stringify(configRef.current));
     form.set("mugEnabled", String(mugSetup.enabled));
     form.set("mugCategory", mugSetup.category);
@@ -1551,25 +1563,7 @@ export default function PersonalizerHome() {
       </s-button>
       <s-section heading="Product template">
         <s-stack direction="block" gap="base">
-          <s-paragraph>
-            Upload this product’s design once. Its Shopify tag automatically supplies the saved sizes, prices and optional mockups.
-          </s-paragraph>
-          <details>
-            <summary>Product designs</summary>
-            <label>Find a design<input value={productSearch} placeholder="Type a product name" onChange={e=>setProductSearch(e.target.value)} /></label>
-            <div style={{maxHeight:260,overflow:"auto"}}>
-              {products.filter(p=>p.title.toLowerCase().includes(productSearch.trim().toLowerCase())).map(p=><div key={p.id}><s-button onClick={()=>openDesign(p)}>{p.title}</s-button></div>)}
-            </div>
-          </details>
-          <div>
-            <label>Setup tag<input value={tagsOpen?tagSearch:setupTag} placeholder="Click to see saved tags, or type 2–3 letters" onFocus={()=>{setTagsOpen(true);setTagSearch("");}} onChange={e=>{setTagsOpen(true);setTagSearch(e.target.value);}} /></label>
-            {tagsOpen&&<div style={{maxHeight:260,overflow:"auto"}} role="group" aria-label="Saved setup tags">
-              <s-button onClick={()=>{setSetupTag("");setTagsOpen(false);setDirty(true);}}>No setup tag</s-button>
-              {savedTags.filter(t=>(t.tag+" "+t.name).toLowerCase().includes(tagSearch.trim().toLowerCase())).map(t=><div key={t.tag}><s-button onClick={()=>{setSetupTag(t.tag);setTagsOpen(false);setDirty(true);}}>{t.tag} · {t.name} · {t.direction}</s-button></div>)}
-              {!savedTags.filter(t=>(t.tag+" "+t.name).toLowerCase().includes(tagSearch.trim().toLowerCase())).length&&<p>No matching saved tags.</p>}
-            </div>}
-            <s-paragraph>Save configuration to apply this tag and its shared sizes, prices and images.</s-paragraph>
-          </div>
+          <s-button onClick={chooseProduct}>Choose product</s-button>
           {selected && (
             <s-box
               padding="base"
