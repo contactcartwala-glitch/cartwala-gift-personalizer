@@ -1,3 +1,9 @@
+/* Retire the theme's outdated size guide on every product page. */
+[data-size-guide-open],
+.size-guide-modal {
+  display: none !important;
+}
+
 /* Keep wide mug mockups fully visible in theme product cards. */
 html.cw-mug-collection-page body:has(.cw-mug-gallery) #MainContent > .shopify-section:first-child {
   display: none !important;
