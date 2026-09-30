@@ -42,7 +42,7 @@
       <div data-cw-config="{{ personalizer_config | json | escape }}" hidden></div>
     {% endif %}
     {% if acrylic_product %}
-      <div data-cw-acrylic data-variants="{{ product.variants | json | escape }}" data-selected-variant="{{ product.selected_or_first_available_variant.id }}" data-room-image="{{ 'cartwala-acrylic-room.webp' | asset_url }}" data-stud-image="{{ 'cartwala-acrylic-stud.webp' | asset_url }}" hidden></div>
+      <div data-cw-acrylic data-variants="{{ product.variants | json | escape }}" data-selected-variant="{{ product.selected_or_first_available_variant.id }}" data-room-image="{{ 'cartwala-acrylic-room.jpg' | asset_url }}" data-stud-image="{{ 'cartwala-acrylic-stud.png' | asset_url }}" hidden></div>
       <script src="{{ 'cartwala-acrylic-frame.js' | asset_url }}" defer></script>
       {{ 'cartwala-acrylic-frame.css' | asset_url | stylesheet_tag }}
     {% endif %}
