@@ -93,3 +93,27 @@ assert.equal(registryState.state.groups.length,1);assert.equal(registryState.sta
 assert.equal((await registryRoute.action(createRequest(' TEST-FRAME-TAG '))).ok,false);
 assert.equal(registrySaves,1);
 console.log('Create-tag action passed: explicit persistence, duplicate prevention and no product changes.');
+
+for(const input of ['10x15','10 × 15','10 by 15','10*15','10 inch x 15 inch','10" x 15"']){
+ const dims=core.parseSizeInput(input);assert.equal(dims.width,10);assert.equal(dims.height,15);
+}
+assert.equal(core.parseSizeInput('15x10').width,10);
+assert.equal(core.parseSizeInput('0x12'),null);assert.equal(core.parseSizeInput('sizes'),null);
+console.log('Add-size input passed: common size formats and invalid dimensions.');
+
+// Exercise the actual Add size handler: an empty price must not block the row or PNG slots.
+const routeSource=fs.readFileSync('app/routes/app.product-groups.tsx','utf8');
+const handlerSource=ts.transpileModule(routeSource.slice(routeSource.indexOf(' const addSize=()=>{'),routeSource.indexOf('\n if(index){')).replace('const addSize=','var addSize='),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+let inlineError='',focused='',selectedRow='';
+const sizeContext={parseSizeInput:core.parseSizeInput,emptyTemplate:core.emptyTemplate,crypto:globalThis.crypto,group:core.createTagSetup('test','test','',[]),newSize:'10x15',newType:'',newPrice:'',newOldPrice:'',document:{getElementById:id=>({focus:()=>{focused=id;}})},setSizeError:v=>{inlineError=v;},setCopyMessage:()=>{},setRowId:v=>{selectedRow=v;},setNewSize:()=>{},setNewPrice:()=>{},setNewOldPrice:()=>{},change:patch=>Object.assign(sizeContext.group,patch)};
+vm.runInNewContext(handlerSource+'\naddSize();',sizeContext);
+assert.equal(sizeContext.group.rows.length,1);assert.equal(sizeContext.group.rows[0].price,0);
+assert.equal(sizeContext.group.rows[0].templates.Portrait.mockup,undefined);
+assert.equal(selectedRow,sizeContext.group.rows[0].id);
+assert.throws(()=>core.validateGroup(structuredClone(sizeContext.group)),/Prices must be positive/);
+sizeContext.group.rows[0].price=750;core.validateGroup(structuredClone(sizeContext.group));
+sizeContext.newSize='12 by 18';vm.runInNewContext(handlerSource+'\naddSize();',sizeContext);
+assert.equal(sizeContext.group.rows.length,2);
+vm.runInNewContext(handlerSource+'\naddSize();',sizeContext);
+assert.equal(sizeContext.group.rows.length,2);assert.match(inlineError,/already exists/);assert.equal(focused,'pg-new-size');
+console.log('Add-size handler passed: blank-price rows, independent multiple sizes, PNG availability and duplicate focus.');

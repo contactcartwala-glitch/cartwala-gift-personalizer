@@ -110,3 +110,11 @@ export function createTagSetup(id:string,name:string,description:string,groups:P
  if(Object.keys(errors).length)throw new Error(Object.values(errors)[0]);
  return g;
 }
+
+export function parseSizeInput(value:string):{width:number;height:number}|null {
+ const input=value.trim().toLowerCase().replace(/["″]/g,"").replace(/inches|inch|\bin\b/g,"").replace(/\s+by\s+/g,"x");
+ const dims=input.match(/^\s*(\d+(?:\.\d+)?)\s*[x×*]\s*(\d+(?:\.\d+)?)\s*$/);
+ if(!dims)return null;
+ const width=Math.min(Number(dims[1]),Number(dims[2])),height=Math.max(Number(dims[1]),Number(dims[2]));
+ return width>0&&height<=1000?{width,height}:null;
+}
