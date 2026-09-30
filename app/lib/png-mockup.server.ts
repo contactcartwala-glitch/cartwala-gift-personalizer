@@ -1,6 +1,13 @@
 import PNGModule from "@pdf-lib/upng";
+import { inflateRawSync } from "node:zlib";
 // The package ships a nested default export when loaded by Node ESM.
 const UPNG=(PNGModule as unknown as {default?:typeof PNGModule}).default||PNGModule;
+// Reject damaged compressed streams promptly with Node's bounded inflater.
+// The bundled JavaScript inflater can loop on truncated PNG data.
+(UPNG as unknown as {inflateRaw:(input:Uint8Array,output?:Uint8Array)=>Uint8Array}).inflateRaw=(input,output)=>{
+ const inflated=inflateRawSync(input,{maxOutputLength:output?.byteLength||64*1024*1024});
+ if(output){output.set(inflated);return output;}return new Uint8Array(inflated);
+};
 
 /** Finds one enclosed transparent photo opening. No merchant coordinates needed. */
 export function inspectMockupPng(bytes: ArrayBuffer, expectedRatio: number) {

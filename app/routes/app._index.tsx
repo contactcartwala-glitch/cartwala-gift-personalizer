@@ -4,6 +4,7 @@ import { useFetcher, useRouteError, useRouteLoaderData, useSearchParams } from "
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
+import { syncProductSetup } from "../lib/product-groups.server";
 import type { loader as appLoader } from "./app";
 import {
   MAX_FIELDS,
@@ -445,6 +446,8 @@ async function handlePsdImport(
     const saveError = firstMetafieldsSetError(saveJson);
     if (saveError) throw new Error(saveError);
     committed = true;
+    const setupWarning=await syncProductSetup(admin,productId).catch(e=>e instanceof Error?e.message:String(e));
+    if(setupWarning)warning=[warning,`Shared setup: ${setupWarning}`].filter(Boolean).join(" ");
 
     return {
       ok: true,
@@ -527,7 +530,8 @@ async function handleRestorePsdRevision(
     const saveJson = await saveResponse.json();
     const saveError = firstMetafieldsSetError(saveJson);
     if (saveError) throw new Error(saveError);
-    return { ok: true, restoredConfig: restored.config };
+    const warning=await syncProductSetup(admin,productId).catch(e=>e instanceof Error?e.message:String(e));
+    return { ok: true, restoredConfig: restored.config, warning };
   } catch (error) {
     return {
       ok: false,
@@ -549,7 +553,7 @@ async function handleBulkImport(
     if (!Array.isArray(entries) || !entries.length || entries.length > 1000) {
       throw new Error("The CSV contains no valid products or is too large.");
     }
-    let saved = 0;
+    let saved = 0;const setupWarnings:string[]=[];
     for (let offset = 0; offset < entries.length; offset += 12) {
       const metafields = entries.slice(offset, offset + 12).flatMap((entry) => {
         if (!entry.productId.startsWith("gid://shopify/Product/"))
@@ -570,8 +574,9 @@ async function handleBulkImport(
       const error = firstMetafieldsSetError(json);
       if (error) throw new Error(error);
       saved += metafields.length / 2;
+      for(const entry of entries.slice(offset,offset+12)){const warning=await syncProductSetup(admin,entry.productId).catch(e=>e instanceof Error?e.message:String(e));if(warning)setupWarnings.push(warning);}
     }
-    return { ok: true, bulkSaved: saved };
+    return { ok: true, bulkSaved: saved, warning:setupWarnings.length?`${setupWarnings.length} shared setups need attention: ${setupWarnings[0]}`:undefined };
   } catch (error) {
     return {
       ok: false,
@@ -647,6 +652,7 @@ async function handleSave(
   const json = await response.json();
   const error = firstMetafieldsSetError(json);
   if (error) return { ok: false, error };
+  const setupWarning=await syncProductSetup(admin,productId).catch(e=>e instanceof Error?e.message:String(e));
 
   const productResponse = await admin.graphql(
     `#graphql
@@ -793,6 +799,7 @@ async function handleSave(
   }
   return {
     ok: true,
+    warning: setupWarning,
     mugSetupSaved: mugEnabled,
     sharedProductsUpdated,
   };
@@ -1548,8 +1555,7 @@ export default function PersonalizerHome() {
       <s-section heading="Product template">
         <s-stack direction="block" gap="base">
           <s-paragraph>
-            Build each product independently. Add as many photo, text,
-            design-file and Canva-link fields as its artwork needs.
+            Upload this product’s design once. Its Shopify tag automatically supplies the saved sizes, prices and optional mockups.
           </s-paragraph>
           <s-button onClick={chooseProduct}>Choose product</s-button>
           {selected && (

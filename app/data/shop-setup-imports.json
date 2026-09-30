@@ -1,0 +1,847 @@
+{
+  "gid://shopify/Shop/80379314361": {
+    "version": 1,
+    "importId": "acrylic-png-shared-20260930-v3",
+    "groups": [
+      {
+        "id": "acrylic-frames",
+        "name": "Acrylic Photo Frames",
+        "tags": [
+          "cw-acrylic-frame",
+          "acrylic-photo-frames"
+        ],
+        "collectionIds": [],
+        "productIds": [],
+        "excludedIds": [],
+        "keepPriceIds": [],
+        "options": [
+          "Size",
+          "Acrylic"
+        ],
+        "rows": [
+          {
+            "id": "acrylic-8-12-3",
+            "values": [
+              "8×12 inches",
+              "3mm without studs"
+            ],
+            "price": 750,
+            "compare": 1050,
+            "width": 8,
+            "height": 12,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 11.666666666666666,
+                "height": 17.5,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-8x12-3mm-portrait-v3.png?v=1790764791",
+                "mockupName": "acrylic-8x12-3mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 17.5,
+                "height": 11.666666666666666,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-8x12-3mm-landscape-v3.png?v=1790764799",
+                "mockupName": "acrylic-8x12-3mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-8-12-5",
+            "values": [
+              "8×12 inches",
+              "5mm with studs"
+            ],
+            "price": 1125,
+            "compare": 1575,
+            "width": 8,
+            "height": 12,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 11.666666666666666,
+                "height": 17.5,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-8x12-5mm-portrait-v3.png?v=1790764806",
+                "mockupName": "acrylic-8x12-5mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 17.5,
+                "height": 11.666666666666666,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-8x12-5mm-landscape-v3.png?v=1790764814",
+                "mockupName": "acrylic-8x12-5mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-12-18-3",
+            "values": [
+              "12×18 inches",
+              "3mm without studs"
+            ],
+            "price": 1250,
+            "compare": 1750,
+            "width": 12,
+            "height": 18,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.125,
+                "width": 17.5,
+                "height": 26.25,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-12x18-3mm-portrait-v3.png?v=1790764822",
+                "mockupName": "acrylic-12x18-3mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 49.958333333333336,
+                "y": 29.166666666666668,
+                "width": 26.25,
+                "height": 17.5,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-12x18-3mm-landscape-v3.png?v=1790764831",
+                "mockupName": "acrylic-12x18-3mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-12-18-5",
+            "values": [
+              "12×18 inches",
+              "5mm with studs"
+            ],
+            "price": 2125,
+            "compare": 2975,
+            "width": 12,
+            "height": 18,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.125,
+                "width": 17.5,
+                "height": 26.25,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-12x18-5mm-portrait-v3.png?v=1790764839",
+                "mockupName": "acrylic-12x18-5mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 49.958333333333336,
+                "y": 29.166666666666668,
+                "width": 26.25,
+                "height": 17.5,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-12x18-5mm-landscape-v3.png?v=1790764848",
+                "mockupName": "acrylic-12x18-5mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-16-24-3",
+            "values": [
+              "16×24 inches",
+              "3mm without studs"
+            ],
+            "price": 2500,
+            "compare": 3500,
+            "width": 16,
+            "height": 24,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 23.333333333333332,
+                "height": 35,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-16x24-3mm-portrait-v3.png?v=1790764856",
+                "mockupName": "acrylic-16x24-3mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 35,
+                "height": 23.333333333333332,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-16x24-3mm-landscape-v3.png?v=1790764863",
+                "mockupName": "acrylic-16x24-3mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-16-24-5",
+            "values": [
+              "16×24 inches",
+              "5mm with studs"
+            ],
+            "price": 3750,
+            "compare": 5250,
+            "width": 16,
+            "height": 24,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 23.333333333333332,
+                "height": 35,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-16x24-5mm-portrait-v3.png?v=1790764871",
+                "mockupName": "acrylic-16x24-5mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 35,
+                "height": 23.333333333333332,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-16x24-5mm-landscape-v3.png?v=1790764878",
+                "mockupName": "acrylic-16x24-5mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-20-30-3",
+            "values": [
+              "20×30 inches",
+              "3mm without studs"
+            ],
+            "price": 3750,
+            "compare": 5250,
+            "width": 20,
+            "height": 30,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.208333333333332,
+                "width": 29.166666666666668,
+                "height": 43.75,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-20x30-3mm-portrait-v3.png?v=1790764886",
+                "mockupName": "acrylic-20x30-3mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50.041666666666664,
+                "y": 29.166666666666668,
+                "width": 43.75,
+                "height": 29.166666666666668,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-20x30-3mm-landscape-v3.png?v=1790764894",
+                "mockupName": "acrylic-20x30-3mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-20-30-5",
+            "values": [
+              "20×30 inches",
+              "5mm with studs"
+            ],
+            "price": 5000,
+            "compare": 7000,
+            "width": 20,
+            "height": 30,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.208333333333332,
+                "width": 29.166666666666668,
+                "height": 43.75,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-20x30-5mm-portrait-v3.png?v=1790764902",
+                "mockupName": "acrylic-20x30-5mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50.041666666666664,
+                "y": 29.166666666666668,
+                "width": 43.75,
+                "height": 29.166666666666668,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-20x30-5mm-landscape-v3.png?v=1790764910",
+                "mockupName": "acrylic-20x30-5mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-24-36-3",
+            "values": [
+              "24×36 inches",
+              "3mm without studs"
+            ],
+            "price": 6250,
+            "compare": 8750,
+            "width": 24,
+            "height": 36,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 35,
+                "height": 52.5,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-24x36-3mm-portrait-v3.png?v=1790764918",
+                "mockupName": "acrylic-24x36-3mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 52.5,
+                "height": 35,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-24x36-3mm-landscape-v3.png?v=1790764926",
+                "mockupName": "acrylic-24x36-3mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-24-36-5",
+            "values": [
+              "24×36 inches",
+              "5mm with studs"
+            ],
+            "price": 8750,
+            "compare": 12250,
+            "width": 24,
+            "height": 36,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 35,
+                "height": 52.5,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-24x36-5mm-portrait-v3.png?v=1790764934",
+                "mockupName": "acrylic-24x36-5mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 52.5,
+                "height": 35,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-24x36-5mm-landscape-v3.png?v=1790764942",
+                "mockupName": "acrylic-24x36-5mm-landscape.png"
+              }
+            }
+          }
+        ],
+        "compareMode": "manual",
+        "percentage": 0,
+        "previewMode": "png",
+        "customization": "plain",
+        "direction": "customer",
+        "orientationOption": "Orientation",
+        "portraitTag": "cw-acrylic-portrait",
+        "landscapeTag": "cw-acrylic-landscape",
+        "background": "",
+        "createVariants": true
+      }
+    ],
+    "published": [
+      {
+        "id": "acrylic-frames",
+        "name": "Acrylic Photo Frames",
+        "tags": [
+          "cw-acrylic-frame",
+          "acrylic-photo-frames"
+        ],
+        "collectionIds": [],
+        "productIds": [],
+        "excludedIds": [],
+        "keepPriceIds": [],
+        "options": [
+          "Size",
+          "Acrylic"
+        ],
+        "rows": [
+          {
+            "id": "acrylic-8-12-3",
+            "values": [
+              "8×12 inches",
+              "3mm without studs"
+            ],
+            "price": 750,
+            "compare": 1050,
+            "width": 8,
+            "height": 12,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 11.666666666666666,
+                "height": 17.5,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-8x12-3mm-portrait-v3.png?v=1790764791",
+                "mockupName": "acrylic-8x12-3mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 17.5,
+                "height": 11.666666666666666,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-8x12-3mm-landscape-v3.png?v=1790764799",
+                "mockupName": "acrylic-8x12-3mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-8-12-5",
+            "values": [
+              "8×12 inches",
+              "5mm with studs"
+            ],
+            "price": 1125,
+            "compare": 1575,
+            "width": 8,
+            "height": 12,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 11.666666666666666,
+                "height": 17.5,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-8x12-5mm-portrait-v3.png?v=1790764806",
+                "mockupName": "acrylic-8x12-5mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 17.5,
+                "height": 11.666666666666666,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-8x12-5mm-landscape-v3.png?v=1790764814",
+                "mockupName": "acrylic-8x12-5mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-12-18-3",
+            "values": [
+              "12×18 inches",
+              "3mm without studs"
+            ],
+            "price": 1250,
+            "compare": 1750,
+            "width": 12,
+            "height": 18,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.125,
+                "width": 17.5,
+                "height": 26.25,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-12x18-3mm-portrait-v3.png?v=1790764822",
+                "mockupName": "acrylic-12x18-3mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 49.958333333333336,
+                "y": 29.166666666666668,
+                "width": 26.25,
+                "height": 17.5,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-12x18-3mm-landscape-v3.png?v=1790764831",
+                "mockupName": "acrylic-12x18-3mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-12-18-5",
+            "values": [
+              "12×18 inches",
+              "5mm with studs"
+            ],
+            "price": 2125,
+            "compare": 2975,
+            "width": 12,
+            "height": 18,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.125,
+                "width": 17.5,
+                "height": 26.25,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-12x18-5mm-portrait-v3.png?v=1790764839",
+                "mockupName": "acrylic-12x18-5mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 49.958333333333336,
+                "y": 29.166666666666668,
+                "width": 26.25,
+                "height": 17.5,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-12x18-5mm-landscape-v3.png?v=1790764848",
+                "mockupName": "acrylic-12x18-5mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-16-24-3",
+            "values": [
+              "16×24 inches",
+              "3mm without studs"
+            ],
+            "price": 2500,
+            "compare": 3500,
+            "width": 16,
+            "height": 24,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 23.333333333333332,
+                "height": 35,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-16x24-3mm-portrait-v3.png?v=1790764856",
+                "mockupName": "acrylic-16x24-3mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 35,
+                "height": 23.333333333333332,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-16x24-3mm-landscape-v3.png?v=1790764863",
+                "mockupName": "acrylic-16x24-3mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-16-24-5",
+            "values": [
+              "16×24 inches",
+              "5mm with studs"
+            ],
+            "price": 3750,
+            "compare": 5250,
+            "width": 16,
+            "height": 24,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 23.333333333333332,
+                "height": 35,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-16x24-5mm-portrait-v3.png?v=1790764871",
+                "mockupName": "acrylic-16x24-5mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 35,
+                "height": 23.333333333333332,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-16x24-5mm-landscape-v3.png?v=1790764878",
+                "mockupName": "acrylic-16x24-5mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-20-30-3",
+            "values": [
+              "20×30 inches",
+              "3mm without studs"
+            ],
+            "price": 3750,
+            "compare": 5250,
+            "width": 20,
+            "height": 30,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.208333333333332,
+                "width": 29.166666666666668,
+                "height": 43.75,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-20x30-3mm-portrait-v3.png?v=1790764886",
+                "mockupName": "acrylic-20x30-3mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50.041666666666664,
+                "y": 29.166666666666668,
+                "width": 43.75,
+                "height": 29.166666666666668,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-20x30-3mm-landscape-v3.png?v=1790764894",
+                "mockupName": "acrylic-20x30-3mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-20-30-5",
+            "values": [
+              "20×30 inches",
+              "5mm with studs"
+            ],
+            "price": 5000,
+            "compare": 7000,
+            "width": 20,
+            "height": 30,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.208333333333332,
+                "width": 29.166666666666668,
+                "height": 43.75,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-20x30-5mm-portrait-v3.png?v=1790764902",
+                "mockupName": "acrylic-20x30-5mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50.041666666666664,
+                "y": 29.166666666666668,
+                "width": 43.75,
+                "height": 29.166666666666668,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-20x30-5mm-landscape-v3.png?v=1790764910",
+                "mockupName": "acrylic-20x30-5mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-24-36-3",
+            "values": [
+              "24×36 inches",
+              "3mm without studs"
+            ],
+            "price": 6250,
+            "compare": 8750,
+            "width": 24,
+            "height": 36,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 35,
+                "height": 52.5,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-24x36-3mm-portrait-v3.png?v=1790764918",
+                "mockupName": "acrylic-24x36-3mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 52.5,
+                "height": 35,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-24x36-3mm-landscape-v3.png?v=1790764926",
+                "mockupName": "acrylic-24x36-3mm-landscape.png"
+              }
+            }
+          },
+          {
+            "id": "acrylic-24-36-5",
+            "values": [
+              "24×36 inches",
+              "5mm with studs"
+            ],
+            "price": 8750,
+            "compare": 12250,
+            "width": 24,
+            "height": 36,
+            "templates": {
+              "Portrait": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 35,
+                "height": 52.5,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-24x36-5mm-portrait-v3.png?v=1790764934",
+                "mockupName": "acrylic-24x36-5mm-portrait.png"
+              },
+              "Landscape": {
+                "image": "",
+                "background": "",
+                "overlay": "",
+                "x": 50,
+                "y": 29.166666666666668,
+                "width": 52.5,
+                "height": 35,
+                "studs": false,
+                "mockupAspect": 1,
+                "mockup": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cw-acrylic-24x36-5mm-landscape-v3.png?v=1790764942",
+                "mockupName": "acrylic-24x36-5mm-landscape.png"
+              }
+            }
+          }
+        ],
+        "compareMode": "manual",
+        "percentage": 0,
+        "previewMode": "png",
+        "customization": "plain",
+        "direction": "customer",
+        "orientationOption": "Orientation",
+        "portraitTag": "cw-acrylic-portrait",
+        "landscapeTag": "cw-acrylic-landscape",
+        "background": "",
+        "createVariants": true
+      }
+    ],
+    "history": []
+  }
+}

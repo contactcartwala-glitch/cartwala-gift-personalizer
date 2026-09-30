@@ -1,4 +1,5 @@
 import db from "../db.server";
+import preparedShopSetups from "../data/shop-setup-imports.json";
 import type { GroupState, ProductGroup } from "./product-groups";
 import { comparePrice, directionFor, emptyGroup, emptyTemplate, matches, normalizeValue, rowKey, validateGroup } from "./product-groups";
 import type { authenticate } from "../shopify.server";
@@ -38,6 +39,10 @@ export const SET_META = `#graphql
 mutation GroupMetafields($metafields: [MetafieldsSetInput!]!) { metafieldsSet(metafields:$metafields) { userErrors { message } } }`;
 export const BULK_PRICES = `#graphql
 mutation GroupVariantPrices($productId: ID!, $variants: [ProductVariantsBulkInput!]!) { productVariantsBulkUpdate(productId:$productId,variants:$variants) { userErrors { message } } }`;
+export const CREATE_VARIANTS = `#graphql
+mutation GroupMissingVariants($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+ productVariantsBulkCreate(productId:$productId,variants:$variants,strategy:DEFAULT) { userErrors { message } }
+}`;
 export const BOOTSTRAP = `#graphql
 mutation GroupVariants($identifier: ProductSetIdentifiers!, $input: ProductSetInput!) {
  productSet(identifier:$identifier,input:$input,synchronous:true) { userErrors { message } product { id } }
@@ -61,9 +66,11 @@ export async function loadGroupProduct(admin: Admin, id: string): Promise<Catalo
  const p=d.product;if(!p)return null;return {id:p.id,title:p.title,handle:p.handle,tags:p.tags,image:p.featuredImage?.url||"",collectionIds:p.collections.nodes.map(c=>c.id),collectionsTruncated:p.collections.pageInfo.hasNextPage,variants:p.variants.nodes,truncated:p.variants.pageInfo.hasNextPage,config:p.groupConfig?.jsonValue||null,designRatio:p.design?.jsonValue?.canvasRatio||p.appDesign?.jsonValue?.canvasRatio};
 }
 const DEFAULT_ROOM="https://cdn.shopify.com/extensions/01a0f10f-2c0c-7f1b-8519-f2854ed801ae/cartwala-gift-personalizer-239/assets/cartwala-acrylic-room.jpg";
-export async function loadGroupSettings(admin: Admin, catalog: CatalogProduct[] = []) {
+export type GroupSettings={shopId:string;shopName:string;currency:string;digest:string|null;state:GroupState;collections:Array<{id:string;title:string}>;collectionsTruncated:boolean};
+export async function loadGroupSettings(admin: Admin, catalog: CatalogProduct[] = []):Promise<GroupSettings> {
  const d=await query<{shop:{id:string;name:string;currencyCode:string;groups:{jsonValue:GroupState;compareDigest:string}|null};collections:{nodes:Array<{id:string;title:string;handle:string;legacy:{jsonValue:{version:number;multiplier?:number;sizes:Array<{size:string;price3?:number;price5?:number;cost3?:number;cost5?:number}>}}|null;room:{reference:{image:{url:string}}}|null}>;pageInfo:{hasNextPage:boolean}}}>(admin,SETTINGS_QUERY);
  const stored=await db.productGroupSettings.findUnique({where:{shopId:d.shop.id}});
+ let digest=stored?String(stored.revision):null;
  let state:GroupState=(stored?.state as unknown as GroupState)||d.shop.groups?.jsonValue||{version:1,groups:[],published:[],history:[]};
  if(state.version!==1 || !Array.isArray(state.groups) || !Array.isArray(state.published))throw new Error("Unsupported product group settings.");
  if(!stored && !d.shop.groups){
@@ -80,7 +87,19 @@ export async function loadGroupSettings(admin: Admin, catalog: CatalogProduct[] 
    validateGroup(g);state={version:1,groups:[g],published:[structuredClone(g)],history:[]};
   }
  }
- return {shopId:d.shop.id,shopName:d.shop.name,currency:d.shop.currencyCode,digest:stored?String(stored.revision):null,state,collections:d.collections.nodes.map(c=>({id:c.id,title:c.title})),collectionsTruncated:d.collections.pageInfo.hasNextPage};
+ // Consume a versioned shared setup import once; preserve unrelated setups.
+ const prepared=(preparedShopSetups as unknown as Record<string,GroupState&{importId:string}>|undefined)?.[d.shop.id];
+ const incoming=(d.shop.groups?.jsonValue || prepared) as (GroupState&{importId?:string})|undefined;
+ if(incoming?.importId&&incoming.importId!==state.appliedImportId){
+  if(incoming.version!==1||!Array.isArray(incoming.groups)||!Array.isArray(incoming.published))throw new Error("Invalid shared setup import.");
+  const imported=incoming.groups.map(g=>validateGroup(structuredClone(g))),published=incoming.published.map(g=>validateGroup(structuredClone(g)));
+  if(published.some(g=>!imported.some(draft=>draft.id===g.id)))throw new Error("Imported published setup has no matching draft.");
+  checkpoint(state,"Before shared setup import");
+  state={...state,groups:[...state.groups.filter(g=>!imported.some(i=>i.id===g.id)),...imported],published:[...state.published.filter(g=>!imported.some(i=>i.id===g.id)),...published],appliedImportId:incoming.importId};
+  await saveGroupSettings(admin,{shopId:d.shop.id,shopName:d.shop.name,currency:d.shop.currencyCode,digest,state,collections:[],collectionsTruncated:false});
+  digest=String(Number(digest||0)+1);
+ }
+ return {shopId:d.shop.id,shopName:d.shop.name,currency:d.shop.currencyCode,digest,state,collections:d.collections.nodes.map(c=>({id:c.id,title:c.title})),collectionsTruncated:d.collections.pageInfo.hasNextPage};
 }
 export function checkpoint(state: GroupState,name:string) { state.history=[{at:new Date().toISOString(),name,groups:structuredClone(state.groups),published:structuredClone(state.published)},...state.history].slice(0,10); }
 export async function saveGroupSettings(admin: Admin, settings: Awaited<ReturnType<typeof loadGroupSettings>>) {
@@ -112,22 +131,42 @@ async function bootstrap(admin:Admin,g:ProductGroup,p:CatalogProduct) {
  const d=await query<{productSet:{userErrors:Array<{message:string}>}}>(admin,BOOTSTRAP,{identifier:{id:p.id},input:{productOptions,variants}});if(d.productSet.userErrors.length)throw new Error(d.productSet.userErrors[0].message);
  const fresh=await loadGroupProduct(admin,p.id);if(!fresh)throw new Error("Product vanished during variant setup.");return fresh;
 }
+async function addMissingVariants(admin:Admin,g:ProductGroup,p:CatalogProduct) {
+ if(!g.createVariants)return p;
+ const optionNames=new Set(p.variants.flatMap(v=>v.selectedOptions.map(o=>o.name.toLowerCase())));
+ if(g.options.some(name=>!optionNames.has(name.toLowerCase()))||[...optionNames].some(name=>!g.options.some(n=>n.toLowerCase()===name)&&name!==g.orientationOption.toLowerCase()))return p;
+ if(p.variants.some(v=>{const opts=new Map(v.selectedOptions.map(o=>[o.name.toLowerCase(),o.value]));return !g.rows.some(r=>rowKey(r.values)===rowKey(g.options.map(name=>opts.get(name.toLowerCase())||"")));}))return p;
+ const fixed=productDirection(g,p),hasDirection=optionNames.has(g.orientationOption.toLowerCase());
+ const directions=hasDirection?(fixed?[fixed]:["Portrait","Landscape"]):[null];
+ const existing=new Set(p.variants.map(v=>{const values=new Map(v.selectedOptions.map(o=>[o.name.toLowerCase(),o.value]));return rowKey(g.options.map(name=>values.get(name.toLowerCase())||""))+"|"+(hasDirection?values.get(g.orientationOption.toLowerCase()):"");}));
+ const missing=g.rows.flatMap(row=>directions.filter(direction=>!existing.has(rowKey(row.values)+"|"+(direction||""))).map(direction=>({optionValues:[...g.options.map((optionName,index)=>({optionName,name:row.values[index]})),...(direction?[{optionName:g.orientationOption,name:direction}]:[])],price:row.price,compareAtPrice:comparePrice(g,row),inventoryItem:{tracked:false,requiresShipping:true}})));
+ if(!missing.length)return p;
+ if(p.variants.length+missing.length>250)throw new Error("This product would exceed 250 managed variants. Use a separate setup.");
+ const created=await query<{productVariantsBulkCreate:{userErrors:Array<{message:string}>}}>(admin,CREATE_VARIANTS,{productId:p.id,variants:missing});
+ if(created.productVariantsBulkCreate.userErrors.length)throw new Error(created.productVariantsBulkCreate.userErrors[0].message);
+ const fresh=await loadGroupProduct(admin,p.id);if(!fresh)throw new Error("Product vanished while adding sizes.");return fresh;
+}
+
+/** Design saves immediately reuse the product's published tag setup. */
+export async function syncProductSetup(admin:Admin,productId:string) {
+ const product=await loadGroupProduct(admin,productId);if(!product)return "Product no longer exists.";
+ const settings=await loadGroupSettings(admin,[product]);
+ const result=await syncGroupProduct(admin,settings.state.published,product);
+ return result.status==="error"||result.status==="conflict"?result.message:undefined;
+}
+
 export async function syncGroupProduct(admin:Admin,groups:ProductGroup[],original:CatalogProduct) {
  const gs=matchingGroups(groups,original);
  if(gs.length>1)return {status:"conflict",message:"Matches more than one group: "+gs.map(g=>g.name).join(", ")};
  if(!gs.length){if(original.config?.groupId)await setMeta(admin,[{ownerId:original.id,namespace:"$app",key:"group_config",type:"json",value:JSON.stringify({managed:true,disabled:true})}]);return {status:"unchanged",message:""};}
  const g=gs[0];if(original.truncated || (original.collectionsTruncated&&g.collectionIds.length))return {status:"error",message:"Product has more variants or collections than supported."};
- if(g.previewMode==="png"){
-  const fixed=productDirection(g,original),dirs=fixed?[fixed]:g.direction==="customer"?["Portrait","Landscape"] as const:["Portrait"] as const;
-  for(const row of g.rows)for(const dir of dirs)if(!row.templates[dir].mockup)return {status:"error",message:"Upload the "+dir+" PNG for "+row.values.join(" / ")+" first."};
- }
  if(original.designRatio){
   const [dw,dh]=original.designRatio.split(":").map(Number),direction=productDirection(g,original);
-  for(const row of g.rows){const width=direction==="Landscape"?row.height:row.width,height=direction==="Landscape"?row.width:row.height;
+  for(const row of g.rows){if(g.previewMode!=="png"||!row.templates[direction||"Portrait"].mockup)continue;const width=direction==="Landscape"?row.height:row.width,height=direction==="Landscape"?row.width:row.height;
    if(!(dw>0&&dh>0)||Math.abs((width/height)/(dw/dh)-1)>.02)return {status:"error",message:"The uploaded design ratio does not match "+row.values.join(" / ")+". Use a separate size group for a different ratio."};
   }
  }
- let p=await bootstrap(admin,g,original);const fixed=productDirection(g,p),updates:Record<string,unknown>[]=[];
+ let p=await bootstrap(admin,g,original);p=await addMissingVariants(admin,g,p);const fixed=productDirection(g,p),updates:Record<string,unknown>[]=[];
  const previews: Record<string,unknown>={};const seen=new Set<string>();
  for(const v of p.variants){
   const options=new Map(v.selectedOptions.map(o=>[o.name.toLowerCase(),o.value]));const values=g.options.map(name=>options.get(name.toLowerCase())||"");const row=g.rows.find(r=>rowKey(r.values)===rowKey(values));
@@ -139,11 +178,11 @@ export async function syncGroupProduct(admin:Admin,groups:ProductGroup[],origina
   const direction=fixed||(variantDirection==="Landscape"?"Landscape":"Portrait"),key=row.id+"|"+direction;
   if(seen.has(key))return {status:"error",message:"Duplicate variant matching. Check option names."};seen.add(key);
   const template=row.templates[direction],width=direction==="Landscape"?row.height:row.width,height=direction==="Landscape"?row.width:row.height;
-  if(p.designRatio){const [dw,dh]=p.designRatio.split(":").map(Number);if(!(dw>0&&dh>0)||Math.abs((width/height)/(dw/dh)-1)>.02)return {status:"error",message:"The uploaded design ratio does not match "+row.values.join(" / ")+". Use a separate size group for a different ratio."};}
-  if(g.previewMode==="png"&&!template.mockup)return {status:"error",message:"Upload the "+direction+" PNG for "+row.values.join(" / ")+" before updating this product."};
+  if(p.designRatio&&g.previewMode==="png"&&template.mockup){const [dw,dh]=p.designRatio.split(":").map(Number);if(!(dw>0&&dh>0)||Math.abs((width/height)/(dw/dh)-1)>.02)return {status:"error",message:"The uploaded design ratio does not match "+row.values.join(" / ")+". Use a separate size group for a different ratio."};}
   previews[v.id.split("/").pop()!]={...template,background:template.background||g.background,widthInches:width,heightInches:height,direction};
  }
- const expected=g.rows.length*(g.direction==="customer"&&!fixed?2:1);if(seen.size!==expected)return {status:"error",message:"Missing variant combinations. Complete the variants or enable new-product setup."};
+ const hasOrientation=p.variants.some(v=>v.selectedOptions.some(o=>o.name.toLowerCase()===g.orientationOption.toLowerCase()));
+ const expected=g.rows.length*(hasOrientation&&!fixed?2:1);if(seen.size!==expected)return {status:"error",message:"Missing variant combinations. Complete the variants or enable new-product setup."};
  const config={managed:true,groupId:g.id,groupName:g.name,previewMode:g.previewMode,customization:p.designRatio?"design":g.customization,fixedDirection:fixed,orientationOption:g.orientationOption,previews};
  if(Buffer.byteLength(JSON.stringify(config),"utf8")>120000)throw new Error("Preview settings exceed Shopify’s size limit. Use shorter image URLs or fewer rows.");
  if(updates.length){const d=await query<{productVariantsBulkUpdate:{userErrors:Array<{message:string}>}}>(admin,BULK_PRICES,{productId:p.id,variants:updates});if(d.productVariantsBulkUpdate.userErrors.length)throw new Error(d.productVariantsBulkUpdate.userErrors[0].message);}

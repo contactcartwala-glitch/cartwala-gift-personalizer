@@ -35,7 +35,7 @@
    if(completeImage){img.src=t.image;Object.assign(photo.style,{left:'50%',top:'50%',width:'100%',height:'100%'});photo.classList.remove('cw-group-photo--studs');overlay.hidden=true;height.hidden=true;width.hidden=true;}
    else{img.src=artwork;height.hidden=png;width.hidden=png;}
    show(!!artwork&&config.previewMode!=='off'&&(!png||!!t.mockup));
-   if(customer&&config.previewMode==='off'&&original)original.src=artwork;
+   if(customer&&(config.previewMode==='off'||(png&&!t.mockup))&&original)original.src=artwork;
    if(root&&config.customization==='plain')root.dispatchEvent(new CustomEvent('cw:acrylic-selection',{detail:{ratio:`${Math.round(t.widthInches*100)}:${Math.round(t.heightInches*100)}`,variantId:String(selected.id)}}));
   };
   const choose=(v)=>{if(!v||!config.previews?.[String(v.id)]||v.id===selected.id)return;selected=v;productForms().forEach(form=>{form.querySelector('[name="id"]').value=String(v.id);});render();};
