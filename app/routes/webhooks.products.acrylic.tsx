@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs } from "react-router";
 import { authenticate } from "../shopify.server";
-import { ACRYLIC_TAG, loadAcrylicMatrix, loadAcrylicProduct, syncAcrylicProduct } from "../lib/acrylic-prices.server";
+import { isAcrylicProduct, loadAcrylicMatrix, loadAcrylicProduct, syncAcrylicProduct } from "../lib/acrylic-prices.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { admin, payload, topic } = await authenticate.webhook(request);
@@ -10,7 +10,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (!id) return new Response();
   try {
     const product = await loadAcrylicProduct(admin, id);
-    if (product?.tags.includes(ACRYLIC_TAG)) {
+    if (product && isAcrylicProduct(product.tags)) {
       const result = await syncAcrylicProduct(admin, product, await loadAcrylicMatrix(admin));
       console.log(`Acrylic price sync ${topic}: ${result}`);
     }

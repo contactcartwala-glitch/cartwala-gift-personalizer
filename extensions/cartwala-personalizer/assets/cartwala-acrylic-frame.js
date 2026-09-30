@@ -34,7 +34,7 @@
     if (panel.dataset.roomImage) preview.style.setProperty("--cw-acrylic-room-image", `url("${panel.dataset.roomImage}")`);
     if (panel.dataset.studImage) preview.style.setProperty("--cw-acrylic-stud-image", `url("${panel.dataset.studImage}")`);
     gallery?.appendChild(preview);
-    let designUrl = "";
+    let designUrl = panel.dataset.designImage || "";
     const showPreview = () => {
       if (!gallery || !designUrl) return;
       preview.querySelector("[data-cw-acrylic-photo]").src = designUrl;
@@ -57,7 +57,7 @@
     };
     const render = () => {
       const size = option(selected, "Size");
-      const orientation = option(selected, "Orientation") || fixedOrientation;
+      const orientation = panel.dataset.fixedOrientation || option(selected, "Orientation") || fixedOrientation;
       const [short, long] = size.split(" ")[0].split("×").map(Number);
       if (!Number.isFinite(short) || !Number.isFinite(long)) return;
       const width = orientation === "Landscape" ? long : short;

@@ -5,9 +5,15 @@
   endif
   assign personalizer_enabled = personalizer_config.enabled
   assign acrylic_product = false
-  if product.tags contains 'cw-acrylic-frame'
+  if product.tags contains 'cw-acrylic-frame' or product.tags contains 'cw-acrylic-portrait' or product.tags contains 'cw-acrylic-landscape'
     assign acrylic_product = true
     assign personalizer_enabled = true
+  endif
+  assign acrylic_fixed_orientation = ''
+  if product.tags contains 'cw-acrylic-landscape' or product.tags contains 'cw-frame-landscape'
+    assign acrylic_fixed_orientation = 'Landscape'
+  elsif product.tags contains 'cw-acrylic-portrait' or product.tags contains 'cw-frame-portrait'
+    assign acrylic_fixed_orientation = 'Portrait'
   endif
   assign acrylic_plain_photo = false
   if acrylic_product and personalizer_config == blank
@@ -41,12 +47,12 @@
     {% if heart_magic_mirror_fallback %}
       <div data-cw-config='{"enabled":true,"overlayUrl":"https://cdn.shopify.com/s/files/1/0803/7931/4361/files/love_shape-overlay_019e41fb-91c2-47b6-8017-ffcfa79af20c.png?v=1789700102","canvasRatio":"1254:1254","photoFields":[{"id":"photo-1","label":"1 MASK","maskUrl":"https://cdn.shopify.com/s/files/1/0803/7931/4361/files/psd-photo-mask-1_0cf43e8b-95f1-477d-ba79-84c22c4314bb.png?v=1789700105","x":49.68102073365231,"y":40.82934609250399,"width":63.31738437001595,"height":55.18341307814992,"rotationEnabled":false,"required":true}],"textFields":[],"fileFields":[],"linkFields":[],"customFonts":[]}' hidden></div>
     {% elsif acrylic_plain_photo %}
-      <div data-cw-config='{"enabled":true,"canvasRatio":"{% if product.selected_or_first_available_variant.option3 == 'Landscape' or product.tags contains 'cw-frame-landscape' %}12:8{% else %}8:12{% endif %}","photoFields":[{"id":"acrylic-photo","label":"Your Photo","x":50,"y":50,"width":100,"height":100,"required":true}],"textFields":[],"fileFields":[],"linkFields":[],"customFonts":[]}' hidden></div>
+      <div data-cw-config='{"enabled":true,"canvasRatio":"{% if product.selected_or_first_available_variant.option3 == 'Landscape' or acrylic_fixed_orientation == 'Landscape' %}12:8{% else %}8:12{% endif %}","photoFields":[{"id":"acrylic-photo","label":"Your Photo","x":50,"y":50,"width":100,"height":100,"required":true}],"textFields":[],"fileFields":[],"linkFields":[],"customFonts":[]}' hidden></div>
     {% else %}
       <div data-cw-config="{{ personalizer_config | json | escape }}" hidden></div>
     {% endif %}
     {% if acrylic_product %}
-      <div data-cw-acrylic data-option-names="{{ product.options | json | escape }}" data-design-ratio="{{ personalizer_config.canvasRatio | escape }}" data-fixed-orientation="{% if product.tags contains 'cw-frame-landscape' %}Landscape{% elsif product.tags contains 'cw-frame-portrait' %}Portrait{% endif %}" data-variants="{{ product.variants | json | escape }}" data-selected-variant="{{ product.selected_or_first_available_variant.id }}" data-room-image="{{ 'cartwala-acrylic-room.jpg' | asset_url }}" data-stud-image="{{ 'cartwala-acrylic-stud.png' | asset_url }}" hidden></div>
+      <div data-cw-acrylic data-option-names="{{ product.options | json | escape }}" data-design-ratio="{{ personalizer_config.canvasRatio | escape }}" data-fixed-orientation="{{ acrylic_fixed_orientation }}" data-design-image="{% if acrylic_fixed_orientation != blank and product.featured_image != blank %}{{ product.featured_image | image_url: width: 2400 }}{% endif %}" data-variants="{{ product.variants | json | escape }}" data-selected-variant="{{ product.selected_or_first_available_variant.id }}" data-room-image="{{ 'cartwala-acrylic-room.jpg' | asset_url }}" data-stud-image="{{ 'cartwala-acrylic-stud.png' | asset_url }}" hidden></div>
       <script src="{{ 'cartwala-acrylic-frame.js' | asset_url }}" defer></script>
       {{ 'cartwala-acrylic-frame.css' | asset_url | stylesheet_tag }}
     {% endif %}

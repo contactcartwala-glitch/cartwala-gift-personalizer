@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Form, useActionData, useLoaderData, useNavigation } from "react-router";
 import { authenticate } from "../shopify.server";
-import { ACRYLIC_MULTIPLIER, ACRYLIC_SIZES } from "../lib/acrylic-prices";
+import { acrylicComparePrice, ACRYLIC_SIZES } from "../lib/acrylic-prices";
 import {
   ACRYLIC_COLLECTION_ID, loadAcrylicMatrix, saveAcrylicMatrix,
   syncAcrylicCollection, validateMatrix, type AcrylicMatrix,
@@ -20,9 +20,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     let matrix: AcrylicMatrix;
     if (form.get("intent") === "save") {
       matrix = validateMatrix({
-        version: 1, multiplier: ACRYLIC_MULTIPLIER,
+        version: 2,
         sizes: ACRYLIC_SIZES.map((size, index) => ({
-          size, cost3: Number(form.get(`cost3-${index}`)), cost5: Number(form.get(`cost5-${index}`)),
+          size, price3: Number(form.get(`price3-${index}`)), price5: Number(form.get(`price5-${index}`)),
         })),
       });
       await saveAcrylicMatrix(admin, matrix);
@@ -44,29 +44,29 @@ export default function AcrylicPrices() {
   const navigation = useNavigation();
   const [rows, setRows] = useState(matrix.sizes);
   const busy = navigation.state !== "idle";
-  const setCost = (index: number, key: "cost3" | "cost5", value: string) =>
+  const setPrice = (index: number, key: "price3" | "price5", value: string) =>
     setRows((previous) => previous.map((row, rowIndex) => rowIndex === index
       ? { ...row, [key]: Number(value) } : row));
 
   return (
     <s-page heading="Acrylic Photo Frames · Prices">
       <s-section heading="One price table for every design">
-        <p>These five sizes use 3mm acrylic without studs or 5mm acrylic with studs. Selling price = base cost × 2.5. Save to update every tagged design in this collection.</p>
-        <p>Plain photo products offer Portrait and Landscape. For a designed product, duplicate the matching Portrait or Landscape draft template, upload its design, and keep the Size and Acrylic variants plus the cw-acrylic-frame tag. Designed products have no customer orientation choice. Prices depend only on size and acrylic thickness.</p>
+        <p>Edit your selling prices here. Save to update all tagged acrylic designs. The crossed-out price is automatically set 40% above the selling price.</p>
+        <p>For a new design, upload the flat artwork as its first product image and use cw-acrylic-portrait or cw-acrylic-landscape. A new product with no custom options automatically receives all five sizes and both acrylic choices. The same room background shows your artwork at the selected size. Plain photo products retain the Portrait/Landscape choice. Both directions use the same prices.</p>
         <p><s-link href={`shopify://admin/collections/${collectionId.split("/").pop()}`}>Open Acrylic Photo Frames collection</s-link></p>
       </s-section>
-      <s-section heading="Base costs and selling prices (₹)">
+      <s-section heading="Selling prices (₹)">
         <Form method="post">
           <input type="hidden" name="intent" value="save" />
           <div style={{ overflowX: "auto" }}>
             <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 600 }}>
-              <thead><tr><th scope="col">Size (inches)</th><th scope="col">3mm base</th><th scope="col">3mm selling</th><th scope="col">5mm base</th><th scope="col">5mm selling</th></tr></thead>
+              <thead><tr><th scope="col">Size (inches)</th><th scope="col">3mm selling price</th><th scope="col">3mm crossed-out price</th><th scope="col">5mm selling price</th><th scope="col">5mm crossed-out price</th></tr></thead>
               <tbody>{rows.map((row, index) => <tr key={row.size}>
                 <th scope="row">{row.size}</th>
-                <td><input aria-label={`${row.size} 3mm base cost`} name={`cost3-${index}`} type="number" min="1" max="1000000" step="1" required value={row.cost3} onChange={(event) => setCost(index, "cost3", event.target.value)} style={{ width: 110, padding: 8 }} /></td>
-                <td>₹{(row.cost3 * ACRYLIC_MULTIPLIER).toLocaleString("en-IN")}</td>
-                <td><input aria-label={`${row.size} 5mm base cost`} name={`cost5-${index}`} type="number" min="1" max="1000000" step="1" required value={row.cost5} onChange={(event) => setCost(index, "cost5", event.target.value)} style={{ width: 110, padding: 8 }} /></td>
-                <td>₹{(row.cost5 * ACRYLIC_MULTIPLIER).toLocaleString("en-IN")}</td>
+                <td><input aria-label={`${row.size} 3mm selling price`} name={`price3-${index}`} type="number" min="1" max="10000000" step="0.01" required value={row.price3} onChange={(event) => setPrice(index, "price3", event.target.value)} style={{ width: 110, padding: 8 }} /></td>
+                <td>₹{acrylicComparePrice(row.price3).toLocaleString("en-IN")}</td>
+                <td><input aria-label={`${row.size} 5mm selling price`} name={`price5-${index}`} type="number" min="1" max="10000000" step="0.01" required value={row.price5} onChange={(event) => setPrice(index, "price5", event.target.value)} style={{ width: 110, padding: 8 }} /></td>
+                <td>₹{acrylicComparePrice(row.price5).toLocaleString("en-IN")}</td>
               </tr>)}</tbody>
             </table>
           </div>

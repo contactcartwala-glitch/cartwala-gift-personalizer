@@ -1,38 +1,52 @@
-import { ACRYLIC_MULTIPLIER, ACRYLIC_SIZES } from "./acrylic-prices";
+import { ACRYLIC_SIZES, acrylicComparePrice } from "./acrylic-prices";
 
 export const ACRYLIC_COLLECTION_ID = "gid://shopify/Collection/507932115129";
 export const ACRYLIC_TAG = "cw-acrylic-frame";
+export const ACRYLIC_PORTRAIT_TAG = "cw-acrylic-portrait";
+export const ACRYLIC_LANDSCAPE_TAG = "cw-acrylic-landscape";
+export const isAcrylicProduct = (tags: string[]) => [ACRYLIC_TAG, ACRYLIC_PORTRAIT_TAG, ACRYLIC_LANDSCAPE_TAG].some(tag => tags.includes(tag));
+export const acrylicDesignDirection = (tags: string[]) => {
+  const portrait = tags.includes(ACRYLIC_PORTRAIT_TAG) || tags.includes("cw-frame-portrait");
+  const landscape = tags.includes(ACRYLIC_LANDSCAPE_TAG) || tags.includes("cw-frame-landscape");
+  if (portrait && landscape) throw new Error("Use only one acrylic design direction tag.");
+  return portrait ? "Portrait" : landscape ? "Landscape" : null;
+};
 
-type Row = { size: string; cost3: number; cost5: number };
-export type AcrylicMatrix = { version: 1; multiplier: 2.5; sizes: Row[] };
+type Row = { size: string; price3: number; price5: number };
+export type AcrylicMatrix = { version: 2; sizes: Row[] };
 type Graphql = (query: string, options?: { variables?: Record<string, unknown> }) => Promise<Response>;
-type Variant = { id: string; price: string; selectedOptions: Array<{ name: string; value: string }> };
+type Variant = { id: string; price: string; compareAtPrice: string | null; selectedOptions: Array<{ name: string; value: string }> };
 type Product = { id: string; title: string; tags: string[]; variants: { nodes: Variant[]; pageInfo: { hasNextPage: boolean } } };
 
 export const DEFAULT_ACRYLIC_MATRIX: AcrylicMatrix = {
-  version: 1, multiplier: ACRYLIC_MULTIPLIER,
+  version: 2,
   sizes: [
-    { size: "8×12", cost3: 300, cost5: 450 },
-    { size: "12×18", cost3: 500, cost5: 850 },
-    { size: "16×24", cost3: 1000, cost5: 1500 },
-    { size: "20×30", cost3: 1500, cost5: 2000 },
-    { size: "24×36", cost3: 2500, cost5: 3500 },
+    { size: "8×12", price3: 750, price5: 1125 },
+    { size: "12×18", price3: 1250, price5: 2125 },
+    { size: "16×24", price3: 2500, price5: 3750 },
+    { size: "20×30", price3: 3750, price5: 5000 },
+    { size: "24×36", price3: 6250, price5: 8750 },
   ],
 };
 
 export function validateMatrix(value: unknown): AcrylicMatrix {
   if (!value || typeof value !== "object") throw new Error("Price table is missing.");
-  const matrix = value as Partial<AcrylicMatrix>;
-  if (matrix.version !== 1 || matrix.multiplier !== ACRYLIC_MULTIPLIER ||
-      !Array.isArray(matrix.sizes) || matrix.sizes.length !== ACRYLIC_SIZES.length)
-    throw new Error("The price table must have the five approved sizes and a 2.5 multiplier.");
+  const input = value as { version?: number; multiplier?: number; sizes?: Array<{ size: string; cost3?: number; cost5?: number; price3?: number; price5?: number }> };
+  // Read the previous table once without changing existing selling prices.
+  const matrix: AcrylicMatrix = input.version === 1 && input.multiplier === 2.5
+    ? { version: 2, sizes: (input.sizes || []).map(row => ({ size: row.size,
+        price3: Number(row.cost3) * 2.5, price5: Number(row.cost5) * 2.5 })) }
+    : value as AcrylicMatrix;
+  if (matrix.version !== 2 || !Array.isArray(matrix.sizes) || matrix.sizes.length !== ACRYLIC_SIZES.length)
+    throw new Error("The price table must contain the five approved sizes.");
   ACRYLIC_SIZES.forEach((size, index) => {
-    const row = matrix.sizes?.[index];
-    if (row?.size !== size || !Number.isSafeInteger(row.cost3) || !Number.isSafeInteger(row.cost5) ||
-        row.cost3 <= 0 || row.cost5 <= 0 || row.cost3 > 1000000 || row.cost5 > 1000000)
-      throw new Error(`Check the base costs for ${size}.`);
+    const row = matrix.sizes[index];
+    if (row?.size !== size || [row.price3, row.price5].some(price =>
+        !Number.isFinite(price) || price <= 0 || price > 10000000 ||
+        Math.abs(price * 100 - Math.round(price * 100)) > 0.00001))
+      throw new Error(`Check the selling prices for ${size}.`);
   });
-  return matrix as AcrylicMatrix;
+  return matrix;
 }
 
 async function graphql<T>(admin: { graphql: Graphql }, query: string, variables: Record<string, unknown>): Promise<T> {
@@ -68,13 +82,58 @@ function variantPrice(variant: Variant, matrix: AcrylicMatrix): number | null {
   const acrylic = options.get("acrylic") || "";
   const row = matrix.sizes.find((item) => item.size === size);
   if (!row) return null;
-  if (/^3\s*mm\b/.test(acrylic)) return row.cost3 * matrix.multiplier;
-  if (/^5\s*mm\b/.test(acrylic)) return row.cost5 * matrix.multiplier;
+  if (/^3\s*mm\b/.test(acrylic)) return row.price3;
+  if (/^5\s*mm\b/.test(acrylic)) return row.price5;
   return null;
 }
 
+async function prepareAcrylicDesign(admin: { graphql: Graphql }, product: Product, matrix: AcrylicMatrix): Promise<Product> {
+  const direction = acrylicDesignDirection(product.tags);
+  if (!product.tags.includes(ACRYLIC_TAG)) {
+    const result = await graphql<{ tagsAdd: { userErrors: Array<{ message: string }> } }>(admin,
+      `#graphql
+      mutation AddAcrylicCollectionTag($id: ID!, $tags: [String!]!) {
+        tagsAdd(id: $id, tags: $tags) { userErrors { message } }
+      }`, { id: product.id, tags: [ACRYLIC_TAG] });
+    if (result.tagsAdd.userErrors.length) throw new Error(result.tagsAdd.userErrors[0].message);
+    product = { ...product, tags: [...product.tags, ACRYLIC_TAG] };
+  }
+  // Bootstrap only a new product with Shopify's default variant. Existing custom
+  // options and variants are never deleted or rebuilt by the price webhook.
+  const current = product.variants.nodes;
+  if (!direction || product.variants.pageInfo.hasNextPage || current.length !== 1 ||
+      current[0].selectedOptions.some(option => option.name !== "Title")) return product;
+  const materials = ["3mm without studs", "5mm with studs"];
+  const result = await graphql<{ productSet: { product: Product | null; userErrors: Array<{ message: string }> } }>(admin,
+    `#graphql
+    mutation PrepareAcrylicDesign($identifier: ProductSetIdentifiers!, $input: ProductSetInput!) {
+      productSet(identifier: $identifier, input: $input, synchronous: true) {
+        product { id title tags variants(first: 100) {
+          nodes { id price compareAtPrice selectedOptions { name value } }
+          pageInfo { hasNextPage }
+        } }
+        userErrors { message }
+      }
+    }`, { identifier: { id: product.id }, input: {
+      productOptions: [
+        { name: "Size", position: 1, values: matrix.sizes.map(row => ({ name: `${row.size} inches` })) },
+        { name: "Acrylic", position: 2, values: materials.map(name => ({ name })) },
+      ],
+      variants: matrix.sizes.flatMap(row => materials.map((material, index) => {
+        const price = index ? row.price5 : row.price3;
+        return { optionValues: [{ optionName: "Size", name: `${row.size} inches` },
+          { optionName: "Acrylic", name: material }], price, compareAtPrice: acrylicComparePrice(price),
+          inventoryItem: { tracked: false, requiresShipping: true } };
+      })),
+    } });
+  if (result.productSet.userErrors.length || !result.productSet.product)
+    throw new Error(result.productSet.userErrors[0]?.message || "Could not create acrylic design variants.");
+  return result.productSet.product;
+}
+
 export async function syncAcrylicProduct(admin: { graphql: Graphql }, product: Product, matrix: AcrylicMatrix) {
-  if (!product.tags.includes(ACRYLIC_TAG)) return "ignored";
+  if (!isAcrylicProduct(product.tags)) return "ignored";
+  product = await prepareAcrylicDesign(admin, product, matrix);
   const variants = product.variants.nodes;
   const desired = variants.map((variant) => variantPrice(variant, matrix));
   const groups = new Map<string, Set<string>>();
@@ -99,7 +158,8 @@ export async function syncAcrylicProduct(admin: { graphql: Graphql }, product: P
       [...groups.values()].some((directions) => directions.size !== expectedDirections.length ||
         expectedDirections.some((direction) => !directions.has(direction)))) return "incomplete";
   const updates = variants.flatMap((variant, index) =>
-    Number(variant.price) === desired[index] ? [] : [{ id: variant.id, price: desired[index] }]);
+    Number(variant.price) === desired[index] && Number(variant.compareAtPrice) === acrylicComparePrice(desired[index]!)
+      ? [] : [{ id: variant.id, price: desired[index], compareAtPrice: acrylicComparePrice(desired[index]!) }]);
   if (!updates.length) return "unchanged";
   const data = await graphql<{ productVariantsBulkUpdate: { userErrors: Array<{ message: string }> } }>(admin,
     `#graphql
@@ -117,7 +177,7 @@ export async function loadAcrylicProduct(admin: { graphql: Graphql }, id: string
     query AcrylicProduct($id: ID!) {
       product(id: $id) {
         id title tags variants(first: 100) {
-          nodes { id price selectedOptions { name value } }
+          nodes { id price compareAtPrice selectedOptions { name value } }
           pageInfo { hasNextPage }
         }
       }
@@ -134,12 +194,12 @@ export async function syncAcrylicCollection(admin: { graphql: Graphql }, matrix:
       query AcrylicProducts($after: String, $query: String!) {
         products(first: 100, after: $after, query: $query) {
           nodes { id title tags variants(first: 100) {
-            nodes { id price selectedOptions { name value } }
+            nodes { id price compareAtPrice selectedOptions { name value } }
             pageInfo { hasNextPage }
           } }
           pageInfo { hasNextPage endCursor }
         }
-      }`, { after: cursor, query: `tag:${ACRYLIC_TAG}` });
+      }`, { after: cursor, query: `(tag:${ACRYLIC_TAG} OR tag:${ACRYLIC_PORTRAIT_TAG} OR tag:${ACRYLIC_LANDSCAPE_TAG})` });
     for (const product of data.products.nodes) {
       try {
         const result = await syncAcrylicProduct(admin, product, matrix);
