@@ -17,6 +17,27 @@ query GroupCatalog($after: String) {
   } pageInfo { hasNextPage endCursor }
  }
 }`;
+export const CATALOG_SUMMARY_QUERY = `#graphql
+query GroupCatalogSummary($after: String) {
+ products(first: 50, after: $after) {
+  nodes { id title handle tags collections(first: 10) { nodes { id } pageInfo { hasNextPage } } }
+  pageInfo { hasNextPage endCursor }
+ }
+}`;
+/** Read-only setup pages need matching tags and collections, not every variant. */
+export async function loadCatalogSummary(admin: Admin): Promise<CatalogProduct[]> {
+ const products: CatalogProduct[]=[];let after:string|null=null;
+ type SummaryPage={products:{nodes:Array<{id:string;title:string;handle:string;tags:string[];collections:{nodes:{id:string}[];pageInfo:{hasNextPage:boolean}}}>;pageInfo:{hasNextPage:boolean;endCursor:string|null}}};
+ do {
+  const d:SummaryPage=await query<SummaryPage>(admin,CATALOG_SUMMARY_QUERY,{after});
+  for(const p of d.products.nodes){
+   if(p.collections.pageInfo.hasNextPage){const full=await loadGroupProduct(admin,p.id);if(full)products.push(full);}
+   else products.push({id:p.id,title:p.title,handle:p.handle,tags:p.tags,collectionIds:p.collections.nodes.map(c=>c.id),image:"",config:null,variants:[],truncated:false,collectionsTruncated:false});
+  }
+  after=d.products.pageInfo.hasNextPage?d.products.pageInfo.endCursor:null;
+  if(d.products.pageInfo.hasNextPage&&!after)throw new Error("Product pagination failed.");
+ }while(after);return products;
+}
 export const PRODUCT_QUERY = `#graphql
 query GroupProduct($id: ID!) {
  product(id:$id) { id title handle tags featuredImage { url }
@@ -76,6 +97,8 @@ export async function loadGroupSettings(admin: Admin, catalog: CatalogProduct[] 
  if(!stored && !d.shop.groups){
   const legacy=d.collections.nodes.find(c=>c.legacy?.jsonValue?.sizes?.length);
   if(legacy){
+   // Preserve original prices during a first-time legacy import only.
+   if(catalog.length&&catalog.every(p=>!p.variants.length))catalog=await loadCatalog(admin);
    const g=emptyGroup("acrylic-frames");Object.assign(g,{name:legacy.title,tags:["cw-acrylic-frame","cw-acrylic-portrait","cw-acrylic-landscape"],options:["Size","Acrylic"],previewMode:"automatic",customization:"plain",direction:"customer",portraitTag:"cw-acrylic-portrait",landscapeTag:"cw-acrylic-landscape",background:legacy.room?.reference?.image?.url||DEFAULT_ROOM,createVariants:true});
    g.rows=legacy.legacy!.jsonValue.sizes.flatMap((r,index)=>[3,5].map(mm=>{
     const size=r.size+" inches",material=mm===3?"3mm without studs":"5mm with studs";

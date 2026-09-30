@@ -22,6 +22,10 @@ settings=await server.loadGroupSettings(preparedAdmin);assert.equal(settings.sta
 record.state.groups[0].rows[0].price=777;settings=await server.loadGroupSettings(preparedAdmin);assert.equal(settings.state.groups[0].rows[0].price,777);assert.equal(writes,2);
 record=null;const otherAdmin={graphql:async()=>new Response(JSON.stringify({data:{shop:{id:'other-store',name:'Other',currencyCode:'USD',groups:null},collections:{nodes:[],pageInfo:{hasNextPage:false}}}}))};settings=await server.loadGroupSettings(otherAdmin);assert.equal(settings.state.groups.length,0);
 console.log('Shared setup passed: optional images, cost-only application, new-size creation, stable existing variant IDs, idempotence and one-time import.');
+// Setup browsing fetches fifty product summaries per page and never fetches variants.
+const summaryCalls=[];
+const summaryAdmin={graphql:async(q,{variables})=>{summaryCalls.push({q,variables});assert.match(q,/products\(first: 50/);assert.doesNotMatch(q,/variants\(/);return new Response(JSON.stringify({data:{products:{nodes:[{id:variables.after?'p2':'p1',title:'Frame',handle:'frame',tags:['frames'],collections:{nodes:[{id:'collection'}],pageInfo:{hasNextPage:false}}}],pageInfo:{hasNextPage:!variables.after,endCursor:variables.after?null:'next'}}}}));}};
+const summaries=await server.loadCatalogSummary(summaryAdmin);assert.equal(summaries.length,2);assert.equal(summaryCalls.length,2);assert.equal(summaryCalls[1].variables.after,'next');assert.equal(summaries[1].collectionIds[0],'collection');
 // Three independent setup tags; duplicates are rejected within this store.
 const tags=structuredClone(group);tags.tags=['frames'];tags.portraitTag='frames-p';tags.landscapeTag='frames-l';
 assert.deepEqual(Object.keys(core.tagErrors(tags,[tags])),[]);

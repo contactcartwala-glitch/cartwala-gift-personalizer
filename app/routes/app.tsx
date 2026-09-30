@@ -1,5 +1,5 @@
-import type { HeadersFunction, LoaderFunctionArgs } from "react-router";
-import { Outlet, useLoaderData, useRouteError } from "react-router";
+import type { HeadersFunction, LoaderFunctionArgs, ShouldRevalidateFunction } from "react-router";
+import { Outlet, useLoaderData, useNavigation, useRouteError } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { AppProvider } from "@shopify/shopify-app-react-router/react";
 
@@ -74,8 +74,15 @@ type Product = {
   personalizer?: { jsonValue?: Config | null } | null;
 };
 
+const isDesignPage = (pathname: string) => pathname.replace(/\/$/, "") === "/app";
+export const shouldRevalidate: ShouldRevalidateFunction = ({ currentUrl, nextUrl, defaultShouldRevalidate }) =>
+  isDesignPage(currentUrl.pathname) !== isDesignPage(nextUrl.pathname) || defaultShouldRevalidate;
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { admin } = await authenticate.admin(request);
+  if (!isDesignPage(new URL(request.url).pathname)) {
+    return { apiKey: process.env.SHOPIFY_API_KEY || "", products: [] as Product[] };
+  }
   const products: Product[] = [];
   let cursor: string | null = null;
   let hasNextPage = true;
@@ -137,6 +144,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function App() {
   const { apiKey } = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
 
   return (
     <AppProvider embedded apiKey={apiKey}>
@@ -145,7 +153,7 @@ export default function App() {
         <s-link href="/app/print-files">Print Files</s-link>
         <s-link href="/app/product-groups">Sizes & mockups</s-link>
       </s-app-nav>
-      <Outlet />
+      {navigation.state === "loading" ? <s-page heading="Loading"><s-spinner accessibilityLabel="Loading page" /></s-page> : <Outlet />}
     </AppProvider>
   );
 }

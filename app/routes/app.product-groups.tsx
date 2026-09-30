@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, ShouldRevalidateFunction } from "react-router";
 import { Form, Link, useActionData, useLoaderData, useNavigation, useFetcher } from "react-router";
 import { authenticate } from "../shopify.server";
-import { checkpoint, loadCatalog, loadGroupSettings, saveGroupSettings, syncGroups } from "../lib/product-groups.server";
+import { checkpoint, loadCatalog, loadCatalogSummary, loadGroupSettings, saveGroupSettings, syncGroups } from "../lib/product-groups.server";
 import { comparePrice, emptyGroup, emptyTemplate, escapeCsv, matches, parseCsv, validateGroup, tagErrors, type Direction, type GroupRow, type ProductGroup } from "../lib/product-groups";
 import { inspectMockupPng } from "../lib/png-mockup.server";
 import { uploadImageAsset } from "../lib/shopify-files.server";
@@ -10,7 +10,7 @@ import { uploadImageAsset } from "../lib/shopify-files.server";
 export const shouldRevalidate:ShouldRevalidateFunction=({formData,defaultShouldRevalidate})=>formData?.get("intent")==="upload"?false:defaultShouldRevalidate;
 
 export const loader=async({request}:LoaderFunctionArgs)=>{
- const {admin}=await authenticate.admin(request);const catalog=await loadCatalog(admin),settings=await loadGroupSettings(admin,catalog);
+ const {admin}=await authenticate.admin(request);const catalog=await loadCatalogSummary(admin),settings=await loadGroupSettings(admin,catalog);
  const fresh=()=>({...emptyGroup(crypto.randomUUID()),options:["Size"]});const id=new URL(request.url).searchParams.get("group");const selected=id==="new"?fresh():settings.state.groups.find(g=>g.id===id)||settings.state.groups[0]||fresh();
  return {settings,catalog,selected,index:!id};
 };
