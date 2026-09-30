@@ -1,7 +1,8 @@
 import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';import ts from 'typescript';
 const compile=path=>ts.transpileModule(fs.readFileSync(path,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
 const core={};vm.runInNewContext(compile('app/lib/product-groups.ts'),{exports:core});
-const server={};vm.runInNewContext(compile('app/lib/product-groups.server.ts'),{exports:server,require:()=>core,structuredClone,Response,Date});
+let databaseCalls=[];const db={productGroupSettings:{findUnique:async()=>null,create:async args=>{databaseCalls.push(args);},updateMany:async args=>{databaseCalls.push(args);return {count:1};}}};
+const server={};vm.runInNewContext(compile('app/lib/product-groups.server.ts'),{exports:server,require:path=>path.includes("db.server")?{default:db}:core,structuredClone,Response,Date,Buffer});
 const group=core.emptyGroup('test');group.tags=['my-tag'];group.rows=[{id:'row',values:['8x12','3mm'],price:750,compare:1050,width:8,height:12,templates:{Portrait:core.emptyTemplate(),Landscape:core.emptyTemplate()}}];core.validateGroup(group);
 assert.equal(core.comparePrice(group,group.rows[0]),1050);group.compareMode='percent';group.percentage=20;assert.equal(core.comparePrice(group,group.rows[0]),900);group.compareMode='none';assert.equal(core.comparePrice(group,group.rows[0]),null);group.compareMode='manual';
 const duplicate=structuredClone(group);duplicate.rows.push({...duplicate.rows[0],values:['8×12 inches','3mm']});assert.throws(()=>core.validateGroup(duplicate),/same option/);
@@ -14,7 +15,7 @@ calls=[];const result=await server.syncGroupProduct(admin,[group,{...group,id:'c
 calls=[];const incomplete={...product,variants:[...product.variants,{...product.variants[0],id:'other',selectedOptions:[{name:'Size',value:'12x18'},{name:'Material',value:'3mm'}]}]};assert.equal((await server.syncGroupProduct(admin,[group],incomplete)).status,'error');assert.equal(calls.length,0);
 calls=[];group.compareMode='none';await server.syncGroupProduct(admin,[group],product);assert.equal(calls[0].variables.variants[0].compareAtPrice,null);
 calls=[];await server.syncGroupProduct(admin,[],{...product,config:{groupId:'test'}});assert.equal(JSON.parse(calls[0].variables.metafields[0].value).disabled,true);
-const settings={shopId:'gid://shopify/Shop/2',state:{version:1,groups:[group],published:[],history:[]},digest:'previous'};calls=[];await server.saveGroupSettings(admin,settings);assert.equal(calls[0].variables.metafields[0].ownerId,settings.shopId);assert.equal(calls[0].variables.metafields[0].compareDigest,'previous');
+const settings={shopId:'gid://shopify/Shop/2',state:{version:1,groups:[group],published:[],history:[]},digest:'4'};calls=[];await server.saveGroupSettings(admin,settings);assert.equal(databaseCalls[0].where.shopId,settings.shopId);assert.equal(databaseCalls[0].where.revision,4);
 // Verify that old selling and compare-at prices survive migration without a markup formula.
 const migrationAdmin={graphql:async()=>new Response(JSON.stringify({data:{shop:{id:'shop',name:'Example',currencyCode:'USD',groups:null},collections:{nodes:[{id:'collection',title:'Old frames',legacy:{jsonValue:{version:2,sizes:[{size:'8×12',price3:750,price5:1125}]}},room:null}],pageInfo:{hasNextPage:false}}}}))};
 const migrated=await server.loadGroupSettings(migrationAdmin,[product]);assert.equal(migrated.state.groups[0].compareMode,'manual');assert.equal(migrated.state.groups[0].rows[0].price,750);assert.equal(migrated.state.groups[0].rows[0].compare,null);assert.equal(migrated.currency,'USD');

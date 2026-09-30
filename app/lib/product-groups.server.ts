@@ -1,3 +1,4 @@
+import db from "../db.server";
 import type { GroupState, ProductGroup } from "./product-groups";
 import { comparePrice, directionFor, emptyGroup, emptyTemplate, matches, normalizeValue, rowKey, validateGroup } from "./product-groups";
 import type { authenticate } from "../shopify.server";
@@ -58,9 +59,10 @@ export async function loadGroupProduct(admin: Admin, id: string): Promise<Catalo
 const DEFAULT_ROOM="https://cdn.shopify.com/extensions/01a0f10f-2c0c-7f1b-8519-f2854ed801ae/cartwala-gift-personalizer-239/assets/cartwala-acrylic-room.jpg";
 export async function loadGroupSettings(admin: Admin, catalog: CatalogProduct[] = []) {
  const d=await query<{shop:{id:string;name:string;currencyCode:string;groups:{jsonValue:GroupState;compareDigest:string}|null};collections:{nodes:Array<{id:string;title:string;handle:string;legacy:{jsonValue:{version:number;multiplier?:number;sizes:Array<{size:string;price3?:number;price5?:number;cost3?:number;cost5?:number}>}}|null;room:{reference:{image:{url:string}}}|null}>;pageInfo:{hasNextPage:boolean}}}>(admin,SETTINGS_QUERY);
- let state:GroupState=d.shop.groups?.jsonValue||{version:1,groups:[],published:[],history:[]};
+ const stored=await db.productGroupSettings.findUnique({where:{shopId:d.shop.id}});
+ let state:GroupState=(stored?.state as unknown as GroupState)||d.shop.groups?.jsonValue||{version:1,groups:[],published:[],history:[]};
  if(state.version!==1 || !Array.isArray(state.groups) || !Array.isArray(state.published))throw new Error("Unsupported product group settings.");
- if(!d.shop.groups){
+ if(!stored && !d.shop.groups){
   const legacy=d.collections.nodes.find(c=>c.legacy?.jsonValue?.sizes?.length);
   if(legacy){
    const g=emptyGroup("acrylic-frames");Object.assign(g,{name:legacy.title,tags:["cw-acrylic-frame","cw-acrylic-portrait","cw-acrylic-landscape"],options:["Size","Acrylic"],previewMode:"automatic",customization:"plain",direction:"customer",portraitTag:"cw-acrylic-portrait",landscapeTag:"cw-acrylic-landscape",background:legacy.room?.reference?.image?.url||DEFAULT_ROOM,createVariants:true});
@@ -74,13 +76,19 @@ export async function loadGroupSettings(admin: Admin, catalog: CatalogProduct[] 
    validateGroup(g);state={version:1,groups:[g],published:[structuredClone(g)],history:[]};
   }
  }
- return {shopId:d.shop.id,shopName:d.shop.name,currency:d.shop.currencyCode,digest:d.shop.groups?.compareDigest||null,state,collections:d.collections.nodes.map(c=>({id:c.id,title:c.title})),collectionsTruncated:d.collections.pageInfo.hasNextPage};
+ return {shopId:d.shop.id,shopName:d.shop.name,currency:d.shop.currencyCode,digest:stored?String(stored.revision):null,state,collections:d.collections.nodes.map(c=>({id:c.id,title:c.title})),collectionsTruncated:d.collections.pageInfo.hasNextPage};
 }
 export function checkpoint(state: GroupState,name:string) { state.history=[{at:new Date().toISOString(),name,groups:structuredClone(state.groups),published:structuredClone(state.published)},...state.history].slice(0,10); }
 export async function saveGroupSettings(admin: Admin, settings: Awaited<ReturnType<typeof loadGroupSettings>>) {
  if(settings.state.groups.length>50)throw new Error("Maximum 50 groups per store.");
  const value=JSON.stringify(settings.state);if(value.length>1800000)throw new Error("Group settings are too large. Reduce history or images.");
- await setMeta(admin,[{ownerId:settings.shopId,namespace:"$app",key:"product_groups",type:"json",value,compareDigest:settings.digest}]);
+ if(settings.digest===null) {
+  try { await db.productGroupSettings.create({data:{shopId:settings.shopId,state:JSON.parse(value),revision:1}}); }
+  catch(error) { if((error as {code?:string}).code==="P2002")throw new Error("Another session saved these settings. Refresh before saving again.");throw error; }
+ } else {
+  const saved=await db.productGroupSettings.updateMany({where:{shopId:settings.shopId,revision:Number(settings.digest)},data:{state:JSON.parse(value),revision:{increment:1}}});
+  if(!saved.count)throw new Error("Another session saved these settings. Refresh before saving again.");
+ }
 }
 export function matchingGroups(groups: ProductGroup[],p:CatalogProduct) { return groups.filter(g=>matches(g,p)); }
 export function syncPreview(groups:ProductGroup[],catalog:CatalogProduct[]) {
@@ -114,6 +122,7 @@ export async function syncGroupProduct(admin:Admin,groups:ProductGroup[],origina
  }
  const expected=g.rows.length*(g.direction==="customer"&&!fixed?2:1);if(p.variants.length!==expected)return {status:"error",message:"Missing variant combinations. Complete the variants or enable new-product setup."};
  const config={managed:true,groupId:g.id,groupName:g.name,previewMode:g.previewMode,customization:g.customization,fixedDirection:fixed,orientationOption:g.orientationOption,previews};
+ if(Buffer.byteLength(JSON.stringify(config),"utf8")>120000)throw new Error("Preview settings exceed Shopify’s size limit. Use shorter image URLs or fewer rows.");
  if(updates.length){const d=await query<{productVariantsBulkUpdate:{userErrors:Array<{message:string}>}}>(admin,BULK_PRICES,{productId:p.id,variants:updates});if(d.productVariantsBulkUpdate.userErrors.length)throw new Error(d.productVariantsBulkUpdate.userErrors[0].message);}
  if(JSON.stringify(p.config)!==JSON.stringify(config))await setMeta(admin,[{ownerId:p.id,namespace:"$app",key:"group_config",type:"json",value:JSON.stringify(config)}]);
  return {status:updates.length||JSON.stringify(p.config)!==JSON.stringify(config)?"updated":"unchanged",message:""};

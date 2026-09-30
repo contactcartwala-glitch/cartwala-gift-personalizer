@@ -46,3 +46,10 @@ model SignatureDayDesign {
 
   @@index([shop, createdAt])
 }
+
+model ProductGroupSettings {
+  shopId    String   @id
+  state     Json
+  revision  Int      @default(1)
+  updatedAt DateTime @updatedAt
+}
