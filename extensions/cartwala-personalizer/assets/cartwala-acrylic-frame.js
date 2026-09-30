@@ -10,8 +10,14 @@
       find(panel.dataset.selectedVariant) || variants[0];
     if (!selected) return;
     const choice = (variant, index) => variant[`option${index + 1}`] || variant.options?.[index];
-    const lookup = (size, material, orientation) => variants.find((variant) =>
-      choice(variant, 0) === size && choice(variant, 1) === material && choice(variant, 2) === orientation);
+    let optionNames;
+    try { optionNames = JSON.parse(panel.dataset.optionNames || '["Size","Acrylic","Orientation"]'); } catch { return; }
+    const option = (variant, name) => choice(variant, optionNames.indexOf(name));
+    const designRatio = (panel.dataset.designRatio || "").split(":").map(Number);
+    const fixedOrientation = panel.dataset.fixedOrientation ||
+      (designRatio.length === 2 && designRatio[0] > designRatio[1] ? "Landscape" : "Portrait");
+    const lookup = (values) => variants.find((variant) =>
+      optionNames.every((_, index) => choice(variant, index) === values[index]));
     const syncCartVariant = () => document.querySelectorAll('form[action*="/cart/add"] input[name="id"]')
       .forEach((input) => {
         if (input.value === String(selected.id)) return;
@@ -50,8 +56,8 @@
       if (mainImage && media.alt) mainImage.alt = media.alt;
     };
     const render = () => {
-      const size = choice(selected, 0);
-      const orientation = choice(selected, 2);
+      const size = option(selected, "Size");
+      const orientation = option(selected, "Orientation") || fixedOrientation;
       const [short, long] = size.split(" ")[0].split("×").map(Number);
       if (!Number.isFinite(short) || !Number.isFinite(long)) return;
       const width = orientation === "Landscape" ? long : short;
@@ -60,7 +66,7 @@
       frame.style.width = `${(width / 60) * 78}%`;
       frame.style.height = `${(height / 60) * 78}%`;
       frame.style.setProperty("--cw-acrylic-stud-size", `${Math.max(4, Math.min(12, Math.round(short / 2)))}px`);
-      frame.classList.toggle("cw-acrylic__frame--studs", choice(selected, 1) === "5mm with studs");
+      frame.classList.toggle("cw-acrylic__frame--studs", option(selected, "Acrylic") === "5mm with studs");
       if (!designUrl) selectGalleryMedia();
       preview.querySelector("[data-cw-acrylic-width]").textContent = `← ${width}″ width →`;
       preview.querySelector("[data-cw-acrylic-height]").textContent = `${height}″ height`;
@@ -83,9 +89,9 @@
         const next = find(event.target.value);
         if (next && next.id !== selected.id) { selected = next; render(); }
       } else if (["option1", "option2", "option3"].includes(event.target?.name)) {
-        const current = [1, 2, 3].map((index) =>
-          document.querySelector(`input[name="option${index}"]:checked`)?.value);
-        const next = lookup(...current);
+        const current = optionNames.map((_, index) =>
+          document.querySelector(`input[name="option${index + 1}"]:checked`)?.value || choice(selected, index));
+        const next = lookup(current);
         if (next && next.id !== selected.id) {
           selected = next;
           render();

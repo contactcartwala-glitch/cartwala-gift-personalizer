@@ -77,10 +77,27 @@ export async function syncAcrylicProduct(admin: { graphql: Graphql }, product: P
   if (!product.tags.includes(ACRYLIC_TAG)) return "ignored";
   const variants = product.variants.nodes;
   const desired = variants.map((variant) => variantPrice(variant, matrix));
+  const groups = new Map<string, Set<string>>();
+  for (const variant of variants) {
+    const options = new Map(variant.selectedOptions.map(({ name, value }) => [name.toLowerCase(), value.toLowerCase()]));
+    const size = options.get("size")?.replace(/\s*(inches|inch|in|")\s*$/i, "").replace(/\s*[x×]\s*/g, "×");
+    const material = options.get("acrylic")?.match(/^(3|5)\s*mm\b/)?.[1];
+    const orientation = options.get("orientation") || "fixed";
+    if (!size || !material || !["fixed", "portrait", "landscape"].includes(orientation) ||
+        variant.selectedOptions.some(({ name }) => !["size", "acrylic", "orientation"].includes(name.toLowerCase()))) return "incomplete";
+    const key = `${size}|${material}`;
+    const directions = groups.get(key) || new Set<string>();
+    if (directions.has(orientation)) return "incomplete";
+    directions.add(orientation);
+    groups.set(key, directions);
+  }
+  const expectedDirections = variants.length === 20 ? ["portrait", "landscape"] :
+    [...(groups.values().next().value || [])];
   if (product.variants.pageInfo.hasNextPage || ![10, 20].includes(variants.length) ||
-      desired.some((price) => price === null) || new Set(variants.map((variant) =>
-        variant.selectedOptions.map((option) => option.value).join("|")
-      )).size !== variants.length) return "incomplete";
+      desired.some((price) => price === null) || groups.size !== 10 ||
+      expectedDirections.length !== (variants.length === 20 ? 2 : 1) ||
+      [...groups.values()].some((directions) => directions.size !== expectedDirections.length ||
+        expectedDirections.some((direction) => !directions.has(direction)))) return "incomplete";
   const updates = variants.flatMap((variant, index) =>
     Number(variant.price) === desired[index] ? [] : [{ id: variant.id, price: desired[index] }]);
   if (!updates.length) return "unchanged";

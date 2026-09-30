@@ -30,8 +30,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       matrix = await loadAcrylicMatrix(admin);
     } else throw new Error("Unknown action.");
     const report = await syncAcrylicCollection(admin, matrix);
-    return { ok: report.errors.length === 0, report, message: report.errors.length
-      ? "Saved the price table, but some products could not be synced. Try Sync again."
+    return { ok: report.errors.length === 0 && report.incomplete.length === 0, report, message: report.errors.length || report.incomplete.length
+      ? "Some designs could not be synced. Check their size and acrylic variants, then sync again."
       : "Price table saved and tagged designs checked." };
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : String(error), report: null };
@@ -52,7 +52,7 @@ export default function AcrylicPrices() {
     <s-page heading="Acrylic Photo Frames · Prices">
       <s-section heading="One price table for every design">
         <p>These five sizes use 3mm acrylic without studs or 5mm acrylic with studs. Selling price = base cost × 2.5. Save to update every tagged design in this collection.</p>
-        <p>For a new design, duplicate the Acrylic Photo Frame – Design Template product and replace its title and image. Keep its size, acrylic and orientation variants and the cw-acrylic-frame tag.</p>
+        <p>Plain photo products offer Portrait and Landscape. For a designed product, duplicate the matching Portrait or Landscape draft template, upload its design, and keep the Size and Acrylic variants plus the cw-acrylic-frame tag. Designed products have no customer orientation choice. Prices depend only on size and acrylic thickness.</p>
         <p><s-link href={`shopify://admin/collections/${collectionId.split("/").pop()}`}>Open Acrylic Photo Frames collection</s-link></p>
       </s-section>
       <s-section heading="Base costs and selling prices (₹)">
