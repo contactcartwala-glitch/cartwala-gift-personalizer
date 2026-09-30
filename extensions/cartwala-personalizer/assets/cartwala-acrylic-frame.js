@@ -24,7 +24,9 @@
     const preview = document.createElement("div");
     preview.className = "cw-acrylic__gallery-preview";
     preview.hidden = true;
-    preview.innerHTML = '<div class="cw-acrylic__room" aria-hidden="true"><div class="cw-acrylic__room-floor"></div><div class="cw-acrylic__room-sofa"><span></span><span></span></div><div class="cw-acrylic__room-table"></div><div class="cw-acrylic__room-plant"></div><div class="cw-acrylic__room-scale">Approx. 5 ft sofa for scale</div></div><div class="cw-acrylic__gallery-guide"><span data-cw-acrylic-height></span><div class="cw-acrylic__frame" data-cw-acrylic-frame><img class="cw-acrylic__photo" data-cw-acrylic-photo alt="Your acrylic frame design"></div><span data-cw-acrylic-width></span><strong data-cw-acrylic-caption></strong></div>';
+    preview.innerHTML = '<div class="cw-acrylic__room" aria-hidden="true"><div class="cw-acrylic__room-scale">Approx. 5 ft sofa for scale</div></div><div class="cw-acrylic__gallery-guide"><span data-cw-acrylic-height></span><div class="cw-acrylic__frame" data-cw-acrylic-frame><img class="cw-acrylic__photo" data-cw-acrylic-photo alt="Your acrylic frame design"></div><span data-cw-acrylic-width></span><strong data-cw-acrylic-caption></strong></div>';
+    if (panel.dataset.roomImage) preview.style.setProperty("--cw-acrylic-room-image", `url("${panel.dataset.roomImage}")`);
+    if (panel.dataset.studImage) preview.style.setProperty("--cw-acrylic-stud-image", `url("${panel.dataset.studImage}")`);
     gallery?.appendChild(preview);
     let designUrl = "";
     const showPreview = () => {
