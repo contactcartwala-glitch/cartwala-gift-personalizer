@@ -6,7 +6,8 @@ import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
 import { DESIGN_ATTRIBUTE } from "../lib/signature-day.server";
-import { buildSignatureDayPrintPdf, orderedShirts } from "../lib/signature-day-print-pdf.client";
+import { buildSignatureDayPrintPdf } from "../lib/signature-day-print-pdf.client";
+import { orderedShirts } from "../lib/signature-day-print-order";
 type Attribute = { key: string; value: string };
 type PrintItem = {
   orderId: string;

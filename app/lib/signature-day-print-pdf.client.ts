@@ -1,16 +1,9 @@
 import { PDFDocument } from "pdf-lib";
 
-type Shirt = { front: string; back?: string };
-type PrintDesign = { printUrls: Shirt[]; shirtSizes: string[] };
+import { orderedShirts } from "./signature-day-print-order";
+type PrintDesign = Parameters<typeof orderedShirts>[0];
 const PAGE_W = 595.28;
 const PAGE_H = 841.89;
-const SIZES = ["S", "M", "L", "XL", "XXL", "XS"];
-
-export function orderedShirts(design: PrintDesign) {
-  return design.printUrls.map((shirt, index) => ({ shirt, index, size: design.shirtSizes[index] || "Unknown" }))
-    .sort((a, b) => (SIZES.indexOf(a.size) < 0 ? 99 : SIZES.indexOf(a.size)) -
-      (SIZES.indexOf(b.size) < 0 ? 99 : SIZES.indexOf(b.size)) || a.index - b.index);
-}
 
 function contentBounds(context: CanvasRenderingContext2D, width: number, height: number) {
   const pixels = context.getImageData(0, 0, width, height).data;
