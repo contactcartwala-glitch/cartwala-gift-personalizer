@@ -1,3 +1,4 @@
+{% if collection.handle == 'customised-mugs' %}
 {% liquid
   assign active_model = ''
   assign model_tag = ''
@@ -128,6 +129,7 @@
     {% endpaginate %}
   {% endif %}
 </section>
+{% endif %}
 
 {% schema %}
 {"name":"t:mug_gallery.block_name","target":"section","enabled_on":{"templates":["collection"]},"settings":[{"type":"inline_richtext","id":"intro","label":"t:mug_gallery.intro","default":"Choose a mug type, select a design, upload your photo and preview your personalised mug."},{"type":"color","id":"accent_color","label":"t:mug_gallery.accent_color","default":"#ff6200"},{"type":"image_picker","id":"normal_mug_image","label":"t:mug_gallery.normal_mug_image"},{"type":"image_picker","id":"magic_mug_image","label":"t:mug_gallery.magic_mug_image"},{"type":"image_picker","id":"love_handle_mug_image","label":"t:mug_gallery.love_handle_mug_image"},{"type":"image_picker","id":"inner_red_mug_image","label":"t:mug_gallery.inner_red_mug_image"},{"type":"range","id":"products_per_page","label":"t:mug_gallery.products_per_page","min":12,"max":48,"step":4,"default":24}]}
