@@ -18,7 +18,20 @@ let settings=await server.loadGroupSettings(settingsAdmin);assert.equal(settings
 settings=await server.loadGroupSettings(settingsAdmin);assert.equal(settings.state.groups[0].rows[0].price,800);assert.equal(writes,1);
 record=null;writes=0;
 const preparedAdmin={graphql:async()=>new Response(JSON.stringify({data:{shop:{id:'gid://shopify/Shop/80379314361',name:'Cartwala',currencyCode:'INR',groups:null},collections:{nodes:[],pageInfo:{hasNextPage:false}}}}))};
-settings=await server.loadGroupSettings(preparedAdmin);assert.equal(settings.state.groups[0].rows.length,10);assert.equal(writes,1);assert.equal(settings.state.groups[0].rows[0].templates.Portrait.mockup.includes('v3'),true);
-record.state.groups[0].rows[0].price=777;settings=await server.loadGroupSettings(preparedAdmin);assert.equal(settings.state.groups[0].rows[0].price,777);assert.equal(writes,1);
+settings=await server.loadGroupSettings(preparedAdmin);assert.equal(settings.state.groups[0].rows.length,10);assert.equal(writes,2);assert.equal(settings.state.groups[0].rows[0].templates.Portrait.mockup.includes('v3'),true);
+record.state.groups[0].rows[0].price=777;settings=await server.loadGroupSettings(preparedAdmin);assert.equal(settings.state.groups[0].rows[0].price,777);assert.equal(writes,2);
 record=null;const otherAdmin={graphql:async()=>new Response(JSON.stringify({data:{shop:{id:'other-store',name:'Other',currencyCode:'USD',groups:null},collections:{nodes:[],pageInfo:{hasNextPage:false}}}}))};settings=await server.loadGroupSettings(otherAdmin);assert.equal(settings.state.groups.length,0);
 console.log('Shared setup passed: optional images, cost-only application, new-size creation, stable existing variant IDs, idempotence and one-time import.');
+// Three independent setup tags; duplicates are rejected within this store.
+const tags=structuredClone(group);tags.tags=['frames'];tags.portraitTag='frames-p';tags.landscapeTag='frames-l';
+assert.deepEqual(Object.keys(core.tagErrors(tags,[tags])),[]);
+const collision=structuredClone(tags);collision.id='other';collision.name='Other setup';collision.tags=[' FRAMES '];
+assert.match(core.tagErrors(collision,[tags]).plain,/already used/);
+collision.tags=['different'];collision.portraitTag='different';collision.landscapeTag='different-l';assert.match(core.tagErrors(collision,[]).portrait,/different tag/);
+assert.equal(core.directionFor(tags,['frames-p']),'Portrait');assert.equal(core.directionFor(tags,['frames-l']),'Landscape');assert.equal(core.directionFor(tags,['frames']),null);assert.throws(()=>core.directionFor(tags,['frames','frames-p']),/only one/);
+// Name/value updates rename options only: no productSet, price or variant writes.
+const renamed=structuredClone(group);renamed.options=['Size','Thickness'];renamed.optionAliases={Thickness:['Acrylic']};renamed.valueAliases={Thickness:{'3mm without studs':['Standard']}};renamed.rows[0].values[1]='3mm without studs';
+const original=structuredClone(product);original.variants[0].selectedOptions[1].name='Acrylic';let optionCalls=[];
+const optionAdmin={graphql:async(q,{variables})=>{optionCalls.push({q,variables});return new Response(JSON.stringify({data:q.includes('SetupOptionNames')?{product:{options:[{id:'option-1',name:'Size',position:1,optionValues:[{id:'size-1',name:'8x12'}]},{id:'option-2',name:'Acrylic',position:2,optionValues:[{id:'value-2',name:'Standard'}]}]}}:{productOptionUpdate:{userErrors:[]}}}));}};
+const updated=await server.renameOptions(optionAdmin,renamed,original);assert.equal(updated.variants[0].id,original.variants[0].id);assert.equal(updated.variants[0].price,original.variants[0].price);assert.equal(updated.variants[0].selectedOptions[1].name,'Thickness');assert.equal(updated.variants[0].selectedOptions[1].value,'3mm without studs');assert.equal(original.variants[0].selectedOptions[1].name,'Acrylic');assert.equal(optionCalls.length,3);assert(optionCalls.every(c=>c.q.includes('SetupOption')));optionCalls=[];await server.renameOptions(optionAdmin,renamed,updated);assert.equal(optionCalls.length,0);
+console.log('Tag uniqueness, three-tag selection, option/value renaming, stable variant IDs and idempotent retry passed.');

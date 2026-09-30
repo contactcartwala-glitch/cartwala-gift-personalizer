@@ -1,8 +1,8 @@
 export type Direction = "Portrait" | "Landscape";
 export type PreviewTemplate = { image: string; background: string; overlay: string; x: number; y: number; width: number; height: number; studs: boolean; mockup?: string; mockupAspect?: number; mockupName?: string };
 export type GroupRow = { id: string; values: string[]; price: number; compare: number | null; width: number; height: number; templates: Record<Direction, PreviewTemplate> };
-export type ProductGroup = { id: string; name: string; tags: string[]; collectionIds: string[]; productIds: string[]; excludedIds: string[]; keepPriceIds: string[]; options: string[]; rows: GroupRow[]; compareMode: "manual" | "percent" | "none"; percentage: number; previewMode: "manual" | "automatic" | "off" | "png"; customization: "plain" | "design" | "existing"; direction: "customer" | "portrait" | "landscape" | "product"; orientationOption: string; portraitTag: string; landscapeTag: string; background: string; createVariants: boolean };
-export type GroupState = { version: 1; appliedImportId?: string; groups: ProductGroup[]; published: ProductGroup[]; history: Array<{ at: string; name: string; groups: ProductGroup[]; published: ProductGroup[] }> };
+export type ProductGroup = { id: string; name: string; tags: string[]; collectionIds: string[]; productIds: string[]; excludedIds: string[]; keepPriceIds: string[]; options: string[]; optionAliases?: Record<string,string[]>; valueAliases?: Record<string,Record<string,string[]>>; rows: GroupRow[]; compareMode: "manual" | "percent" | "none"; percentage: number; previewMode: "manual" | "automatic" | "off" | "png"; customization: "plain" | "design" | "existing"; direction: "customer" | "portrait" | "landscape" | "product"; orientationOption: string; portraitTag: string; landscapeTag: string; background: string; createVariants: boolean };
+export type GroupState = { version: 1; appliedImportId?: string; optionNamesVersion?: number; groups: ProductGroup[]; published: ProductGroup[]; history: Array<{ at: string; name: string; groups: ProductGroup[]; published: ProductGroup[] }> };
 export const emptyTemplate = (): PreviewTemplate => ({ image: "", background: "", overlay: "", x: 50, y: 34, width: 30, height: 45, studs: false });
 export const emptyGroup = (id: string): ProductGroup => ({ id, name: "New Product Group", tags: [], collectionIds: [], productIds: [], excludedIds: [], keepPriceIds: [], options: ["Size", "Material"], rows: [], compareMode: "manual", percentage: 0, previewMode: "png", customization: "plain", direction: "customer", orientationOption: "Orientation", portraitTag: "", landscapeTag: "", background: "", createVariants: true });
 export const normalizeValue = (value: string) => value.trim().toLowerCase().replace(/\s*(inches|inch|in|\")\s*$/i, "").replace(/\s*[x×]\s*/g, "×");
@@ -15,6 +15,8 @@ export function matches(group: ProductGroup, product: { id: string; tags: string
   return !group.excludedIds.includes(product.id) && (group.productIds.includes(product.id) || [...group.tags,group.portraitTag,group.landscapeTag].filter(Boolean).some(tag => product.tags.includes(tag.trim())) || group.collectionIds.some(id => product.collectionIds.includes(id)));
 }
 export function directionFor(group: ProductGroup, tags: string[]): Direction | null {
+  const plain=group.tags.some(tag=>tag!==group.portraitTag&&tag!==group.landscapeTag&&tags.includes(tag));
+  if(plain&&[group.portraitTag,group.landscapeTag].filter(Boolean).some(tag=>tags.includes(tag)))throw new Error("Use only one setup tag: plain photo, portrait or landscape.");
   const p = !!group.portraitTag && tags.includes(group.portraitTag), l = !!group.landscapeTag && tags.includes(group.landscapeTag);
   if (p && l) throw new Error("Both direction tags are present. Keep only one.");
   if (p) return "Portrait"; if (l) return "Landscape";
@@ -33,7 +35,9 @@ export function validateGroup(value: unknown): ProductGroup {
   if (!g.options.length || g.options.length > 3 || new Set(g.options.map(v => v.toLowerCase())).size !== g.options.length) throw new Error("Use one to three different option names.");
   if (!["manual", "percent", "none"].includes(g.compareMode) || !["manual", "automatic", "off", "png"].includes(g.previewMode) || !["plain", "design", "existing"].includes(g.customization) || !["customer", "portrait", "landscape", "product"].includes(g.direction)) throw new Error("Check group settings.");
   if (!Number.isFinite(g.percentage) || g.percentage < 0 || g.percentage > 1000) throw new Error("Percentage must be between 0 and 1000.");
-  if (g.direction === "customer" && (g.options.length > 2 || !g.orientationOption?.trim() || g.options.includes(g.orientationOption))) throw new Error("Customer orientation requires a separate option and at most two other options.");
+  if (g.direction === "customer" && (g.options.length > 2 || !g.orientationOption?.trim() || g.options.some(n=>n.toLowerCase()===g.orientationOption.toLowerCase()))) throw new Error("Customer orientation requires a separate option and at most two other options.");
+  if(g.optionAliases){if(typeof g.optionAliases!=="object"||Array.isArray(g.optionAliases))throw new Error("Check option names.");g.optionAliases=Object.fromEntries(Object.entries(g.optionAliases).filter(([name])=>[...g.options,g.orientationOption].includes(name)).map(([name,aliases])=>{if(!Array.isArray(aliases)||aliases.length>100||aliases.some(v=>typeof v!=="string"||v.length>255))throw new Error("Check previous option names.");return [name,[...new Set(aliases.map(v=>v.trim()).filter(Boolean))]];}));}
+  if(g.valueAliases){if(typeof g.valueAliases!=="object"||Array.isArray(g.valueAliases))throw new Error("Check option values.");const entries=Object.entries(g.valueAliases).filter(([name])=>g.options.includes(name));if(entries.length>3)throw new Error("Check option values.");for(const [,values] of entries){if(!values||typeof values!=="object"||Array.isArray(values)||Object.keys(values).length>500)throw new Error("Check option values.");for(const [target,aliases] of Object.entries(values)){if(target.length>255||!Array.isArray(aliases)||aliases.length>100||aliases.some(v=>typeof v!=="string"||v.length>255))throw new Error("Check previous option values.");}}g.valueAliases=Object.fromEntries(entries.map(([name,values])=>[name,Object.fromEntries(Object.entries(values).filter(([target])=>g.rows.some(r=>r.values[g.options.indexOf(name)]===target)).map(([target,aliases])=>[target,[...new Set(aliases.map(v=>v.trim()).filter(Boolean))]]))]));}
   const url = (v: string) => { if (v && (!/^https:\/\//.test(v) || v.length > 2048)) throw new Error("Images must use an HTTPS URL."); };
   url(g.background);
   if (!Array.isArray(g.rows) || !g.rows.length || g.rows.length > 100) throw new Error("Add between 1 and 100 price rows.");
@@ -60,4 +64,16 @@ export function parseCsv(input: string): string[][] {
   const rows: string[][] = []; let row: string[] = [], cell = "", quoted = false;
   for (let i=0;i<input.length;i++) { const c=input[i]; if(c==='"') { if(quoted && input[i+1]==='"'){cell+='"';i++;}else quoted=!quoted; } else if(c===','&&!quoted){row.push(cell);cell="";}else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&input[i+1]==='\n')i++;row.push(cell);if(row.some(Boolean))rows.push(row);row=[];cell="";}else cell+=c; }
   if(quoted)throw new Error("CSV has an unclosed quote.");row.push(cell);if(row.some(Boolean))rows.push(row);return rows;
+}
+
+export function tagErrors(group:ProductGroup,groups:ProductGroup[]):Record<string,string> {
+ const errors:Record<string,string>={}, normalize=(v:string)=>v.trim().toLowerCase();
+ const fields={plain:group.tags[0]||"",portrait:group.portraitTag||"",landscape:group.landscapeTag||""};
+ for(const [key,tag] of Object.entries(fields)){
+  if(!tag.trim()){errors[key]="Enter a tag name.";continue;}
+  if(Object.entries(fields).some(([other,value])=>other!==key&&normalize(value)===normalize(tag)))errors[key]="Use a different tag for each of the three choices.";
+  const used=groups.find(g=>g.id!==group.id&&[...g.tags,g.portraitTag,g.landscapeTag].filter(Boolean).some(t=>normalize(t)===normalize(tag)));
+  if(used)errors[key]=`This tag is already used by ${used.name}. Choose another tag.`;
+ }
+ return errors;
 }

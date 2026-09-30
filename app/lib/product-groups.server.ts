@@ -99,6 +99,14 @@ export async function loadGroupSettings(admin: Admin, catalog: CatalogProduct[] 
   await saveGroupSettings(admin,{shopId:d.shop.id,shopName:d.shop.name,currency:d.shop.currencyCode,digest,state,collections:[],collectionsTruncated:false});
   digest=String(Number(digest||0)+1);
  }
+ // Approved label migration: keep every manually added row, price and PNG.
+ if(d.shop.id==="gid://shopify/Shop/80379314361"&&state.optionNamesVersion!==1){
+  for(const g of [...state.groups,...state.published]){g.options=g.options.map(name=>{if(name!=="Acrylic")return name;g.optionAliases={...g.optionAliases,Thickness:[...(g.optionAliases?.Thickness||[]),"Acrylic"]};return "Thickness";});
+   g.tags=g.tags.filter(t=>t!==g.portraitTag&&t!==g.landscapeTag);
+  }
+  state.optionNamesVersion=1;
+  await saveGroupSettings(admin,{shopId:d.shop.id,shopName:d.shop.name,currency:d.shop.currencyCode,digest,state,collections:[],collectionsTruncated:false});digest=String(Number(digest||0)+1);
+ }
  return {shopId:d.shop.id,shopName:d.shop.name,currency:d.shop.currencyCode,digest,state,collections:d.collections.nodes.map(c=>({id:c.id,title:c.title})),collectionsTruncated:d.collections.pageInfo.hasNextPage};
 }
 export function checkpoint(state: GroupState,name:string) { state.history=[{at:new Date().toISOString(),name,groups:structuredClone(state.groups),published:structuredClone(state.published)},...state.history].slice(0,10); }
@@ -155,6 +163,29 @@ export async function syncProductSetup(admin:Admin,productId:string) {
  return result.status==="error"||result.status==="conflict"?result.message:undefined;
 }
 
+export const OPTION_NAMES_QUERY=`query SetupOptionNames($id: ID!) { product(id:$id) { options { id name position optionValues { id name } } } }`;
+export const OPTION_NAME_UPDATE=`mutation SetupOptionName($productId: ID!, $option: OptionUpdateInput!) { productOptionUpdate(productId:$productId,option:$option) { userErrors { message } } }`;
+export const OPTION_VALUE_UPDATE=`mutation SetupOptionValue($productId: ID!, $option: OptionUpdateInput!, $values: [OptionValueUpdateInput!]) { productOptionUpdate(productId:$productId,option:$option,optionValuesToUpdate:$values) { userErrors { message } } }`;
+export async function renameOptions(admin:Admin,g:ProductGroup,p:CatalogProduct):Promise<CatalogProduct>{
+ const changes=Object.entries(g.optionAliases||{}).filter(([target,aliases])=>!p.variants.some(v=>v.selectedOptions.some(o=>o.name===target))&&p.variants.some(v=>v.selectedOptions.some(o=>aliases.includes(o.name))));
+ const valueChanges=Object.entries(g.valueAliases||{}).filter(([name,values])=>Object.entries(values).some(([target,aliases])=>p.variants.some(v=>v.selectedOptions.some(o=>(o.name===name||(g.optionAliases?.[name]||[]).includes(o.name))&&aliases.includes(o.value)&&o.value!==target))));
+ if(!changes.length&&!valueChanges.length)return p;
+ const d=await query<{product:{options:Array<{id:string;name:string;position:number;optionValues:Array<{id:string;name:string}>}>}|null}>(admin,OPTION_NAMES_QUERY,{id:p.id});
+ for(const [target,aliases] of changes){const option=d.product?.options.find(o=>aliases.includes(o.name));if(!option)continue;
+  const updated=await query<{productOptionUpdate:{userErrors:Array<{message:string}>}}>(admin,OPTION_NAME_UPDATE,{productId:p.id,option:{id:option.id,name:target}});
+  if(updated.productOptionUpdate.userErrors.length)throw new Error(updated.productOptionUpdate.userErrors[0].message);
+  p={...p,variants:p.variants.map(v=>({...v,selectedOptions:v.selectedOptions.map(o=>o.name===option.name?{...o,name:target}:o)}))};option.name=target;
+ }
+ for(const [name,values] of valueChanges){const option=d.product?.options.find(o=>o.name===name);if(!option)continue;
+  const updates=Object.entries(values).flatMap(([target,aliases])=>option.optionValues.filter(v=>aliases.includes(v.name)&&v.name!==target).map(v=>({id:v.id,name:target,old:v.name})));
+  if(!updates.length)continue;
+  if(new Set(updates.map(u=>u.id)).size!==updates.length||new Set(updates.map(u=>u.name)).size!==updates.length||updates.some(u=>option.optionValues.some(v=>v.name===u.name&&v.id!==u.id)))throw new Error("Option values overlap. Use a different name.");
+  const updated=await query<{productOptionUpdate:{userErrors:Array<{message:string}>}}>(admin,OPTION_VALUE_UPDATE,{productId:p.id,option:{id:option.id},values:updates.map(({id,name})=>({id,name}))});
+  if(updated.productOptionUpdate.userErrors.length)throw new Error(updated.productOptionUpdate.userErrors[0].message);
+  p={...p,variants:p.variants.map(v=>({...v,selectedOptions:v.selectedOptions.map(o=>o.name===name&&updates.some(u=>u.old===o.value)?{...o,value:updates.find(u=>u.old===o.value)!.name}:o)}))};
+ }
+ return p;
+}
 export async function syncGroupProduct(admin:Admin,groups:ProductGroup[],original:CatalogProduct) {
  const gs=matchingGroups(groups,original);
  if(gs.length>1)return {status:"conflict",message:"Matches more than one group: "+gs.map(g=>g.name).join(", ")};
@@ -166,7 +197,7 @@ export async function syncGroupProduct(admin:Admin,groups:ProductGroup[],origina
    if(!(dw>0&&dh>0)||Math.abs((width/height)/(dw/dh)-1)>.02)return {status:"error",message:"The uploaded design ratio does not match "+row.values.join(" / ")+". Use a separate size group for a different ratio."};
   }
  }
- let p=await bootstrap(admin,g,original);p=await addMissingVariants(admin,g,p);const fixed=productDirection(g,p),updates:Record<string,unknown>[]=[];
+ let p=await renameOptions(admin,g,original);p=await bootstrap(admin,g,p);p=await addMissingVariants(admin,g,p);const fixed=productDirection(g,p),updates:Record<string,unknown>[]=[];
  const previews: Record<string,unknown>={};const seen=new Set<string>();
  for(const v of p.variants){
   const options=new Map(v.selectedOptions.map(o=>[o.name.toLowerCase(),o.value]));const values=g.options.map(name=>options.get(name.toLowerCase())||"");const row=g.rows.find(r=>rowKey(r.values)===rowKey(values));
