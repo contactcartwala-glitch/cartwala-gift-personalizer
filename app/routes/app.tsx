@@ -3,6 +3,9 @@ import { Outlet, useLoaderData, useNavigation, useRouteError } from "react-route
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { AppProvider } from "@shopify/shopify-app-react-router/react";
 
+import { loadGroupSettings } from "../lib/product-groups.server";
+import { setupTags } from "../lib/product-groups";
+
 import { authenticate } from "../shopify.server";
 
 type Config = {
@@ -81,7 +84,7 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({ currentUrl, nextUrl
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { admin } = await authenticate.admin(request);
   if (!isDesignPage(new URL(request.url).pathname)) {
-    return { apiKey: process.env.SHOPIFY_API_KEY || "", products: [] as Product[] };
+    return { apiKey: process.env.SHOPIFY_API_KEY || "", products: [] as Product[], setupTags: [] as ReturnType<typeof setupTags> };
   }
   const products: Product[] = [];
   let cursor: string | null = null;
@@ -136,7 +139,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     if (hasNextPage && !cursor) hasNextPage = false;
   }
 
+  const settings = await loadGroupSettings(admin);
   return {
+    setupTags: setupTags(settings.state.published),
     apiKey: process.env.SHOPIFY_API_KEY || "",
     products,
   };

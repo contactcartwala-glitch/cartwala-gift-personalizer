@@ -54,3 +54,13 @@ await server.renameRowVariants(scopedAdmin,isolated,scopedResult);assert.equal(s
 isolated.rows=core.renameRowValue(isolated,'row-1',1,'Revised 5mm');await server.renameRowVariants(scopedAdmin,isolated,scopedResult);assert.equal(scopedCalls.length,2);assert.equal(scopedCalls[1].variables.variants.length,2);
 const duplicate=structuredClone(isolated);duplicate.rows.push({...structuredClone(duplicate.rows[1]),id:'duplicate'});assert.throws(()=>core.validateGroup(duplicate),/same option/);
 console.log('Independent row names passed: single-row UI edits, both orientations, preserved IDs/prices/PNGs, repeat edits and idempotent save retries.');
+
+// One setup tag is enough. Direction tags remain optional and reusable.
+const simple=structuredClone(tags);simple.portraitTag='';simple.landscapeTag='';
+assert.equal(Object.keys(core.tagErrors(simple,[])).length,0);
+assert.equal(core.setupTags([simple]).length,1);
+assert.equal(core.setupTags([tags]).length,3);
+assert.equal(core.replaceSetupTag(['unrelated','frames-p'],[tags],'frames-l').join(','),'unrelated,frames-l');
+assert.equal(core.replaceSetupTag(['unrelated','frames-p'],[tags],'').join(','),'unrelated');
+assert.throws(()=>core.replaceSetupTag(['unrelated'],[tags],'unsaved-tag'),/not saved/);
+console.log('Single-tag setup and tag replacement preserve unrelated product tags.');

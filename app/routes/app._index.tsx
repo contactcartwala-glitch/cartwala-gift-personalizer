@@ -4,7 +4,8 @@ import { useFetcher, useRouteError, useRouteLoaderData, useSearchParams } from "
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
-import { syncProductSetup } from "../lib/product-groups.server";
+import { replaceSetupTag } from "../lib/product-groups";
+import { loadGroupSettings, syncProductSetup } from "../lib/product-groups.server";
 import type { loader as appLoader } from "./app";
 import {
   MAX_FIELDS,
@@ -599,6 +600,9 @@ async function handleSave(
   if (!productId) return { ok: false, error: "Choose a product first." };
   if (!productId.startsWith("gid://shopify/Product/"))
     return { ok: false, error: "The selected product is invalid." };
+  const setupSettings=data.has("setupTag")?await loadGroupSettings(admin):null;
+  try { if(setupSettings)replaceSetupTag([],setupSettings.state.published,String(data.get("setupTag")||"")); }
+  catch(e){return {ok:false,error:e instanceof Error?e.message:"Invalid setup tag."};}
   const mugEnabled = String(data.get("mugEnabled")) === "true";
   const mugCategory = String(data.get("mugCategory")) as MugCategory;
   const mugModel = String(data.get("mugModel")) as MugModel;
@@ -652,8 +656,6 @@ async function handleSave(
   const json = await response.json();
   const error = firstMetafieldsSetError(json);
   if (error) return { ok: false, error };
-  const setupWarning=await syncProductSetup(admin,productId).catch(e=>e instanceof Error?e.message:String(e));
-
   const productResponse = await admin.graphql(
     `#graphql
     query MugProductState($id: ID!) {
@@ -678,7 +680,7 @@ async function handleSave(
   if (productJson.errors?.length || !productJson.data?.product)
     return { ok: false, error: "Settings saved, but mug setup could not load." };
   const product = productJson.data.product;
-  const tags = product.tags.filter(
+  let tags = product.tags.filter(
     (tag) =>
       !MUG_TAGS.includes(tag) && !tag.startsWith(MUG_TEMPLATE_TAG_PREFIX),
   );
@@ -689,6 +691,11 @@ async function handleSave(
       MUG_MODEL_TAGS[mugModel],
       `${MUG_TEMPLATE_TAG_PREFIX}${mugTemplateId}`,
     );
+  if(data.has("setupTag")){
+    try{
+      tags=replaceSetupTag(tags,setupSettings!.state.published,String(data.get("setupTag")||""));
+    }catch(e){return {ok:false,error:e instanceof Error?e.message:"Invalid setup tag."};}
+  }
   const tagsResponse = await admin.graphql(
     `#graphql
     mutation UpdateMugTags($product: ProductUpdateInput!) {
@@ -707,6 +714,8 @@ async function handleSave(
     tagsJson.errors?.[0]?.message ||
     tagsJson.data?.productUpdate?.userErrors?.[0]?.message;
   if (tagError) return { ok: false, error: `Mug tags: ${tagError}` };
+
+  const setupWarning=await syncProductSetup(admin,productId).catch(e=>e instanceof Error?e.message:String(e));
 
   if (mugEnabled && product.variants.nodes.length) {
     const variantsResponse = await admin.graphql(
@@ -812,7 +821,7 @@ async function handleSave(
 type FieldKind = "photoFields" | "textFields" | "fileFields" | "linkFields";
 
 export default function PersonalizerHome() {
-  const { products } = useRouteLoaderData<typeof appLoader>("routes/app")!;
+  const { products, setupTags: savedTags } = useRouteLoaderData<typeof appLoader>("routes/app")!;
   const saveFetcher = useFetcher<typeof action>();
   const fontFetcher = useFetcher<typeof action>();
   const imageFetcher = useFetcher<typeof action>();
@@ -822,7 +831,12 @@ export default function PersonalizerHome() {
   const shopify = useAppBridge();
   const [searchParams] = useSearchParams();
   const requestedProduct = products.find(p => p.id === searchParams.get("product")) ?? products[0] ?? null;
+  const [productSearch,setProductSearch]=useState("");
+  const [tagSearch,setTagSearch]=useState("");
+  const [tagsOpen,setTagsOpen]=useState(false);
   const [selected, setSelected] = useState<Product | null>(requestedProduct);
+  const tagFor=(product:Product|null)=>savedTags.find(item=>product?.tags.includes(item.tag))?.tag||"";
+  const [setupTag,setSetupTag]=useState(()=>tagFor(requestedProduct));
   const [mugSetup, setMugSetup] = useState<MugSetup>(() =>
     mugSetupForProduct(requestedProduct),
   );
@@ -994,37 +1008,20 @@ export default function PersonalizerHome() {
   const confirmDiscardIfDirty = (message: string) =>
     !dirty || window.confirm(message);
 
-  const chooseProduct = async () => {
-    if (
-      !confirmDiscardIfDirty(
-        "You have unsaved changes for this product. Switch products and discard them?",
-      )
-    )
-      return;
-    const selection = await shopify.resourcePicker({
-      type: "product",
-      multiple: false,
-      action: "select",
-    });
-    const product =
-      products.find((item) => item.id === selection?.[0]?.id) ?? null;
-    if (product) {
-      const next = normalizeConfig(
-        product.personalizer?.jsonValue ?? emptyConfig,
-      );
-      skipNextDirtyCheck.current = true;
-      setSelected(product);
-      setConfig(next);
-      setMugSetup(mugSetupForProduct(product));
-      setActiveSlot(next.photoFields[0]?.id ?? null);
-      setDirty(false);
-    }
+  const openDesign = (product:Product) => {
+    if (!confirmDiscardIfDirty("You have unsaved changes. Open another design and discard them?")) return;
+    const next=normalizeConfig(product.personalizer?.jsonValue??emptyConfig);
+    skipNextDirtyCheck.current=true;
+    setSelected(product);setConfig(next);setMugSetup(mugSetupForProduct(product));
+    setSetupTag(tagFor(product));setTagSearch("");setTagsOpen(false);
+    setActiveSlot(next.photoFields[0]?.id??null);setDirty(false);setProductSearch("");
   };
 
   const save = () => {
     if (!selected) return;
     const form = new FormData();
     form.set("productId", selected.id);
+    form.set("setupTag", setupTag);
     form.set("config", JSON.stringify(configRef.current));
     form.set("mugEnabled", String(mugSetup.enabled));
     form.set("mugCategory", mugSetup.category);
@@ -1557,7 +1554,22 @@ export default function PersonalizerHome() {
           <s-paragraph>
             Upload this product’s design once. Its Shopify tag automatically supplies the saved sizes, prices and optional mockups.
           </s-paragraph>
-          <s-button onClick={chooseProduct}>Choose product</s-button>
+          <details>
+            <summary>Product designs</summary>
+            <label>Find a design<input value={productSearch} placeholder="Type a product name" onChange={e=>setProductSearch(e.target.value)} /></label>
+            <div style={{maxHeight:260,overflow:"auto"}}>
+              {products.filter(p=>p.title.toLowerCase().includes(productSearch.trim().toLowerCase())).map(p=><div key={p.id}><s-button onClick={()=>openDesign(p)}>{p.title}</s-button></div>)}
+            </div>
+          </details>
+          <div>
+            <label>Setup tag<input value={tagsOpen?tagSearch:setupTag} placeholder="Click to see saved tags, or type 2–3 letters" onFocus={()=>{setTagsOpen(true);setTagSearch("");}} onChange={e=>{setTagsOpen(true);setTagSearch(e.target.value);}} /></label>
+            {tagsOpen&&<div style={{maxHeight:260,overflow:"auto"}} role="group" aria-label="Saved setup tags">
+              <s-button onClick={()=>{setSetupTag("");setTagsOpen(false);setDirty(true);}}>No setup tag</s-button>
+              {savedTags.filter(t=>(t.tag+" "+t.name).toLowerCase().includes(tagSearch.trim().toLowerCase())).map(t=><div key={t.tag}><s-button onClick={()=>{setSetupTag(t.tag);setTagsOpen(false);setDirty(true);}}>{t.tag} · {t.name} · {t.direction}</s-button></div>)}
+              {!savedTags.filter(t=>(t.tag+" "+t.name).toLowerCase().includes(tagSearch.trim().toLowerCase())).length&&<p>No matching saved tags.</p>}
+            </div>}
+            <s-paragraph>Save configuration to apply this tag and its shared sizes, prices and images.</s-paragraph>
+          </div>
           {selected && (
             <s-box
               padding="base"

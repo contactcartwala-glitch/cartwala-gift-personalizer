@@ -83,10 +83,19 @@ export function tagErrors(group:ProductGroup,groups:ProductGroup[]):Record<strin
  const errors:Record<string,string>={}, normalize=(v:string)=>v.trim().toLowerCase();
  const fields={plain:group.tags[0]||"",portrait:group.portraitTag||"",landscape:group.landscapeTag||""};
  for(const [key,tag] of Object.entries(fields)){
-  if(!tag.trim()){errors[key]="Enter a tag name.";continue;}
-  if(Object.entries(fields).some(([other,value])=>other!==key&&normalize(value)===normalize(tag)))errors[key]="Use a different tag for each of the three choices.";
+  if(!tag.trim()){if(key==="plain")errors[key]="Enter a tag name.";continue;}
+  if(Object.entries(fields).some(([other,value])=>other!==key&&normalize(value)===normalize(tag)))errors[key]="Use a different tag for each choice.";
   const used=groups.find(g=>g.id!==group.id&&[...g.tags,g.portraitTag,g.landscapeTag].filter(Boolean).some(t=>normalize(t)===normalize(tag)));
   if(used)errors[key]=`This tag is already used by ${used.name}. Choose another tag.`;
  }
  return errors;
+}
+
+export function setupTags(groups:ProductGroup[]):Array<{tag:string;name:string;direction:string}> {
+ return groups.flatMap(g=>[{tag:g.tags[0]||"",name:g.name,direction:g.direction==="portrait"?"Portrait":g.direction==="landscape"?"Landscape":"Customer chooses"}, {tag:g.portraitTag,name:g.name,direction:"Portrait"}, {tag:g.landscapeTag,name:g.name,direction:"Landscape"}].filter(item=>item.tag.trim()));
+}
+export function replaceSetupTag(current:string[], groups:ProductGroup[], tag:string):string[] {
+ const known=new Set(setupTags(groups).map(item=>item.tag));
+ if(tag&&!known.has(tag))throw new Error("This setup tag is not saved. Save the setup first.");
+ return [...current.filter(value=>!known.has(value)),...(tag?[tag]:[])];
 }
