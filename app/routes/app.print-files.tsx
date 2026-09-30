@@ -5,6 +5,8 @@ import { useLoaderData } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import { orderedPrintSize } from "../lib/print-dimensions";
+import { printPngWithDpi } from "../lib/png-print-density.client";
 import { DESIGN_ATTRIBUTE } from "../lib/signature-day.server";
 import { buildSignatureDayPrintPdf } from "../lib/signature-day-print-pdf.client";
 import { orderedShirts } from "../lib/signature-day-print-order";
@@ -497,13 +499,13 @@ const psdTextLayer = (t: TextDesign, width: number, height: number) => {
     },
   };
 };
-async function buildPrint(item: PrintItem) {
+async function buildPrint(item: PrintItem, keepLayers = true) {
   const { design, exact, attributes } = getDesign(item);
   if (!exact && attributes["_Personalised Preview"]) {
     const reference = await loadImage(attributes["_Personalised Preview"]);
     design.r = `${reference.naturalWidth}:${reference.naturalHeight}`;
   }
-  const { width, height } = documentSize(design.r, item.productTitle),
+  const { width, height } = orderedPrintSize(attributes) || documentSize(design.r, item.productTitle),
     composite = makeCanvas(width, height),
     ctx = composite.getContext("2d");
   if (!ctx) throw new Error("Print canvas is unavailable.");
@@ -513,7 +515,8 @@ async function buildPrint(item: PrintItem) {
     if (!source) continue;
     const layer = await renderPhotoLayer(photo, source, width, height);
     ctx.drawImage(layer.preview, 0, 0);
-    photoLayers.push(layer);
+    if(keepLayers) photoLayers.push(layer);
+    else {layer.preview.width=layer.preview.height=1;layer.canvas.width=layer.canvas.height=1;layer.mask.width=layer.mask.height=1;}
   }
   let overlayLayer: { name: string; canvas: HTMLCanvasElement } | null = null;
   if (design.o) {
@@ -563,7 +566,7 @@ const downloadBlob = (blob: Blob, filename: string) => {
   setTimeout(() => URL.revokeObjectURL(u), 2000);
 };
 async function downloadPng(item: PrintItem) {
-  const p = await buildPrint(item);
+  const p = await buildPrint(item, false);
   if (!p.exact && p.attributes["_Personalised Preview"]) {
     const r = await fetch(assetUrl(p.attributes["_Personalised Preview"]));
     if (!r.ok) throw new Error("Saved preview could not be downloaded.");
@@ -574,7 +577,7 @@ async function downloadPng(item: PrintItem) {
     return;
   }
   downloadBlob(
-    await canvasBlob(p.composite),
+    await printPngWithDpi(await canvasBlob(p.composite)),
     `${safeFile(`${item.orderName}-${item.productTitle}`)}.png`,
   );
 }

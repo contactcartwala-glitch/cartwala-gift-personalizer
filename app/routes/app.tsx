@@ -141,9 +141,9 @@ export default function App() {
   return (
     <AppProvider embedded apiKey={apiKey}>
       <s-app-nav>
-        <s-link href="/app">Personalizer</s-link>
+        <s-link href="/app">Product designs</s-link>
         <s-link href="/app/print-files">Print Files</s-link>
-        <s-link href="/app/product-groups">Product Groups</s-link>
+        <s-link href="/app/product-groups">Sizes & mockups</s-link>
       </s-app-nav>
       <Outlet />
     </AppProvider>

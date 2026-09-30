@@ -1059,6 +1059,13 @@
           console.error("Cartwala configuration is invalid", error);
         }
         const config = normalize(raw);
+        try {
+          const groupPanel = document.querySelector(`[data-cw-product-group][data-product-id="${root.dataset.productId}"]`);
+          const group = JSON.parse(groupPanel?.dataset.config || "{}");
+          const variant = group.previews?.[groupPanel?.dataset.variant];
+          if(group.customization === "plain" && variant) config.ratio = `${Math.round(variant.widthInches * 100)}:${Math.round(variant.heightInches * 100)}`;
+        } catch { /* Keep the saved product design if group data is unavailable. */ }
+
         root.style.setProperty("--cw-accent", root.dataset.accent || "#ff6200");
         root.style.setProperty("--cw-ratio", config.ratio.replace(":", "/"));
         const [canvasWidth, canvasHeight] = config.ratio.split(":").map(Number);

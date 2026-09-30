@@ -3,7 +3,7 @@ const compile=path=>ts.transpileModule(fs.readFileSync(path,'utf8'),{compilerOpt
 const core={};vm.runInNewContext(compile('app/lib/product-groups.ts'),{exports:core});
 let databaseCalls=[];const db={productGroupSettings:{findUnique:async()=>null,create:async args=>{databaseCalls.push(args);},updateMany:async args=>{databaseCalls.push(args);return {count:1};}}};
 const server={};vm.runInNewContext(compile('app/lib/product-groups.server.ts'),{exports:server,require:path=>path.includes("db.server")?{default:db}:core,structuredClone,Response,Date,Buffer});
-const group=core.emptyGroup('test');group.tags=['my-tag'];group.rows=[{id:'row',values:['8x12','3mm'],price:750,compare:1050,width:8,height:12,templates:{Portrait:core.emptyTemplate(),Landscape:core.emptyTemplate()}}];core.validateGroup(group);
+const group=core.emptyGroup('test');group.previewMode='manual';group.direction='product';group.tags=['my-tag'];group.rows=[{id:'row',values:['8x12','3mm'],price:750,compare:1050,width:8,height:12,templates:{Portrait:core.emptyTemplate(),Landscape:core.emptyTemplate()}}];core.validateGroup(group);
 assert.equal(core.comparePrice(group,group.rows[0]),1050);group.compareMode='percent';group.percentage=20;assert.equal(core.comparePrice(group,group.rows[0]),900);group.compareMode='none';assert.equal(core.comparePrice(group,group.rows[0]),null);group.compareMode='manual';
 const duplicate=structuredClone(group);duplicate.rows.push({...duplicate.rows[0],values:['8×12 inches','3mm']});assert.throws(()=>core.validateGroup(duplicate),/same option/);
 assert.equal(core.parseCsv('"a","b"\r\n"8x12","say ""hello"", friend"')[1][1],'say "hello", friend');
@@ -36,3 +36,16 @@ assert.equal(preview.nodes['.cw-group-photo'].nodes.img.src,one.image);assert.eq
 root.dispatchEvent({type:'cartwala:preview-ready',target:root,detail:{url:'blob:customer-photo'}});assert.equal(preview.nodes['.cw-group-photo'].nodes.img.src,'blob:customer-photo');
 const target=new Element();target.attrs={name:'id'};target.value='22';doc.listeners.change({target});assert.equal(preview.nodes['.cw-group-photo'].nodes.img.src,'blob:customer-photo');assert.equal(preview.nodes['.cw-group-photo'].style.width,'40%');assert.equal(preview.nodes['.cw-group-background'].style.backgroundImage,'url("https://example.com/room-b.jpg")');assert(preview.nodes['.cw-group-photo'].classes.has('cw-group-photo--studs'));
 console.log('Variant images and templates passed: product image before upload, retained customer photo on resize, selected background, box size and studs.');
+// PNG composition uses one correctly proportioned stage and only this product's cart forms.
+panel.dataset.ready='';panel.dataset.artwork='https://example.com/design.png';
+const pngOne={...one,mockup:'https://example.com/mock-small.png',mockupAspect:2,studs:true};const pngTwo={...two,mockup:'https://example.com/mock-large.png',mockupAspect:2};
+panel.dataset.config=JSON.stringify({groupId:'png',customization:'plain',previewMode:'png',previews:{11:pngOne,22:pngTwo}});panel.dataset.variant='11';
+gallery.getBoundingClientRect=()=>({width:600,height:600});
+const makeForm=id=>{const inputs={id:{value:id}},form={querySelector:s=>s==='[name="id"]'?inputs.id:inputs[s.match(/name="(.+)"/)?.[1]]||null,appendChild:i=>{inputs[i.name]=i;}};return {form,inputs};};
+const main=makeForm('11'),related=makeForm('999');const previousCreate=doc.createElement;
+doc.createElement=tag=>{if(tag==='input')return {};const result=previousCreate();result.nodes['.cw-group-stage']=new Element();return result;};
+doc.querySelectorAll=s=>s==='[data-cw-product-group]'?[panel]:s==='form[action*="/cart/add"]'?[main.form,related.form]:[];
+vm.runInNewContext(fs.readFileSync('extensions/cartwala-personalizer/assets/cartwala-product-groups.js','utf8'),{document:doc,location:{search:''},URLSearchParams,CustomEvent:class{constructor(type,init){this.type=type;this.detail=init.detail;}},HTMLElement:Element});
+assert.equal(preview.nodes['.cw-group-stage'].style.width,'600px');assert.equal(preview.nodes['.cw-group-stage'].style.height,'300px');assert.equal(preview.nodes['.cw-group-overlay'].src,pngOne.mockup);assert.equal(preview.nodes['.cw-group-photo'].classes.has('cw-group-photo--studs'),false);assert.equal(preview.nodes['.cw-group-height'].hidden,true);assert.equal(main.inputs['properties[_Cartwala Print Width]'].value,'8');assert.equal(related.inputs['properties[_Cartwala Print Width]'],undefined);
+root.dispatchEvent({type:'cartwala:preview-ready',target:root,detail:{url:'blob:personalized-design'}});target.value='22';doc.listeners.change({target});assert.equal(main.inputs.id.value,'22');assert.equal(related.inputs.id.value,'999');assert.equal(main.inputs['properties[_Cartwala Print Height]'].value,'24');assert.equal(preview.nodes['.cw-group-photo'].nodes.img.src,'blob:personalized-design');assert.equal(preview.nodes['.cw-group-overlay'].src,pngTwo.mockup);
+console.log('PNG storefront passed: proportionate stage, mockup overlay, retained design, no generated studs, isolated cart variants and selected print dimensions.');

@@ -6,34 +6,39 @@
   const root=document.querySelector(`[data-cw-personalizer][data-product-id="${panel.dataset.productId}"]`);
   const gallery=document.querySelector('[data-gallery-main]')||document.querySelector('.product__media-list .product__media-item')||document.querySelector('.product__media');
   if(!gallery)return;
-  const original=gallery.querySelector('img');let selected=variants.find(v=>String(v.id)===new URLSearchParams(location.search).get('variant'))||variants.find(v=>String(v.id)===panel.dataset.variant)||variants[0];if(!selected)return;
+  const original=gallery.querySelector('img');let selected=variants.find(v=>String(v.id)===new URLSearchParams(location.search).get('variant'))||variants.find(v=>String(v.id)===panel.dataset.variant)||variants[0];if(!selected)return;selected=variants.find(v=>v.id===selected.id&&config.previews?.[String(v.id)])||variants.find(v=>config.previews?.[String(v.id)]);if(!selected)return;panel.dataset.variant=String(selected.id);
   const preview=document.createElement('div');preview.className='cw-group-preview';preview.hidden=true;
-  preview.innerHTML='<div class="cw-group-background"></div><div class="cw-group-photo"><img alt="Your customized product"><span class="cw-group-studs"></span></div><img class="cw-group-overlay" alt=""><span class="cw-group-height"></span><span class="cw-group-width"></span>';
+  preview.innerHTML='<div class="cw-group-stage"><div class="cw-group-background"></div><div class="cw-group-photo"><img alt="Your customized product"><span class="cw-group-studs"></span></div><img class="cw-group-overlay" alt=""><span class="cw-group-height"></span><span class="cw-group-width"></span></div>';
   gallery.classList.add('cw-group-gallery');gallery.append(preview);let artwork='',customer=false;
+  const stage=preview.querySelector('.cw-group-stage');
+  const fitStage=(t)=>{if(!stage)return;const box=gallery.getBoundingClientRect(),aspect=config.previewMode==='png'?(t.mockupAspect||1):(box.width/box.height||1);const w=Math.min(box.width,box.height*aspect);Object.assign(stage.style,{width:`${w}px`,height:`${w/aspect}px`,left:'50%',top:'50%',transform:'translate(-50%,-50%)'});};
+  if(typeof ResizeObserver!=='undefined')new ResizeObserver(()=>{const t=config.previews?.[String(selected.id)];if(t)fitStage(t);}).observe(gallery);
+  const productForms=()=>Array.from(document.querySelectorAll('form[action*="/cart/add"]')).filter(form=>variants.some(v=>String(v.id)===form.querySelector('[name="id"]')?.value));
+  const printProperties=(t)=>productForms().forEach(form=>{for(const [name,value] of Object.entries({'_Cartwala Print Width':t.widthInches,'_Cartwala Print Height':t.heightInches,'_Cartwala Print DPI':300})){let input=form.querySelector(`input[name="properties[${name}]"]`);if(!input){input=document.createElement('input');input.type='hidden';input.name=`properties[${name}]`;form.appendChild(input);}input.value=String(value);}});
   const show=(visible)=>{preview.hidden=!visible;original?.classList.toggle('cw-group-original-hidden',visible);};
   const render=()=>{
-   const t=config.previews?.[String(selected.id)];if(!t){show(false);return;}
+   const t=config.previews?.[String(selected.id)];if(!t){show(false);return;}panel.dataset.variant=String(selected.id);fitStage(t);printProperties(t);
    const photo=preview.querySelector('.cw-group-photo'),img=photo.querySelector('img'),overlay=preview.querySelector('.cw-group-overlay');
-   if(!customer){artwork=config.customization==='design'?(panel.dataset.artwork||t.image||''):t.image||'';}
-   const bg=t.background||'';
+   if(!customer){artwork=config.previewMode==='png'?(panel.dataset.artwork||''):config.customization==='design'?(panel.dataset.artwork||t.image||''):t.image||'';}
+   const png=config.previewMode==='png',bg=png?'':t.background||'';preview.classList.toggle('cw-group-preview--png',png);
    preview.querySelector('.cw-group-background').style.backgroundImage=bg?`url("${bg}")`:'none';
-   overlay.hidden=!t.overlay;overlay.src=t.overlay||'';
+   overlay.hidden=!(png?t.mockup:t.overlay);overlay.src=(png?t.mockup:t.overlay)||'';
    let x=t.x,y=t.y,w=t.width,h=t.height;
    if(config.previewMode==='automatic'){x=50;y=34;w=t.widthInches/60*78;h=t.heightInches/60*78;}
    Object.assign(photo.style,{left:`${x}%`,top:`${y}%`,width:`${w}%`,height:`${h}%`});
-   photo.classList.toggle('cw-group-photo--studs',!!t.studs);photo.style.setProperty('--cw-group-stud',`url("${panel.dataset.stud}")`);photo.style.setProperty('--cw-group-stud-size',`${Math.max(4,Math.min(12,Math.round(Math.min(t.widthInches,t.heightInches)/2)))}px`);
+   photo.classList.toggle('cw-group-photo--studs',!png&&!!t.studs);photo.style.setProperty('--cw-group-stud',`url("${panel.dataset.stud}")`);photo.style.setProperty('--cw-group-stud-size',`${Math.max(4,Math.min(12,Math.round(Math.min(t.widthInches,t.heightInches)/2)))}px`);
    const height=preview.querySelector('.cw-group-height'),width=preview.querySelector('.cw-group-width');height.textContent=`${t.heightInches}″ height`;width.textContent=`← ${t.widthInches}″ width →`;
    Object.assign(height.style,{left:`${x}%`,top:`${Math.max(0,y-h/2-5)}%`});Object.assign(width.style,{left:`${x}%`,top:`${Math.min(95,y+h/2+2)}%`});
    // A finished product image is displayed directly before customization; artwork
    // after upload is rendered inside the selected room template.
-   const completeImage=!customer&&config.customization!=='design'&&!!t.image;
+   const completeImage=!png&&!customer&&config.customization!=='design'&&!!t.image;
    if(completeImage){img.src=t.image;Object.assign(photo.style,{left:'50%',top:'50%',width:'100%',height:'100%'});photo.classList.remove('cw-group-photo--studs');overlay.hidden=true;height.hidden=true;width.hidden=true;}
-   else{img.src=artwork;height.hidden=false;width.hidden=false;}
-   show(!!artwork&&config.previewMode!=='off');
+   else{img.src=artwork;height.hidden=png;width.hidden=png;}
+   show(!!artwork&&config.previewMode!=='off'&&(!png||!!t.mockup));
    if(customer&&config.previewMode==='off'&&original)original.src=artwork;
    if(root&&config.customization==='plain')root.dispatchEvent(new CustomEvent('cw:acrylic-selection',{detail:{ratio:`${Math.round(t.widthInches*100)}:${Math.round(t.heightInches*100)}`,variantId:String(selected.id)}}));
   };
-  const choose=(v)=>{if(!v||v.id===selected.id)return;selected=v;document.querySelectorAll('form[action*="/cart/add"] input[name="id"]').forEach(i=>{i.value=String(v.id);});render();};
+  const choose=(v)=>{if(!v||!config.previews?.[String(v.id)]||v.id===selected.id)return;selected=v;productForms().forEach(form=>{form.querySelector('[name="id"]').value=String(v.id);});render();};
   (root||document).addEventListener('cartwala:preview-ready',event=>{if(root&&event.target!==root)return;if(!event.detail?.url)return;artwork=event.detail.url;customer=true;render();});
   document.addEventListener('change',event=>{
    const target=event.target;if(!(target instanceof HTMLElement))return;
@@ -43,6 +48,13 @@
     choose(variants.find(v=>values.every((value,i)=>(v.options?.[i]||v[`option${i+1}`])===value)));
    }
   });
+  if(config.fixedDirection){
+   const index=names.indexOf(config.orientationOption);if(index>=0){
+    document.querySelectorAll(`input[name="option${index+1}"]`).forEach(input=>{input.checked=input.value===config.fixedDirection;const label=input.closest('label')||document.querySelector(`label[for="${input.id}"]`);if(label)label.hidden=true;const field=input.closest('fieldset');if(field&&Array.from(field.querySelectorAll('input')).every(i=>i.name===input.name))field.hidden=true;});
+    document.querySelectorAll(`select[name="option${index+1}"]`).forEach(input=>{input.value=config.fixedDirection;input.hidden=true;});
+   }
+   productForms().forEach(form=>{const input=form.querySelector('[name="id"]');if(input.value!==String(selected.id)){input.value=String(selected.id);input.dispatchEvent(new Event('change',{bubbles:true}));}});
+  }
   render();
  });
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize);else initialize();document.addEventListener('shopify:section:load',initialize);

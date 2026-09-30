@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ActionFunctionArgs, HeadersFunction } from "react-router";
-import { useFetcher, useRouteError, useRouteLoaderData } from "react-router";
+import { useFetcher, useRouteError, useRouteLoaderData, useSearchParams } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
@@ -813,9 +813,11 @@ export default function PersonalizerHome() {
   const psdFetcher = useFetcher<typeof action>();
   const restoreFetcher = useFetcher<typeof action>();
   const shopify = useAppBridge();
-  const [selected, setSelected] = useState<Product | null>(products[0] ?? null);
+  const [searchParams] = useSearchParams();
+  const requestedProduct = products.find(p => p.id === searchParams.get("product")) ?? products[0] ?? null;
+  const [selected, setSelected] = useState<Product | null>(requestedProduct);
   const [mugSetup, setMugSetup] = useState<MugSetup>(() =>
-    mugSetupForProduct(products[0] ?? null),
+    mugSetupForProduct(requestedProduct),
   );
   const [config, setConfig] = useState<Config>(
     normalizeConfig(selected?.personalizer?.jsonValue ?? emptyConfig),

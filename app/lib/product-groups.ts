@@ -1,10 +1,10 @@
 export type Direction = "Portrait" | "Landscape";
-export type PreviewTemplate = { image: string; background: string; overlay: string; x: number; y: number; width: number; height: number; studs: boolean };
+export type PreviewTemplate = { image: string; background: string; overlay: string; x: number; y: number; width: number; height: number; studs: boolean; mockup?: string; mockupAspect?: number; mockupName?: string };
 export type GroupRow = { id: string; values: string[]; price: number; compare: number | null; width: number; height: number; templates: Record<Direction, PreviewTemplate> };
-export type ProductGroup = { id: string; name: string; tags: string[]; collectionIds: string[]; productIds: string[]; excludedIds: string[]; keepPriceIds: string[]; options: string[]; rows: GroupRow[]; compareMode: "manual" | "percent" | "none"; percentage: number; previewMode: "manual" | "automatic" | "off"; customization: "plain" | "design" | "existing"; direction: "customer" | "portrait" | "landscape" | "product"; orientationOption: string; portraitTag: string; landscapeTag: string; background: string; createVariants: boolean };
+export type ProductGroup = { id: string; name: string; tags: string[]; collectionIds: string[]; productIds: string[]; excludedIds: string[]; keepPriceIds: string[]; options: string[]; rows: GroupRow[]; compareMode: "manual" | "percent" | "none"; percentage: number; previewMode: "manual" | "automatic" | "off" | "png"; customization: "plain" | "design" | "existing"; direction: "customer" | "portrait" | "landscape" | "product"; orientationOption: string; portraitTag: string; landscapeTag: string; background: string; createVariants: boolean };
 export type GroupState = { version: 1; groups: ProductGroup[]; published: ProductGroup[]; history: Array<{ at: string; name: string; groups: ProductGroup[]; published: ProductGroup[] }> };
 export const emptyTemplate = (): PreviewTemplate => ({ image: "", background: "", overlay: "", x: 50, y: 34, width: 30, height: 45, studs: false });
-export const emptyGroup = (id: string): ProductGroup => ({ id, name: "New Product Group", tags: [], collectionIds: [], productIds: [], excludedIds: [], keepPriceIds: [], options: ["Size", "Material"], rows: [], compareMode: "manual", percentage: 0, previewMode: "manual", customization: "existing", direction: "product", orientationOption: "Orientation", portraitTag: "", landscapeTag: "", background: "", createVariants: false });
+export const emptyGroup = (id: string): ProductGroup => ({ id, name: "New Product Group", tags: [], collectionIds: [], productIds: [], excludedIds: [], keepPriceIds: [], options: ["Size", "Material"], rows: [], compareMode: "manual", percentage: 0, previewMode: "png", customization: "plain", direction: "customer", orientationOption: "Orientation", portraitTag: "", landscapeTag: "", background: "", createVariants: true });
 export const normalizeValue = (value: string) => value.trim().toLowerCase().replace(/\s*(inches|inch|in|\")\s*$/i, "").replace(/\s*[x×]\s*/g, "×");
 export const rowKey = (values: string[]) => values.map(normalizeValue).join("|");
 export function comparePrice(group: ProductGroup, row: GroupRow): number | null {
@@ -12,7 +12,7 @@ export function comparePrice(group: ProductGroup, row: GroupRow): number | null 
   return group.compareMode === "percent" ? Math.round(row.price * (1 + group.percentage / 100) * 100) / 100 : row.compare;
 }
 export function matches(group: ProductGroup, product: { id: string; tags: string[]; collectionIds: string[] }): boolean {
-  return !group.excludedIds.includes(product.id) && (group.productIds.includes(product.id) || group.tags.some(tag => product.tags.includes(tag.trim())) || group.collectionIds.some(id => product.collectionIds.includes(id)));
+  return !group.excludedIds.includes(product.id) && (group.productIds.includes(product.id) || [...group.tags,group.portraitTag,group.landscapeTag].filter(Boolean).some(tag => product.tags.includes(tag.trim())) || group.collectionIds.some(id => product.collectionIds.includes(id)));
 }
 export function directionFor(group: ProductGroup, tags: string[]): Direction | null {
   const p = !!group.portraitTag && tags.includes(group.portraitTag), l = !!group.landscapeTag && tags.includes(group.landscapeTag);
@@ -31,7 +31,7 @@ export function validateGroup(value: unknown): ProductGroup {
   }
   if (!g.tags.length && !g.collectionIds.length && !g.productIds.length) throw new Error("Choose at least one tag, collection or product.");
   if (!g.options.length || g.options.length > 3 || new Set(g.options.map(v => v.toLowerCase())).size !== g.options.length) throw new Error("Use one to three different option names.");
-  if (!["manual", "percent", "none"].includes(g.compareMode) || !["manual", "automatic", "off"].includes(g.previewMode) || !["plain", "design", "existing"].includes(g.customization) || !["customer", "portrait", "landscape", "product"].includes(g.direction)) throw new Error("Check group settings.");
+  if (!["manual", "percent", "none"].includes(g.compareMode) || !["manual", "automatic", "off", "png"].includes(g.previewMode) || !["plain", "design", "existing"].includes(g.customization) || !["customer", "portrait", "landscape", "product"].includes(g.direction)) throw new Error("Check group settings.");
   if (!Number.isFinite(g.percentage) || g.percentage < 0 || g.percentage > 1000) throw new Error("Percentage must be between 0 and 1000.");
   if (g.direction === "customer" && (g.options.length > 2 || !g.orientationOption?.trim() || g.options.includes(g.orientationOption))) throw new Error("Customer orientation requires a separate option and at most two other options.");
   const url = (v: string) => { if (v && (!/^https:\/\//.test(v) || v.length > 2048)) throw new Error("Images must use an HTTPS URL."); };
@@ -48,7 +48,8 @@ export function validateGroup(value: unknown): ProductGroup {
     if (![r.width,r.height].every(n => Number.isFinite(n) && n > 0 && n <= 1000)) throw new Error("Enter valid physical width and height.");
     for (const direction of ["Portrait", "Landscape"] as const) {
       const t = r.templates?.[direction]; if (!t) throw new Error("Both preview directions need settings.");
-      [t.image,t.background,t.overlay].forEach(url);
+      [t.image,t.background,t.overlay,t.mockup||""].forEach(url);
+      if(t.mockup&&(!Number.isFinite(t.mockupAspect)||t.mockupAspect!<=0))throw new Error("Upload the mockup PNG again.");
       if (![t.x,t.y,t.width,t.height].every(n => Number.isFinite(n) && n >= 0 && n <= 100) || !t.width || !t.height || t.x-t.width/2 < 0 || t.x+t.width/2 > 100 || t.y-t.height/2 < 0 || t.y+t.height/2 > 100) throw new Error("Keep the photo box inside its background.");
     }
   }
