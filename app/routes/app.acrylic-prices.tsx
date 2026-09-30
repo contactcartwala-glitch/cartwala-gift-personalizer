@@ -73,9 +73,9 @@ export default function AcrylicPrices() {
       </form>
     </s-section>
     <s-section heading="Add a size to this product">
-      <s-paragraph>Enter the physical size and both selling prices. Saving creates Portrait and Landscape variants for 3mm and 5mm.</s-paragraph>
+      <s-paragraph>Enter the physical size and both selling prices. For example, add 10×15 here whenever you need it. Saving creates Portrait and Landscape variants for 3mm and 5mm.</s-paragraph>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-        <input aria-label="New size in inches" placeholder="e.g. 18×24" value={newSize} onChange={event => setNewSize(event.currentTarget.value)} />
+        <input aria-label="New size in inches" placeholder="e.g. 10×15" value={newSize} onChange={event => setNewSize(event.currentTarget.value)} />
         <input aria-label="New 3mm price" type="number" min="1" step="0.01" placeholder="3mm ₹" value={newPrice3} onChange={event => setNewPrice3(event.currentTarget.value)} />
         <input aria-label="New 5mm price" type="number" min="1" step="0.01" placeholder="5mm ₹" value={newPrice5} onChange={event => setNewPrice5(event.currentTarget.value)} />
         <button type="button" onClick={add}>Add size</button>
