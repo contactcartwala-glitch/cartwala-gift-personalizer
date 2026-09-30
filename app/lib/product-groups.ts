@@ -1,12 +1,21 @@
 export type Direction = "Portrait" | "Landscape";
 export type PreviewTemplate = { image: string; background: string; overlay: string; x: number; y: number; width: number; height: number; studs: boolean; mockup?: string; mockupAspect?: number; mockupName?: string };
-export type GroupRow = { id: string; values: string[]; price: number; compare: number | null; width: number; height: number; templates: Record<Direction, PreviewTemplate> };
+export type GroupRow = { id: string; values: string[]; previousValues?: string[][]; price: number; compare: number | null; width: number; height: number; templates: Record<Direction, PreviewTemplate> };
 export type ProductGroup = { id: string; name: string; tags: string[]; collectionIds: string[]; productIds: string[]; excludedIds: string[]; keepPriceIds: string[]; options: string[]; optionAliases?: Record<string,string[]>; valueAliases?: Record<string,Record<string,string[]>>; rows: GroupRow[]; compareMode: "manual" | "percent" | "none"; percentage: number; previewMode: "manual" | "automatic" | "off" | "png"; customization: "plain" | "design" | "existing"; direction: "customer" | "portrait" | "landscape" | "product"; orientationOption: string; portraitTag: string; landscapeTag: string; background: string; createVariants: boolean };
 export type GroupState = { version: 1; appliedImportId?: string; optionNamesVersion?: number; groups: ProductGroup[]; published: ProductGroup[]; history: Array<{ at: string; name: string; groups: ProductGroup[]; published: ProductGroup[] }> };
 export const emptyTemplate = (): PreviewTemplate => ({ image: "", background: "", overlay: "", x: 50, y: 34, width: 30, height: 45, studs: false });
 export const emptyGroup = (id: string): ProductGroup => ({ id, name: "New Product Group", tags: [], collectionIds: [], productIds: [], excludedIds: [], keepPriceIds: [], options: ["Size", "Material"], rows: [], compareMode: "manual", percentage: 0, previewMode: "png", customization: "plain", direction: "customer", orientationOption: "Orientation", portraitTag: "", landscapeTag: "", background: "", createVariants: true });
 export const normalizeValue = (value: string) => value.trim().toLowerCase().replace(/\s*(inches|inch|in|\")\s*$/i, "").replace(/\s*[x×]\s*/g, "×");
 export const rowKey = (values: string[]) => values.map(normalizeValue).join("|");
+/** Editing a row never renames the same value in another size. */
+export function renameRowValue(group:ProductGroup,id:string,index:number,name:string):GroupRow[] {
+ return group.rows.map(r=>{
+  if(r.id!==id||r.values[index]===name)return r;
+  const previousValues=[...(r.previousValues||[])];
+  if(r.values.every(v=>v.trim())&&!previousValues.some(values=>rowKey(values)===rowKey(r.values)))previousValues.push([...r.values]);
+  return {...r,values:r.values.map((v,i)=>i===index?name:v),previousValues};
+ });
+}
 export function comparePrice(group: ProductGroup, row: GroupRow): number | null {
   if (group.compareMode === "none") return null;
   return group.compareMode === "percent" ? Math.round(row.price * (1 + group.percentage / 100) * 100) / 100 : row.compare;
@@ -45,6 +54,10 @@ export function validateGroup(value: unknown): ProductGroup {
   for (const r of g.rows) {
     if (!r.id || !Array.isArray(r.values) || r.values.length !== g.options.length || r.values.some(v => typeof v !== "string" || !v.trim())) throw new Error("Every row needs a value for each option.");
     r.values = r.values.map(v => v.trim()); const key = rowKey(r.values);
+    if(r.previousValues){
+      if(!Array.isArray(r.previousValues)||r.previousValues.length>500||r.previousValues.some(values=>!Array.isArray(values)||values.length!==g.options.length||values.some(v=>typeof v!=="string"||!v.trim()||v.length>255)))throw new Error("Check previous row values.");
+      const previous=new Map(r.previousValues.map(values=>{const clean=values.map(v=>v.trim());return [rowKey(clean),clean] as const;}));previous.delete(key);r.previousValues=[...previous.values()];
+    }
     if (keys.has(key)) throw new Error("Two rows have the same option values."); keys.add(key);
     const money = (n: number) => Number.isFinite(n) && n > 0 && n <= 10000000 && Math.abs(n*100-Math.round(n*100)) < .00001;
     if (!money(r.price) || (r.compare !== null && !money(r.compare))) throw new Error("Prices must be positive with up to two decimals.");

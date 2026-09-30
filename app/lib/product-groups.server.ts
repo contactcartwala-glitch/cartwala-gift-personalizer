@@ -189,6 +189,29 @@ export async function syncProductSetup(admin:Admin,productId:string) {
 export const OPTION_NAMES_QUERY=`query SetupOptionNames($id: ID!) { product(id:$id) { options { id name position optionValues { id name } } } }`;
 export const OPTION_NAME_UPDATE=`mutation SetupOptionName($productId: ID!, $option: OptionUpdateInput!) { productOptionUpdate(productId:$productId,option:$option) { userErrors { message } } }`;
 export const OPTION_VALUE_UPDATE=`mutation SetupOptionValue($productId: ID!, $option: OptionUpdateInput!, $values: [OptionValueUpdateInput!]) { productOptionUpdate(productId:$productId,option:$option,optionValuesToUpdate:$values) { userErrors { message } } }`;
+export const ROW_VALUE_UPDATE=`mutation ScopedRowValues($productId: ID!, $variants: [ProductVariantsBulkInput!]!) { productVariantsBulkUpdate(productId:$productId,variants:$variants,allowPartialUpdates:false) { userErrors { message } } }`;
+export async function renameRowVariants(admin:Admin,g:ProductGroup,p:CatalogProduct):Promise<CatalogProduct>{
+ if(!g.rows.some(r=>r.previousValues?.length))return p;
+ // A previous name must not belong to a different current row: avoid swapping identities.
+ for(const r of g.rows)if(r.previousValues?.some(values=>g.rows.some(other=>other.id!==r.id&&rowKey(other.values)===rowKey(values))))throw new Error("Row names overlap. Use a different name for each type in this size.");
+ const updates:Array<{id:string;optionValues:Array<{optionName:string;name:string}>}>=[];
+ const planned=p.variants.map(v=>{
+  const values=g.options.map(name=>v.selectedOptions.find(o=>o.name.toLowerCase()===name.toLowerCase())?.value||"");
+  if(g.rows.some(r=>rowKey(r.values)===rowKey(values)))return v;
+  const candidates=g.rows.filter(r=>r.previousValues?.some(previous=>rowKey(previous)===rowKey(values)));
+  if(candidates.length>1)throw new Error("Previous row names overlap. Check this size's type names.");
+  if(!candidates.length)return v;
+  const row=candidates[0],selectedOptions=v.selectedOptions.map(o=>{const index=g.options.findIndex(name=>name.toLowerCase()===o.name.toLowerCase());return index<0?o:{...o,value:row.values[index]};});
+  updates.push({id:v.id,optionValues:selectedOptions.map(o=>({optionName:o.name,name:o.value}))});
+  return {...v,selectedOptions};
+ });
+ const combinations=planned.map(v=>v.selectedOptions.map(o=>o.name.toLowerCase()+"="+normalizeValue(o.value)).sort().join("|"));
+ if(new Set(combinations).size!==combinations.length)throw new Error("This name would duplicate another variant. Choose a different name.");
+ if(!updates.length)return p;
+ const result=await query<{productVariantsBulkUpdate:{userErrors:Array<{message:string}>}}>(admin,ROW_VALUE_UPDATE,{productId:p.id,variants:updates});
+ if(result.productVariantsBulkUpdate.userErrors.length)throw new Error(result.productVariantsBulkUpdate.userErrors[0].message);
+ return {...p,variants:planned};
+}
 export async function renameOptions(admin:Admin,g:ProductGroup,p:CatalogProduct):Promise<CatalogProduct>{
  const changes=Object.entries(g.optionAliases||{}).filter(([target,aliases])=>!p.variants.some(v=>v.selectedOptions.some(o=>o.name===target))&&p.variants.some(v=>v.selectedOptions.some(o=>aliases.includes(o.name))));
  const valueChanges=Object.entries(g.valueAliases||{}).filter(([name,values])=>Object.entries(values).some(([target,aliases])=>p.variants.some(v=>v.selectedOptions.some(o=>(o.name===name||(g.optionAliases?.[name]||[]).includes(o.name))&&aliases.includes(o.value)&&o.value!==target))));
@@ -220,7 +243,7 @@ export async function syncGroupProduct(admin:Admin,groups:ProductGroup[],origina
    if(!(dw>0&&dh>0)||Math.abs((width/height)/(dw/dh)-1)>.02)return {status:"error",message:"The uploaded design ratio does not match "+row.values.join(" / ")+". Use a separate size group for a different ratio."};
   }
  }
- let p=await renameOptions(admin,g,original);p=await bootstrap(admin,g,p);p=await addMissingVariants(admin,g,p);const fixed=productDirection(g,p),updates:Record<string,unknown>[]=[];
+ let p=await renameOptions(admin,g,original);p=await renameRowVariants(admin,g,p);p=await bootstrap(admin,g,p);p=await addMissingVariants(admin,g,p);const fixed=productDirection(g,p),updates:Record<string,unknown>[]=[];
  const previews: Record<string,unknown>={};const seen=new Set<string>();
  for(const v of p.variants){
   const options=new Map(v.selectedOptions.map(o=>[o.name.toLowerCase(),o.value]));const values=g.options.map(name=>options.get(name.toLowerCase())||"");const row=g.rows.find(r=>rowKey(r.values)===rowKey(values));
