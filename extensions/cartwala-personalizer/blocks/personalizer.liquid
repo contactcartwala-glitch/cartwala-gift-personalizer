@@ -1,4 +1,7 @@
 {% liquid
+  assign group_config = product.metafields['app--421161926657'].group_config.value
+  assign group_variant_key = product.selected_or_first_available_variant.id | append: ''
+  assign group_preview = group_config.previews[group_variant_key]
   assign acrylic_room = collections['acrylic-photo-frames'].metafields['app--421161926657'].acrylic_room.value
   assign personalizer_config = product.metafields.cartwala_personalizer.personalizer_config.value
   if personalizer_config == blank
@@ -6,8 +9,13 @@
   endif
   assign personalizer_enabled = personalizer_config.enabled
   assign acrylic_product = false
-  if product.tags contains 'cw-acrylic-frame' or product.tags contains 'cw-acrylic-portrait' or product.tags contains 'cw-acrylic-landscape'
+  if group_config == blank
+    if product.tags contains 'cw-acrylic-frame' or product.tags contains 'cw-acrylic-portrait' or product.tags contains 'cw-acrylic-landscape'
     assign acrylic_product = true
+    assign personalizer_enabled = true
+    endif
+  endif
+  if group_config.groupId != blank and group_config.customization == 'plain'
     assign personalizer_enabled = true
   endif
   assign acrylic_fixed_orientation = ''
@@ -17,7 +25,9 @@
     assign acrylic_fixed_orientation = 'Portrait'
   endif
   assign acrylic_plain_photo = false
-  if acrylic_product and personalizer_config == blank
+  if group_config.groupId != blank and group_config.customization == 'plain' and personalizer_config == blank
+    assign acrylic_plain_photo = true
+  elsif acrylic_product and personalizer_config == blank
     assign acrylic_plain_photo = true
   endif
   assign mug_product = false
@@ -42,13 +52,18 @@
   endif
 %}
 
+{% if group_config.groupId != blank %}
+  <div data-cw-product-group data-config="{{ group_config | json | escape }}" data-options="{{ product.options | json | escape }}" data-variants="{{ product.variants | json | escape }}" data-product-id="{{ product.id }}" data-variant="{{ product.selected_or_first_available_variant.id }}" data-artwork="{{ product.featured_image | image_url: width: 2400 }}" data-stud="{{ 'cartwala-acrylic-stud.png' | asset_url }}" hidden></div>
+  <script src="{{ 'cartwala-product-groups.js' | asset_url }}" defer></script>
+  {{ 'cartwala-product-groups.css' | asset_url | stylesheet_tag }}
+{% endif %}
 {% if personalizer_enabled %}
   {{ 'cartwala-loading.css' | asset_url | stylesheet_tag }}
-  <div class="cw-personalizer" data-cw-personalizer data-product-kind="{% if mug_product %}mug{% else %}gift{% endif %}" {% if acrylic_product %}data-cw-acrylic-product="true"{% endif %} data-cw-mug-model="{{ mug_model }}" data-label-edit="{{ 'personalizer.edit_again' | t | escape }}" data-label-saved="{{ 'personalizer.saved_preview' | t | escape }}" data-product-id="{{ product.id }}" data-overlay="{% if heart_magic_mirror_fallback %}https://cdn.shopify.com/s/files/1/0803/7931/4361/files/love_shape-overlay_019e41fb-91c2-47b6-8017-ffcfa79af20c.png?v=1789700102{% elsif acrylic_plain_photo %}{% else %}{{ personalizer_config.overlayUrl | escape }}{% endif %}" data-accent="#ff6200" data-label-upload="{{ 'personalizer.upload' | t | escape }}" data-label-reset="{{ 'personalizer.reset' | t | escape }}" data-label-zoom="{{ 'personalizer.zoom' | t | escape }}" data-label-rotation="{{ 'personalizer.rotation' | t | escape }}" data-label-change="{{ 'personalizer.change_photo' | t | escape }}" data-label-font="{{ 'personalizer.font' | t | escape }}" data-label-required="{{ 'personalizer.required' | t | escape }}" data-label-file="{{ 'personalizer.choose_file' | t | escape }}" {{ block.shopify_attributes }}>
+  <div class="cw-personalizer" data-cw-personalizer data-product-kind="{% if mug_product %}mug{% else %}gift{% endif %}" {% if acrylic_product or acrylic_plain_photo %}data-cw-acrylic-product="true"{% endif %} data-cw-mug-model="{{ mug_model }}" data-label-edit="{{ 'personalizer.edit_again' | t | escape }}" data-label-saved="{{ 'personalizer.saved_preview' | t | escape }}" data-product-id="{{ product.id }}" data-overlay="{% if heart_magic_mirror_fallback %}https://cdn.shopify.com/s/files/1/0803/7931/4361/files/love_shape-overlay_019e41fb-91c2-47b6-8017-ffcfa79af20c.png?v=1789700102{% elsif acrylic_plain_photo %}{% else %}{{ personalizer_config.overlayUrl | escape }}{% endif %}" data-accent="#ff6200" data-label-upload="{{ 'personalizer.upload' | t | escape }}" data-label-reset="{{ 'personalizer.reset' | t | escape }}" data-label-zoom="{{ 'personalizer.zoom' | t | escape }}" data-label-rotation="{{ 'personalizer.rotation' | t | escape }}" data-label-change="{{ 'personalizer.change_photo' | t | escape }}" data-label-font="{{ 'personalizer.font' | t | escape }}" data-label-required="{{ 'personalizer.required' | t | escape }}" data-label-file="{{ 'personalizer.choose_file' | t | escape }}" {{ block.shopify_attributes }}>
     {% if heart_magic_mirror_fallback %}
       <div data-cw-config='{"enabled":true,"overlayUrl":"https://cdn.shopify.com/s/files/1/0803/7931/4361/files/love_shape-overlay_019e41fb-91c2-47b6-8017-ffcfa79af20c.png?v=1789700102","canvasRatio":"1254:1254","photoFields":[{"id":"photo-1","label":"1 MASK","maskUrl":"https://cdn.shopify.com/s/files/1/0803/7931/4361/files/psd-photo-mask-1_0cf43e8b-95f1-477d-ba79-84c22c4314bb.png?v=1789700105","x":49.68102073365231,"y":40.82934609250399,"width":63.31738437001595,"height":55.18341307814992,"rotationEnabled":false,"required":true}],"textFields":[],"fileFields":[],"linkFields":[],"customFonts":[]}' hidden></div>
     {% elsif acrylic_plain_photo %}
-      <div data-cw-config='{"enabled":true,"canvasRatio":"{% if product.selected_or_first_available_variant.option3 == 'Landscape' or acrylic_fixed_orientation == 'Landscape' %}12:8{% else %}8:12{% endif %}","photoFields":[{"id":"acrylic-photo","label":"Your Photo","x":50,"y":50,"width":100,"height":100,"required":true}],"textFields":[],"fileFields":[],"linkFields":[],"customFonts":[]}' hidden></div>
+      <div data-cw-config='{"enabled":true,"canvasRatio":"{% if group_preview != blank %}{{ group_preview.widthInches | times: 100 | round }}:{{ group_preview.heightInches | times: 100 | round }}{% elsif product.selected_or_first_available_variant.option3 == 'Landscape' or acrylic_fixed_orientation == 'Landscape' %}12:8{% else %}8:12{% endif %}","photoFields":[{"id":"acrylic-photo","label":"Your Photo","x":50,"y":50,"width":100,"height":100,"required":true}],"textFields":[],"fileFields":[],"linkFields":[],"customFonts":[]}' hidden></div>
     {% else %}
       <div data-cw-config="{{ personalizer_config | json | escape }}" hidden></div>
     {% endif %}

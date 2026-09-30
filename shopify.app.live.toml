@@ -54,3 +54,16 @@ description = "Shared sofa background for every acrylic frame design"
 access.admin = "merchant_read_write"
 access.storefront = "public_read"
 validations.file_type_options = ["Image"]
+
+[shop.metafields.app.product_groups]
+type = "json"
+name = "Product Groups"
+description = "Store-specific product matching, pricing and preview settings"
+access.admin = "merchant_read_write"
+
+[product.metafields.app.group_config]
+type = "json"
+name = "Product Group Preview"
+description = "Published preview settings for this product"
+access.admin = "merchant_read_write"
+access.storefront = "public_read"

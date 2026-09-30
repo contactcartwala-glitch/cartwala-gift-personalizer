@@ -29,7 +29,9 @@ const shopify = shopifyApp({
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
   sessionStorage: new PrismaSessionStorage(prisma),
-  distribution: AppDistribution.SingleMerchant,
+  distribution: process.env.SHOPIFY_APP_DISTRIBUTION === "public"
+    ? AppDistribution.AppStore
+    : AppDistribution.SingleMerchant,
   ...(process.env.SHOP_CUSTOM_DOMAIN
     ? { customShopDomains: [process.env.SHOP_CUSTOM_DOMAIN] }
     : {}),

@@ -1229,13 +1229,13 @@
           setPurchaseReady(false);
           result.hidden = true;
         };
-        let selectedVariantId = root.querySelector("[data-cw-acrylic]")?.dataset.selectedVariant;
+        let selectedVariantId = root.querySelector("[data-cw-acrylic]")?.dataset.selectedVariant || document.querySelector("[data-cw-product-group]")?.dataset.variant;
         if (root.dataset.cwAcrylicProduct === "true") {
           let acrylicPreviewTimer;
           root.addEventListener("cw:acrylic-selection", (event) => {
             const ratio = event.detail?.ratio;
             const variantId = event.detail?.variantId;
-            if (!/^\d{1,3}:\d{1,3}$/.test(ratio || "")) return;
+            if (!/^\d{1,6}:\d{1,6}$/.test(ratio || "")) return;
             const changed = ratio !== config.ratio || variantId !== selectedVariantId;
             if (changed) invalidate();
             selectedVariantId = variantId;
