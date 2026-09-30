@@ -98,12 +98,13 @@ assert.notEqual(twice.rows[1].values[1],twice.rows[2].values[1]);
 core.validateGroup(structuredClone(twice));
 console.log('Duplicate size passed: unique options, preserved prices, empty new PNGs and original unchanged.');
 
-// Removed admin pages redirect to the original editor and expose no write action.
-for(const path of ['app/routes/app.product-groups.tsx','app/routes/app.acrylic-prices.tsx']){
- const source=fs.readFileSync(path,'utf8');
- assert.match(source,/return redirect\("\/app"\)/);
- assert.doesNotMatch(source,/export const action|saveGroupSettings|deleteMany/);
-}
+// Shared setup remains removed; the new acrylic editor targets only one known product.
+const removed=fs.readFileSync('app/routes/app.product-groups.tsx','utf8');
+assert.match(removed,/return redirect\("\/app"\)/);
+assert.doesNotMatch(removed,/export const action|saveGroupSettings|deleteMany/);
+const acrylicEditor=fs.readFileSync('app/routes/app.acrylic-prices.tsx','utf8');
+assert.match(acrylicEditor,/ACRYLIC_ACTIVE_PRODUCT_ID/);
+assert.doesNotMatch(acrylicEditor,/saveGroupSettings|syncAcrylicCollection|deleteMany/);
 const editor=fs.readFileSync('app/routes/app._index.tsx','utf8');
 assert.match(editor,/<s-button onClick={chooseProduct}>Choose product<\/s-button>/);
 assert.match(editor,/shopify.resourcePicker/);

@@ -1,6 +1,7 @@
 import { ACRYLIC_SIZES, acrylicComparePrice } from "./acrylic-prices";
 
 export const ACRYLIC_COLLECTION_ID = "gid://shopify/Collection/507932115129";
+export const ACRYLIC_ACTIVE_PRODUCT_ID = "gid://shopify/Product/15402886135993";
 export const ACRYLIC_TAG = "cw-acrylic-frame";
 export const ACRYLIC_PORTRAIT_TAG = "cw-acrylic-portrait";
 export const ACRYLIC_LANDSCAPE_TAG = "cw-acrylic-landscape";
@@ -37,15 +38,20 @@ export function validateMatrix(value: unknown): AcrylicMatrix {
     ? { version: 2, sizes: (input.sizes || []).map(row => ({ size: row.size,
         price3: Number(row.cost3) * 2.5, price5: Number(row.cost5) * 2.5 })) }
     : value as AcrylicMatrix;
-  if (matrix.version !== 2 || !Array.isArray(matrix.sizes) || matrix.sizes.length !== ACRYLIC_SIZES.length)
-    throw new Error("The price table must contain the five approved sizes.");
-  ACRYLIC_SIZES.forEach((size, index) => {
-    const row = matrix.sizes[index];
-    if (row?.size !== size || [row.price3, row.price5].some(price =>
+  if (matrix.version !== 2 || !Array.isArray(matrix.sizes) || matrix.sizes.length < ACRYLIC_SIZES.length || matrix.sizes.length > 40)
+    throw new Error("Keep the five approved sizes and add up to 35 more sizes.");
+  const seen = new Set<string>();
+  matrix.sizes.forEach((row) => {
+    const size = row?.size?.replace(/\s*[x×]\s*/g, "×");
+    const dimensions = size?.match(/^(\d+(?:\.\d+)?)×(\d+(?:\.\d+)?)$/);
+    if (!dimensions || size === "10×15" || Number(dimensions[1]) <= 0 || Number(dimensions[2]) <= Number(dimensions[1]) || Number(dimensions[2]) > 100 || seen.has(size) || [row.price3, row.price5].some(price =>
         !Number.isFinite(price) || price <= 0 || price > 10000000 ||
         Math.abs(price * 100 - Math.round(price * 100)) > 0.00001))
       throw new Error(`Check the selling prices for ${size}.`);
+    row.size = size;
+    seen.add(size);
   });
+  if (ACRYLIC_SIZES.some(size => !seen.has(size))) throw new Error("Keep the five approved sizes.");
   return matrix;
 }
 
@@ -62,7 +68,7 @@ export async function loadAcrylicMatrix(admin: { graphql: Graphql }): Promise<Ac
     query AcrylicPriceMatrix($id: ID!) {
       collection(id: $id) { metafield(namespace: "cartwala_acrylic", key: "price_matrix") { jsonValue } }
     }`, { id: ACRYLIC_COLLECTION_ID });
-  if (!data.collection?.metafield) throw new Error("Acrylic collection price table is missing.");
+  if (!data.collection?.metafield) return structuredClone(DEFAULT_ACRYLIC_MATRIX);
   return validateMatrix(data.collection.metafield.jsonValue);
 }
 
@@ -79,7 +85,7 @@ export async function saveAcrylicMatrix(admin: { graphql: Graphql }, matrix: Acr
 function variantPrice(variant: Variant, matrix: AcrylicMatrix): number | null {
   const options = new Map(variant.selectedOptions.map(({ name, value }) => [name.toLowerCase(), value.toLowerCase()]));
   const size = options.get("size")?.replace(/\s*(inches|inch|in|")\s*$/i, "").replace(/\s*[x×]\s*/g, "×");
-  const acrylic = options.get("acrylic") || "";
+  const acrylic = options.get("thickness") || options.get("acrylic") || "";
   const row = matrix.sizes.find((item) => item.size === size);
   if (!row) return null;
   if (/^3\s*mm\b/.test(acrylic)) return row.price3;
@@ -140,26 +146,25 @@ export async function syncAcrylicProduct(admin: { graphql: Graphql }, product: P
   for (const variant of variants) {
     const options = new Map(variant.selectedOptions.map(({ name, value }) => [name.toLowerCase(), value.toLowerCase()]));
     const size = options.get("size")?.replace(/\s*(inches|inch|in|")\s*$/i, "").replace(/\s*[x×]\s*/g, "×");
-    const material = options.get("acrylic")?.match(/^(3|5)\s*mm\b/)?.[1];
+    const material = (options.get("thickness") || options.get("acrylic"))?.match(/^(3|5)\s*mm\b/)?.[1];
     const orientation = options.get("orientation") || "fixed";
     if (!size || !material || !["fixed", "portrait", "landscape"].includes(orientation) ||
-        variant.selectedOptions.some(({ name }) => !["size", "acrylic", "orientation"].includes(name.toLowerCase()))) return "incomplete";
+        variant.selectedOptions.some(({ name }) => !["size", "thickness", "acrylic", "orientation"].includes(name.toLowerCase()))) return "incomplete";
     const key = `${size}|${material}`;
     const directions = groups.get(key) || new Set<string>();
     if (directions.has(orientation)) return "incomplete";
     directions.add(orientation);
     groups.set(key, directions);
   }
-  const expectedDirections = variants.length === 20 ? ["portrait", "landscape"] :
+  const expectedDirections = variants.length === matrix.sizes.length * 4 ? ["portrait", "landscape"] :
     [...(groups.values().next().value || [])];
-  if (product.variants.pageInfo.hasNextPage || ![10, 20].includes(variants.length) ||
-      desired.some((price) => price === null) || groups.size !== 10 ||
-      expectedDirections.length !== (variants.length === 20 ? 2 : 1) ||
+  if (product.variants.pageInfo.hasNextPage || ![matrix.sizes.length * 2, matrix.sizes.length * 4].includes(variants.length) ||
+      desired.some((price) => price === null) || groups.size !== matrix.sizes.length * 2 ||
+      expectedDirections.length !== (variants.length === matrix.sizes.length * 4 ? 2 : 1) ||
       [...groups.values()].some((directions) => directions.size !== expectedDirections.length ||
         expectedDirections.some((direction) => !directions.has(direction)))) return "incomplete";
   const updates = variants.flatMap((variant, index) =>
-    Number(variant.price) === desired[index] && Number(variant.compareAtPrice) === acrylicComparePrice(desired[index]!)
-      ? [] : [{ id: variant.id, price: desired[index], compareAtPrice: acrylicComparePrice(desired[index]!) }]);
+    Number(variant.price) === desired[index] ? [] : [{ id: variant.id, price: desired[index] }]);
   if (!updates.length) return "unchanged";
   const data = await graphql<{ productVariantsBulkUpdate: { userErrors: Array<{ message: string }> } }>(admin,
     `#graphql
@@ -169,6 +174,39 @@ export async function syncAcrylicProduct(admin: { graphql: Graphql }, product: P
   if (data.productVariantsBulkUpdate.userErrors.length)
     throw new Error(`${product.title}: ${data.productVariantsBulkUpdate.userErrors[0].message}`);
   return "updated";
+}
+
+/** Add only the four variants of a newly entered size. Existing variant IDs and images stay intact. */
+export async function addAcrylicSizes(admin: { graphql: Graphql }, product: Product, matrix: AcrylicMatrix) {
+  if (product.id !== ACRYLIC_ACTIVE_PRODUCT_ID || product.variants.pageInfo.hasNextPage)
+    throw new Error("The selected acrylic product cannot be updated safely.");
+  const existing = new Set(product.variants.nodes.map(variant =>
+    variant.selectedOptions.find(option => option.name === "Size")?.value.replace(/ inches$/, "")));
+  const missing = matrix.sizes.filter(row => !existing.has(row.size));
+  if (!missing.length) return;
+  if (product.variants.nodes.length + missing.length * 4 > 100)
+    throw new Error("Too many sizes for this product preview. Contact support before adding more.");
+  const variants = missing.flatMap(row => [
+    { thickness: "3mm without studs", price: row.price3 },
+    { thickness: "5mm with studs", price: row.price5 },
+  ].flatMap(material => ["Portrait", "Landscape"].map(orientation => ({
+    optionValues: [
+      { optionName: "Size", name: `${row.size} inches` },
+      { optionName: "Thickness", name: material.thickness },
+      { optionName: "Orientation", name: orientation },
+    ],
+    price: material.price,
+    inventoryItem: { tracked: false, requiresShipping: true },
+  }))));
+  const data = await graphql<{ productVariantsBulkCreate: { userErrors: Array<{ message: string }> } }>(admin,
+    `#graphql
+    mutation AddAcrylicSizes($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+      productVariantsBulkCreate(productId: $productId, variants: $variants, strategy: DEFAULT) {
+        userErrors { message }
+      }
+    }`, { productId: product.id, variants });
+  if (data.productVariantsBulkCreate.userErrors.length)
+    throw new Error(data.productVariantsBulkCreate.userErrors[0].message);
 }
 
 export async function loadAcrylicProduct(admin: { graphql: Graphql }, id: string): Promise<Product | null> {
