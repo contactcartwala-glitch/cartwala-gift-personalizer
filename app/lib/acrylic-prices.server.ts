@@ -44,7 +44,7 @@ export function validateMatrix(value: unknown): AcrylicMatrix {
   matrix.sizes.forEach((row) => {
     const size = row?.size?.replace(/\s*[x×]\s*/g, "×");
     const dimensions = size?.match(/^(\d+(?:\.\d+)?)×(\d+(?:\.\d+)?)$/);
-    if (!dimensions || size === "10×15" || Number(dimensions[1]) <= 0 || Number(dimensions[2]) <= Number(dimensions[1]) || Number(dimensions[2]) > 100 || seen.has(size) || [row.price3, row.price5].some(price =>
+    if (!dimensions || Number(dimensions[1]) <= 0 || Number(dimensions[2]) <= Number(dimensions[1]) || Number(dimensions[2]) > 100 || seen.has(size) || [row.price3, row.price5].some(price =>
         !Number.isFinite(price) || price <= 0 || price > 10000000 ||
         Math.abs(price * 100 - Math.round(price * 100)) > 0.00001))
       throw new Error(`Check the selling prices for ${size}.`);
