@@ -141,7 +141,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const settings = await loadGroupSettings(admin);
   return {
-    setupTags: setupTags(settings.state.published),
+    setupTags: setupTags(settings.state.groups),
     apiKey: process.env.SHOPIFY_API_KEY || "",
     products,
   };
@@ -156,7 +156,7 @@ export default function App() {
       <s-app-nav>
         <s-link href="/app">Product designs</s-link>
         <s-link href="/app/print-files">Print Files</s-link>
-        <s-link href="/app/product-groups">Sizes & mockups</s-link>
+        <s-link href="/app/product-groups">Tags & mockups</s-link>
       </s-app-nav>
       {navigation.state === "loading" ? <s-page heading="Loading"><s-spinner accessibilityLabel="Loading page" /></s-page> : <Outlet />}
     </AppProvider>

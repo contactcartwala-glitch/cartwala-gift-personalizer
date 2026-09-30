@@ -1,7 +1,7 @@
 export type Direction = "Portrait" | "Landscape";
 export type PreviewTemplate = { image: string; background: string; overlay: string; x: number; y: number; width: number; height: number; studs: boolean; mockup?: string; mockupAspect?: number; mockupName?: string };
 export type GroupRow = { id: string; values: string[]; previousValues?: string[][]; price: number; compare: number | null; width: number; height: number; templates: Record<Direction, PreviewTemplate> };
-export type ProductGroup = { id: string; name: string; tags: string[]; collectionIds: string[]; productIds: string[]; excludedIds: string[]; keepPriceIds: string[]; options: string[]; optionAliases?: Record<string,string[]>; valueAliases?: Record<string,Record<string,string[]>>; rows: GroupRow[]; compareMode: "manual" | "percent" | "none"; percentage: number; previewMode: "manual" | "automatic" | "off" | "png"; customization: "plain" | "design" | "existing"; direction: "customer" | "portrait" | "landscape" | "product"; orientationOption: string; portraitTag: string; landscapeTag: string; background: string; createVariants: boolean };
+export type ProductGroup = { id: string; name: string; description?: string; tags: string[]; collectionIds: string[]; productIds: string[]; excludedIds: string[]; keepPriceIds: string[]; options: string[]; optionAliases?: Record<string,string[]>; valueAliases?: Record<string,Record<string,string[]>>; rows: GroupRow[]; compareMode: "manual" | "percent" | "none"; percentage: number; previewMode: "manual" | "automatic" | "off" | "png"; customization: "plain" | "design" | "existing"; direction: "customer" | "portrait" | "landscape" | "product"; orientationOption: string; portraitTag: string; landscapeTag: string; background: string; createVariants: boolean };
 export type GroupState = { version: 1; appliedImportId?: string; optionNamesVersion?: number; groups: ProductGroup[]; published: ProductGroup[]; history: Array<{ at: string; name: string; groups: ProductGroup[]; published: ProductGroup[] }> };
 export const emptyTemplate = (): PreviewTemplate => ({ image: "", background: "", overlay: "", x: 50, y: 34, width: 30, height: 45, studs: false });
 export const emptyGroup = (id: string): ProductGroup => ({ id, name: "New Product Group", tags: [], collectionIds: [], productIds: [], excludedIds: [], keepPriceIds: [], options: ["Size", "Material"], rows: [], compareMode: "manual", percentage: 0, previewMode: "png", customization: "plain", direction: "customer", orientationOption: "Orientation", portraitTag: "", landscapeTag: "", background: "", createVariants: true });
@@ -36,6 +36,7 @@ export function directionFor(group: ProductGroup, tags: string[]): Direction | n
 export function validateGroup(value: unknown): ProductGroup {
   const g = value as ProductGroup;
   if (!g || !/^[a-zA-Z0-9_-]{1,80}$/.test(g.id) || !g.name?.trim()) throw new Error("Enter a group name.");
+  g.description=String(g.description||"").trim().slice(0,1500);
   for (const key of ["tags", "collectionIds", "productIds", "excludedIds", "keepPriceIds", "options"] as const) {
     if (!Array.isArray(g[key]) || g[key].some(v => typeof v !== "string" || v.length > 255) || g[key].length > 1000) throw new Error(`Check ${key}.`);
     g[key] = [...new Set(g[key].map(v => v.trim()).filter(Boolean))];
@@ -98,4 +99,14 @@ export function replaceSetupTag(current:string[], groups:ProductGroup[], tag:str
  const known=new Set(setupTags(groups).map(item=>item.tag));
  if(tag&&!known.has(tag))throw new Error("This setup tag is not saved. Save the setup first.");
  return [...current.filter(value=>!known.has(value)),...(tag?[tag]:[])];
+}
+
+/** Register once; sizes and mockups can be added later without choosing products. */
+export function createTagSetup(id:string,name:string,description:string,groups:ProductGroup[]):ProductGroup {
+ const tag=name.trim();
+ if(!tag||tag.length>255||tag.includes(","))throw new Error("Enter a tag name up to 255 characters, without commas.");
+ const g={...emptyGroup(id),name:tag,description:description.trim().slice(0,1500),tags:[tag],options:["Size"]};
+ const errors=tagErrors(g,groups);
+ if(Object.keys(errors).length)throw new Error(Object.values(errors)[0]);
+ return g;
 }

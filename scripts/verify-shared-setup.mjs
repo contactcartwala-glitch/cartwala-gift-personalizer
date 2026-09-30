@@ -64,3 +64,32 @@ assert.equal(core.replaceSetupTag(['unrelated','frames-p'],[tags],'frames-l').jo
 assert.equal(core.replaceSetupTag(['unrelated','frames-p'],[tags],'').join(','),'unrelated');
 assert.throws(()=>core.replaceSetupTag(['unrelated'],[tags],'unsaved-tag'),/not saved/);
 console.log('Single-tag setup and tag replacement preserve unrelated product tags.');
+
+// WordPress-style tag registration is independent of products and optional PNGs.
+const registered=core.createTagSetup('new-tag','  photo-frames  ',' My frames ',[tags]);
+assert.equal(registered.tags.join(','),'photo-frames');
+assert.equal(registered.description,'My frames');
+assert.equal(registered.rows.length,0);
+assert.equal(registered.productIds.length,0);
+assert.equal(registered.collectionIds.length,0);
+assert.equal(core.setupTags([registered])[0].tag,'photo-frames');
+assert.throws(()=>core.createTagSetup('duplicate',' FRAMES ','',[tags]),/already used/);
+assert.throws(()=>core.createTagSetup('empty','','',[]),/Enter a tag name/);
+assert.throws(()=>core.createTagSetup('comma','one,two','',[]),/without commas/);
+console.log('Tag registry passed: one-time creation, optional description/images, instant availability and duplicate protection.');
+
+// Creating a tag persists only the registry; no products, variants or uploads change.
+const registryState={state:{groups:[],published:[],history:[]},digest:'1'};
+let registrySaves=0,summaryReads=0;
+const registryRoute={};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('app/routes/app.product-groups.tsx','utf8'),{fileName:'app.product-groups.tsx',compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText,{
+ exports:registryRoute,crypto:globalThis.crypto,URL,FormData,File,structuredClone,
+ require:p=>p.includes('shopify.server')?{authenticate:{admin:async()=>({admin:{}})}}:p.includes('product-groups.server')?{loadCatalogSummary:async()=>{summaryReads++;return [];},loadCatalog:async()=>{throw new Error('Full catalog must not load for tag creation');},loadGroupSettings:async()=>registryState,saveGroupSettings:async()=>{registrySaves++;}}:p.endsWith('/product-groups')?core:{},
+});
+const createRequest=(name)=>{const form=new FormData();form.set('intent','create-tag');form.set('tagName',name);return {request:{formData:async()=>form}};};
+assert.equal((await registryRoute.action(createRequest('test-frame-tag'))).ok,true);
+assert.equal(registrySaves,1);assert.equal(summaryReads,1);
+assert.equal(registryState.state.groups.length,1);assert.equal(registryState.state.published.length,0);
+assert.equal((await registryRoute.action(createRequest(' TEST-FRAME-TAG '))).ok,false);
+assert.equal(registrySaves,1);
+console.log('Create-tag action passed: explicit persistence, duplicate prevention and no product changes.');

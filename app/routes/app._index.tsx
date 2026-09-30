@@ -601,7 +601,7 @@ async function handleSave(
   if (!productId.startsWith("gid://shopify/Product/"))
     return { ok: false, error: "The selected product is invalid." };
   const setupSettings=data.has("setupTag")?await loadGroupSettings(admin):null;
-  try { if(setupSettings)replaceSetupTag([],setupSettings.state.published,String(data.get("setupTag")||"")); }
+  try { if(setupSettings)replaceSetupTag([],setupSettings.state.groups,String(data.get("setupTag")||"")); }
   catch(e){return {ok:false,error:e instanceof Error?e.message:"Invalid setup tag."};}
   const mugEnabled = String(data.get("mugEnabled")) === "true";
   const mugCategory = String(data.get("mugCategory")) as MugCategory;
@@ -693,7 +693,7 @@ async function handleSave(
     );
   if(data.has("setupTag")){
     try{
-      tags=replaceSetupTag(tags,setupSettings!.state.published,String(data.get("setupTag")||""));
+      tags=replaceSetupTag(tags,setupSettings!.state.groups,String(data.get("setupTag")||""));
     }catch(e){return {ok:false,error:e instanceof Error?e.message:"Invalid setup tag."};}
   }
   const tagsResponse = await admin.graphql(
