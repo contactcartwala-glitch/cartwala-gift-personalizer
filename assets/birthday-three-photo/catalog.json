@@ -1,0 +1,1099 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-01",
+  "catalog": "Three Photo Birthday Mugs",
+  "designCount": 10,
+  "productCount": 40,
+  "designs": [
+    {
+      "design": 1,
+      "code": "CW-3P-001",
+      "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-001-three-photo-birthday-overlay.png?v=1790828911",
+      "overlayFileId": "gid://shopify/MediaImage/46436932747449",
+      "config": {
+        "enabled": true,
+        "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-001-three-photo-birthday-overlay.png?v=1790828911",
+        "canvasRatio": "2550:1050",
+        "photoFields": [
+          {
+            "x": 22.88265,
+            "y": 39.65087,
+            "width": 24.23469,
+            "height": 63.8404,
+            "id": "cw-3p-001-photo-1",
+            "label": "Upload Photo 1",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 50,
+            "y": 39.65087,
+            "width": 24.89796,
+            "height": 63.8404,
+            "id": "cw-3p-001-photo-2",
+            "label": "Upload Photo 2",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 77.16837,
+            "y": 39.65087,
+            "width": 24.23469,
+            "height": 63.8404,
+            "id": "cw-3p-001-photo-3",
+            "label": "Upload Photo 3",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          }
+        ],
+        "textFields": [
+          {
+            "id": "cw-3p-001-name",
+            "label": "Your Name (optional)",
+            "placeholder": "Your Name",
+            "defaultValue": "",
+            "maxLength": 60,
+            "maxLines": 2,
+            "x": 50,
+            "y": 94,
+            "width": 46,
+            "height": 8,
+            "alignment": "center",
+            "fitToBox": true,
+            "fontSize": 28,
+            "fontFamily": "Georgia",
+            "color": "#f1d393",
+            "required": false,
+            "movable": true,
+            "scalable": true,
+            "rotatable": true,
+            "allowFontChoice": true,
+            "allowColorChoice": true,
+            "rotation": 0
+          }
+        ],
+        "fileFields": [],
+        "linkFields": [],
+        "customFonts": []
+      },
+      "products": [
+        {
+          "id": "gid://shopify/Product/15405607682233",
+          "handle": "personalized-birthday-three-photo-midnight-navy-gold-normal-mug",
+          "model": "normal",
+          "variantId": "gid://shopify/ProductVariant/67618539831481",
+          "price": "250.00",
+          "compareAtPrice": "450.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405608403129",
+          "handle": "personalized-birthday-three-photo-midnight-navy-gold-magic-mug",
+          "model": "magic",
+          "variantId": "gid://shopify/ProductVariant/67618544517305",
+          "price": "400.00",
+          "compareAtPrice": "800.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405608468665",
+          "handle": "personalized-birthday-three-photo-midnight-navy-gold-love-mug",
+          "model": "love",
+          "variantId": "gid://shopify/ProductVariant/67618544582841",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405608566969",
+          "handle": "personalized-birthday-three-photo-midnight-navy-gold-red-mug",
+          "model": "red",
+          "variantId": "gid://shopify/ProductVariant/67618544681145",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        }
+      ]
+    },
+    {
+      "design": 2,
+      "code": "CW-3P-002",
+      "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-002-three-photo-birthday-overlay.png?v=1790828919",
+      "overlayFileId": "gid://shopify/MediaImage/46436935958713",
+      "config": {
+        "enabled": true,
+        "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-002-three-photo-birthday-overlay.png?v=1790828919",
+        "canvasRatio": "2550:1050",
+        "photoFields": [
+          {
+            "x": 18.01433,
+            "y": 36.21118,
+            "width": 28.04504,
+            "height": 60.49689,
+            "id": "cw-3p-002-photo-1",
+            "label": "Upload Photo 1",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 50,
+            "y": 36.14907,
+            "width": 29.58035,
+            "height": 60.37267,
+            "id": "cw-3p-002-photo-2",
+            "label": "Upload Photo 2",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 82.03685,
+            "y": 36.21118,
+            "width": 28.04504,
+            "height": 60.49689,
+            "id": "cw-3p-002-photo-3",
+            "label": "Upload Photo 3",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          }
+        ],
+        "textFields": [
+          {
+            "id": "cw-3p-002-name",
+            "label": "Your Name (optional)",
+            "placeholder": "Your Name",
+            "defaultValue": "",
+            "maxLength": 60,
+            "maxLines": 2,
+            "x": 50,
+            "y": 94,
+            "width": 46,
+            "height": 8,
+            "alignment": "center",
+            "fitToBox": true,
+            "fontSize": 28,
+            "fontFamily": "Georgia",
+            "color": "#f1d393",
+            "required": false,
+            "movable": true,
+            "scalable": true,
+            "rotatable": true,
+            "allowFontChoice": true,
+            "allowColorChoice": true,
+            "rotation": 0
+          }
+        ],
+        "fileFields": [],
+        "linkFields": [],
+        "customFonts": []
+      },
+      "products": [
+        {
+          "id": "gid://shopify/Product/15405608632505",
+          "handle": "personalized-birthday-three-photo-burgundy-rose-gold-normal-mug",
+          "model": "normal",
+          "variantId": "gid://shopify/ProductVariant/67618545008825",
+          "price": "250.00",
+          "compareAtPrice": "450.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405608698041",
+          "handle": "personalized-birthday-three-photo-burgundy-rose-gold-magic-mug",
+          "model": "magic",
+          "variantId": "gid://shopify/ProductVariant/67618545074361",
+          "price": "400.00",
+          "compareAtPrice": "800.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405608763577",
+          "handle": "personalized-birthday-three-photo-burgundy-rose-gold-love-mug",
+          "model": "love",
+          "variantId": "gid://shopify/ProductVariant/67618545139897",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405608861881",
+          "handle": "personalized-birthday-three-photo-burgundy-rose-gold-red-mug",
+          "model": "red",
+          "variantId": "gid://shopify/ProductVariant/67618545238201",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        }
+      ]
+    },
+    {
+      "design": 3,
+      "code": "CW-3P-003",
+      "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-003-three-photo-birthday-overlay.png?v=1790828925",
+      "overlayFileId": "gid://shopify/MediaImage/46436940710073",
+      "config": {
+        "enabled": true,
+        "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-003-three-photo-birthday-overlay.png?v=1790828925",
+        "canvasRatio": "2550:1050",
+        "photoFields": [
+          {
+            "x": 18.67963,
+            "y": 38.01242,
+            "width": 26.30502,
+            "height": 64.84472,
+            "id": "cw-3p-003-photo-1",
+            "label": "Upload Photo 1",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 50,
+            "y": 37.8882,
+            "width": 26.40737,
+            "height": 65.09317,
+            "id": "cw-3p-003-photo-2",
+            "label": "Upload Photo 2",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 81.34596,
+            "y": 37.95031,
+            "width": 26.25384,
+            "height": 64.96894,
+            "id": "cw-3p-003-photo-3",
+            "label": "Upload Photo 3",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          }
+        ],
+        "textFields": [
+          {
+            "id": "cw-3p-003-name",
+            "label": "Your Name (optional)",
+            "placeholder": "Your Name",
+            "defaultValue": "",
+            "maxLength": 60,
+            "maxLines": 2,
+            "x": 50,
+            "y": 94,
+            "width": 46,
+            "height": 8,
+            "alignment": "center",
+            "fitToBox": true,
+            "fontSize": 28,
+            "fontFamily": "Georgia",
+            "color": "#f1d393",
+            "required": false,
+            "movable": true,
+            "scalable": true,
+            "rotatable": true,
+            "allowFontChoice": true,
+            "allowColorChoice": true,
+            "rotation": 0
+          }
+        ],
+        "fileFields": [],
+        "linkFields": [],
+        "customFonts": []
+      },
+      "products": [
+        {
+          "id": "gid://shopify/Product/15405608927417",
+          "handle": "personalized-birthday-three-photo-emerald-botanical-normal-mug",
+          "model": "normal",
+          "variantId": "gid://shopify/ProductVariant/67618545303737",
+          "price": "250.00",
+          "compareAtPrice": "450.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405608992953",
+          "handle": "personalized-birthday-three-photo-emerald-botanical-magic-mug",
+          "model": "magic",
+          "variantId": "gid://shopify/ProductVariant/67618545369273",
+          "price": "400.00",
+          "compareAtPrice": "800.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405609058489",
+          "handle": "personalized-birthday-three-photo-emerald-botanical-love-mug",
+          "model": "love",
+          "variantId": "gid://shopify/ProductVariant/67618545434809",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405609124025",
+          "handle": "personalized-birthday-three-photo-emerald-botanical-red-mug",
+          "model": "red",
+          "variantId": "gid://shopify/ProductVariant/67618545762489",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        }
+      ]
+    },
+    {
+      "design": 4,
+      "code": "CW-3P-004",
+      "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-004-three-photo-birthday-overlay.png?v=1790828934",
+      "overlayFileId": "gid://shopify/MediaImage/46436945985721",
+      "config": {
+        "enabled": true,
+        "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-004-three-photo-birthday-overlay.png?v=1790828934",
+        "canvasRatio": "2550:1050",
+        "photoFields": [
+          {
+            "x": 18.73722,
+            "y": 38.93035,
+            "width": 23.56851,
+            "height": 63.93035,
+            "id": "cw-3p-004-photo-1",
+            "label": "Upload Photo 1",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 49.97444,
+            "y": 37.43781,
+            "width": 23.67076,
+            "height": 60.94527,
+            "id": "cw-3p-004-photo-2",
+            "label": "Upload Photo 2",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 81.26278,
+            "y": 38.93035,
+            "width": 23.56851,
+            "height": 63.93035,
+            "id": "cw-3p-004-photo-3",
+            "label": "Upload Photo 3",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          }
+        ],
+        "textFields": [
+          {
+            "id": "cw-3p-004-name",
+            "label": "Your Name (optional)",
+            "placeholder": "Your Name",
+            "defaultValue": "",
+            "maxLength": 60,
+            "maxLines": 2,
+            "x": 50,
+            "y": 94,
+            "width": 46,
+            "height": 8,
+            "alignment": "center",
+            "fitToBox": true,
+            "fontSize": 28,
+            "fontFamily": "Georgia",
+            "color": "#5e3d32",
+            "required": false,
+            "movable": true,
+            "scalable": true,
+            "rotatable": true,
+            "allowFontChoice": true,
+            "allowColorChoice": true,
+            "rotation": 0
+          }
+        ],
+        "fileFields": [],
+        "linkFields": [],
+        "customFonts": []
+      },
+      "products": [
+        {
+          "id": "gid://shopify/Product/15405609255097",
+          "handle": "personalized-birthday-three-photo-ivory-gold-elegance-normal-mug",
+          "model": "normal",
+          "variantId": "gid://shopify/ProductVariant/67618546090169",
+          "price": "250.00",
+          "compareAtPrice": "450.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405609320633",
+          "handle": "personalized-birthday-three-photo-ivory-gold-elegance-magic-mug",
+          "model": "magic",
+          "variantId": "gid://shopify/ProductVariant/67618546155705",
+          "price": "400.00",
+          "compareAtPrice": "800.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405609386169",
+          "handle": "personalized-birthday-three-photo-ivory-gold-elegance-love-mug",
+          "model": "love",
+          "variantId": "gid://shopify/ProductVariant/67618546483385",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405609484473",
+          "handle": "personalized-birthday-three-photo-ivory-gold-elegance-red-mug",
+          "model": "red",
+          "variantId": "gid://shopify/ProductVariant/67618546548921",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        }
+      ]
+    },
+    {
+      "design": 5,
+      "code": "CW-3P-005",
+      "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-005-three-photo-birthday-overlay.png?v=1790828942",
+      "overlayFileId": "gid://shopify/MediaImage/46436950081721",
+      "config": {
+        "enabled": true,
+        "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-005-three-photo-birthday-overlay.png?v=1790828942",
+        "canvasRatio": "2550:1050",
+        "photoFields": [
+          {
+            "x": 20.9826,
+            "y": 38.19876,
+            "width": 26.40737,
+            "height": 65.21739,
+            "id": "cw-3p-005-photo-1",
+            "label": "Upload Photo 1",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 50,
+            "y": 37.95031,
+            "width": 26.61208,
+            "height": 65.46584,
+            "id": "cw-3p-005-photo-2",
+            "label": "Upload Photo 2",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 79.06858,
+            "y": 38.13665,
+            "width": 26.40737,
+            "height": 65.34161,
+            "id": "cw-3p-005-photo-3",
+            "label": "Upload Photo 3",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          }
+        ],
+        "textFields": [
+          {
+            "id": "cw-3p-005-name",
+            "label": "Your Name (optional)",
+            "placeholder": "Your Name",
+            "defaultValue": "",
+            "maxLength": 60,
+            "maxLines": 2,
+            "x": 50,
+            "y": 94,
+            "width": 46,
+            "height": 8,
+            "alignment": "center",
+            "fitToBox": true,
+            "fontSize": 28,
+            "fontFamily": "Georgia",
+            "color": "#5e3d32",
+            "required": false,
+            "movable": true,
+            "scalable": true,
+            "rotatable": true,
+            "allowFontChoice": true,
+            "allowColorChoice": true,
+            "rotation": 0
+          }
+        ],
+        "fileFields": [],
+        "linkFields": [],
+        "customFonts": []
+      },
+      "products": [
+        {
+          "id": "gid://shopify/Product/15405609550009",
+          "handle": "personalized-birthday-three-photo-blush-birthday-bloom-normal-mug",
+          "model": "normal",
+          "variantId": "gid://shopify/ProductVariant/67618546647225",
+          "price": "250.00",
+          "compareAtPrice": "450.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405609615545",
+          "handle": "personalized-birthday-three-photo-blush-birthday-bloom-magic-mug",
+          "model": "magic",
+          "variantId": "gid://shopify/ProductVariant/67618546712761",
+          "price": "400.00",
+          "compareAtPrice": "800.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405609681081",
+          "handle": "personalized-birthday-three-photo-blush-birthday-bloom-love-mug",
+          "model": "love",
+          "variantId": "gid://shopify/ProductVariant/67618547040441",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405609746617",
+          "handle": "personalized-birthday-three-photo-blush-birthday-bloom-red-mug",
+          "model": "red",
+          "variantId": "gid://shopify/ProductVariant/67618547105977",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        }
+      ]
+    },
+    {
+      "design": 6,
+      "code": "CW-3P-006",
+      "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-006-three-photo-birthday-overlay.png?v=1790828961",
+      "overlayFileId": "gid://shopify/MediaImage/46436956668089",
+      "config": {
+        "enabled": true,
+        "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-006-three-photo-birthday-overlay.png?v=1790828961",
+        "canvasRatio": "2550:1050",
+        "photoFields": [
+          {
+            "x": 18.14227,
+            "y": 38.19876,
+            "width": 28.60798,
+            "height": 59.50311,
+            "id": "cw-3p-006-photo-1",
+            "label": "Upload Photo 1",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 50.02559,
+            "y": 38.19876,
+            "width": 28.71034,
+            "height": 59.50311,
+            "id": "cw-3p-006-photo-2",
+            "label": "Upload Photo 2",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 81.98567,
+            "y": 38.19876,
+            "width": 28.86387,
+            "height": 59.50311,
+            "id": "cw-3p-006-photo-3",
+            "label": "Upload Photo 3",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          }
+        ],
+        "textFields": [
+          {
+            "id": "cw-3p-006-name",
+            "label": "Your Name (optional)",
+            "placeholder": "Your Name",
+            "defaultValue": "",
+            "maxLength": 60,
+            "maxLines": 2,
+            "x": 50,
+            "y": 94,
+            "width": 46,
+            "height": 8,
+            "alignment": "center",
+            "fitToBox": true,
+            "fontSize": 28,
+            "fontFamily": "Georgia",
+            "color": "#f1d393",
+            "required": false,
+            "movable": true,
+            "scalable": true,
+            "rotatable": true,
+            "allowFontChoice": true,
+            "allowColorChoice": true,
+            "rotation": 0
+          }
+        ],
+        "fileFields": [],
+        "linkFields": [],
+        "customFonts": []
+      },
+      "products": [
+        {
+          "id": "gid://shopify/Product/15405609844921",
+          "handle": "personalized-birthday-three-photo-royal-blue-celebration-normal-mug",
+          "model": "normal",
+          "variantId": "gid://shopify/ProductVariant/67618547204281",
+          "price": "250.00",
+          "compareAtPrice": "450.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405619151033",
+          "handle": "personalized-birthday-three-photo-royal-blue-celebration-magic-mug",
+          "model": "magic",
+          "variantId": "gid://shopify/ProductVariant/67618591637689",
+          "price": "400.00",
+          "compareAtPrice": "800.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405619183801",
+          "handle": "personalized-birthday-three-photo-royal-blue-celebration-love-mug",
+          "model": "love",
+          "variantId": "gid://shopify/ProductVariant/67618591670457",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405619249337",
+          "handle": "personalized-birthday-three-photo-royal-blue-celebration-red-mug",
+          "model": "red",
+          "variantId": "gid://shopify/ProductVariant/67618591735993",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        }
+      ]
+    },
+    {
+      "design": 7,
+      "code": "CW-3P-007",
+      "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-007-three-photo-birthday-overlay.png?v=1790828970",
+      "overlayFileId": "gid://shopify/MediaImage/46436959912121",
+      "config": {
+        "enabled": true,
+        "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-007-three-photo-birthday-overlay.png?v=1790828970",
+        "canvasRatio": "2550:1050",
+        "photoFields": [
+          {
+            "x": 19.98465,
+            "y": 37.63975,
+            "width": 23.69498,
+            "height": 67.08075,
+            "id": "cw-3p-007-photo-1",
+            "label": "Upload Photo 1",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 49.97441,
+            "y": 36.77019,
+            "width": 24.51382,
+            "height": 64.84472,
+            "id": "cw-3p-007-photo-2",
+            "label": "Upload Photo 2",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 80.04094,
+            "y": 37.70186,
+            "width": 23.64381,
+            "height": 66.95652,
+            "id": "cw-3p-007-photo-3",
+            "label": "Upload Photo 3",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          }
+        ],
+        "textFields": [
+          {
+            "id": "cw-3p-007-name",
+            "label": "Your Name (optional)",
+            "placeholder": "Your Name",
+            "defaultValue": "",
+            "maxLength": 60,
+            "maxLines": 2,
+            "x": 50,
+            "y": 94,
+            "width": 46,
+            "height": 8,
+            "alignment": "center",
+            "fitToBox": true,
+            "fontSize": 28,
+            "fontFamily": "Georgia",
+            "color": "#5e3d32",
+            "required": false,
+            "movable": true,
+            "scalable": true,
+            "rotatable": true,
+            "allowFontChoice": true,
+            "allowColorChoice": true,
+            "rotation": 0
+          }
+        ],
+        "fileFields": [],
+        "linkFields": [],
+        "customFonts": []
+      },
+      "products": [
+        {
+          "id": "gid://shopify/Product/15405619282105",
+          "handle": "personalized-birthday-three-photo-lavender-pearl-normal-mug",
+          "model": "normal",
+          "variantId": "gid://shopify/ProductVariant/67618591768761",
+          "price": "250.00",
+          "compareAtPrice": "450.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405619773625",
+          "handle": "personalized-birthday-three-photo-lavender-pearl-magic-mug",
+          "model": "magic",
+          "variantId": "gid://shopify/ProductVariant/67618592915641",
+          "price": "400.00",
+          "compareAtPrice": "800.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405619806393",
+          "handle": "personalized-birthday-three-photo-lavender-pearl-love-mug",
+          "model": "love",
+          "variantId": "gid://shopify/ProductVariant/67618592948409",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405619871929",
+          "handle": "personalized-birthday-three-photo-lavender-pearl-red-mug",
+          "model": "red",
+          "variantId": "gid://shopify/ProductVariant/67618593013945",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        }
+      ]
+    },
+    {
+      "design": 8,
+      "code": "CW-3P-008",
+      "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-008-three-photo-birthday-overlay.png?v=1790828978",
+      "overlayFileId": "gid://shopify/MediaImage/46436963680441",
+      "config": {
+        "enabled": true,
+        "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-008-three-photo-birthday-overlay.png?v=1790828978",
+        "canvasRatio": "2550:1050",
+        "photoFields": [
+          {
+            "x": 18.90993,
+            "y": 39.87578,
+            "width": 25.84442,
+            "height": 64.59627,
+            "id": "cw-3p-008-photo-1",
+            "label": "Upload Photo 1",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 50.07677,
+            "y": 39.31677,
+            "width": 25.84442,
+            "height": 63.97516,
+            "id": "cw-3p-008-photo-2",
+            "label": "Upload Photo 2",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 81.19243,
+            "y": 39.81366,
+            "width": 25.84442,
+            "height": 64.7205,
+            "id": "cw-3p-008-photo-3",
+            "label": "Upload Photo 3",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          }
+        ],
+        "textFields": [
+          {
+            "id": "cw-3p-008-name",
+            "label": "Your Name (optional)",
+            "placeholder": "Your Name",
+            "defaultValue": "",
+            "maxLength": 60,
+            "maxLines": 2,
+            "x": 50,
+            "y": 94,
+            "width": 46,
+            "height": 8,
+            "alignment": "center",
+            "fitToBox": true,
+            "fontSize": 28,
+            "fontFamily": "Georgia",
+            "color": "#5e3d32",
+            "required": false,
+            "movable": true,
+            "scalable": true,
+            "rotatable": true,
+            "allowFontChoice": true,
+            "allowColorChoice": true,
+            "rotation": 0
+          }
+        ],
+        "fileFields": [],
+        "linkFields": [],
+        "customFonts": []
+      },
+      "products": [
+        {
+          "id": "gid://shopify/Product/15405619904697",
+          "handle": "personalized-birthday-three-photo-peach-champagne-normal-mug",
+          "model": "normal",
+          "variantId": "gid://shopify/ProductVariant/67618593046713",
+          "price": "250.00",
+          "compareAtPrice": "450.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405619970233",
+          "handle": "personalized-birthday-three-photo-peach-champagne-magic-mug",
+          "model": "magic",
+          "variantId": "gid://shopify/ProductVariant/67618593112249",
+          "price": "400.00",
+          "compareAtPrice": "800.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405620035769",
+          "handle": "personalized-birthday-three-photo-peach-champagne-love-mug",
+          "model": "love",
+          "variantId": "gid://shopify/ProductVariant/67618593407161",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405620068537",
+          "handle": "personalized-birthday-three-photo-peach-champagne-red-mug",
+          "model": "red",
+          "variantId": "gid://shopify/ProductVariant/67618593439929",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        }
+      ]
+    },
+    {
+      "design": 9,
+      "code": "CW-3P-009",
+      "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-009-three-photo-birthday-overlay.png?v=1790828988",
+      "overlayFileId": "gid://shopify/MediaImage/46436967973049",
+      "config": {
+        "enabled": true,
+        "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-009-three-photo-birthday-overlay.png?v=1790828988",
+        "canvasRatio": "2550:1050",
+        "photoFields": [
+          {
+            "x": 18.67963,
+            "y": 37.08075,
+            "width": 27.73797,
+            "height": 62.73292,
+            "id": "cw-3p-009-photo-1",
+            "label": "Upload Photo 1",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 50.05118,
+            "y": 36.95652,
+            "width": 27.73797,
+            "height": 62.48447,
+            "id": "cw-3p-009-photo-2",
+            "label": "Upload Photo 2",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 81.37155,
+            "y": 37.01863,
+            "width": 27.63562,
+            "height": 62.85714,
+            "id": "cw-3p-009-photo-3",
+            "label": "Upload Photo 3",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          }
+        ],
+        "textFields": [
+          {
+            "id": "cw-3p-009-name",
+            "label": "Your Name (optional)",
+            "placeholder": "Your Name",
+            "defaultValue": "",
+            "maxLength": 60,
+            "maxLines": 2,
+            "x": 50,
+            "y": 94,
+            "width": 46,
+            "height": 8,
+            "alignment": "center",
+            "fitToBox": true,
+            "fontSize": 28,
+            "fontFamily": "Georgia",
+            "color": "#f1d393",
+            "required": false,
+            "movable": true,
+            "scalable": true,
+            "rotatable": true,
+            "allowFontChoice": true,
+            "allowColorChoice": true,
+            "rotation": 0
+          }
+        ],
+        "fileFields": [],
+        "linkFields": [],
+        "customFonts": []
+      },
+      "products": [
+        {
+          "id": "gid://shopify/Product/15405620134073",
+          "handle": "personalized-birthday-three-photo-black-gold-luxe-normal-mug",
+          "model": "normal",
+          "variantId": "gid://shopify/ProductVariant/67618593505465",
+          "price": "250.00",
+          "compareAtPrice": "450.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405620232377",
+          "handle": "personalized-birthday-three-photo-black-gold-luxe-magic-mug",
+          "model": "magic",
+          "variantId": "gid://shopify/ProductVariant/67618593833145",
+          "price": "400.00",
+          "compareAtPrice": "800.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405620265145",
+          "handle": "personalized-birthday-three-photo-black-gold-luxe-love-mug",
+          "model": "love",
+          "variantId": "gid://shopify/ProductVariant/67618593865913",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405620330681",
+          "handle": "personalized-birthday-three-photo-black-gold-luxe-red-mug",
+          "model": "red",
+          "variantId": "gid://shopify/ProductVariant/67618594160825",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        }
+      ]
+    },
+    {
+      "design": 10,
+      "code": "CW-3P-010",
+      "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-010-three-photo-birthday-overlay.png?v=1790828998",
+      "overlayFileId": "gid://shopify/MediaImage/46436972167353",
+      "config": {
+        "enabled": true,
+        "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-010-three-photo-birthday-overlay.png?v=1790828998",
+        "canvasRatio": "2550:1050",
+        "photoFields": [
+          {
+            "x": 19.16581,
+            "y": 37.01863,
+            "width": 27.27738,
+            "height": 66.58385,
+            "id": "cw-3p-010-photo-1",
+            "label": "Upload Photo 1",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 49.97441,
+            "y": 37.08075,
+            "width": 25.53736,
+            "height": 66.45963,
+            "id": "cw-3p-010-photo-2",
+            "label": "Upload Photo 2",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          },
+          {
+            "x": 80.73183,
+            "y": 37.01863,
+            "width": 27.27738,
+            "height": 66.58385,
+            "id": "cw-3p-010-photo-3",
+            "label": "Upload Photo 3",
+            "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/two-photo-full-cover-mask.png?v=1789980689",
+            "rotationEnabled": true,
+            "required": true
+          }
+        ],
+        "textFields": [
+          {
+            "id": "cw-3p-010-name",
+            "label": "Your Name (optional)",
+            "placeholder": "Your Name",
+            "defaultValue": "",
+            "maxLength": 60,
+            "maxLines": 2,
+            "x": 50,
+            "y": 94,
+            "width": 46,
+            "height": 8,
+            "alignment": "center",
+            "fitToBox": true,
+            "fontSize": 28,
+            "fontFamily": "Georgia",
+            "color": "#f1d393",
+            "required": false,
+            "movable": true,
+            "scalable": true,
+            "rotatable": true,
+            "allowFontChoice": true,
+            "allowColorChoice": true,
+            "rotation": 0
+          }
+        ],
+        "fileFields": [],
+        "linkFields": [],
+        "customFonts": []
+      },
+      "products": [
+        {
+          "id": "gid://shopify/Product/15405620363449",
+          "handle": "personalized-birthday-three-photo-teal-copper-memories-normal-mug",
+          "model": "normal",
+          "variantId": "gid://shopify/ProductVariant/67618594193593",
+          "price": "250.00",
+          "compareAtPrice": "450.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405620428985",
+          "handle": "personalized-birthday-three-photo-teal-copper-memories-magic-mug",
+          "model": "magic",
+          "variantId": "gid://shopify/ProductVariant/67618594488505",
+          "price": "400.00",
+          "compareAtPrice": "800.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405620494521",
+          "handle": "personalized-birthday-three-photo-teal-copper-memories-love-mug",
+          "model": "love",
+          "variantId": "gid://shopify/ProductVariant/67618594783417",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        },
+        {
+          "id": "gid://shopify/Product/15405620527289",
+          "handle": "personalized-birthday-three-photo-teal-copper-memories-red-mug",
+          "model": "red",
+          "variantId": "gid://shopify/ProductVariant/67618594816185",
+          "price": "300.00",
+          "compareAtPrice": "700.00"
+        }
+      ]
+    }
+  ]
+}
