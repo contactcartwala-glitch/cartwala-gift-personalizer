@@ -1,3 +1,4 @@
+import { MasterProductNavigation } from "../components/MasterProducts";
 import { ACRYLIC_MASTER_ID } from "../lib/acrylic-design";
 import { validateAcrylicDesign } from "../lib/acrylic-design.server";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -830,7 +831,7 @@ async function handleSave(
 
 type FieldKind = "photoFields" | "textFields" | "fileFields" | "linkFields";
 
-export default function PersonalizerHome() {
+export default function PersonalizerHome({ masterMode = false }: { masterMode?: boolean }) {
   const { products } = useRouteLoaderData<typeof appLoader>("routes/app")!;
   const saveFetcher = useFetcher<typeof action>();
   const fontFetcher = useFetcher<typeof action>();
@@ -840,7 +841,8 @@ export default function PersonalizerHome() {
   const restoreFetcher = useFetcher<typeof action>();
   const shopify = useAppBridge();
   const [searchParams] = useSearchParams();
-  const requestedProduct = products.find(p => p.id === searchParams.get("product")) ?? products[0] ?? null;
+  const designProducts = products.filter(p => p.id !== ACRYLIC_MASTER_ID && (p.tags.includes("cw-acrylic-frame") || normalizeConfig(p.personalizer?.jsonValue).acrylicDesign));
+  const requestedProduct = (masterMode ? designProducts : products).find(p => p.id === searchParams.get("product")) ?? (masterMode ? designProducts[0] : products[0]) ?? null;
   const [selected, setSelected] = useState<Product | null>(requestedProduct);
   const [mugSetup, setMugSetup] = useState<MugSetup>(() =>
     mugSetupForProduct(requestedProduct),
@@ -1028,9 +1030,17 @@ export default function PersonalizerHome() {
     const product =
       products.find((item) => item.id === selection?.[0]?.id) ?? null;
     if (product) {
+      if (masterMode && (product.id === ACRYLIC_MASTER_ID || product.tags.includes("cw-mug"))) {
+        shopify.toast.show("Choose an acrylic design product. Master photos are managed in Sizes, prices & master photos.", { isError: true });
+        return;
+      }
       const next = normalizeConfig(
         product.personalizer?.jsonValue ?? emptyConfig,
       );
+      if (masterMode && !next.acrylicDesign) {
+        next.acrylicDesign = { masterProductId: ACRYLIC_MASTER_ID, orientation: "Portrait" };
+        next.canvasRatio = "2:3";
+      }
       skipNextDirtyCheck.current = true;
       setSelected(product);
       setConfig(next);
@@ -1563,7 +1573,7 @@ export default function PersonalizerHome() {
   };
 
   return (
-    <s-page heading="Cartwala Personalizer V5.2" inlineSize="large">
+    <s-page heading={masterMode ? "Master Products" : "Cartwala Personalizer V5.2"} inlineSize="large">
       <s-button
         slot="primary-action"
         variant="primary"
@@ -1572,9 +1582,23 @@ export default function PersonalizerHome() {
       >
         Save configuration
       </s-button>
-      <s-section heading="Product template">
+      {masterMode && <MasterProductNavigation designs />}
+      {masterMode && <s-section heading="Acrylic designs">
+        <s-paragraph>Choose a linked design below, or choose another product to link. Upload its PSD, select Portrait only or Landscape only, then save. Sizes and 3mm / 5mm prices come from the master.</s-paragraph>
+        <label>Design product <select value={selected?.id || ""} onChange={event => {
+          if (!confirmDiscardIfDirty("Discard unsaved changes and open another design?")) return;
+          const product = designProducts.find(p => p.id === event.currentTarget.value);
+          if (!product) return;
+          const next = normalizeConfig(product.personalizer?.jsonValue ?? emptyConfig);
+          skipNextDirtyCheck.current = true;
+          setSelected(product); setConfig(next); setMugSetup(mugSetupForProduct(product));
+          setActiveSlot(next.photoFields[0]?.id ?? null); setDirty(false);
+        }}><option value="" disabled>Choose an acrylic design</option>{designProducts.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></label>
+        {selected && <s-button href={`https://cartwala.in/products/${selected.handle}`} target="_blank">Open customer preview</s-button>}
+      </s-section>}
+      <s-section heading={masterMode ? "Design artwork and photo slots" : "Product template"}>
         <s-stack direction="block" gap="base">
-          <s-button onClick={chooseProduct}>Choose product</s-button>
+          {masterMode ? <s-button onClick={chooseProduct}>Choose / link another design product</s-button> : <s-button onClick={chooseProduct}>Choose product</s-button>}
           {selected && (
             <s-box
               padding="base"
@@ -1707,11 +1731,11 @@ export default function PersonalizerHome() {
           <label>Customer orientation <select value={config.acrylicDesign.orientation} onChange={event => setConfig(current => ({ ...current, acrylicDesign: { masterProductId: ACRYLIC_MASTER_ID, orientation: event.target.value as "Portrait" | "Landscape" } }))}>
             <option value="Portrait">Portrait only</option><option value="Landscape">Landscape only</option>
           </select></label>
-          <s-paragraph>Upload one layered PSD below for this design. PHOTO 1, PHOTO 2 and PHOTO 3 become customer upload slots. Matching master sizes and 3mm / 5mm prices are shared automatically. Different ratios need a separate design product; a 2:3 PSD cannot use 36×48 (3:4).</s-paragraph>
-          <s-button href="/app/acrylic-prices">Open Acrylic Master sizes &amp; prices</s-button>
+          <s-paragraph>Upload one layered PSD below for this design. PHOTO 1, PHOTO 2 and PHOTO 3 become customer upload slots. Matching master sizes and 3mm / 5mm prices are shared automatically. Different ratios need a separate design product; a 2:3 PSD needs sizes with the same ratio.</s-paragraph>
+          <s-button href="/app/master-products">Open Acrylic Master sizes &amp; prices</s-button>
         </>}
       </s-section>
-      <s-section heading="Mug product setup">
+      {!masterMode && <s-section heading="Mug product setup">
         <s-stack direction="block" gap="base">
           <s-paragraph>
             Enable this only for mug products. Saving automatically applies the
@@ -1840,7 +1864,7 @@ export default function PersonalizerHome() {
             </>
           )}
         </s-stack>
-      </s-section>
+      </s-section>}
 
       <s-section heading="PSD auto template import">
         <s-stack direction="block" gap="base">

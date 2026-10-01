@@ -1,3 +1,4 @@
+import { MasterProductNavigation } from "../components/MasterProducts";
 import { syncLinkedAcrylicDesigns } from "../lib/acrylic-design.server";
 import { useState } from "react";
 import { useActionData, useLoaderData, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router";
@@ -65,7 +66,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 };
 
-export default function AcrylicPrices() {
+export default function AcrylicPrices({ masterMode = false }: { masterMode?: boolean }) {
   const { matrix: initial, productTitle, variantCount, mockups, previewSizes } = useLoaderData<typeof loader>();
   const result = useActionData<typeof action>();
   const [rows, setRows] = useState(initial.sizes);
@@ -80,8 +81,8 @@ export default function AcrylicPrices() {
     setRows(current => [...current, { size, price3: Number(newPrice3), price5: Number(newPrice5) }]);
     setNewSize(""); setNewPrice3(""); setNewPrice5("");
   };
-  return <s-page heading="Acrylic sizes, prices & mockups" inlineSize="large">
-    <s-button href="/app/master-products">Back to Master Products</s-button>
+  return <s-page heading={masterMode ? "Master Products" : "Acrylic sizes, prices & mockups"} inlineSize="large">
+    {masterMode ? <MasterProductNavigation /> : <s-button href="/app/master-products">Back to Master Products</s-button>}
     <AcrylicMockupEditor sizes={previewSizes} templates={mockups.templates} digest={mockups.digest} />
     <s-section heading={productTitle}>
       <s-paragraph>Manage Acrylic Master and linked design prices. Existing photos and variants are preserved. Portrait and Landscape share each size price. Current variants: {variantCount}.</s-paragraph>
