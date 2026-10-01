@@ -20,7 +20,7 @@ for(let i=0;i<slots.length;i++){
  t.fillStyle=['#e1d9cd','#d5d0c4','#e7dfd0'][i];t.fillRect(0,0,s.w,s.h);
  t.fillStyle='#726650';t.font='24px sans-serif';t.textAlign='center';t.fillText(`Upload Photo ${i+1}`,s.w/2,s.h/2);
  children.unshift({name:s.name,top:s.y,left:s.x,bottom:s.y+s.h,right:s.x+s.w,canvas:tile});pc.drawImage(tile,s.x,s.y);
- const mask=canvas(),m=mask.getContext('2d');m.fillStyle='white';m.fillRect(s.x,s.y,s.w,s.h);fs.writeFileSync(`${dir}/photo-${i+1}-mask.png`,mask.toBuffer('image/png'));
+ const mask=createCanvas(1000,1000),m=mask.getContext('2d');m.fillStyle='white';m.fillRect(0,0,1000,1000);fs.writeFileSync(`${dir}/photo-${i+1}-mask.png`,mask.toBuffer('image/png'));
 }
 pc.drawImage(bg,0,0);
 fs.writeFileSync(`${dir}/three-photo-portrait-preview.png`,preview.toBuffer('image/png'));
