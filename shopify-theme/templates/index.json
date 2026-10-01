@@ -1,0 +1,153 @@
+{
+  "sections": {
+    "welcome-marquee": {
+      "type": "announcement-bar",
+      "blocks": {
+        "m1": {
+          "type": "message",
+          "settings": {
+            "text": "Personalised Gifts Made With Love",
+            "link": "/collections/all"
+          }
+        },
+        "m2": {
+          "type": "message",
+          "settings": {
+            "text": "Carefully Packed & Delivered Across India",
+            "link": ""
+          }
+        },
+        "m3": {
+          "type": "message",
+          "settings": {
+            "text": "Create Memories. Gift Happiness.",
+            "link": "/collections/all"
+          }
+        }
+      },
+      "block_order": [
+        "m1",
+        "m2",
+        "m3"
+      ],
+      "settings": {
+        "background": "#111111",
+        "text_color": "#ffffff"
+      }
+    },
+    "hero": {
+      "type": "hero",
+      "settings": {}
+    },
+    "shop-by-category": {
+      "type": "shop-by-category",
+      "settings": {
+        "eyebrow": "PERSONALISED FOR YOU",
+        "heading": "Shop by Category",
+        "link_label": "View All Gifts",
+        "link_url": "/collections/all"
+      },
+      "blocks": {
+        "acrylic": {
+          "type": "category",
+          "settings": {
+            "collection": "acrylic-photo-frames",
+            "title": "Acrylic Frames"
+          }
+        },
+        "crystal": {
+          "type": "category",
+          "settings": {
+            "collection": "crystal",
+            "title": "Crystal Gifts"
+          }
+        },
+        "corporate": {
+          "type": "category",
+          "settings": {
+            "collection": "corporate-gifts",
+            "title": "Corporate Gifts"
+          }
+        },
+        "bottles": {
+          "type": "category",
+          "settings": {
+            "collection": "customised-bottles",
+            "title": "Printed Bottles"
+          }
+        }
+      },
+      "block_order": [
+        "acrylic",
+        "crystal",
+        "corporate",
+        "bottles"
+      ]
+    },
+    "bestsellers": {
+      "type": "featured-collection",
+      "settings": {
+        "collection": "photo-frames",
+        "eyebrow": "CUSTOMER FAVOURITES",
+        "heading": "Best Sellers",
+        "subheading": "Popular personalised gifts for your special moments.",
+        "product_limit": 6
+      }
+    },
+    "trust": {
+      "type": "trust-badges",
+      "settings": {}
+    },
+    "faq": {
+      "type": "faq",
+      "blocks": {
+        "q1": {
+          "type": "question",
+          "settings": {
+            "question": "How do I personalise my gift?",
+            "answer": "<p>Choose your product and add the photo, name or message requested on the product page. Follow the personalisation instructions shown for that item.</p>"
+          }
+        },
+        "q2": {
+          "type": "question",
+          "settings": {
+            "question": "What photo quality should I use?",
+            "answer": "<p>For the best print result, upload a clear, well-lit and high-resolution photo without screenshots or heavy compression.</p>"
+          }
+        },
+        "q3": {
+          "type": "question",
+          "settings": {
+            "question": "How will I receive delivery updates?",
+            "answer": "<p>Once your order is dispatched, available tracking details will be shared so you can follow the delivery.</p>"
+          }
+        },
+        "q4": {
+          "type": "question",
+          "settings": {
+            "question": "Need help with an order?",
+            "answer": "<p>Contact Cartwala customer support with your order number and our team will help you with the next steps.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4"
+      ],
+      "settings": {
+        "eyebrow": "NEED HELP?",
+        "heading": "Frequently Asked Questions"
+      }
+    }
+  },
+  "order": [
+    "welcome-marquee",
+    "hero",
+    "shop-by-category",
+    "bestsellers",
+    "trust",
+    "faq"
+  ]
+}
