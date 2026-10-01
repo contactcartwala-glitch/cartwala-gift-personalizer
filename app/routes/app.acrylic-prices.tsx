@@ -71,7 +71,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 };
 
-export default function AcrylicPrices({ masterMode = false }: { masterMode?: boolean }) {
+export function AcrylicPrices({ masterMode = false }: { masterMode?: boolean }) {
   const { matrix: initial, productTitle, variantCount, mockups, previewSizes } = useLoaderData<typeof loader>();
   const result = useActionData<typeof action>();
   const [rows, setRows] = useState(initial.sizes);
@@ -115,4 +115,8 @@ export default function AcrylicPrices({ masterMode = false }: { masterMode?: boo
       </div>
     </s-section>
   </s-page>;
+}
+
+export default function AcrylicPricesPage() {
+  return <AcrylicPrices />;
 }

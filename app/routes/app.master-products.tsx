@@ -1,7 +1,7 @@
 import type { ActionFunctionArgs } from "react-router";
 import { useSearchParams } from "react-router";
-import AcrylicPrices, { loader, action as masterAction } from "./app.acrylic-prices";
-import PersonalizerHome, { action as designAction } from "./app._index";
+import { AcrylicPrices, loader, action as masterAction } from "./app.acrylic-prices";
+import { PersonalizerHome, action as designAction } from "./app._index";
 
 export { loader };
 export async function action(args: ActionFunctionArgs) {
