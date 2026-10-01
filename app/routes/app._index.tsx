@@ -1,3 +1,5 @@
+import { ACRYLIC_MASTER_ID } from "../lib/acrylic-design";
+import { validateAcrylicDesign } from "../lib/acrylic-design.server";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ActionFunctionArgs, HeadersFunction } from "react-router";
 import { useFetcher, useRouteError, useRouteLoaderData, useSearchParams } from "react-router";
@@ -28,6 +30,7 @@ import {
   uploadFont,
   uploadImage,
   uploadImageAsset,
+  uploadPsdAsset,
   firstMetafieldsSetError,
   type ShopifyFileAsset,
 } from "../lib/shopify-files.server";
@@ -307,7 +310,8 @@ async function handlePsdImport(
 
     const overlayFile = data.get("overlayFile");
     const maskFiles = data.getAll("maskFiles");
-    const imported = JSON.parse(String(data.get("config") || "{}")) as Config;
+    const imported = normalizeConfig(JSON.parse(String(data.get("config") || "{}")));
+    await validateAcrylicDesign(admin, productId, imported);
     if (!(overlayFile instanceof File) || !overlayFile.size)
       throw new Error("The PSD overlay could not be generated.");
     if (
@@ -387,6 +391,9 @@ async function handlePsdImport(
       }
     }
 
+    const sourceFile = data.get("sourcePsd");
+    const source = sourceFile instanceof File ? await uploadPsdAsset(admin, sourceFile) : undefined;
+    if (source) uploadedIds.push(source.id);
     const overlay = await uploadImageAsset(admin, overlayFile);
     uploadedIds.push(overlay.id);
     const masks: ShopifyFileAsset[] = [];
@@ -401,6 +408,7 @@ async function handlePsdImport(
     const config = normalizeConfig({
       ...imported,
       overlayUrl: overlay.url,
+      sourcePsdUrl: source?.url || imported.sourcePsdUrl,
       photoFields: imported.photoFields.map((field, index) => ({
         ...field,
         maskUrl: masks[index].url,
@@ -600,6 +608,8 @@ async function handleSave(
   if (!productId) return { ok: false, error: "Choose a product first." };
   if (!productId.startsWith("gid://shopify/Product/"))
     return { ok: false, error: "The selected product is invalid." };
+  try { await validateAcrylicDesign(admin, productId, config); }
+  catch(e){return {ok:false,error:e instanceof Error?e.message:"Invalid acrylic design."};}
   const setupSettings=data.has("setupTag")?await loadGroupSettings(admin):null;
   try { if(setupSettings)replaceSetupTag([],setupSettings.state.groups,String(data.get("setupTag")||"")); }
   catch(e){return {ok:false,error:e instanceof Error?e.message:"Invalid setup tag."};}
@@ -1499,6 +1509,7 @@ export default function PersonalizerHome() {
       };
       const form = new FormData();
       form.append("intent", "psdImport");
+      form.append("sourcePsd", file);
       form.append("productId", selected.id);
       form.append("config", JSON.stringify(imported));
       const knownFontKeys = new Set(
@@ -1687,6 +1698,19 @@ export default function PersonalizerHome() {
         </s-stack>
       </s-section>
 
+      <s-section heading="Acrylic design setup">
+        {config.sourcePsdUrl && <a href={config.sourcePsdUrl} target="_blank" rel="noreferrer">Download original PSD</a>}
+        <label>Master product <select value={config.acrylicDesign ? "acrylic" : ""} onChange={event => setConfig(current => ({ ...current, acrylicDesign: event.target.value ? { masterProductId: ACRYLIC_MASTER_ID, orientation: "Portrait" } : undefined }))}>
+          <option value="">No acrylic master link</option><option value="acrylic">Acrylic Photo Frame Master</option>
+        </select></label>
+        {config.acrylicDesign && <>
+          <label>Customer orientation <select value={config.acrylicDesign.orientation} onChange={event => setConfig(current => ({ ...current, acrylicDesign: { masterProductId: ACRYLIC_MASTER_ID, orientation: event.target.value as "Portrait" | "Landscape" } }))}>
+            <option value="Portrait">Portrait only</option><option value="Landscape">Landscape only</option>
+          </select></label>
+          <s-paragraph>Upload one layered PSD below for this design. PHOTO 1, PHOTO 2 and PHOTO 3 become customer upload slots. Matching master sizes and 3mm / 5mm prices are shared automatically. Different ratios need a separate design product; a 2:3 PSD cannot use 36×48 (3:4).</s-paragraph>
+          <s-button href="/app/acrylic-prices">Open Acrylic Master sizes &amp; prices</s-button>
+        </>}
+      </s-section>
       <s-section heading="Mug product setup">
         <s-stack direction="block" gap="base">
           <s-paragraph>

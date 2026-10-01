@@ -1,0 +1,48 @@
+{
+  "enabled": true,
+  "acrylicDesign": {
+    "masterProductId": "gid://shopify/Product/15402886135993",
+    "orientation": "Portrait"
+  },
+  "overlayUrl": "",
+  "canvasRatio": "1200:1800",
+  "photoFields": [
+    {
+      "id": "acrylic-photo-1",
+      "label": "Upload Photo 1",
+      "maskUrl": "",
+      "x": 50,
+      "y": 35.27777777777778,
+      "width": 84,
+      "height": 45.666666666666664,
+      "required": true,
+      "rotationEnabled": false
+    },
+    {
+      "id": "acrylic-photo-2",
+      "label": "Upload Photo 2",
+      "maskUrl": "",
+      "x": 28.291666666666664,
+      "y": 74.11111111111111,
+      "width": 40.583333333333336,
+      "height": 28.22222222222222,
+      "required": true,
+      "rotationEnabled": false
+    },
+    {
+      "id": "acrylic-photo-3",
+      "label": "Upload Photo 3",
+      "maskUrl": "",
+      "x": 71.70833333333333,
+      "y": 74.11111111111111,
+      "width": 40.583333333333336,
+      "height": 28.22222222222222,
+      "required": true,
+      "rotationEnabled": false
+    }
+  ],
+  "textFields": [],
+  "fileFields": [],
+  "linkFields": [],
+  "customFonts": []
+}

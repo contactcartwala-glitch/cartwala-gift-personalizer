@@ -21,7 +21,7 @@ const size=orderedPrintSize({'_Cartwala Print Width':'24','_Cartwala Print Heigh
 assert.throws(()=>orderedPrintSize({'_Cartwala Print Width':'100','_Cartwala Print Height':'100'}),/too large/);
 const {printPngWithDpi}=load('app/lib/png-print-density.client.ts');
 const print=await printPngWithDpi(new Blob([portrait]));const decoded=UPNG.decode(await print.arrayBuffer());assert.equal(decoded.tabs.pHYs[0],11811);assert.equal(decoded.tabs.pHYs[1],11811);assert.equal(decoded.tabs.pHYs[2],1);assert.equal(UPNG.toRGBA8(decoded)[0].byteLength,400*400*4);
-const core=load('app/lib/product-groups.ts');const server=load('app/lib/product-groups.server.ts',{'../db.server':{default:{}},'../data/shop-setup-imports.json':{default:{}},'./product-groups':core});
+const core=load('app/lib/product-groups.ts');const server=load('app/lib/product-groups.server.ts',{'../db.server':{default:{}},'../data/shop-setup-imports.json':{default:{}},'./product-groups':core,'./acrylic-design.server':{syncAcrylicDesign:async()=>false}});
 const group=core.emptyGroup('png');group.tags=['frames'];group.portraitTag='frames-portrait';group.landscapeTag='frames-landscape';
 group.rows=[{id:'a',values:['8x12','3mm'],price:750,compare:1050,width:8,height:12,templates:{Portrait:core.emptyTemplate(),Landscape:{...core.emptyTemplate(),...inspectMockupPng(landscape,3/2),mockup:'https://example.com/landscape.png'}}}];
 const product={id:'gid://shopify/Product/1',title:'Landscape birthday',handle:'birthday',tags:['frames-landscape'],collectionIds:[],image:'',config:null,designRatio:'3:2',variants:[{id:'gid://shopify/ProductVariant/1',price:'1',compareAtPrice:null,selectedOptions:[{name:'Size',value:'8x12'},{name:'Material',value:'3mm'}]}],truncated:false,collectionsTruncated:false};

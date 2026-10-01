@@ -1,3 +1,4 @@
+import { normalizeAcrylicDesign, type AcrylicDesign } from "./acrylic-design";
 // Shared config shape + validation for one product's personalizer template.
 //
 // This is the server/admin copy. It is intentionally isomorphic (no Node- or
@@ -68,6 +69,8 @@ export type LinkField = {
 export type CustomFont = { id: string; name: string; url: string };
 
 export type Config = {
+  acrylicDesign?: AcrylicDesign;
+  sourcePsdUrl?: string;
   enabled: boolean;
   overlayUrl: string;
   canvasRatio: string;
@@ -362,8 +365,10 @@ export const normalizeConfig = (value: unknown): Config => {
     : "1:1";
 
   return {
+    ...(normalizeAcrylicDesign(input.acrylicDesign) ? { acrylicDesign: normalizeAcrylicDesign(input.acrylicDesign) } : {}),
     enabled: input.enabled !== false,
     overlayUrl: cleanAssetUrl(input.overlayUrl),
+    ...(cleanAssetUrl(input.sourcePsdUrl) ? {sourcePsdUrl:cleanAssetUrl(input.sourcePsdUrl)} : {}),
     canvasRatio,
     photoFields,
     textFields,

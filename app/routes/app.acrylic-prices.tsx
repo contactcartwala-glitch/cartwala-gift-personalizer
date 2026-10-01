@@ -1,3 +1,4 @@
+import { syncLinkedAcrylicDesigns } from "../lib/acrylic-design.server";
 import { useState } from "react";
 import { useActionData, useLoaderData, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router";
 import { authenticate } from "../shopify.server";
@@ -57,7 +58,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     if (result === "incomplete")
       throw new Error("Variant choices do not match the price table. No existing variants were changed.");
     await saveAcrylicMatrix(admin, matrix);
-    return { ok: true, message: "Acrylic frame sizes and prices saved." };
+    await syncLinkedAcrylicDesigns(admin, matrix);
+    return { ok: true, message: "Master sizes and prices saved. Linked acrylic designs synced." };
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : "Could not save acrylic prices." };
   }
@@ -82,7 +84,7 @@ export default function AcrylicPrices() {
     <s-button href="/app/master-products">Back to Master Products</s-button>
     <AcrylicMockupEditor sizes={previewSizes} templates={mockups.templates} digest={mockups.digest} />
     <s-section heading={productTitle}>
-      <s-paragraph>Manage this product only. Existing photos and variants are preserved. Portrait and Landscape share each size price. Current variants: {variantCount}.</s-paragraph>
+      <s-paragraph>Manage Acrylic Master and linked design prices. Existing photos and variants are preserved. Portrait and Landscape share each size price. Current variants: {variantCount}.</s-paragraph>
       {result?.message && <s-paragraph>{result.message}</s-paragraph>}
       <form method="post">
         <input type="hidden" name="matrix" value={JSON.stringify({ version: 2, sizes: rows })} />
