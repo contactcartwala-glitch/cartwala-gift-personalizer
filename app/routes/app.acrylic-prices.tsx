@@ -79,6 +79,7 @@ export default function AcrylicPrices() {
     setNewSize(""); setNewPrice3(""); setNewPrice5("");
   };
   return <s-page heading="Acrylic sizes, prices & mockups" inlineSize="large">
+    <s-button href="/app/master-products">Back to Master Products</s-button>
     <AcrylicMockupEditor sizes={previewSizes} templates={mockups.templates} digest={mockups.digest} />
     <s-section heading={productTitle}>
       <s-paragraph>Manage this product only. Existing photos and variants are preserved. Portrait and Landscape share each size price. Current variants: {variantCount}.</s-paragraph>
