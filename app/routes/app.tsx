@@ -151,6 +151,7 @@ export default function App() {
     <AppProvider embedded apiKey={apiKey}>
       <s-app-nav>
         <s-link href="/app">Personalizer</s-link>
+        <s-link href="/app/master-products">Master Products</s-link>
         <s-link href="/app/print-files">Print Files</s-link>
       </s-app-nav>
       {navigation.state === "loading" ? <s-page heading="Loading"><s-spinner accessibilityLabel="Loading page" /></s-page> : <Outlet />}
