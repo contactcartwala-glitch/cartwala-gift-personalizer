@@ -48,6 +48,70 @@
         "link_url": "/collections/all"
       },
       "blocks": {
+        "photo_frames": {
+          "type": "category",
+          "settings": {
+            "collection": "photo-frames",
+            "title": "Photo Frames",
+            "image": "shopify://shop_images/cartwala-photo-frames-category-1x1.png"
+          }
+        },
+        "magic_mirrors": {
+          "type": "category",
+          "settings": {
+            "collection": "magic-mirrors",
+            "title": "Magic Mirrors",
+            "image": "shopify://shop_images/cartwala-magic-mirrors-category-1x1.png"
+          }
+        },
+        "mugs": {
+          "type": "category",
+          "settings": {
+            "collection": "customised-mugs",
+            "title": "Customised Mugs",
+            "image": "shopify://shop_images/cartwala-customised-mugs-category-1x1.png"
+          }
+        },
+        "tshirts": {
+          "type": "category",
+          "settings": {
+            "collection": "t-shirts",
+            "title": "T-Shirts",
+            "image": "shopify://shop_images/cartwala-t-shirts-category-1x1.png"
+          }
+        },
+        "keychains": {
+          "type": "category",
+          "settings": {
+            "collection": "key-chain",
+            "title": "Keychains",
+            "image": "shopify://shop_images/cartwala-keychains-category-1x1.png"
+          }
+        },
+        "pillows": {
+          "type": "category",
+          "settings": {
+            "collection": "pillows",
+            "title": "Customised Pillows",
+            "image": "shopify://shop_images/cartwala-customised-pillows-category-1x1.png"
+          }
+        },
+        "rotating_lamps": {
+          "type": "category",
+          "settings": {
+            "collection": "rotating-lamps",
+            "title": "Rotating Lamps",
+            "image": "shopify://shop_images/cartwala-rotating-lamps-category-final-1x1.png"
+          }
+        },
+        "more_gifts": {
+          "type": "category",
+          "settings": {
+            "collection": "all",
+            "title": "More Gifts",
+            "image": "shopify://shop_images/cartwala-more-gifts-category-final-1x1.png"
+          }
+        },
         "acrylic": {
           "type": "category",
           "settings": {
@@ -78,6 +142,14 @@
         }
       },
       "block_order": [
+        "photo_frames",
+        "magic_mirrors",
+        "mugs",
+        "tshirts",
+        "keychains",
+        "pillows",
+        "rotating_lamps",
+        "more_gifts",
         "acrylic",
         "crystal",
         "corporate",
