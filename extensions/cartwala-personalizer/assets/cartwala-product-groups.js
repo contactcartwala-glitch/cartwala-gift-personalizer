@@ -3,11 +3,23 @@
   if(panel.dataset.ready)return;panel.dataset.ready='true';let config,variants,names;
   try{config=JSON.parse(panel.dataset.config||'{}');variants=JSON.parse(panel.dataset.variants||'[]');names=JSON.parse(panel.dataset.options||'[]');}catch{return;}
   if(!config.groupId)return;
+  const liveAcrylic=panel.dataset.productId==='15402886135993'&&config.customization==='plain'&&!!panel.dataset.acrylicLiveRoom;
+  if(liveAcrylic){
+   const option=(v,name)=>{const i=names.findIndex(n=>n.toLowerCase()===name.toLowerCase());return v.options?.[i]||v[`option${i+1}`]||'';};
+   const previews={};
+   for(const v of variants){
+    const dimensions=option(v,'Size').match(/^(\d+(?:\.\d+)?)\s*[×x]\s*(\d+(?:\.\d+)?)/i);if(!dimensions)continue;
+    const a=Number(dimensions[1]),b=Number(dimensions[2]);if(!(a>0&&b>0))continue;
+    const direction=config.fixedDirection||option(v,config.orientationOption||'Orientation')||'Portrait';
+    previews[String(v.id)]={background:panel.dataset.acrylicLiveRoom,image:v.featured_image?.src||'',overlay:'',x:50,y:34,width:0,height:0,widthInches:direction==='Landscape'?Math.max(a,b):Math.min(a,b),heightInches:direction==='Landscape'?Math.min(a,b):Math.max(a,b),direction,studs:/^5\s*mm\b/i.test(option(v,'Thickness')||option(v,'Acrylic'))};
+   }
+   config={...config,previewMode:'automatic',previews};panel.dataset.config=JSON.stringify(config);
+  }
   const root=document.querySelector(`[data-cw-personalizer][data-product-id="${panel.dataset.productId}"]`);
   const gallery=document.querySelector('[data-gallery-main]')||document.querySelector('.product__media-list .product__media-item')||document.querySelector('.product__media');
   if(!gallery)return;
   const original=gallery.querySelector('img');let selected=variants.find(v=>String(v.id)===new URLSearchParams(location.search).get('variant'))||variants.find(v=>String(v.id)===panel.dataset.variant)||variants[0];if(!selected)return;selected=variants.find(v=>v.id===selected.id&&config.previews?.[String(v.id)])||variants.find(v=>config.previews?.[String(v.id)]);if(!selected)return;panel.dataset.variant=String(selected.id);
-  const preview=document.createElement('div');preview.className='cw-group-preview';preview.hidden=true;
+  const preview=document.createElement('div');preview.className='cw-group-preview';preview.hidden=true;if(liveAcrylic)preview.classList.add('cw-group-preview--acrylic-live');
   preview.innerHTML='<div class="cw-group-stage"><div class="cw-group-background"></div><div class="cw-group-photo"><img alt="Your customized product"><span class="cw-group-studs"></span></div><img class="cw-group-overlay" alt=""><span class="cw-group-height"></span><span class="cw-group-width"></span></div>';
   gallery.classList.add('cw-group-gallery');gallery.append(preview);let artwork='',customer=false;
   const stage=preview.querySelector('.cw-group-stage');
@@ -34,7 +46,7 @@
    const completeImage=!png&&!customer&&config.customization!=='design'&&!!t.image;
    if(completeImage){img.src=t.image;Object.assign(photo.style,{left:'50%',top:'50%',width:'100%',height:'100%'});photo.classList.remove('cw-group-photo--studs');overlay.hidden=true;height.hidden=true;width.hidden=true;}
    else{img.src=artwork;height.hidden=png;width.hidden=png;}
-   show(!!artwork&&config.previewMode!=='off'&&(!png||!!t.mockup));
+   show((!liveAcrylic||customer)&&!!artwork&&config.previewMode!=='off'&&(!png||!!t.mockup));
    if(customer&&(config.previewMode==='off'||(png&&!t.mockup))&&original)original.src=artwork;
    if(root&&config.customization==='plain')root.dispatchEvent(new CustomEvent('cw:acrylic-selection',{detail:{ratio:`${Math.round(t.widthInches*100)}:${Math.round(t.heightInches*100)}`,variantId:String(selected.id)}}));
   };
