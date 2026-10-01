@@ -831,7 +831,7 @@ async function handleSave(
 
 type FieldKind = "photoFields" | "textFields" | "fileFields" | "linkFields";
 
-export default function PersonalizerHome({ masterMode = false }: { masterMode?: boolean }) {
+export function PersonalizerHome({ masterMode = false }: { masterMode?: boolean }) {
   const { products } = useRouteLoaderData<typeof appLoader>("routes/app")!;
   const saveFetcher = useFetcher<typeof action>();
   const fontFetcher = useFetcher<typeof action>();
@@ -2602,3 +2602,7 @@ export function ErrorBoundary() {
   return boundary.error(useRouteError());
 }
 export const headers: HeadersFunction = (args) => boundary.headers(args);
+
+export default function PersonalizerPage() {
+  return <PersonalizerHome />;
+}

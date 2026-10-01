@@ -20,7 +20,8 @@
     "vite": "vite",
     "typecheck": "react-router typegen && tsc --noEmit",
     "qa": "node scripts/verify-personalizer.mjs && node scripts/verify-mug-preview.mjs && node --check extensions/cartwala-personalizer/assets/cartwala-personalizer.js && node --check extensions/cartwala-personalizer/assets/cartwala-cart-preview.js && node --check extensions/cartwala-personalizer/assets/cartwala-selection-box.js && node scripts/verify-product-groups.mjs && node --check extensions/cartwala-personalizer/assets/cartwala-product-groups.js && node scripts/verify-png-mockups.mjs && node scripts/verify-shared-setup.mjs && node scripts/verify-acrylic-mockups.mjs && node scripts/verify-acrylic-designs.mjs && node scripts/verify-master-navigation.mjs",
-    "verify": "npm run lint && npm run typecheck && npm run qa && npm run build"
+    "verify": "npm run lint && npm run typecheck && npm run qa && npm run build && npm run qa:master-render",
+    "qa:master-render": "node scripts/verify-master-render.mjs"
   },
   "type": "module",
   "engines": {
