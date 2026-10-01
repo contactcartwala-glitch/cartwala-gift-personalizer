@@ -1,3 +1,4 @@
+import { syncAcrylicDesign } from "../lib/acrylic-design.server";
 import type { ActionFunctionArgs } from "react-router";
 import { authenticate } from "../shopify.server";
 import { loadGroupProduct, loadGroupSettings, syncGroupProduct } from "../lib/product-groups.server";
@@ -9,6 +10,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     ((payload as { id?: number }).id ? `gid://shopify/Product/${(payload as { id: number }).id}` : null);
   if (!id) return new Response();
   try {
+    if (await syncAcrylicDesign(admin, id)) return new Response();
     const product = await loadGroupProduct(admin, id);
     const settings = await loadGroupSettings(admin, product ? [product] : []);
     if (product) {

@@ -34,10 +34,38 @@
     if (panel.dataset.roomImage) preview.style.setProperty("--cw-acrylic-room-image", `url("${panel.dataset.roomImage}")`);
     if (panel.dataset.studImage) preview.style.setProperty("--cw-acrylic-stud-image", `url("${panel.dataset.studImage}")`);
     gallery?.appendChild(preview);
+    let templates = {};
+    try {
+      for (const t of Object.values(JSON.parse(panel.dataset.masterPreviews || "{}") || {})) {
+        if (!t.mockup) continue;
+        const a = Math.min(t.widthInches, t.heightInches), b = Math.max(t.widthInches, t.heightInches);
+        templates[`${a}×${b}|${/5mm/i.test(t.mockupName || t.mockup) ? "5mm" : "3mm"}|${t.widthInches > t.heightInches ? "Landscape" : "Portrait"}`] = t;
+      }
+      Object.assign(templates, JSON.parse(panel.dataset.masterMockups || "{}")?.templates || {});
+    } catch { templates = {}; }
+    const pngStage = document.createElement("div");
+    pngStage.className = "cw-acrylic__master-preview";
+    pngStage.hidden = true;
+    pngStage.innerHTML = '<img data-cw-master-art alt="Your personalised acrylic design"><img data-cw-master-png alt="Acrylic wall preview">';
+    preview.appendChild(pngStage);
     let designUrl = panel.dataset.designImage || "";
     const showPreview = () => {
       if (!gallery || !designUrl) return;
       preview.querySelector("[data-cw-acrylic-photo]").src = designUrl;
+      const size = option(selected, "Size")?.replace(/ inches$/, "");
+      const material = (option(selected, "Thickness") || option(selected, "Acrylic") || "").match(/^(3|5)mm/)?.[0];
+      const direction = panel.dataset.fixedOrientation || option(selected, "Orientation") || fixedOrientation;
+      const template = templates[`${size}|${material}|${direction}`];
+      pngStage.hidden = !template;
+      preview.querySelector(".cw-acrylic__gallery-guide").hidden = !!template;
+      preview.querySelector(".cw-acrylic__room").hidden = !!template;
+      if (template) {
+        pngStage.style.aspectRatio = String(template.mockupAspect || 1);
+        const art = pngStage.querySelector("[data-cw-master-art]");
+        art.src = designUrl;
+        Object.assign(art.style, { left: `${template.x}%`, top: `${template.y}%`, width: `${template.width}%`, height: `${template.height}%` });
+        pngStage.querySelector("[data-cw-master-png]").src = template.mockup;
+      }
       preview.hidden = false;
       galleryImage?.classList.add("cw-acrylic__gallery-original--hidden");
     };
@@ -62,6 +90,13 @@
       if (!Number.isFinite(short) || !Number.isFinite(long)) return;
       const width = orientation === "Landscape" ? long : short;
       const height = orientation === "Landscape" ? short : long;
+      for (const form of document.querySelectorAll('form[action*="/cart/add"]')) {
+        for (const [name, value] of Object.entries({ '_Cartwala Print Width': width, '_Cartwala Print Height': height, '_Cartwala Print DPI': 300 })) {
+          let input = form.querySelector(`input[name="properties[${name}]"]`);
+          if (!input) { input = document.createElement('input'); input.type = 'hidden'; input.name = `properties[${name}]`; form.appendChild(input); }
+          input.value = String(value);
+        }
+      }
       // Keep the room reference fixed: the 78%-wide sofa represents roughly 60 inches.
       frame.style.width = `${(width / 60) * 78}%`;
       frame.style.height = `${(height / 60) * 78}%`;
@@ -73,7 +108,7 @@
       preview.querySelector("[data-cw-acrylic-height]").textContent = `${height}″ height`;
       preview.querySelector("[data-cw-acrylic-caption]").textContent = `${size.replace(" inches", "")}, ${orientation}`;
       root.dispatchEvent(new CustomEvent("cw:acrylic-selection", {
-        detail: { ratio: `${width}:${height}`, variantId: String(selected.id) },
+        detail: { ratio: `${width}:${height}`, widthInches: width, heightInches: height, variantId: String(selected.id) },
       }));
       if (designUrl) showPreview();
     };

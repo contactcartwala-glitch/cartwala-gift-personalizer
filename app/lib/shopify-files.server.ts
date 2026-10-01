@@ -376,3 +376,10 @@ export async function deleteShopifyFiles(
 export function firstMetafieldsSetError(json: GraphQLJson): string | undefined {
   return firstError(json, "metafieldsSet");
 }
+
+export async function uploadPsdAsset(admin: AdminApiContext, file: File): Promise<ShopifyFileAsset> {
+ if (!/\.psd$/i.test(file.name) || !file.size || file.size > 250 * 1024 * 1024) throw new ShopifyFileUploadError("Choose a PSD under 250 MB.");
+ const header = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+ if (String.fromCharCode(...header) !== "8BPS") throw new ShopifyFileUploadError("Invalid PSD file.");
+ return uploadToShopifyFiles(admin, new File([file], file.name, {type:"image/vnd.adobe.photoshop"}), "FILE", 30);
+}

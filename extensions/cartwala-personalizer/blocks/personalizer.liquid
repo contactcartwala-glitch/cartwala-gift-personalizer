@@ -7,6 +7,10 @@
   if personalizer_config == blank
     assign personalizer_config = product.metafields['app--340764327937'].personalizer_config.value
   endif
+  assign acrylic_design = personalizer_config.acrylicDesign
+  if acrylic_design.masterProductId != blank
+    assign group_config = nil
+  endif
   assign personalizer_enabled = personalizer_config.enabled
   assign acrylic_product = false
   if group_config == blank
@@ -18,11 +22,16 @@
   if group_config.groupId != blank and group_config.customization == 'plain'
     assign personalizer_enabled = true
   endif
+  assign acrylic_master = all_products['customized-acrylic-photo-frame']
   assign acrylic_fixed_orientation = ''
   if product.tags contains 'cw-acrylic-landscape' or product.tags contains 'cw-frame-landscape'
     assign acrylic_fixed_orientation = 'Landscape'
   elsif product.tags contains 'cw-acrylic-portrait' or product.tags contains 'cw-frame-portrait'
     assign acrylic_fixed_orientation = 'Portrait'
+  endif
+  if acrylic_design.masterProductId != blank
+    assign acrylic_product = true
+    assign acrylic_fixed_orientation = acrylic_design.orientation
   endif
   assign acrylic_plain_photo = false
   if group_config.groupId != blank and group_config.customization == 'plain' and personalizer_config == blank
@@ -68,7 +77,7 @@
       <div data-cw-config="{{ personalizer_config | json | escape }}" hidden></div>
     {% endif %}
     {% if acrylic_product %}
-      <div data-cw-acrylic data-option-names="{{ product.options | json | escape }}" data-design-ratio="{{ personalizer_config.canvasRatio | escape }}" data-fixed-orientation="{{ acrylic_fixed_orientation }}" data-design-image="{% if acrylic_fixed_orientation != blank and product.featured_image != blank %}{{ product.featured_image | image_url: width: 2400 }}{% endif %}" data-variants="{{ product.variants | json | escape }}" data-selected-variant="{{ product.selected_or_first_available_variant.id }}" data-room-image="{% if acrylic_room != blank %}{{ acrylic_room | image_url: width: 2000 }}{% else %}{{ 'cartwala-acrylic-room.jpg' | asset_url }}{% endif %}" data-stud-image="{{ 'cartwala-acrylic-stud.png' | asset_url }}" hidden></div>
+      <div data-cw-acrylic data-master-mockups="{{ acrylic_master.metafields['app--421161926657'].acrylic_mockups.value | json | escape }}" data-master-previews="{{ acrylic_master.metafields['app--421161926657'].group_config.value.previews | json | escape }}" data-option-names="{{ product.options | json | escape }}" data-design-ratio="{{ personalizer_config.canvasRatio | escape }}" data-fixed-orientation="{{ acrylic_fixed_orientation }}" data-design-image="{% if acrylic_fixed_orientation != blank and product.featured_image != blank %}{{ product.featured_image | image_url: width: 2400 }}{% endif %}" data-variants="{{ product.variants | json | escape }}" data-selected-variant="{{ product.selected_or_first_available_variant.id }}" data-room-image="{% if acrylic_room != blank %}{{ acrylic_room | image_url: width: 2000 }}{% else %}{{ 'cartwala-acrylic-room.jpg' | asset_url }}{% endif %}" data-stud-image="{{ 'cartwala-acrylic-stud.png' | asset_url }}" hidden></div>
       <script src="{{ 'cartwala-acrylic-frame.js' | asset_url }}" defer></script>
       {{ 'cartwala-acrylic-frame.css' | asset_url | stylesheet_tag }}
     {% endif %}
