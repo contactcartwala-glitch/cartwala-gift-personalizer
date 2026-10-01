@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import MasterProducts from "../components/MasterProducts";
 import type { ActionFunctionArgs, HeadersFunction } from "react-router";
 import { useFetcher, useRouteError, useRouteLoaderData, useSearchParams } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
@@ -1562,7 +1561,6 @@ export default function PersonalizerHome() {
       >
         Save configuration
       </s-button>
-      <MasterProducts />
       <s-section heading="Product template">
         <s-stack direction="block" gap="base">
           <s-button onClick={chooseProduct}>Choose product</s-button>
