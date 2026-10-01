@@ -1,7 +1,7 @@
 import { MasterProductNavigation } from "../components/MasterProducts";
 import { syncLinkedAcrylicDesigns } from "../lib/acrylic-design.server";
 import { useState } from "react";
-import { redirect, useActionData, useLoaderData, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router";
+import { redirectDocument, useActionData, useLoaderData, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router";
 import { authenticate } from "../shopify.server";
 import AcrylicMockupEditor from "../components/AcrylicMockupEditor";
 import { acrylicChoice } from "../lib/acrylic-mockups";
@@ -15,7 +15,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   if (url.pathname.replace(/\/$/, "") === "/app/acrylic-prices") {
     url.pathname = "/app/master-products";
-    return redirect(`${url.pathname}${url.search}`);
+    return redirectDocument(`${url.pathname}${url.search}`, { headers: { "Cache-Control": "no-store" } });
   }
   const { admin } = await authenticate.admin(request);
   const [matrix, product, mockups] = await Promise.all([

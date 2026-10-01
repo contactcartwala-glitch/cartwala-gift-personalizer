@@ -15,6 +15,9 @@ export default async function handleRequest(
   reactRouterContext: EntryContext
 ) {
   addDocumentResponseHeaders(request, responseHeaders);
+  // Embedded app navigation can retain an older route manifest after a release.
+  // Always request fresh HTML when a document navigation is required.
+  responseHeaders.set("Cache-Control", "no-store");
   const userAgent = request.headers.get("user-agent");
   const callbackName = isbot(userAgent ?? '')
     ? "onAllReady"
