@@ -1582,7 +1582,7 @@ export default function PersonalizerHome({ masterMode = false }: { masterMode?: 
       >
         Save configuration
       </s-button>
-      {masterMode && <MasterProductNavigation designs />}
+      {masterMode && <MasterProductNavigation designs canNavigate={() => confirmDiscardIfDirty("Discard unsaved design changes and switch master settings?")} />}
       {masterMode && <s-section heading="Acrylic designs">
         <s-paragraph>Choose a linked design below, or choose another product to link. Upload its PSD, select Portrait only or Landscape only, then save. Sizes and 3mm / 5mm prices come from the master.</s-paragraph>
         <label>Design product <select value={selected?.id || ""} onChange={event => {
