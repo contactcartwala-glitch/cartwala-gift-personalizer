@@ -67,3 +67,10 @@ name = "Product Group Preview"
 description = "Published preview settings for this product"
 access.admin = "merchant_read_write"
 access.storefront = "public_read"
+
+[product.metafields.app.acrylic_mockups]
+type = "json"
+name = "Acrylic master mockups"
+description = "Merchant-selected master PNGs for each size, thickness and orientation"
+access.admin = "merchant_read_write"
+access.storefront = "public_read"

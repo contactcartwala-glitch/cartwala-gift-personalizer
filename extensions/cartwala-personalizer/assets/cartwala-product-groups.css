@@ -4,3 +4,5 @@
 
 /* Let the gallery grid item shrink even with a long thumbnail row. */
 .product-layout:has(.cw-group-gallery)>*{min-width:0}
+
+.cw-group-preview--acrylic-live .cw-group-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(125deg,#fff2,transparent 38%,#fff1 72%,transparent);pointer-events:none}

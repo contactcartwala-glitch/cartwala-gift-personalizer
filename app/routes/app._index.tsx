@@ -1575,7 +1575,7 @@ export default function PersonalizerHome() {
             </s-box>
           )}
           {selected?.id === "gid://shopify/Product/15402886135993" && (
-            <s-button href="/app/acrylic-prices">Acrylic sizes and prices</s-button>
+            <s-button href="/app/acrylic-prices">Acrylic sizes, prices &amp; mockups</s-button>
           )}
           <s-switch
             label="Enable personalization"

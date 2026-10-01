@@ -53,7 +53,7 @@
 %}
 
 {% if group_config.groupId != blank %}
-  <div data-cw-product-group data-config="{{ group_config | json | escape }}" data-options="{{ product.options | json | escape }}" data-variants="{{ product.variants | json | escape }}" data-product-id="{{ product.id }}" data-variant="{{ product.selected_or_first_available_variant.id }}" data-artwork="{% if product.featured_image != blank %}{{ product.featured_image | image_url: width: 2400 }}{% endif %}" data-stud="{{ 'cartwala-acrylic-stud.png' | asset_url }}" hidden></div>
+  <div data-cw-product-group {% if product.id == 15402886135993 and group_config.customization == 'plain' %}data-acrylic-live-room="{{ 'cartwala-acrylic-room.jpg' | asset_url }}" data-acrylic-mockups="{{ product.metafields['app--421161926657'].acrylic_mockups.value | json | escape }}"{% endif %} data-config="{{ group_config | json | escape }}" data-options="{{ product.options | json | escape }}" data-variants="{{ product.variants | json | escape }}" data-product-id="{{ product.id }}" data-variant="{{ product.selected_or_first_available_variant.id }}" data-artwork="{% if product.featured_image != blank %}{{ product.featured_image | image_url: width: 2400 }}{% endif %}" data-stud="{{ 'cartwala-acrylic-stud.png' | asset_url }}" hidden></div>
   <script src="{{ 'cartwala-product-groups.js' | asset_url }}" defer></script>
   {{ 'cartwala-product-groups.css' | asset_url | stylesheet_tag }}
 {% endif %}
