@@ -86,7 +86,11 @@
           "model": "normal",
           "variantId": "gid://shopify/ProductVariant/67618539831481",
           "price": "250.00",
-          "compareAtPrice": "450.00"
+          "compareAtPrice": "450.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-001-normal-three-photo-birthday-mug.png?v=1790829247",
+          "imageFileId": "gid://shopify/MediaImage/46437075648697",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405608403129",
@@ -94,7 +98,11 @@
           "model": "magic",
           "variantId": "gid://shopify/ProductVariant/67618544517305",
           "price": "400.00",
-          "compareAtPrice": "800.00"
+          "compareAtPrice": "800.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-001-magic-three-photo-birthday-mug.png?v=1790829498",
+          "imageFileId": "gid://shopify/MediaImage/46437204099257",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405608468665",
@@ -102,7 +110,11 @@
           "model": "love",
           "variantId": "gid://shopify/ProductVariant/67618544582841",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-001-love-three-photo-birthday-mug.png?v=1790829508",
+          "imageFileId": "gid://shopify/MediaImage/46437210325177",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405608566969",
@@ -110,7 +122,11 @@
           "model": "red",
           "variantId": "gid://shopify/ProductVariant/67618544681145",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-001-red-three-photo-birthday-mug.png?v=1790829516",
+          "imageFileId": "gid://shopify/MediaImage/46437213405369",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         }
       ]
     },
@@ -195,7 +211,11 @@
           "model": "normal",
           "variantId": "gid://shopify/ProductVariant/67618545008825",
           "price": "250.00",
-          "compareAtPrice": "450.00"
+          "compareAtPrice": "450.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-002-normal-three-photo-birthday-mug.png?v=1790830386",
+          "imageFileId": "gid://shopify/MediaImage/46437497340089",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405608698041",
@@ -203,7 +223,11 @@
           "model": "magic",
           "variantId": "gid://shopify/ProductVariant/67618545074361",
           "price": "400.00",
-          "compareAtPrice": "800.00"
+          "compareAtPrice": "800.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-002-magic-three-photo-birthday-mug.png?v=1790830395",
+          "imageFileId": "gid://shopify/MediaImage/46437500059833",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405608763577",
@@ -211,7 +235,11 @@
           "model": "love",
           "variantId": "gid://shopify/ProductVariant/67618545139897",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-002-love-three-photo-birthday-mug.png?v=1790830403",
+          "imageFileId": "gid://shopify/MediaImage/46437503140025",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405608861881",
@@ -219,7 +247,11 @@
           "model": "red",
           "variantId": "gid://shopify/ProductVariant/67618545238201",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-002-red-three-photo-birthday-mug.png?v=1790830414",
+          "imageFileId": "gid://shopify/MediaImage/46437507006649",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         }
       ]
     },
@@ -304,7 +336,11 @@
           "model": "normal",
           "variantId": "gid://shopify/ProductVariant/67618545303737",
           "price": "250.00",
-          "compareAtPrice": "450.00"
+          "compareAtPrice": "450.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-003-normal-three-photo-birthday-mug.png?v=1790830465",
+          "imageFileId": "gid://shopify/MediaImage/46437527191737",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405608992953",
@@ -312,7 +348,11 @@
           "model": "magic",
           "variantId": "gid://shopify/ProductVariant/67618545369273",
           "price": "400.00",
-          "compareAtPrice": "800.00"
+          "compareAtPrice": "800.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-003-magic-three-photo-birthday-mug.png?v=1790830474",
+          "imageFileId": "gid://shopify/MediaImage/46437530566841",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405609058489",
@@ -320,7 +360,11 @@
           "model": "love",
           "variantId": "gid://shopify/ProductVariant/67618545434809",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-003-love-three-photo-birthday-mug.png?v=1790830483",
+          "imageFileId": "gid://shopify/MediaImage/46437534138553",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405609124025",
@@ -328,7 +372,11 @@
           "model": "red",
           "variantId": "gid://shopify/ProductVariant/67618545762489",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-003-red-three-photo-birthday-mug.png?v=1790830493",
+          "imageFileId": "gid://shopify/MediaImage/46437538300089",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         }
       ]
     },
@@ -413,7 +461,11 @@
           "model": "normal",
           "variantId": "gid://shopify/ProductVariant/67618546090169",
           "price": "250.00",
-          "compareAtPrice": "450.00"
+          "compareAtPrice": "450.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-004-normal-three-photo-birthday-mug.png?v=1790830550",
+          "imageFileId": "gid://shopify/MediaImage/46437563007161",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405609320633",
@@ -421,7 +473,11 @@
           "model": "magic",
           "variantId": "gid://shopify/ProductVariant/67618546155705",
           "price": "400.00",
-          "compareAtPrice": "800.00"
+          "compareAtPrice": "800.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-004-magic-three-photo-birthday-mug.png?v=1790830559",
+          "imageFileId": "gid://shopify/MediaImage/46437568807097",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405609386169",
@@ -429,7 +485,11 @@
           "model": "love",
           "variantId": "gid://shopify/ProductVariant/67618546483385",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-004-love-three-photo-birthday-mug.png?v=1790830567",
+          "imageFileId": "gid://shopify/MediaImage/46437572214969",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405609484473",
@@ -437,7 +497,11 @@
           "model": "red",
           "variantId": "gid://shopify/ProductVariant/67618546548921",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-004-red-three-photo-birthday-mug.png?v=1790830576",
+          "imageFileId": "gid://shopify/MediaImage/46437575491769",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         }
       ]
     },
@@ -522,7 +586,11 @@
           "model": "normal",
           "variantId": "gid://shopify/ProductVariant/67618546647225",
           "price": "250.00",
-          "compareAtPrice": "450.00"
+          "compareAtPrice": "450.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-005-normal-three-photo-birthday-mug.png?v=1790830608",
+          "imageFileId": "gid://shopify/MediaImage/46437588795577",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405609615545",
@@ -530,7 +598,11 @@
           "model": "magic",
           "variantId": "gid://shopify/ProductVariant/67618546712761",
           "price": "400.00",
-          "compareAtPrice": "800.00"
+          "compareAtPrice": "800.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-005-magic-three-photo-birthday-mug.png?v=1790830617",
+          "imageFileId": "gid://shopify/MediaImage/46437593088185",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405609681081",
@@ -538,7 +610,11 @@
           "model": "love",
           "variantId": "gid://shopify/ProductVariant/67618547040441",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-005-love-three-photo-birthday-mug.png?v=1790830627",
+          "imageFileId": "gid://shopify/MediaImage/46437596987577",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405609746617",
@@ -546,7 +622,11 @@
           "model": "red",
           "variantId": "gid://shopify/ProductVariant/67618547105977",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-005-red-three-photo-birthday-mug.png?v=1790830635",
+          "imageFileId": "gid://shopify/MediaImage/46437600559289",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         }
       ]
     },
@@ -631,7 +711,11 @@
           "model": "normal",
           "variantId": "gid://shopify/ProductVariant/67618547204281",
           "price": "250.00",
-          "compareAtPrice": "450.00"
+          "compareAtPrice": "450.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-006-normal-three-photo-birthday-mug.png?v=1790830689",
+          "imageFileId": "gid://shopify/MediaImage/46437625200825",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405619151033",
@@ -639,7 +723,11 @@
           "model": "magic",
           "variantId": "gid://shopify/ProductVariant/67618591637689",
           "price": "400.00",
-          "compareAtPrice": "800.00"
+          "compareAtPrice": "800.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-006-magic-three-photo-birthday-mug.png?v=1790830699",
+          "imageFileId": "gid://shopify/MediaImage/46437628575929",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405619183801",
@@ -647,7 +735,11 @@
           "model": "love",
           "variantId": "gid://shopify/ProductVariant/67618591670457",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-006-love-three-photo-birthday-mug.png?v=1790830709",
+          "imageFileId": "gid://shopify/MediaImage/46437632213177",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405619249337",
@@ -655,7 +747,11 @@
           "model": "red",
           "variantId": "gid://shopify/ProductVariant/67618591735993",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-006-red-three-photo-birthday-mug.png?v=1790830718",
+          "imageFileId": "gid://shopify/MediaImage/46437636243641",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         }
       ]
     },
@@ -740,7 +836,11 @@
           "model": "normal",
           "variantId": "gid://shopify/ProductVariant/67618591768761",
           "price": "250.00",
-          "compareAtPrice": "450.00"
+          "compareAtPrice": "450.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-007-normal-three-photo-birthday-mug.png?v=1790830762",
+          "imageFileId": "gid://shopify/MediaImage/46437656166585",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405619773625",
@@ -748,7 +848,11 @@
           "model": "magic",
           "variantId": "gid://shopify/ProductVariant/67618592915641",
           "price": "400.00",
-          "compareAtPrice": "800.00"
+          "compareAtPrice": "800.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-007-magic-three-photo-birthday-mug.png?v=1790830772",
+          "imageFileId": "gid://shopify/MediaImage/46437660885177",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405619806393",
@@ -756,7 +860,11 @@
           "model": "love",
           "variantId": "gid://shopify/ProductVariant/67618592948409",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-007-love-three-photo-birthday-mug.png?v=1790830782",
+          "imageFileId": "gid://shopify/MediaImage/46437664850105",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405619871929",
@@ -764,7 +872,11 @@
           "model": "red",
           "variantId": "gid://shopify/ProductVariant/67618593013945",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-007-red-three-photo-birthday-mug.png?v=1790830790",
+          "imageFileId": "gid://shopify/MediaImage/46437670748345",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         }
       ]
     },
@@ -849,7 +961,11 @@
           "model": "normal",
           "variantId": "gid://shopify/ProductVariant/67618593046713",
           "price": "250.00",
-          "compareAtPrice": "450.00"
+          "compareAtPrice": "450.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-008-normal-three-photo-birthday-mug.png?v=1790830836",
+          "imageFileId": "gid://shopify/MediaImage/46437691031737",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405619970233",
@@ -857,7 +973,11 @@
           "model": "magic",
           "variantId": "gid://shopify/ProductVariant/67618593112249",
           "price": "400.00",
-          "compareAtPrice": "800.00"
+          "compareAtPrice": "800.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-008-magic-three-photo-birthday-mug.png?v=1790830845",
+          "imageFileId": "gid://shopify/MediaImage/46437693489337",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405620035769",
@@ -865,7 +985,11 @@
           "model": "love",
           "variantId": "gid://shopify/ProductVariant/67618593407161",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-008-love-three-photo-birthday-mug.png?v=1790830853",
+          "imageFileId": "gid://shopify/MediaImage/46437697093817",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405620068537",
@@ -873,7 +997,11 @@
           "model": "red",
           "variantId": "gid://shopify/ProductVariant/67618593439929",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-008-red-three-photo-birthday-mug.png?v=1790830862",
+          "imageFileId": "gid://shopify/MediaImage/46437700927673",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         }
       ]
     },
@@ -958,7 +1086,11 @@
           "model": "normal",
           "variantId": "gid://shopify/ProductVariant/67618593505465",
           "price": "250.00",
-          "compareAtPrice": "450.00"
+          "compareAtPrice": "450.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-009-normal-three-photo-birthday-mug.png?v=1790829524",
+          "imageFileId": "gid://shopify/MediaImage/46437217075385",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405620232377",
@@ -966,7 +1098,11 @@
           "model": "magic",
           "variantId": "gid://shopify/ProductVariant/67618593833145",
           "price": "400.00",
-          "compareAtPrice": "800.00"
+          "compareAtPrice": "800.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-009-magic-three-photo-birthday-mug.png?v=1790829532",
+          "imageFileId": "gid://shopify/MediaImage/46437220745401",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405620265145",
@@ -974,7 +1110,11 @@
           "model": "love",
           "variantId": "gid://shopify/ProductVariant/67618593865913",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-009-love-three-photo-birthday-mug.png?v=1790829710",
+          "imageFileId": "gid://shopify/MediaImage/46437304107193",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405620330681",
@@ -982,7 +1122,11 @@
           "model": "red",
           "variantId": "gid://shopify/ProductVariant/67618594160825",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-009-red-three-photo-birthday-mug.png?v=1790829719",
+          "imageFileId": "gid://shopify/MediaImage/46437304336569",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         }
       ]
     },
@@ -1067,7 +1211,11 @@
           "model": "normal",
           "variantId": "gid://shopify/ProductVariant/67618594193593",
           "price": "250.00",
-          "compareAtPrice": "450.00"
+          "compareAtPrice": "450.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-010-normal-three-photo-birthday-mug.png?v=1790830892",
+          "imageFileId": "gid://shopify/MediaImage/46437712298169",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405620428985",
@@ -1075,7 +1223,11 @@
           "model": "magic",
           "variantId": "gid://shopify/ProductVariant/67618594488505",
           "price": "400.00",
-          "compareAtPrice": "800.00"
+          "compareAtPrice": "800.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-010-magic-three-photo-birthday-mug.png?v=1790830901",
+          "imageFileId": "gid://shopify/MediaImage/46437718720697",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405620494521",
@@ -1083,7 +1235,11 @@
           "model": "love",
           "variantId": "gid://shopify/ProductVariant/67618594783417",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-010-love-three-photo-birthday-mug.png?v=1790830909",
+          "imageFileId": "gid://shopify/MediaImage/46437722194105",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         },
         {
           "id": "gid://shopify/Product/15405620527289",
@@ -1091,9 +1247,32 @@
           "model": "red",
           "variantId": "gid://shopify/ProductVariant/67618594816185",
           "price": "300.00",
-          "compareAtPrice": "700.00"
+          "compareAtPrice": "700.00",
+          "imageUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-3P-010-red-three-photo-birthday-mug.png?v=1790830918",
+          "imageFileId": "gid://shopify/MediaImage/46437725339833",
+          "status": "ACTIVE",
+          "publishedOnlineStore": true
         }
       ]
     }
-  ]
+  ],
+  "completedAt": "2026-10-01",
+  "status": "ACTIVE",
+  "onlineStorePublicationId": "gid://shopify/Publication/210273730745",
+  "catalogueUrl": "https://cartwala.in/collections/customised-mugs/cw-mug-birthday+cw-mug-model-white+cw-mug-three-photo",
+  "validation": {
+    "products": 40,
+    "active": 40,
+    "publishedOnlineStore": 40,
+    "readyProductImages": 40,
+    "photoUploadsPerProduct": 3,
+    "templateGroups": 10,
+    "productsPerGroup": 4,
+    "checked": {
+      "threeRequiredUploads": true,
+      "optionalNameBlankSave": true,
+      "cartSavedPreview": true
+    },
+    "browser3D": "WebGL unavailable; saved print fallback verified"
+  }
 }
