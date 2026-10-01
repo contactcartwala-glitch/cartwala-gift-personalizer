@@ -75,7 +75,7 @@ type Product = {
   personalizer?: { jsonValue?: Config | null } | null;
 };
 
-const isDesignPage = (pathname: string) => pathname.replace(/\/$/, "") === "/app";
+const isDesignPage = (pathname: string) => ["/app", "/app/master-products"].includes(pathname.replace(/\/$/, ""));
 export const shouldRevalidate: ShouldRevalidateFunction = ({ currentUrl, nextUrl, defaultShouldRevalidate }) =>
   isDesignPage(currentUrl.pathname) !== isDesignPage(nextUrl.pathname) || defaultShouldRevalidate;
 
