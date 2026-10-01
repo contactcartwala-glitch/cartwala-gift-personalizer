@@ -51,6 +51,7 @@ root.dispatchEvent({type:'cartwala:preview-ready',target:root,detail:{url:'blob:
 console.log('PNG storefront passed: proportionate stage, mockup overlay, retained design, no generated studs, isolated cart variants and selected print dimensions.');
 
 // Live acrylic sizes use current variants even when stored PNG mappings have old IDs.
+panel.dataset.acrylicMockups=JSON.stringify({version:1,templates:{'8×12|3mm|Portrait':null}});
 panel.dataset.ready='';panel.dataset.productId='15402886135993';panel.dataset.acrylicLiveRoom='https://example.com/clean-room.jpg';
 panel.dataset.config=JSON.stringify({groupId:'acrylic-frames',customization:'plain',previewMode:'png',previews:{11:pngOne}});
 const liveVariants=[{id:101,options:['8×12 inches','3mm without studs','Portrait']},{id:102,options:['36×48 inches','3mm without studs','Portrait']},{id:103,options:['36×48 inches','5mm with studs','Landscape']},{id:104,options:['36×48 inches','3mm without studs','Landscape']},{id:105,options:['10×15 inches','3mm without studs','Portrait']}];
@@ -67,3 +68,11 @@ target.value='101';doc.listeners.change({target});assert.equal(Number(parseFloat
 const savedQuery=doc.querySelector;doc.querySelector=s=>s==='input[name="option1"]:checked'?{value:'36×48 inches'}:s==='input[name="option2"]:checked'?{value:'3mm without studs'}:s==='input[name="option3"]:checked'?{value:'Landscape'}:savedQuery(s);
 target.attrs={name:'option3'};doc.listeners.change({target});assert.equal(panel.dataset.variant,'104');assert.equal(main.inputs.id.value,'104');assert.equal(main.inputs['properties[_Cartwala Print Width]'].value,'48');assert.equal(main.inputs['properties[_Cartwala Print Height]'].value,'36');assert.equal(livePhoto.nodes.img.src,'blob:customer-photo-only');
 console.log('Live acrylic passed: stale IDs, new sizes, 36×48 P/L scale, studs, uploaded-photo retention, radio pickers and isolated cart/print properties.');
+
+// Explicit master PNGs are keyed by choices, not IDs, and retain their detected opening.
+panel.dataset.ready='';panel.dataset.acrylicMockups=JSON.stringify({version:1,templates:{'36×48|3mm|Landscape':{mockup:'https://example.com/merchant-36x48.png',mockupName:'merchant.png',mockupAspect:1,x:50,y:30,width:64,height:48}}});
+panel.dataset.config=JSON.stringify({groupId:'acrylic-frames',customization:'plain',previewMode:'png',previews:{}});main.inputs.id.value='104';
+vm.runInNewContext(fs.readFileSync('extensions/cartwala-personalizer/assets/cartwala-product-groups.js','utf8'),{document:doc,location:{search:'?variant=104'},URLSearchParams,CustomEvent:class{constructor(type,init){this.type=type;this.detail=init.detail;}},HTMLElement:Element});
+root.dispatchEvent({type:'cartwala:preview-ready',target:root,detail:{url:'blob:customer-photo-only'}});
+assert.equal(preview.nodes['.cw-group-overlay'].src,'https://example.com/merchant-36x48.png');assert.equal(preview.nodes['.cw-group-overlay'].hidden,false);assert.equal(preview.nodes['.cw-group-photo'].style.width,'64%');assert.equal(preview.nodes['.cw-group-photo'].style.height,'48%');assert.equal(preview.nodes['.cw-group-photo'].nodes.img.src,'blob:customer-photo-only');
+console.log('Manual master PNG passed: stable option keys, merchant opening geometry and uploaded photo under the selected overlay.');
