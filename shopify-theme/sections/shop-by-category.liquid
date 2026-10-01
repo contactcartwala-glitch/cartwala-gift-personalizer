@@ -17,13 +17,15 @@
           assign title = block.settings.title | default: category.title
         %}
         {% if category != blank %}
-          <a class="cw-home-categories__card" href="{{ category.url }}" {{ block.shopify_attributes }}>
+          <a class="cw-home-categories__card" href="{{ category.url }}" aria-label="{{ title | escape }}" {{ block.shopify_attributes }}>
             <div class="cw-home-categories__photo">
               {% if photo != blank %}
                 {{ photo | image_url: width: 800 | image_tag: loading: 'lazy', widths: '240, 400, 600, 800', sizes: '(min-width: 990px) 300px, 50vw', alt: title }}
               {% endif %}
+              {% if block.settings.show_title %}
+                <div class="cw-home-categories__label"><span>{{ title | escape }}</span><span class="cw-home-categories__arrow" aria-hidden="true">→</span></div>
+              {% endif %}
             </div>
-            <h3>{{ title | escape }}</h3>
           </a>
         {% endif %}
       {% endfor %}
@@ -35,9 +37,10 @@
 .cw-home-categories .section-header { margin-bottom: 20px; }
 .cw-home-categories__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .cw-home-categories__card { display: block; color: inherit; text-decoration: none; overflow: hidden; border: 1px solid #e5e5e5; border-radius: 14px; background: #fff; transition: border-color .2s ease; }
-.cw-home-categories__photo { aspect-ratio: 1; overflow: hidden; background: #f7f6f3; }
+.cw-home-categories__photo { position: relative; aspect-ratio: 1; overflow: hidden; background: #f7f6f3; }
 .cw-home-categories__photo img { display: block; width: 100%; height: 100%; object-fit: contain; }
-.cw-home-categories__card h3 { margin: 0; padding: 16px 10px; text-align: center; font-size: clamp(16px, 1.5vw, 21px); line-height: 1.3; }
+.cw-home-categories__label { position: absolute; left: 5%; right: 5%; bottom: 5%; display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 5px 5px 5px 12px; border-radius: 40px; background: #fff3e7; color: #111; font-size: clamp(13px, 1.5vw, 21px); font-weight: 800; line-height: 1.15; }
+.cw-home-categories__arrow { display: flex; align-items: center; justify-content: center; flex: 0 0 32px; width: 32px; height: 32px; border-radius: 50%; background: #ff5b00; color: #fff; font-size: 27px; font-weight: 400; }
 .cw-home-categories__card:hover { border-color: #ff6a00; }
 .cw-home-categories__card:focus-visible { outline: 3px solid #ff6a00; outline-offset: 3px; }
 @media (min-width: 750px) { .cw-home-categories__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; } }
@@ -60,6 +63,7 @@
       "settings": [
         {"type": "collection", "id": "collection", "label": "Collection"},
         {"type": "text", "id": "title", "label": "Display name"},
+        {"type": "checkbox", "id": "show_title", "label": "Show name on photo", "default": true},
         {"type": "image_picker", "id": "image", "label": "Photo override"}
       ]
     }

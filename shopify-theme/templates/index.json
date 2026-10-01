@@ -53,7 +53,8 @@
           "settings": {
             "collection": "photo-frames",
             "title": "Photo Frames",
-            "image": "shopify://shop_images/cartwala-photo-frames-category-1x1.png"
+            "image": "shopify://shop_images/cartwala-photo-frames-category-1x1.png",
+            "show_title": false
           }
         },
         "magic_mirrors": {
@@ -61,7 +62,8 @@
           "settings": {
             "collection": "magic-mirrors",
             "title": "Magic Mirrors",
-            "image": "shopify://shop_images/cartwala-magic-mirrors-category-1x1.png"
+            "image": "shopify://shop_images/cartwala-magic-mirrors-category-1x1.png",
+            "show_title": false
           }
         },
         "mugs": {
@@ -69,7 +71,8 @@
           "settings": {
             "collection": "customised-mugs",
             "title": "Customised Mugs",
-            "image": "shopify://shop_images/cartwala-customised-mugs-category-1x1.png"
+            "image": "shopify://shop_images/cartwala-customised-mugs-category-1x1.png",
+            "show_title": false
           }
         },
         "tshirts": {
@@ -77,7 +80,8 @@
           "settings": {
             "collection": "t-shirts",
             "title": "T-Shirts",
-            "image": "shopify://shop_images/cartwala-t-shirts-category-1x1.png"
+            "image": "shopify://shop_images/cartwala-t-shirts-category-1x1.png",
+            "show_title": false
           }
         },
         "keychains": {
@@ -85,7 +89,8 @@
           "settings": {
             "collection": "key-chain",
             "title": "Keychains",
-            "image": "shopify://shop_images/cartwala-keychains-category-1x1.png"
+            "image": "shopify://shop_images/cartwala-keychains-category-1x1.png",
+            "show_title": false
           }
         },
         "pillows": {
@@ -93,7 +98,8 @@
           "settings": {
             "collection": "pillows",
             "title": "Customised Pillows",
-            "image": "shopify://shop_images/cartwala-customised-pillows-category-1x1.png"
+            "image": "shopify://shop_images/cartwala-customised-pillows-category-1x1.png",
+            "show_title": false
           }
         },
         "rotating_lamps": {
@@ -101,7 +107,8 @@
           "settings": {
             "collection": "rotating-lamps",
             "title": "Rotating Lamps",
-            "image": "shopify://shop_images/cartwala-rotating-lamps-category-final-1x1.png"
+            "image": "shopify://shop_images/cartwala-rotating-lamps-category-final-1x1.png",
+            "show_title": false
           }
         },
         "more_gifts": {
@@ -109,35 +116,40 @@
           "settings": {
             "collection": "all",
             "title": "More Gifts",
-            "image": "shopify://shop_images/cartwala-more-gifts-category-final-1x1.png"
+            "image": "shopify://shop_images/cartwala-more-gifts-category-final-1x1.png",
+            "show_title": false
           }
         },
         "acrylic": {
           "type": "category",
           "settings": {
             "collection": "acrylic-photo-frames",
-            "title": "Acrylic Frames"
+            "title": "Acrylic Frames",
+            "show_title": true
           }
         },
         "crystal": {
           "type": "category",
           "settings": {
             "collection": "crystal",
-            "title": "Crystal Gifts"
+            "title": "Crystal Gifts",
+            "show_title": true
           }
         },
         "corporate": {
           "type": "category",
           "settings": {
             "collection": "corporate-gifts",
-            "title": "Corporate Gifts"
+            "title": "Corporate Gifts",
+            "show_title": true
           }
         },
         "bottles": {
           "type": "category",
           "settings": {
             "collection": "customised-bottles",
-            "title": "Printed Bottles"
+            "title": "Printed Bottles",
+            "show_title": true
           }
         }
       },
