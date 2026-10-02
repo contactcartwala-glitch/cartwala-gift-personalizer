@@ -43,6 +43,9 @@ jobs:
       - name: Run personalizer QA
         run: npm run qa
 
+      - name: Check order photo persistence and print exports
+        run: npm run qa:order-assets
+
       - name: Install latest Shopify CLI
         run: npm install -g @shopify/cli@latest
 
