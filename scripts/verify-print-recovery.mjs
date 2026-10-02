@@ -8,7 +8,7 @@ const route = fs.readFileSync("app/routes/app.print-files.tsx", "utf8");
 const helpers = route.slice(route.indexOf("const attrMap ="), route.indexOf("const documentSize ="));
 const js = ts.transpileModule(helpers, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
 const context = vm.createContext({});
-vm.runInContext(`${js}\nthis.getDesign = getDesign; this.numeric = numeric;`, context);
+vm.runInContext(`${js}\nthis.getDesign = getDesign; this.numeric = numeric; this.sourceFor = sourceFor; this.missingPhotos = missingPhotos;`, context);
 const attributes = [
   { key: "_Upload your photo", value: "https://cdn.shopify.com/s/files/test/uploads/photo.jpg" },
   { key: "_Upload your photo Position", value: '{"x":null,"y":null,"scale":1}' },
@@ -28,6 +28,17 @@ const configured = context.getDesign({ attributes, config: { photoFields: [{ lab
 assert.equal(configured.design.p.length, 1);
 const saved = { v: 1, r: "17:7", o: "", p: [], t: [] };
 assert.equal(context.getDesign({ attributes: [{ key: "_Cartwala Design JSON", value: JSON.stringify(saved) }] }).exact, true);
+const threePhotos = { p: [0, 1, 2].map((i) => ({ i: String(i), l: `Photo ${i + 1}` })) };
+assert.equal(context.missingPhotos(threePhotos, {}).length, 3);
+assert.equal(context.missingPhotos(threePhotos, { "_Cartwala Source 0": "https://cdn.shopify.com/s/files/source0.jpg" }).length, 2,
+  "one saved source must not enable a partial three-photo export");
+assert.equal(context.sourceFor({ "_Photo 1": "photo.jpg" }, threePhotos.p[0]), "",
+  "a filename is not an uploaded source URL");
+assert.equal(context.sourceFor({ "Photo 1": "https://cdn.shopify.com/s/files/legacy.jpg" }, threePhotos.p[0]),
+  "https://cdn.shopify.com/s/files/legacy.jpg", "visible legacy photo properties remain supported");
+assert.equal(context.sourceFor({ "_Cartwala Source 0": "https://cdn.shopify.com/s/files/original.jpg",
+  "_Photo 1": "https://cdn.shopify.com/s/files/other.jpg" }, threePhotos.p[0]),
+  "https://cdn.shopify.com/s/files/original.jpg", "stable field IDs take precedence over labels");
 const storefront = fs.readFileSync("extensions/cartwala-personalizer/assets/cartwala-personalizer.js", "utf8");
 const persist = storefront.slice(storefront.indexOf("const persist = async"), storefront.indexOf("const persist = async") + 1800);
 assert.ok(persist.indexOf("const record =") < persist.indexOf("await database"), "snapshot must precede async database access and dialog close");

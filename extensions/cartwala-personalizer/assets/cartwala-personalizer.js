@@ -7,6 +7,51 @@
     );
   };
   const array = (value) => (Array.isArray(value) ? value : []);
+  // Store originals in Shopify Files before creating a cart line. Cart file
+  // properties are not our durable source of truth for print exports.
+  const orderAssetUrl = (value) => {
+    try {
+      const url = new URL(value);
+      return url.protocol === "https:" &&
+        (url.hostname === "cdn.shopify.com" || url.hostname.endsWith(".cdn.shopify.com")) &&
+        url.pathname.startsWith("/s/files/");
+    } catch { return false; }
+  };
+  const uploadOrderAsset = async (file, cache) => {
+    if (cache.has(file)) return cache.get(file);
+    const body = new FormData();
+    body.set("intent", "personalizer_upload");
+    body.set("file", file, file.name);
+    const response = await fetch(
+      (window.Shopify?.routes?.root || "/") + "apps/cartwala-signature-day",
+      { method: "POST", body, headers: { Accept: "application/json" } },
+    );
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !orderAssetUrl(payload.url))
+      throw new Error(payload.error || "Your photo could not be saved. Please try Add to Cart again.");
+    cache.set(file, payload.url);
+    return payload.url;
+  };
+  const prepareOrderAssets = async (formData, files, photos, cache) => {
+    const pending = [...new Set([
+      ...[...files.values()].filter((file) => /^image\/(jpeg|png|webp)$/.test(file.type)),
+      ...photos.map((state) => state.file).filter(Boolean),
+    ])];
+    // Bound upload concurrency so large multi-photo designs work on phones.
+    let next = 0;
+    await Promise.all(Array.from({ length: Math.min(3, pending.length) }, async () => {
+      while (next < pending.length) await uploadOrderAsset(pending[next++], cache);
+    }));
+    files.forEach((file, name) => {
+      const key = `properties[${name.startsWith("_") ? name : `_${name}`}]`;
+      if (cache.has(file)) formData.set(key, cache.get(file));
+      else formData.set(key, file, file.name || "upload");
+    });
+    photos.forEach((state) => {
+      if (state.file)
+        formData.set(`properties[_Cartwala Source ${state.field.id}]`, cache.get(state.file));
+    });
+  };
   const MAX_FIELDS = 200;
   const MAX_FONTS = 50;
   const createId = () => {
@@ -1274,15 +1319,12 @@
             cartSubmitting = true;
             purchaseButtons().forEach((button) => (button.disabled = true));
             try {
+              const submitRevision = revision;
+              const submitDesignId = designId;
               const formData = new FormData(productForm);
-              stagedFiles.forEach((file, name) => {
-                const propertyName = name.startsWith("_") ? name : `_${name}`;
-                formData.set(
-                  `properties[${propertyName}]`,
-                  file,
-                  file.name || "upload",
-                );
-              });
+              await prepareOrderAssets(formData, stagedFiles, photoStates, uploadedOrderAssets);
+              if (!saved || revision !== submitRevision || designId !== submitDesignId)
+                throw new Error("Design changed while saving photos. Please preview again before adding to cart.");
               formData.set("sections", "cart-drawer,cart-icon-bubble");
               formData.set("sections_url", location.pathname);
               const response = await fetch(
@@ -2045,6 +2087,7 @@
         stage.addEventListener("lostpointercapture", endPointer);
 
         const stagedFiles = new Map();
+        const uploadedOrderAssets = new WeakMap();
         const putFile = (form, name, file) => {
           if (file) stagedFiles.set(name, file);
           else stagedFiles.delete(name);

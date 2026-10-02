@@ -252,6 +252,14 @@ function getDesign(item: PrintItem) {
     attributes,
   };
 }
+const printSourceUrl = (value: string) => /^https?:\/\//i.test(value || "");
+const sourceFor = (a: Record<string, string>, photo: PhotoDesign) =>
+  [a[`_Cartwala Source ${photo.i}`], a[`_${photo.l}`], a[photo.l]]
+    .find((value) => printSourceUrl(value || "")) || "";
+const missingPhotos = (design: Design, attributes: Record<string, string>) =>
+  design.p.filter((photo) => !sourceFor(attributes, photo));
+const hasPrintContent = (design: Design) =>
+  design.p.length > 0 || design.t.some((text) => text.v.trim());
 const documentSize = (r: string, productTitle = "") => {
   if (/\bmug\b/i.test(productTitle))
     return { width: 2550, height: 1050 };
@@ -278,8 +286,6 @@ const makeCanvas = (w: number, h: number) => {
   c.height = Math.max(1, Math.ceil(h));
   return c;
 };
-const sourceFor = (a: Record<string, string>, l: string) =>
-  a[`_${l}`] || a[l] || "";
 async function renderPhotoLayer(
   photo: PhotoDesign,
   source: string,
@@ -501,6 +507,9 @@ const psdTextLayer = (t: TextDesign, width: number, height: number) => {
 };
 async function buildPrint(item: PrintItem, keepLayers = true) {
   const { design, exact, attributes } = getDesign(item);
+  const missing = missingPhotos(design, attributes);
+  if (missing.length || !hasPrintContent(design))
+    throw new Error(`Original photos are missing${missing.length ? `: ${missing.map((photo) => photo.l).join(", ")}` : ""}. A complete print file cannot be generated.`);
   if (!exact && attributes["_Personalised Preview"]) {
     const reference = await loadImage(attributes["_Personalised Preview"]);
     design.r = `${reference.naturalWidth}:${reference.naturalHeight}`;
@@ -511,8 +520,7 @@ async function buildPrint(item: PrintItem, keepLayers = true) {
   if (!ctx) throw new Error("Print canvas is unavailable.");
   const photoLayers: PhotoLayer[] = [];
   for (const photo of design.p) {
-    const source = sourceFor(attributes, photo.l);
-    if (!source) continue;
+    const source = sourceFor(attributes, photo);
     const layer = await renderPhotoLayer(photo, source, width, height);
     ctx.drawImage(layer.preview, 0, 0);
     if(keepLayers) photoLayers.push(layer);
@@ -566,16 +574,18 @@ const downloadBlob = (blob: Blob, filename: string) => {
   setTimeout(() => URL.revokeObjectURL(u), 2000);
 };
 async function downloadPng(item: PrintItem) {
-  const p = await buildPrint(item, false);
-  if (!p.exact && p.attributes["_Personalised Preview"]) {
-    const r = await fetch(assetUrl(p.attributes["_Personalised Preview"]));
+  const saved = getDesign(item);
+  const incomplete = !hasPrintContent(saved.design) || missingPhotos(saved.design, saved.attributes).length > 0;
+  if ((!saved.exact || incomplete) && printSourceUrl(saved.attributes["_Personalised Preview"])) {
+    const r = await fetch(assetUrl(saved.attributes["_Personalised Preview"]));
     if (!r.ok) throw new Error("Saved preview could not be downloaded.");
     downloadBlob(
       await r.blob(),
-      `${safeFile(`${item.orderName}-${item.productTitle}`)}.png`,
+      `${safeFile(`${item.orderName}-${item.productTitle}`)}-saved-preview.png`,
     );
     return;
   }
+  const p = await buildPrint(item, false);
   downloadBlob(
     await printPngWithDpi(await canvasBlob(p.composite)),
     `${safeFile(`${item.orderName}-${item.productTitle}`)}.png`,
@@ -751,14 +761,12 @@ export default function PrintFilesPage() {
             heading={`${orderName} · ${new Date(orderItems[0].createdAt).toLocaleString()}`}
           >
             {orderItems.map((item) => {
-              const { exact, attributes } = getDesign(item);
-              const hasSource = Object.keys(attributes).some(
-                (k) =>
-                  k.startsWith("_") &&
-                  !k.startsWith("_Cartwala") &&
-                  k !== "_Personalised Preview" &&
-                  /^https?:/i.test(attributes[k] || ""),
-              );
+              const { design, exact, attributes } = getDesign(item);
+              const missing = missingPhotos(design, attributes);
+              const hasSource = design.p.length > 0 && missing.length === 0;
+              const complete = hasPrintContent(design) && missing.length === 0;
+              const hasPreview = printSourceUrl(attributes["_Personalised Preview"]);
+              const previewOnly = (!exact || !complete) && hasPreview;
               const pk = `${item.lineItemId}:png`,
                 sk = `${item.lineItemId}:psd`;
               return (
@@ -779,16 +787,16 @@ export default function PrintFilesPage() {
                     style={{ color: "#666", fontSize: 13, marginBottom: 12 }}
                   >
                     Qty {item.quantity} ·{" "}
-                    {exact
+                    {exact && complete
                       ? "Layer data ready"
-                      : "Recovery PSD only — check layout before printing"}
-                    {!hasSource ? " · source photo missing" : ""}
+                      : hasSource ? "Recovery PSD only — check layout before printing" : "Original photos missing — print export unavailable"}
+                    {missing.length > 0 ? ` (${missing.length}/${design.p.length})` : ""}
                   </div>
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                     <button
                       type="button"
                       onClick={() => run(pk, () => downloadPng(item))}
-                      disabled={Boolean(working)}
+                      disabled={Boolean(working) || (!complete && !hasPreview)}
                       style={{
                         background: "#ff6200",
                         color: "white",
@@ -799,7 +807,7 @@ export default function PrintFilesPage() {
                         cursor: "pointer",
                       }}
                     >
-                      {working === pk ? "Generating PNG…" : "Download PNG"}
+                      {working === pk ? "Generating PNG…" : previewOnly ? "Download Saved Preview" : "Download PNG"}
                     </button>
                     <button
                       type="button"

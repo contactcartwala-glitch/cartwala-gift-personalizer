@@ -73,14 +73,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         const assets = await uploadImageAssets(admin, safeFiles);
         return Response.json({ urls: assets.map((asset) => asset.url) }, { headers: { "Cache-Control": "no-store" } });
       }
-      if (form.get("intent") !== "upload") return Response.json({ error: "Invalid upload" }, { status: 400 });
+      const personalizerUpload = form.get("intent") === "personalizer_upload";
+      if (!personalizerUpload && form.get("intent") !== "upload") return Response.json({ error: "Invalid upload" }, { status: 400 });
       const file = form.get("file");
+      const maxBytes = (personalizerUpload ? 25 : 15) * 1024 * 1024;
       if (!(file instanceof File) || !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
-          file.size < 100 || file.size > 15 * 1024 * 1024) {
-        return Response.json({ error: "Choose a JPG, PNG or WebP under 15 MB" }, { status: 400 });
+          file.size < 100 || file.size > maxBytes) {
+        return Response.json({ error: `Choose a JPG, PNG or WebP under ${personalizerUpload ? 25 : 15} MB` }, { status: 400 });
       }
       const extension = file.type === "image/jpeg" ? "jpg" : file.type === "image/png" ? "png" : "webp";
-      const safeFile = new File([file], `signature-day-${crypto.randomUUID()}.${extension}`, { type: file.type });
+      const safeFile = new File([file], `${personalizerUpload ? "personalizer" : "signature-day"}-${crypto.randomUUID()}.${extension}`, { type: file.type });
       const asset = await uploadImageAsset(admin, safeFile);
       return Response.json({ url: asset.url }, { headers: { "Cache-Control": "no-store" } });
     }
