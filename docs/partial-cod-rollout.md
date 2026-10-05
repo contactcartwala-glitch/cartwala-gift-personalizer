@@ -45,9 +45,19 @@ integer paise and rounds the 20% advance to the nearest paise.
    order-creation timeout, refund, cancelled order and every shipping connector before
    exposing a customer-facing option. Deposit-only orders must never be shipped.
 
-The current app configuration has read_orders but lacks write_orders,
-read_draft_orders and write_draft_orders. Scope expansion and merchant reauthorization are required for
-steps 3–5. This branch deliberately does not expand permissions or deploy automatically.
+The active app configuration and runtime scope list now include the merchant-approved
+write_orders, read_draft_orders and write_draft_orders additions. These are prepared
+in the review branch only. Shopify CLI authorization repeatedly failed with a proxy
+tunnel timeout; no released app version or expanded installation permissions were verified.
+The retired Render app configuration is unchanged. Nothing deploys from this branch automatically.
+
+`partial-cod-quote.ts` and `partial-cod-quote.server.ts` prepare a Shopify-calculated
+quote using variant IDs, artwork properties, a validated Indian delivery address,
+automatic discounts, optional discount codes and free shipping. Client prices and tax
+overrides are discarded. The calculated INR total determines the advance and balance.
+These helpers are not wired to a public route and do not create a payment or order.
+They require live API verification and customer-specific discount eligibility work
+before deposit creation. Quotes are not yet persisted or reserved.
 
 ## Verification
 
