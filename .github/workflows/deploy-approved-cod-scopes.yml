@@ -1,0 +1,29 @@
+name: Deploy approved partial COD scopes
+on:
+  push:
+    branches: [cod/approved-order-scopes]
+permissions:
+  contents: read
+concurrency:
+  group: shopify-app-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+          cache: npm
+      - name: Verify approved app and scope-only diff
+        run: |
+          node --input-type=module -e "import fs from 'node:fs'; const s=fs.readFileSync('shopify.app.live.toml','utf8'); if(!s.includes('ce0ab02aa2c699519934f02e1811a8f2') || !s.includes('read_draft_orders,write_draft_orders,write_orders')) throw new Error('Wrong app or scopes');"
+      - run: npm ci
+      - name: Validate and deploy approved configuration
+        env:
+          SHOPIFY_APP_AUTOMATION_TOKEN: ${{ secrets.SHOPIFY_APP_AUTOMATION_TOKEN }}
+        run: |
+          test -n "$SHOPIFY_APP_AUTOMATION_TOKEN" || { echo "::error::Shopify deployment credential is unavailable"; exit 1; }
+          npx @shopify/cli@4.8.4 app config validate --config live --json
+          npx @shopify/cli@4.8.4 app deploy --config live --allow-updates
