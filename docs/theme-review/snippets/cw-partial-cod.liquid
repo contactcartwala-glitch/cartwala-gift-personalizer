@@ -1,0 +1,46 @@
+{% doc %}
+  Review-only payment options for the cart.
+  @example
+  {% render 'cw-partial-cod' %}
+{% enddoc %}
+{% assign advance = cart.total_price | times: 0.2 | round %}
+{% assign balance = cart.total_price | minus: advance %}
+{% assign pay_now = advance | plus: 8000 %}
+<fieldset class="cw-payment" data-cw-payment>
+  <legend>{{ 'partial_cod.heading' | t }}</legend>
+  <label class="cw-payment__option">
+    <input type="radio" name="cw_payment_review" value="prepaid" checked>
+    <span><strong>{{ 'partial_cod.prepaid' | t }}</strong><small>{{ 'partial_cod.prepaid_hint' | t }}</small></span>
+  </label>
+  <label class="cw-payment__option">
+    <input type="radio" name="cw_payment_review" value="partial_cod">
+    <span><strong>{{ 'partial_cod.cod' | t }}</strong><small>{{ 'partial_cod.cod_hint' | t }}</small></span>
+  </label>
+  <div class="cw-payment__breakdown" hidden data-cw-cod-details>
+    <dl>
+      <div><dt>{{ 'partial_cod.advance' | t }}</dt><dd>{{ advance | money }}</dd></div>
+      <div><dt>{{ 'partial_cod.fee' | t }}</dt><dd>{{ 8000 | money }}</dd></div>
+      <div class="cw-payment__total"><dt>{{ 'partial_cod.now' | t }}</dt><dd>{{ pay_now | money }}</dd></div>
+      <div class="cw-payment__total"><dt>{{ 'partial_cod.delivery' | t }}</dt><dd>{{ balance | money }}</dd></div>
+    </dl>
+    <p>{{ 'partial_cod.shipping' | t }}</p>
+    <p class="cw-payment__notice" role="status">{{ 'partial_cod.review_notice' | t }}</p>
+  </div>
+</fieldset>
+{% stylesheet %}
+.cw-payment{margin:0 0 1.2rem;padding:0;border:0;min-width:0}.cw-payment legend{font-weight:700;margin-bottom:.75rem}.cw-payment__option{display:flex;gap:.7rem;align-items:flex-start;border:1px solid #ddd;border-radius:12px;padding:1rem;margin-bottom:.65rem;cursor:pointer}.cw-payment__option:has(input:checked){border-color:#dc650e;background:#fff8f1}.cw-payment__option input{margin-top:4px;accent-color:#dc650e;flex-shrink:0}.cw-payment__option small{display:block;font-size:.82rem;margin-top:.3rem;line-height:1.5;color:#555}.cw-payment__breakdown{background:#f7f7f7;border-radius:12px;padding:1rem;font-size:.85rem}.cw-payment__breakdown[hidden]{display:none}.cw-payment dl{margin:0}.cw-payment dl div{display:flex;justify-content:space-between;gap:.7rem;margin-bottom:.7rem}.cw-payment dd{margin:0;white-space:nowrap}.cw-payment__total{font-weight:700;border-top:1px solid #ddd;padding-top:.7rem}.cw-payment__notice{color:#7b3900;background:#fff0dd;padding:.7rem;border-radius:8px;line-height:1.5}
+{% endstylesheet %}
+{% javascript %}
+document.querySelectorAll('[data-cw-payment]').forEach(root=>{
+  const form=root.closest('form');
+  const checkout=form?.querySelector('[name="checkout"]');
+  root.addEventListener('change',()=>{
+    const partial=root.querySelector('input:checked')?.value==='partial_cod';
+    root.querySelector('[data-cw-cod-details]').hidden=!partial;
+    if(checkout)checkout.disabled=partial;
+  });
+  form?.addEventListener('submit',event=>{
+    if(event.submitter?.name!=='update' && root.querySelector('input:checked')?.value==='partial_cod')event.preventDefault();
+  });
+});
+{% endjavascript %}

@@ -1,0 +1,66 @@
+<div class="page-width section">
+  {% render 'breadcrumbs' %}
+  <h1 style="margin-top:1rem;">{{ 'cart.general.title' | t: default: 'Your Cart' }}</h1>
+
+  {% if cart.item_count == 0 %}
+    <div class="empty-state">
+      {% render 'icon', name: 'bag', size: 44 %}
+      <h3 style="margin-top:1rem;">Your cart is empty</h3>
+      <p class="text-muted" style="margin-top:.4rem;">Looks like you haven't added any personalised gifts yet.</p>
+      <a href="{{ routes.all_products_collection_url }}" class="btn btn-primary" style="margin-top:1.5rem;">Start Shopping</a>
+    </div>
+  {% else %}
+    <div class="collection-layout" style="grid-template-columns:1fr;margin-top:1.5rem;">
+      <form action="{{ routes.cart_url }}" method="post" id="CartForm">
+        <div style="border-top:1px solid var(--border);">
+          {% for item in cart.items %}
+            {% assign personalised_preview = item.properties['_Personalised Preview'] %}
+            <div class="cart-line" data-cart-line-key="{{ item.key }}" style="grid-template-columns:96px 1fr auto;padding-block:1.5rem;">
+              <a href="{{ item.url }}"><img width="96" height="96" src="{% if personalised_preview != blank %}{{ personalised_preview | escape }}{% else %}{{ item.image | image_url: width: 200 }}{% endif %}" alt="{{ item.product.title | escape }}" style="width:96px;height:96px;object-fit:cover;border-radius:var(--radius-md);"></a>
+              <div>
+                <a href="{{ item.url }}" style="font-weight:600;">{{ item.product.title }}</a>
+                {% if item.variant_title %}<div class="text-muted" style="font-size:.85rem;margin-top:.2rem;">{{ item.variant_title }}</div>{% endif %}
+
+                {% for p in item.properties %}
+                  {% unless p.first contains '_' or p.last == blank %}
+                    <div class="cart-line__props">{{ p.first }}: {{ p.last }}</div>
+                  {% endunless %}
+                {% endfor %}
+
+                <div class="qty-selector" style="margin-top:.75rem;">
+                  <button type="button" data-qty-step="-1" aria-label="Decrease quantity">{% render 'icon', name: 'minus', size: 14 %}</button>
+                  <input type="number" name="updates[]" value="{{ item.quantity }}" min="0" aria-label="Quantity" form="CartForm">
+                  <button type="button" data-qty-step="1" aria-label="Increase quantity">{% render 'icon', name: 'plus', size: 14 %}</button>
+                </div>
+                <a href="{{ item.url_to_remove }}" class="text-muted" style="font-size:.8rem;display:inline-block;margin-top:.6rem;">Remove</a>
+              </div>
+              <div style="text-align:right;font-weight:700;">
+                <span data-line-price>{{ item.final_line_price | money }}</span>
+                {% if item.original_line_price != item.final_line_price %}
+                  <div class="price__compare" style="font-size:.8rem;">{{ item.original_line_price | money }}</div>
+                {% endif %}
+              </div>
+            </div>
+            <hr class="divider">
+          {% endfor %}
+        </div>
+
+        <div style="max-width:24rem;margin-left:auto;margin-top:2rem;">
+          <div style="display:flex;justify-content:space-between;font-size:1.15rem;font-weight:700;margin-bottom:1rem;">
+            <span>Subtotal</span><span data-cart-subtotal>{{ cart.total_price | money }}</span>
+          </div>
+          <p class="text-muted" style="font-size:.82rem;margin-bottom:1.25rem;">Shipping, taxes and discounts calculated at checkout.</p>
+          <button type="submit" name="update" class="btn btn-outline btn-block" style="margin-bottom:1rem;">{{ 'partial_cod.update' | t }}</button>
+          {% render 'cw-partial-cod' %}
+          <button type="submit" name="checkout" class="btn btn-primary btn-block">Proceed to Checkout</button>
+          <a href="{{ routes.all_products_collection_url }}" class="btn btn-outline btn-block" style="margin-top:.65rem;">Continue Shopping</a>
+        </div>
+      </form>
+    </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{ "name": "Cart page", "settings": [] }
+{% endschema %}
+
