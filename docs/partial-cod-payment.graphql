@@ -1,0 +1,11 @@
+query VerifyCodDeposit($id: ID!, $draftId: ID!) {
+ draftOrder(id: $draftId) { order { id } }
+ order(id: $id) {
+ id cancelledAt displayFinancialStatus test
+ customAttributes { key value }
+ totalPriceSet { shopMoney { amount currencyCode } }
+ totalReceivedSet { shopMoney { amount currencyCode } }
+ totalRefundedSet { shopMoney { amount currencyCode } }
+ transactions { id kind status test amountSet { shopMoney { amount currencyCode } } }
+ }
+}
