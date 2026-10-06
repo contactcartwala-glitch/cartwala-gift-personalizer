@@ -82,6 +82,43 @@
       {{ 'cartwala-acrylic-frame.css' | asset_url | stylesheet_tag }}
     {% endif %}
     <button class="cw-personalizer__open" type="button" data-cw-open>{{ 'personalizer.customize' | t }}</button>
+    {% if product.id == 15416028364985 %}
+      <section class="cw-clock-product-preview" data-cw-clock-product-preview hidden>
+        <header class="cw-clock-product-preview__head">
+          <div><p>LIVE PREVIEW</p><h2>Your 3D Photo Clock</h2><span>Drag the clock to rotate. Tap a photo below to crop or change it.</span></div>
+          <button type="button" class="cw-clock-product-preview__badge" data-cw-clock-focus-3d><span aria-hidden="true">↻</span><strong>3D</strong></button>
+        </header>
+        <div class="cw-clock-product-preview__stage" data-cw-clock-product-stage tabindex="0" aria-label="Rotatable 3D photo clock preview">
+          <div class="cw-clock-product-cube" data-cw-clock-product-cube>
+            <div class="cw-clock-product-face cw-clock-product-face--front">
+              <div class="cw-clock-product-screen"><strong>12:12</strong><span>THU&nbsp;&nbsp;8/1&nbsp;&nbsp;&nbsp;27°C</span></div>
+            </div>
+            <div class="cw-clock-product-face cw-clock-product-face--back"><img data-cw-clock-product-face-image="back" alt=""></div>
+            <div class="cw-clock-product-face cw-clock-product-face--left"><img data-cw-clock-product-face-image="left" alt=""></div>
+            <div class="cw-clock-product-face cw-clock-product-face--right"><img data-cw-clock-product-face-image="right" alt=""></div>
+            <div class="cw-clock-product-face cw-clock-product-face--top"><img data-cw-clock-product-face-image="top" alt=""></div>
+            <div class="cw-clock-product-face cw-clock-product-face--bottom"><img src="https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-cube-clock-bottom-side.jpg?v=1791288117" alt="Clock bottom controls"></div>
+          </div>
+        </div>
+        <div class="cw-clock-product-preview__views" role="group" aria-label="Clock views">
+          <button type="button" data-cw-clock-product-view="front">Front</button>
+          <button type="button" data-cw-clock-product-view="top">Top</button>
+          <button type="button" data-cw-clock-product-view="left">Left</button>
+          <button type="button" data-cw-clock-product-view="right">Right</button>
+          <button type="button" data-cw-clock-product-view="back">Back</button>
+          <button type="button" data-cw-clock-product-view="bottom">Bottom</button>
+        </div>
+        <div class="cw-clock-product-preview__photos" data-cw-clock-product-thumbs>
+          {% assign cw_clock_sides = 'top,left,right,back' | split: ',' %}
+          {% for cw_side in cw_clock_sides %}
+            <button type="button" class="cw-clock-product-thumb" data-cw-clock-edit-side="{{ cw_side }}">
+              <span class="cw-clock-product-thumb__image"><img data-cw-clock-thumb-image="{{ cw_side }}" alt="{{ cw_side | capitalize }} photo"></span>
+              <span class="cw-clock-product-thumb__copy"><strong>{{ cw_side | capitalize }}</strong><small>Crop / Edit</small></span>
+            </button>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
     {% if mug_product %}
       <section class="cw-mug-preview cw-mug-preview--{{ mug_model }}" data-cw-mug-preview data-cw-render-fallback="{{ 'mug_preview.render_fallback' | t | escape }}" hidden>
         <header class="cw-mug-preview__heading"><div><p>{{ 'mug_preview.eyebrow' | t }}</p><h2>{{ 'mug_preview.views_title' | t }}</h2></div><span>{{ 'mug_preview.live' | t }}</span></header>
