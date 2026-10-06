@@ -1662,12 +1662,12 @@ body.cw-personalization-complete
   object-fit:cover;
   transform-origin:center;
 }
-.cw-clock-product-face--front{transform:translateZ(calc(var(--cw-clock-size)/2))}
-.cw-clock-product-face--back{transform:rotateY(180deg) translateZ(calc(var(--cw-clock-size)/2))}
-.cw-clock-product-face--right{transform:rotateY(90deg) translateZ(calc(var(--cw-clock-size)/2))}
-.cw-clock-product-face--left{transform:rotateY(-90deg) translateZ(calc(var(--cw-clock-size)/2))}
-.cw-clock-product-face--top{transform:rotateX(90deg) translateZ(calc(var(--cw-clock-size)/2))}
-.cw-clock-product-face--bottom{transform:rotateX(-90deg) translateZ(calc(var(--cw-clock-size)/2));background:#eee}
+.cw-clock-product-face--front{transform:translateZ(calc(var(--cw-clock-size) * 0.5))}
+.cw-clock-product-face--back{transform:rotateY(180deg) translateZ(calc(var(--cw-clock-size) * 0.5))}
+.cw-clock-product-face--right{transform:rotateY(90deg) translateZ(calc(var(--cw-clock-size) * 0.5))}
+.cw-clock-product-face--left{transform:rotateY(-90deg) translateZ(calc(var(--cw-clock-size) * 0.5))}
+.cw-clock-product-face--top{transform:rotateX(90deg) translateZ(calc(var(--cw-clock-size) * 0.5))}
+.cw-clock-product-face--bottom{transform:rotateX(-90deg) translateZ(calc(var(--cw-clock-size) * 0.5));background:#eee}
 .cw-clock-product-face--bottom img{
   object-fit:cover;
   object-position:center;
@@ -1866,12 +1866,12 @@ body.cw-personalization-complete
   object-fit:cover;
   transform-origin:center;
 }
-.cw-clock-modal-face--front{transform:translateZ(calc(var(--cw-clock-modal-size)/2))}
-.cw-clock-modal-face--back{transform:rotateY(180deg) translateZ(calc(var(--cw-clock-modal-size)/2))}
-.cw-clock-modal-face--right{transform:rotateY(90deg) translateZ(calc(var(--cw-clock-modal-size)/2))}
-.cw-clock-modal-face--left{transform:rotateY(-90deg) translateZ(calc(var(--cw-clock-modal-size)/2))}
-.cw-clock-modal-face--top{transform:rotateX(90deg) translateZ(calc(var(--cw-clock-modal-size)/2))}
-.cw-clock-modal-face--bottom{transform:rotateX(-90deg) translateZ(calc(var(--cw-clock-modal-size)/2));background:#eee}
+.cw-clock-modal-face--front{transform:translateZ(calc(var(--cw-clock-modal-size) * 0.5))}
+.cw-clock-modal-face--back{transform:rotateY(180deg) translateZ(calc(var(--cw-clock-modal-size) * 0.5))}
+.cw-clock-modal-face--right{transform:rotateY(90deg) translateZ(calc(var(--cw-clock-modal-size) * 0.5))}
+.cw-clock-modal-face--left{transform:rotateY(-90deg) translateZ(calc(var(--cw-clock-modal-size) * 0.5))}
+.cw-clock-modal-face--top{transform:rotateX(90deg) translateZ(calc(var(--cw-clock-modal-size) * 0.5))}
+.cw-clock-modal-face--bottom{transform:rotateX(-90deg) translateZ(calc(var(--cw-clock-modal-size) * 0.5));background:#eee}
 .cw-clock-modal-screen{
   display:flex;
   width:100%;
