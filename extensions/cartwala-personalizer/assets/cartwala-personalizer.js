@@ -1404,16 +1404,34 @@
         let gesture = null;
         const isPhotoCubeClock =
           String(root.dataset.productId) === "15416028364985";
+        let clock3dButton = null;
+        let hideClockPreview = () => {};
+        let showClockPreview = () => {};
+        let refreshClockPreview = () => {};
 
         if (isPhotoCubeClock) {
           root.classList.add("cw-photo-cube-clock");
+          const openDesign = root.querySelector("[data-cw-open]");
+          if (openDesign && openDesign.textContent.trim() !== "Edit Again")
+            openDesign.textContent = "Customize Now";
           const controlsPane = root.querySelector(".cw-personalizer__controls-pane");
           if (controlsPane && !controlsPane.querySelector(".cw-clock-upload-heading")) {
             const heading = document.createElement("div");
             heading.className = "cw-clock-upload-heading";
             heading.innerHTML =
-              '<strong>Upload Your Photos</strong><span>Add 4 photos for each side (Top, Left, Right, Back)</span>';
+              '<strong>Upload 4 Photos</strong><span>Top, Left, Right and Back — one photo for each side.</span>';
             controlsPane.insertBefore(heading, fields);
+          }
+          if (!root.querySelector("[data-cw-clock-3d]")) {
+            clock3dButton = document.createElement("button");
+            clock3dButton.type = "button";
+            clock3dButton.className = "cw-personalizer__clock-3d";
+            clock3dButton.dataset.cwClock3d = "true";
+            clock3dButton.textContent = "3D Preview";
+            clock3dButton.disabled = true;
+            save.insertAdjacentElement("beforebegin", clock3dButton);
+          } else {
+            clock3dButton = root.querySelector("[data-cw-clock-3d]");
           }
         }
 
@@ -1573,6 +1591,142 @@
           });
           positionSlots?.();
         };
+
+        if (isPhotoCubeClock) {
+          const canvasPane = root.querySelector(".cw-personalizer__canvas-pane");
+          const stageTip = root.querySelector(".cw-personalizer__tip");
+          const panel = document.createElement("section");
+          panel.className = "cw-clock-preview-panel";
+          panel.hidden = true;
+          panel.innerHTML = `
+            <div class="cw-clock-preview-head">
+              <div>
+                <strong>Your Clock Preview</strong>
+                <span>Drag to rotate and check every side.</span>
+              </div>
+              <button type="button" data-cw-clock-back>Edit Photos</button>
+            </div>
+            <div class="cw-clock-scene" data-cw-clock-scene tabindex="0">
+              <div class="cw-clock-cube" data-cw-clock-cube>
+                <div class="cw-clock-face cw-clock-face--front">
+                  <div class="cw-clock-front-screen">
+                    <strong>12:12</strong>
+                    <span>THU&nbsp;&nbsp;8/1&nbsp;&nbsp;&nbsp;27°C</span>
+                  </div>
+                </div>
+                <div class="cw-clock-face cw-clock-face--back" data-cw-clock-face="back"></div>
+                <div class="cw-clock-face cw-clock-face--left" data-cw-clock-face="left"></div>
+                <div class="cw-clock-face cw-clock-face--right" data-cw-clock-face="right"></div>
+                <div class="cw-clock-face cw-clock-face--top" data-cw-clock-face="top"></div>
+                <div class="cw-clock-face cw-clock-face--bottom"></div>
+              </div>
+            </div>
+            <div class="cw-clock-preview-views">
+              <button type="button" data-cw-view="front">Front</button>
+              <button type="button" data-cw-view="top">Top</button>
+              <button type="button" data-cw-view="left">Left</button>
+              <button type="button" data-cw-view="right">Right</button>
+              <button type="button" data-cw-view="back">Back</button>
+            </div>`;
+          canvasPane?.appendChild(panel);
+
+          const scene = panel.querySelector("[data-cw-clock-scene]");
+          const cube = panel.querySelector("[data-cw-clock-cube]");
+          let rx = -18;
+          let ry = 28;
+          let drag = false;
+          let px = 0;
+          let py = 0;
+          let startRx = rx;
+          let startRy = ry;
+
+          const applyClockRotation = () => {
+            if (cube) cube.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+          };
+
+          refreshClockPreview = () => {
+            const states = Object.fromEntries(
+              photoStates.map((state) => [state.field.id, state]),
+            );
+            ["top", "left", "right", "back"].forEach((side) => {
+              const state = states[`clock-${side}`];
+              const face = panel.querySelector(`[data-cw-clock-face="${side}"]`);
+              if (!face) return;
+              if (state?.image?.src) {
+                face.style.backgroundImage = `url("${state.image.src}")`;
+                face.classList.add("has-photo");
+              } else {
+                face.style.backgroundImage = "none";
+                face.classList.remove("has-photo");
+              }
+            });
+          };
+
+          showClockPreview = () => {
+            if (!photoStates.every((state) => state.file)) return;
+            refreshClockPreview();
+            const editPane = root.querySelector(".cw-personalizer__controls-pane");
+            if (editPane) editPane.hidden = true;
+            if (stage) stage.hidden = true;
+            if (stageTip) stageTip.hidden = true;
+            panel.hidden = false;
+            root.classList.add("is-clock-previewing");
+            applyClockRotation();
+          };
+
+          hideClockPreview = () => {
+            const editPane = root.querySelector(".cw-personalizer__controls-pane");
+            if (editPane) editPane.hidden = false;
+            panel.hidden = true;
+            if (stageTip) stageTip.hidden = true;
+            if (stage) stage.hidden = true;
+            root.classList.remove("is-clock-previewing");
+          };
+
+          panel.querySelector("[data-cw-clock-back]")?.addEventListener("click", hideClockPreview);
+          clock3dButton?.addEventListener("click", showClockPreview);
+
+          panel.querySelectorAll("[data-cw-view]").forEach((button) => {
+            button.addEventListener("click", () => {
+              const view = button.dataset.cwView;
+              if (view === "front") { rx = -5; ry = 0; }
+              if (view === "top") { rx = -72; ry = 0; }
+              if (view === "left") { rx = -5; ry = 90; }
+              if (view === "right") { rx = -5; ry = -90; }
+              if (view === "back") { rx = -5; ry = 180; }
+              applyClockRotation();
+            });
+          });
+
+          scene?.addEventListener("pointerdown", (event) => {
+            if (event.button !== 0) return;
+            drag = true;
+            px = event.clientX;
+            py = event.clientY;
+            startRx = rx;
+            startRy = ry;
+            scene.setPointerCapture?.(event.pointerId);
+          });
+          scene?.addEventListener("pointermove", (event) => {
+            if (!drag) return;
+            ry = startRy + (event.clientX - px) * 0.55;
+            rx = Math.max(-85, Math.min(45, startRx - (event.clientY - py) * 0.45));
+            applyClockRotation();
+          });
+          const endDrag = (event) => {
+            drag = false;
+            if (scene?.hasPointerCapture?.(event.pointerId))
+              scene.releasePointerCapture(event.pointerId);
+          };
+          scene?.addEventListener("pointerup", endDrag);
+          scene?.addEventListener("pointercancel", endDrag);
+
+          // In edit mode this product intentionally shows only four equal upload cards.
+          if (canvasPane) {
+            stage.hidden = true;
+            if (stageTip) stageTip.hidden = true;
+          }
+        }
 
         const fontNames = [
           "Arial",
@@ -1844,7 +1998,9 @@
             linkStates.length >
             0;
         const updateReady = () => {
-          save.disabled = busy || !isReady();
+          const ready = isReady();
+          save.disabled = busy || !ready;
+          if (clock3dButton) clock3dButton.disabled = busy || !ready;
         };
         const loadPhoto = (state, file) => {
           if (!file) return;
@@ -2052,6 +2208,7 @@
 
         root.querySelector("[data-cw-open]").addEventListener("click", () => {
           if (isPhotoCubeClock) {
+            hideClockPreview();
             const firstMissing = photoStates.findIndex((state) => !state.file);
             selectPhoto(firstMissing >= 0 ? firstMissing : 0);
           }
@@ -2295,7 +2452,7 @@
                 `Slot ${state.field.x}%,${state.field.y}% ${state.field.width}%×${state.field.height}% · photo offset ${Math.round(state.x)},${Math.round(state.y)} · zoom ${Math.round(state.scale * 100)}% · rotation ${Math.round(state.angle)}°`,
               );
             }
-            if (root.dataset.overlay) {
+            if (root.dataset.overlay && !isPhotoCubeClock) {
               const frame = await loadRemote(root.dataset.overlay);
               context.drawImage(
                 frame,
@@ -2471,7 +2628,8 @@
             putText(productForm, "_Cartwala Personalization", "Completed");
             root.querySelector("[data-cw-open]").textContent =
               root.dataset.labelEdit || "Edit Again";
-            dialog.close();
+            if (isPhotoCubeClock) showClockPreview();
+            else dialog.close();
           } catch (error) {
             console.error("Cartwala personalizer preview failed", error);
             window.alert(
@@ -2487,6 +2645,7 @@
 
         const showProductPreview = (url) => {
           if (root.dataset.productKind === "mug") return;
+          if (isPhotoCubeClock) return;
           // Acrylic designs are mounted inside the main product gallery by the
           // frame selector, which also supplies the selected size and studs.
           if (root.dataset.cwAcrylicProduct === "true") return;
