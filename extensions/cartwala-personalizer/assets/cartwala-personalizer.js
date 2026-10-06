@@ -1719,9 +1719,58 @@
           productClockPreview?.querySelector("[data-cw-clock-focus-3d]")?.addEventListener("click", () => {
             productRx = -18;
             productRy = 28;
+            refreshClockPreview();
             rotateProductClock();
-            pageStage?.focus();
+            if (clockModal && !clockModal.open) {
+              if (typeof clockModal.showModal === "function") clockModal.showModal();
+              else clockModal.setAttribute("open", "");
+            }
+            modalStage?.focus();
           });
+
+          const closeClockModal = () => {
+            if (!clockModal) return;
+            if (typeof clockModal.close === "function" && clockModal.open) clockModal.close();
+            else clockModal.removeAttribute("open");
+          };
+          clockModal?.querySelector("[data-cw-clock-modal-close]")?.addEventListener("click", closeClockModal);
+          clockModal?.addEventListener("click", (event) => {
+            if (event.target === clockModal) closeClockModal();
+          });
+
+          let modalDragging = false;
+          let modalStartX = 0;
+          let modalStartY = 0;
+          let modalStartRx = productRx;
+          let modalStartRy = productRy;
+          modalStage?.addEventListener("pointerdown", (event) => {
+            if (event.button !== 0) return;
+            modalDragging = true;
+            modalStartX = event.clientX;
+            modalStartY = event.clientY;
+            modalStartRx = productRx;
+            modalStartRy = productRy;
+            modalStage.setPointerCapture?.(event.pointerId);
+            modalStage.classList.add("is-dragging");
+          });
+          modalStage?.addEventListener("pointermove", (event) => {
+            if (!modalDragging) return;
+            productRy = modalStartRy + (event.clientX - modalStartX) * 0.75;
+            productRx = Math.max(
+              -110,
+              Math.min(110, modalStartRx - (event.clientY - modalStartY) * 0.55),
+            );
+            rotateProductClock();
+          });
+          const stopModalDrag = (event) => {
+            modalDragging = false;
+            modalStage?.classList.remove("is-dragging");
+            if (modalStage?.hasPointerCapture?.(event.pointerId))
+              modalStage.releasePointerCapture(event.pointerId);
+          };
+          modalStage?.addEventListener("pointerup", stopModalDrag);
+          modalStage?.addEventListener("pointercancel", stopModalDrag);
+          modalStage?.addEventListener("lostpointercapture", stopModalDrag);
 
           productClockPreview?.querySelectorAll("[data-cw-clock-edit-side]").forEach((button) => {
             button.addEventListener("click", () => {
