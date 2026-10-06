@@ -1,0 +1,51 @@
+{
+  "sku": "CW-GIFT-038",
+  "title": "Cartwala Advocate Portrait and Name LED Desk Lamp",
+  "productId": "gid://shopify/Product/8699994538169",
+  "handle": "cartwala-personalised-acrylic-led-photo-frame-038",
+  "source": "sources/CW-GIFT-038.webp",
+  "background": "CW-GIFT-038-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 26,
+        "y": 5,
+        "width": 50,
+        "height": 51
+      },
+      "treatment": "engraved-light",
+      "maskMode": "manual"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Adv. Jaspreet Singh",
+      "x": 63,
+      "y": 60,
+      "width": 48,
+      "height": 8,
+      "size": 0.05,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    },
+    {
+      "id": "degree",
+      "label": "Degree",
+      "sample": "B.A. LLB",
+      "x": 64,
+      "y": 67,
+      "width": 35,
+      "height": 7,
+      "size": 0.045,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

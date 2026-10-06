@@ -1,0 +1,88 @@
+{
+  "sku": "CW-GIFT-047",
+  "title": "Cartwala Best Friend Photo Collage LED Lamp",
+  "productId": "gid://shopify/Product/8699999649977",
+  "handle": "cartwala-personalised-acrylic-led-photo-frame-047",
+  "source": "sources/CW-GIFT-047.webp",
+  "background": "CW-GIFT-047-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 24,
+        "y": 23,
+        "width": 26,
+        "height": 26
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-2",
+      "label": "Photo 2",
+      "guide": {
+        "x": 53,
+        "y": 23,
+        "width": 22,
+        "height": 15
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-3",
+      "label": "Photo 3",
+      "guide": {
+        "x": 24,
+        "y": 52,
+        "width": 26,
+        "height": 25
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-4",
+      "label": "Photo 4",
+      "guide": {
+        "x": 53,
+        "y": 40,
+        "width": 22,
+        "height": 24
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-5",
+      "label": "Photo 5",
+      "guide": {
+        "x": 53,
+        "y": 65,
+        "width": 22,
+        "height": 12
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "optional-name",
+      "label": "Optional name",
+      "sample": "Your name",
+      "x": 50,
+      "y": 74,
+      "width": 45,
+      "height": 8,
+      "size": 0.04,
+      "fontFamily": "Z003",
+      "color": "#fff2bc",
+      "hidden": true
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

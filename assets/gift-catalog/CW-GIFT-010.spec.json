@@ -1,0 +1,124 @@
+{
+  "sku": "CW-GIFT-010",
+  "title": "Cartwala Brother Forever Photo Collage LED Lamp",
+  "productId": "gid://shopify/Product/8699978416313",
+  "handle": "cartwala-personalised-acrylic-led-photo-frame-010",
+  "source": "sources/CW-GIFT-010.webp",
+  "background": "CW-GIFT-010-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 21,
+        "y": 30,
+        "width": 14,
+        "height": 14
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-2",
+      "label": "Photo 2",
+      "guide": {
+        "x": 36,
+        "y": 30,
+        "width": 14,
+        "height": 14
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-3",
+      "label": "Photo 3",
+      "guide": {
+        "x": 51,
+        "y": 30,
+        "width": 14,
+        "height": 14
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-4",
+      "label": "Photo 4",
+      "guide": {
+        "x": 66,
+        "y": 30,
+        "width": 14,
+        "height": 14
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-5",
+      "label": "Photo 5",
+      "guide": {
+        "x": 21,
+        "y": 59,
+        "width": 14,
+        "height": 14
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-6",
+      "label": "Photo 6",
+      "guide": {
+        "x": 36,
+        "y": 59,
+        "width": 14,
+        "height": 14
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-7",
+      "label": "Photo 7",
+      "guide": {
+        "x": 51,
+        "y": 59,
+        "width": 14,
+        "height": 14
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-8",
+      "label": "Photo 8",
+      "guide": {
+        "x": 66,
+        "y": 59,
+        "width": 14,
+        "height": 14
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "optional-name",
+      "label": "Optional name",
+      "sample": "Your name",
+      "x": 50,
+      "y": 74,
+      "width": 45,
+      "height": 8,
+      "size": 0.04,
+      "fontFamily": "Z003",
+      "color": "#fff2bc",
+      "hidden": true
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

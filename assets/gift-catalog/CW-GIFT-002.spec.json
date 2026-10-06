@@ -1,0 +1,63 @@
+{
+  "sku": "CW-GIFT-002",
+  "title": "Cartwala Family Memories Photo Collage LED Lamp",
+  "productId": "gid://shopify/Product/8699974910137",
+  "handle": "cartwala-personalised-acrylic-led-photo-frame-002",
+  "source": "sources/CW-GIFT-002.webp",
+  "background": "CW-GIFT-002-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 38,
+        "y": 20,
+        "width": 46,
+        "height": 29
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-2",
+      "label": "Photo 2",
+      "guide": {
+        "x": 38,
+        "y": 51,
+        "width": 21,
+        "height": 22
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-3",
+      "label": "Photo 3",
+      "guide": {
+        "x": 61,
+        "y": 51,
+        "width": 22,
+        "height": 22
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "message",
+      "label": "Message",
+      "sample": "Our greatest blessing, our beautiful daughter.",
+      "x": 61,
+      "y": 77,
+      "width": 46,
+      "height": 7,
+      "size": 0.025,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

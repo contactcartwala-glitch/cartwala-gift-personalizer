@@ -1,0 +1,48 @@
+{
+  "sku": "CW-GIFT-051",
+  "title": "Cartwala Wedding Calendar Photo LED Lamp",
+  "productId": "gid://shopify/Product/8700001976505",
+  "handle": "cartwala-personalised-led-photo-display-051",
+  "source": "sources/CW-GIFT-051.webp",
+  "background": "CW-GIFT-051-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 51,
+        "y": 21,
+        "width": 29,
+        "height": 51
+      },
+      "treatment": "cutout",
+      "maskMode": "manual"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "PIYUSH & ANGALE",
+      "x": 65,
+      "y": 18.4,
+      "width": 34,
+      "height": 9,
+      "size": 0.04,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": {
+    "x": 19,
+    "y": 21,
+    "width": 26,
+    "height": 23,
+    "month": "February",
+    "monthX": 31,
+    "monthY": 18,
+    "day": 6
+  },
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

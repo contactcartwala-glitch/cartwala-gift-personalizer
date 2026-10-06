@@ -1,0 +1,38 @@
+{
+  "sku": "CW-GIFT-013",
+  "title": "Cartwala Safari Tent Personalised Name and Date Night Lamp",
+  "productId": "gid://shopify/Product/8699979399353",
+  "handle": "cartwala-child-name-and-date-display-013",
+  "source": "sources/CW-GIFT-013.webp",
+  "background": "CW-GIFT-013-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Ishita",
+      "x": 49,
+      "y": 70.5,
+      "width": 42,
+      "height": 8,
+      "size": 0.06,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    },
+    {
+      "id": "date",
+      "label": "Date",
+      "sample": "20.11.2003",
+      "x": 49,
+      "y": 74.3,
+      "width": 29,
+      "height": 3,
+      "size": 0.018,
+      "fontFamily": "DejaVu Sans",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

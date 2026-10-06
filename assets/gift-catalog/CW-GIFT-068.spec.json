@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-068",
+  "title": "Cartwala Dinosaur Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8700011675833",
+  "handle": "cartwala-personalised-name-led-table-lamp-068",
+  "source": "sources/CW-GIFT-068.webp",
+  "background": "CW-GIFT-068-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Aviray",
+      "x": 55,
+      "y": 25,
+      "width": 49,
+      "height": 10,
+      "size": 0.075,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

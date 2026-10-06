@@ -1,0 +1,51 @@
+{
+  "sku": "CW-GIFT-025",
+  "title": "Cartwala Engraved Couple Portrait LED Lamp",
+  "productId": "gid://shopify/Product/8699986477241",
+  "handle": "cartwala-engraved-couple-photo-lamp-025",
+  "source": "sources/CW-GIFT-025.webp",
+  "background": "CW-GIFT-025-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 14,
+        "y": 32,
+        "width": 69,
+        "height": 47
+      },
+      "treatment": "engraved-light",
+      "maskMode": "manual"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Elena & Ryan",
+      "x": 48,
+      "y": 21,
+      "width": 58,
+      "height": 10,
+      "size": 0.064,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    },
+    {
+      "id": "date",
+      "label": "Date",
+      "sample": "14.02.2024",
+      "x": 48,
+      "y": 25,
+      "width": 36,
+      "height": 4,
+      "size": 0.022,
+      "fontFamily": "DejaVu Sans",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

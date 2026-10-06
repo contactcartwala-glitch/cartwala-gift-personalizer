@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-037",
+  "title": "Cartwala Fairytale Princess Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8699994112185",
+  "handle": "cartwala-personalised-name-gift-for-girls-037",
+  "source": "sources/CW-GIFT-037.webp",
+  "background": "CW-GIFT-037-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Riddhi",
+      "x": 51,
+      "y": 60.6,
+      "width": 45,
+      "height": 9,
+      "size": 0.075,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

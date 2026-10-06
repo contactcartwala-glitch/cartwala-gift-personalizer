@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-015",
+  "title": "Cartwala Unicorn Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8699980382393",
+  "handle": "cartwala-custom-name-table-display-015",
+  "source": "sources/CW-GIFT-015.webp",
+  "background": "CW-GIFT-015-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Aayushi",
+      "x": 50,
+      "y": 67,
+      "width": 53,
+      "height": 10,
+      "size": 0.075,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

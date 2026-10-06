@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-023",
+  "title": "Cartwala Pink Princess Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8699985723577",
+  "handle": "cartwala-personalised-name-display-023",
+  "source": "sources/CW-GIFT-023.webp",
+  "background": "CW-GIFT-023-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Sweety",
+      "x": 54,
+      "y": 63,
+      "width": 46,
+      "height": 10,
+      "size": 0.071,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

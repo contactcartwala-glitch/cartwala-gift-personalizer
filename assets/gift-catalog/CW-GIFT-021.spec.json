@@ -1,0 +1,38 @@
+{
+  "sku": "CW-GIFT-021",
+  "title": "Cartwala Personalised Nikah Couple Name Acrylic Plaque",
+  "productId": "gid://shopify/Product/8699985232057",
+  "handle": "cartwala-personalised-couple-acrylic-plaque-021",
+  "source": "sources/CW-GIFT-021.webp",
+  "background": "CW-GIFT-021-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Muhammad\n&\nAleena",
+      "x": 55,
+      "y": 61,
+      "width": 39,
+      "height": 18,
+      "size": 0.04,
+      "fontFamily": "Z003",
+      "color": "#352719"
+    },
+    {
+      "id": "date",
+      "label": "Date",
+      "sample": "21.12.2025",
+      "x": 55,
+      "y": 72,
+      "width": 37,
+      "height": 5,
+      "size": 0.025,
+      "fontFamily": "DejaVu Sans",
+      "color": "#352719"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

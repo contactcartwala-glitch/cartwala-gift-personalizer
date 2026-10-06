@@ -1,0 +1,51 @@
+{
+  "sku": "CW-GIFT-048",
+  "title": "Cartwala Round Couple Portrait LED Lamp",
+  "productId": "gid://shopify/Product/8699999944889",
+  "handle": "cartwala-personalised-acrylic-led-photo-frame-048",
+  "source": "sources/CW-GIFT-048.webp",
+  "background": "CW-GIFT-048-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 12,
+        "y": 20,
+        "width": 68,
+        "height": 31
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Akriti & Sanju",
+      "x": 47,
+      "y": 59.2,
+      "width": 61,
+      "height": 10,
+      "size": 0.07,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    },
+    {
+      "id": "date",
+      "label": "Date",
+      "sample": "06.08.2021",
+      "x": 47,
+      "y": 66.6,
+      "width": 36,
+      "height": 4,
+      "size": 0.025,
+      "fontFamily": "DejaVu Sans",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

@@ -1,0 +1,76 @@
+{
+  "sku": "CW-GIFT-054",
+  "title": "Cartwala Sisters Make Life Brighter Photo Collage LED Lamp",
+  "productId": "gid://shopify/Product/8700004401337",
+  "handle": "cartwala-personalised-acrylic-led-photo-frame-054",
+  "source": "sources/CW-GIFT-054.webp",
+  "background": "CW-GIFT-054-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 28,
+        "y": 16,
+        "width": 22,
+        "height": 22
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-2",
+      "label": "Photo 2",
+      "guide": {
+        "x": 51,
+        "y": 16,
+        "width": 22,
+        "height": 22
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-3",
+      "label": "Photo 3",
+      "guide": {
+        "x": 28,
+        "y": 39,
+        "width": 22,
+        "height": 22
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-4",
+      "label": "Photo 4",
+      "guide": {
+        "x": 51,
+        "y": 39,
+        "width": 22,
+        "height": 22
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "optional-name",
+      "label": "Optional name",
+      "sample": "Your name",
+      "x": 50,
+      "y": 74,
+      "width": 45,
+      "height": 8,
+      "size": 0.04,
+      "fontFamily": "Z003",
+      "color": "#fff2bc",
+      "hidden": true
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-071",
+  "title": "Cartwala Floral Crescent Couple Name LED Lamp",
+  "productId": "gid://shopify/Product/8700013183161",
+  "handle": "cartwala-personalised-led-couple-photo-lamp-071",
+  "source": "sources/CW-GIFT-071.webp",
+  "background": "CW-GIFT-071-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Nishith & Kashvi",
+      "x": 60,
+      "y": 42.8,
+      "width": 33,
+      "height": 8,
+      "size": 0.037,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

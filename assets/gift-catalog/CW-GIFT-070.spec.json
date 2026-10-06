@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-070",
+  "title": "Cartwala Penguin Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8700012691641",
+  "handle": "cartwala-penguin-theme-gift-display-070",
+  "source": "sources/CW-GIFT-070.webp",
+  "background": "CW-GIFT-070-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Vansh",
+      "x": 53,
+      "y": 27,
+      "width": 58,
+      "height": 12,
+      "size": 0.09,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

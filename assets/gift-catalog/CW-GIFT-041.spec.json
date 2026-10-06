@@ -1,0 +1,92 @@
+{
+  "sku": "CW-GIFT-041",
+  "title": "Cartwala Sunflower Thank You Acrylic Desk Plaque",
+  "productId": "gid://shopify/Product/8699996340409",
+  "handle": "cartwala-occasion-gift-display-041",
+  "source": "sources/CW-GIFT-041.webp",
+  "background": "CW-GIFT-041-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "message-1",
+      "label": "Title",
+      "sample": "There are",
+      "x": 51,
+      "y": 13,
+      "width": 40,
+      "height": 6,
+      "size": 0.035,
+      "fontFamily": "DejaVu Serif",
+      "fontWeight": "normal",
+      "color": "#352719"
+    },
+    {
+      "id": "message-2",
+      "label": "Message",
+      "sample": "PEOPLE IN THIS WORLD\nWHO MAKE THINGS",
+      "x": 50,
+      "y": 23,
+      "width": 62,
+      "height": 10,
+      "size": 0.031,
+      "fontFamily": "DejaVu Sans",
+      "fontWeight": "normal",
+      "color": "#352719"
+    },
+    {
+      "id": "message-3",
+      "label": "Highlight",
+      "sample": "better",
+      "x": 50,
+      "y": 33,
+      "width": 44,
+      "height": 10,
+      "size": 0.087,
+      "fontFamily": "Z003",
+      "fontWeight": "normal",
+      "color": "#352719"
+    },
+    {
+      "id": "message-4",
+      "label": "Subtitle",
+      "sample": "WHEREVER THEY GO",
+      "x": 50,
+      "y": 41,
+      "width": 61,
+      "height": 8,
+      "size": 0.03,
+      "fontFamily": "DejaVu Sans",
+      "fontWeight": "normal",
+      "color": "#352719"
+    },
+    {
+      "id": "message-5",
+      "label": "Thanks",
+      "sample": "Thank You",
+      "x": 42,
+      "y": 55,
+      "width": 60,
+      "height": 13,
+      "size": 0.092,
+      "fontFamily": "Z003",
+      "fontWeight": "normal",
+      "color": "#352719"
+    },
+    {
+      "id": "message-6",
+      "label": "Footer",
+      "sample": "FOR BEING\nONE OF THEM",
+      "x": 45,
+      "y": 67,
+      "width": 49,
+      "height": 14,
+      "size": 0.035,
+      "fontFamily": "DejaVu Sans",
+      "fontWeight": "normal",
+      "color": "#352719"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

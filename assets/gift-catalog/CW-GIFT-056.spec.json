@@ -1,0 +1,51 @@
+{
+  "sku": "CW-GIFT-056",
+  "title": "Cartwala Connected Photo Pair LED Lamp",
+  "productId": "gid://shopify/Product/8700005155001",
+  "handle": "cartwala-personalised-acrylic-led-photo-frame-056",
+  "source": "sources/CW-GIFT-056.webp",
+  "background": "CW-GIFT-056-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 32,
+        "y": 32,
+        "width": 19,
+        "height": 29
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-2",
+      "label": "Photo 2",
+      "guide": {
+        "x": 53,
+        "y": 32,
+        "width": 19,
+        "height": 29
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Aniket - Sonia",
+      "x": 54,
+      "y": 29.1,
+      "width": 29,
+      "height": 7,
+      "size": 0.03,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

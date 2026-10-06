@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-035",
+  "title": "Cartwala Safari Animals Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8699992539321",
+  "handle": "cartwala-safari-animal-gift-display-035",
+  "source": "sources/CW-GIFT-035.webp",
+  "background": "CW-GIFT-035-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Lavya",
+      "x": 68,
+      "y": 34,
+      "width": 33,
+      "height": 10,
+      "size": 0.068,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

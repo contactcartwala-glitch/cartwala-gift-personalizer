@@ -1,0 +1,38 @@
+{
+  "sku": "CW-GIFT-039",
+  "title": "Cartwala Lion Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8699994964153",
+  "handle": "cartwala-lion-theme-gift-display-039",
+  "source": "sources/CW-GIFT-039.webp",
+  "background": "CW-GIFT-039-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Arnav",
+      "x": 54,
+      "y": 29.5,
+      "width": 52,
+      "height": 10,
+      "size": 0.079,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    },
+    {
+      "id": "date",
+      "label": "Date",
+      "sample": "05.02.2003",
+      "x": 54,
+      "y": 35.2,
+      "width": 31,
+      "height": 4,
+      "size": 0.018,
+      "fontFamily": "DejaVu Sans",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

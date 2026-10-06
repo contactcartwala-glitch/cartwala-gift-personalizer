@@ -1,0 +1,76 @@
+{
+  "sku": "CW-GIFT-045",
+  "title": "Cartwala My Darling Love Couple Photo Collage LED Lamp",
+  "productId": "gid://shopify/Product/8699998798009",
+  "handle": "cartwala-personalised-acrylic-led-photo-frame-045",
+  "source": "sources/CW-GIFT-045.webp",
+  "background": "CW-GIFT-045-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 25,
+        "y": 20,
+        "width": 20,
+        "height": 20
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-2",
+      "label": "Photo 2",
+      "guide": {
+        "x": 46,
+        "y": 20,
+        "width": 20,
+        "height": 20
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-3",
+      "label": "Photo 3",
+      "guide": {
+        "x": 25,
+        "y": 41,
+        "width": 20,
+        "height": 19
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-4",
+      "label": "Photo 4",
+      "guide": {
+        "x": 46,
+        "y": 41,
+        "width": 20,
+        "height": 19
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "optional-name",
+      "label": "Optional name",
+      "sample": "Your name",
+      "x": 50,
+      "y": 74,
+      "width": 45,
+      "height": 8,
+      "size": 0.04,
+      "fontFamily": "Z003",
+      "color": "#fff2bc",
+      "hidden": true
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

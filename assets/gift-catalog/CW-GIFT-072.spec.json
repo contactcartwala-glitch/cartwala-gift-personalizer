@@ -1,0 +1,38 @@
+{
+  "sku": "CW-GIFT-072",
+  "title": "Cartwala Penguin Couple Quote Acrylic Desk Plaque",
+  "productId": "gid://shopify/Product/8700013674681",
+  "handle": "cartwala-tabletop-occasion-gift-072",
+  "source": "sources/CW-GIFT-072.webp",
+  "background": "CW-GIFT-072-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "message",
+      "label": "Message",
+      "sample": "WHEN PENGUINS FIND\nTHEIR MATE, THEY STAY\nTOGETHER FOREVER.",
+      "x": 60,
+      "y": 34,
+      "width": 43,
+      "height": 17,
+      "size": 0.025,
+      "fontFamily": "DejaVu Serif",
+      "color": "#352719"
+    },
+    {
+      "id": "message",
+      "label": "Message",
+      "sample": "YOU ARE\nmy penguin",
+      "x": 63,
+      "y": 74,
+      "width": 40,
+      "height": 13,
+      "size": 0.034,
+      "fontFamily": "Z003",
+      "color": "#352719"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

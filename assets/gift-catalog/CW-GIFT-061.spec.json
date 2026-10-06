@@ -1,0 +1,41 @@
+{
+  "sku": "CW-GIFT-061",
+  "title": "Cartwala Wedding Portrait Acrylic LED Photo Lamp",
+  "productId": "gid://shopify/Product/8700007481529",
+  "handle": "cartwala-personalised-acrylic-led-photo-frame-061",
+  "source": "sources/CW-GIFT-061.webp",
+  "background": "CW-GIFT-061-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 29.5,
+        "y": 13.5,
+        "width": 46,
+        "height": 63.3
+      },
+      "treatment": "printed",
+      "maskMode": "manual",
+      "preserveSourcePosition": true
+    }
+  ],
+  "textFields": [
+    {
+      "id": "optional-name",
+      "label": "Optional name",
+      "sample": "Your name",
+      "x": 50,
+      "y": 74,
+      "width": 45,
+      "height": 8,
+      "size": 0.04,
+      "fontFamily": "Z003",
+      "color": "#fff2bc",
+      "hidden": true
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

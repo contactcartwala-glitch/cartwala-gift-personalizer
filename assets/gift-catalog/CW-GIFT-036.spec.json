@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-036",
+  "title": "Cartwala Giraffe Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8699993424057",
+  "handle": "cartwala-giraffe-theme-night-light-036",
+  "source": "sources/CW-GIFT-036.webp",
+  "background": "CW-GIFT-036-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Swati",
+      "x": 50,
+      "y": 42,
+      "width": 48,
+      "height": 9,
+      "size": 0.075,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

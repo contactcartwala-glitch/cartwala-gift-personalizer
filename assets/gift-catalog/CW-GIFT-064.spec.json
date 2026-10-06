@@ -1,0 +1,38 @@
+{
+  "sku": "CW-GIFT-064",
+  "title": "Cartwala Floral Islamic Calligraphy Wedding Plaque",
+  "productId": "gid://shopify/Product/8700009873593",
+  "handle": "cartwala-wedding-and-anniversary-photo-display-064",
+  "source": "sources/CW-GIFT-064.webp",
+  "background": "CW-GIFT-064-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Sahil & Naaz",
+      "x": 53,
+      "y": 68.5,
+      "width": 48,
+      "height": 10,
+      "size": 0.05,
+      "fontFamily": "Z003",
+      "color": "#352719"
+    },
+    {
+      "id": "date",
+      "label": "Date",
+      "sample": "06.02.2023",
+      "x": 53,
+      "y": 74,
+      "width": 33,
+      "height": 4,
+      "size": 0.018,
+      "fontFamily": "DejaVu Sans",
+      "color": "#352719"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

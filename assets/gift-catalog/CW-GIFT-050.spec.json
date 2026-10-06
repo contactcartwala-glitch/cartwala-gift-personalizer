@@ -1,0 +1,40 @@
+{
+  "sku": "CW-GIFT-050",
+  "title": "Cartwala Brother Buddy Photo LED Lamp",
+  "productId": "gid://shopify/Product/8700001353913",
+  "handle": "cartwala-personalised-acrylic-led-photo-frame-050",
+  "source": "sources/CW-GIFT-050.webp",
+  "background": "CW-GIFT-050-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 24,
+        "y": 50,
+        "width": 48,
+        "height": 30
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "optional-name",
+      "label": "Optional name",
+      "sample": "Your name",
+      "x": 50,
+      "y": 74,
+      "width": 45,
+      "height": 8,
+      "size": 0.04,
+      "fontFamily": "Z003",
+      "color": "#fff2bc",
+      "hidden": true
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

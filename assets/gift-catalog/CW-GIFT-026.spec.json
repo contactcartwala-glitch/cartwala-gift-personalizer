@@ -1,0 +1,51 @@
+{
+  "sku": "CW-GIFT-026",
+  "title": "Cartwala Crown Birthday Photo LED Lamp",
+  "productId": "gid://shopify/Product/8699987329209",
+  "handle": "cartwala-birthday-acrylic-led-lamp-026",
+  "source": "sources/CW-GIFT-026.webp",
+  "background": "CW-GIFT-026-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 55.86,
+        "y": 34.18,
+        "width": 22.07,
+        "height": 29.59
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Sakshi",
+      "x": 33,
+      "y": 50,
+      "width": 31,
+      "height": 9,
+      "size": 0.055,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    },
+    {
+      "id": "date",
+      "label": "Date",
+      "sample": "30.05.1999",
+      "x": 33,
+      "y": 59,
+      "width": 31,
+      "height": 7,
+      "size": 0.038,
+      "fontFamily": "DejaVu Sans",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

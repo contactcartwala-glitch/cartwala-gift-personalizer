@@ -1,0 +1,35 @@
+{
+  "sku": "CW-GIFT-008",
+  "title": "Cartwala Round Engraved Birthday Photo Calendar Wooden Plaque",
+  "productId": "gid://shopify/Product/8699977171129",
+  "handle": "cartwala-round-engraved-wood-photo-display-008",
+  "source": "sources/CW-GIFT-008.webp",
+  "background": "CW-GIFT-008-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 43,
+        "y": 17,
+        "width": 43,
+        "height": 64
+      },
+      "treatment": "engraved-dark",
+      "maskMode": "manual"
+    }
+  ],
+  "textFields": [],
+  "calendar": {
+    "x": 8,
+    "y": 37,
+    "width": 30,
+    "height": 28,
+    "month": "September",
+    "monthX": 21,
+    "monthY": 34,
+    "day": 6
+  },
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

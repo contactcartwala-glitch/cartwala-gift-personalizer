@@ -1,0 +1,51 @@
+{
+  "sku": "CW-GIFT-003",
+  "title": "Cartwala Round Couple Photo and Date LED Lamp",
+  "productId": "gid://shopify/Product/8699975237817",
+  "handle": "cartwala-couple-photo-and-names-frame-003",
+  "source": "sources/CW-GIFT-003.webp",
+  "background": "CW-GIFT-003-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 21,
+        "y": 16,
+        "width": 56,
+        "height": 39
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Ansh & Sonia",
+      "x": 50,
+      "y": 61,
+      "width": 49,
+      "height": 10,
+      "size": 0.065,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    },
+    {
+      "id": "date",
+      "label": "Date",
+      "sample": "22.11.2025",
+      "x": 50,
+      "y": 67,
+      "width": 39,
+      "height": 4,
+      "size": 0.023,
+      "fontFamily": "DejaVu Sans",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

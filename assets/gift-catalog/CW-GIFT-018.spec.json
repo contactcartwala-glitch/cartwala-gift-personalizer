@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-018",
+  "title": "Cartwala Royal Princess Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8699982545081",
+  "handle": "cartwala-engraved-name-gift-display-018",
+  "source": "sources/CW-GIFT-018.webp",
+  "background": "CW-GIFT-018-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Khushi",
+      "x": 55,
+      "y": 61.3,
+      "width": 49,
+      "height": 9,
+      "size": 0.073,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-011",
+  "title": "Cartwala Jungle Elephant Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8699978678457",
+  "handle": "cartwala-jungle-theme-gift-display-011",
+  "source": "sources/CW-GIFT-011.webp",
+  "background": "CW-GIFT-011-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Muskan",
+      "x": 52,
+      "y": 40.4,
+      "width": 52,
+      "height": 10,
+      "size": 0.075,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

@@ -1,0 +1,40 @@
+{
+  "sku": "CW-GIFT-016",
+  "title": "Cartwala Friends Forever Photo LED Lamp",
+  "productId": "gid://shopify/Product/8699980906681",
+  "handle": "cartwala-personalised-acrylic-led-photo-frame-016",
+  "source": "sources/CW-GIFT-016.webp",
+  "background": "CW-GIFT-016-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 22,
+        "y": 45,
+        "width": 57,
+        "height": 24
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "optional-name",
+      "label": "Optional name",
+      "sample": "Your name",
+      "x": 50,
+      "y": 74,
+      "width": 45,
+      "height": 8,
+      "size": 0.04,
+      "fontFamily": "Z003",
+      "color": "#fff2bc",
+      "hidden": true
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

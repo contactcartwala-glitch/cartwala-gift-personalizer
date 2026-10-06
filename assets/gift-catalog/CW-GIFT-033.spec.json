@@ -1,0 +1,79 @@
+{
+  "sku": "CW-GIFT-033",
+  "title": "Cartwala Appreciation Message Acrylic Desk Plaque",
+  "productId": "gid://shopify/Product/8699991687353",
+  "handle": "cartwala-appreciation-desk-plaque-033",
+  "source": "sources/CW-GIFT-033.webp",
+  "background": "CW-GIFT-033-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "message-1",
+      "label": "Title",
+      "sample": "IN CASE NOBODY TOLD YOU TODAY...",
+      "x": 47,
+      "y": 13,
+      "width": 70,
+      "height": 7,
+      "size": 0.03,
+      "fontFamily": "DejaVu Serif",
+      "fontWeight": "normal",
+      "color": "#352719"
+    },
+    {
+      "id": "message-2",
+      "label": "Message",
+      "sample": "YOU ARE AMAZING\nYOU ARE IMPORTANT\nYOU MAKE A DIFFERENCE\nYOU ARE INCREDIBLY",
+      "x": 49,
+      "y": 31,
+      "width": 60,
+      "height": 25,
+      "size": 0.029,
+      "fontFamily": "DejaVu Sans",
+      "fontWeight": "normal",
+      "color": "#352719"
+    },
+    {
+      "id": "message-3",
+      "label": "Highlight",
+      "sample": "APPRECIATED",
+      "x": 49,
+      "y": 46,
+      "width": 76,
+      "height": 12,
+      "size": 0.075,
+      "fontFamily": "DejaVu Serif",
+      "fontWeight": "bold",
+      "color": "#352719"
+    },
+    {
+      "id": "message-4",
+      "label": "Subtitle",
+      "sample": "& YOU DESERVE THE BEST!",
+      "x": 49,
+      "y": 54,
+      "width": 69,
+      "height": 7,
+      "size": 0.028,
+      "fontFamily": "DejaVu Sans",
+      "fontWeight": "bold",
+      "color": "#352719"
+    },
+    {
+      "id": "message-5",
+      "label": "Footer",
+      "sample": "(SO KEEP ON BEING YOU, BECAUSE\nTHE WORLD NEEDS MORE OF WHO YOU ARE!)",
+      "x": 49,
+      "y": 73,
+      "width": 75,
+      "height": 10,
+      "size": 0.024,
+      "fontFamily": "DejaVu Sans",
+      "fontWeight": "normal",
+      "color": "#352719"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

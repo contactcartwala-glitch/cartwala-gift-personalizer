@@ -1,0 +1,66 @@
+{
+  "sku": "CW-GIFT-062",
+  "title": "Cartwala Thank You Sunflower Acrylic Desk Plaque",
+  "productId": "gid://shopify/Product/8700008071353",
+  "handle": "cartwala-thank-you-acrylic-desk-plaque-062",
+  "source": "sources/CW-GIFT-062.webp",
+  "background": "CW-GIFT-062-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "message-1",
+      "label": "Title",
+      "sample": "THANK YOU",
+      "x": 50,
+      "y": 15,
+      "width": 64,
+      "height": 10,
+      "size": 0.066,
+      "fontFamily": "DejaVu Serif",
+      "fontWeight": "bold",
+      "color": "#352719"
+    },
+    {
+      "id": "message-2",
+      "label": "Message",
+      "sample": "FOR THE AMAZING\nPERSON YOU ARE,\nFOR ALL THAT YOU DO &\nTHE DIFFERENCE\nYOU MAKE.",
+      "x": 51,
+      "y": 37,
+      "width": 63,
+      "height": 33,
+      "size": 0.03,
+      "fontFamily": "DejaVu Sans",
+      "fontWeight": "normal",
+      "color": "#352719"
+    },
+    {
+      "id": "message-3",
+      "label": "Highlight",
+      "sample": "YOU ARE TRULY",
+      "x": 51,
+      "y": 55,
+      "width": 64,
+      "height": 8,
+      "size": 0.034,
+      "fontFamily": "DejaVu Serif",
+      "fontWeight": "bold",
+      "color": "#352719"
+    },
+    {
+      "id": "message-4",
+      "label": "Thanks",
+      "sample": "appreciated.",
+      "x": 52,
+      "y": 64,
+      "width": 48,
+      "height": 11,
+      "size": 0.079,
+      "fontFamily": "Z003",
+      "fontWeight": "normal",
+      "color": "#352719"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

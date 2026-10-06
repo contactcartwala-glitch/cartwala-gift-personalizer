@@ -1,0 +1,51 @@
+{
+  "sku": "CW-GIFT-020",
+  "title": "Cartwala Floral Heart Couple Photo Night Lamp",
+  "productId": "gid://shopify/Product/8699984347321",
+  "handle": "cartwala-personalised-heart-photo-night-light-020",
+  "source": "sources/CW-GIFT-020.webp",
+  "background": "CW-GIFT-020-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 52,
+        "y": 25,
+        "width": 37,
+        "height": 49
+      },
+      "treatment": "cutout",
+      "maskMode": "manual"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Vamshi\n&\nShalini",
+      "x": 35,
+      "y": 43,
+      "width": 26,
+      "height": 18,
+      "size": 0.034,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    },
+    {
+      "id": "date",
+      "label": "Date",
+      "sample": "06.02.2022",
+      "x": 35,
+      "y": 52,
+      "width": 22,
+      "height": 5,
+      "size": 0.023,
+      "fontFamily": "DejaVu Sans",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

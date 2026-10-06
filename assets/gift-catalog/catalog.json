@@ -14,7 +14,7 @@
       "photoTreatment": "printed",
       "calendarRequired": true,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -30,7 +30,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-collage",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -46,7 +46,7 @@
       "photoTreatment": "background-cutout",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -62,7 +62,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -78,7 +78,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -94,7 +94,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -110,7 +110,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -126,7 +126,7 @@
       "photoTreatment": "engraved",
       "calendarRequired": true,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -142,7 +142,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -158,7 +158,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-collage",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -174,7 +174,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -190,7 +190,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-collage",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -206,7 +206,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -222,7 +222,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "message-plaque",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -238,7 +238,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -254,7 +254,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -270,7 +270,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -286,7 +286,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -302,7 +302,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-collage",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -318,7 +318,7 @@
       "photoTreatment": "background-cutout",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -334,7 +334,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -350,7 +350,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -366,7 +366,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -382,7 +382,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -398,7 +398,7 @@
       "photoTreatment": "engraved",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -414,7 +414,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "layered-draft",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -430,7 +430,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -446,7 +446,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -462,7 +462,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -478,7 +478,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -494,7 +494,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-collage",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -510,7 +510,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -526,7 +526,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "message-plaque",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -542,7 +542,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -558,7 +558,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -574,7 +574,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -590,7 +590,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -606,7 +606,7 @@
       "photoTreatment": "engraved",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -622,7 +622,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -638,7 +638,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -654,7 +654,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "message-plaque",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -670,7 +670,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -686,7 +686,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -702,7 +702,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-collage",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -718,7 +718,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-collage",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -734,7 +734,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -750,7 +750,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-collage",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -766,7 +766,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -782,7 +782,7 @@
       "photoTreatment": "background-cutout",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -798,7 +798,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -814,7 +814,7 @@
       "photoTreatment": "background-cutout",
       "calendarRequired": true,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -830,7 +830,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -846,7 +846,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -862,7 +862,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-collage",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -878,7 +878,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -894,7 +894,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-collage",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -910,7 +910,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-collage",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -926,7 +926,7 @@
       "photoTreatment": "engraved",
       "calendarRequired": true,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -942,7 +942,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -958,7 +958,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -974,7 +974,7 @@
       "photoTreatment": "background-cutout",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -990,7 +990,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "message-plaque",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -1006,7 +1006,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "message-plaque",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -1022,7 +1022,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -1038,7 +1038,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-collage",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -1054,7 +1054,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "message-plaque",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -1070,7 +1070,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-collage",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -1086,7 +1086,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -1102,7 +1102,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-collage",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -1118,7 +1118,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -1134,7 +1134,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "text-only",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -1150,7 +1150,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "message-plaque",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     },
@@ -1166,7 +1166,7 @@
       "photoTreatment": "printed",
       "calendarRequired": false,
       "customizationGroup": "photo-and-text",
-      "status": "template-pending",
+      "status": "layered-psd-mockup-prepared",
       "productionVerified": false,
       "storefrontVerified": false
     }

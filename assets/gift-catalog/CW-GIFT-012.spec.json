@@ -1,0 +1,64 @@
+{
+  "sku": "CW-GIFT-012",
+  "title": "Cartwala Mother Photo Collage LED Gift Lamp",
+  "productId": "gid://shopify/Product/8699979071673",
+  "handle": "cartwala-personalised-acrylic-led-photo-frame-012",
+  "source": "sources/CW-GIFT-012.webp",
+  "background": "CW-GIFT-012-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 42,
+        "y": 52,
+        "width": 6,
+        "height": 7
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-2",
+      "label": "Photo 2",
+      "guide": {
+        "x": 43,
+        "y": 59,
+        "width": 6,
+        "height": 7
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-3",
+      "label": "Photo 3",
+      "guide": {
+        "x": 51,
+        "y": 53,
+        "width": 10,
+        "height": 11
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "optional-name",
+      "label": "Optional name",
+      "sample": "Your name",
+      "x": 50,
+      "y": 74,
+      "width": 45,
+      "height": 8,
+      "size": 0.04,
+      "fontFamily": "Z003",
+      "color": "#fff2bc",
+      "hidden": true
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

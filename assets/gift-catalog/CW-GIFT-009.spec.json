@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-009",
+  "title": "Cartwala Rainbow Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8699977990329",
+  "handle": "cartwala-rainbow-theme-gift-display-009",
+  "source": "sources/CW-GIFT-009.webp",
+  "background": "CW-GIFT-009-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Kavish",
+      "x": 51,
+      "y": 60.8,
+      "width": 48,
+      "height": 10,
+      "size": 0.075,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

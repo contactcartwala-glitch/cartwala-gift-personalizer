@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-043",
+  "title": "Cartwala Floral Nikah Couple Acrylic Plaque",
+  "productId": "gid://shopify/Product/8699996930233",
+  "handle": "cartwala-tabletop-decorative-display-043",
+  "source": "sources/CW-GIFT-043.webp",
+  "background": "CW-GIFT-043-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Sadik & Neeru",
+      "x": 53,
+      "y": 52,
+      "width": 35,
+      "height": 9,
+      "size": 0.035,
+      "fontFamily": "Z003",
+      "color": "#352719"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

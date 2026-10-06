@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-040",
+  "title": "Cartwala Jungle Tree Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8699995652281",
+  "handle": "cartwala-child-name-keepsake-display-040",
+  "source": "sources/CW-GIFT-040.webp",
+  "background": "CW-GIFT-040-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Parth",
+      "x": 68,
+      "y": 36,
+      "width": 33,
+      "height": 10,
+      "size": 0.077,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-055",
+  "title": "Cartwala Fairy Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8700004860089",
+  "handle": "cartwala-fairy-and-flowers-night-light-055",
+  "source": "sources/CW-GIFT-055.webp",
+  "background": "CW-GIFT-055-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Maria",
+      "x": 52,
+      "y": 43,
+      "width": 49,
+      "height": 10,
+      "size": 0.081,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

@@ -1,0 +1,48 @@
+{
+  "sku": "CW-GIFT-058",
+  "title": "Cartwala Engraved Couple Photo Calendar Wooden Plaque",
+  "productId": "gid://shopify/Product/8700006269113",
+  "handle": "cartwala-engraved-round-wood-photo-plaque-058",
+  "source": "sources/CW-GIFT-058.webp",
+  "background": "CW-GIFT-058-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 13,
+        "y": 29,
+        "width": 39,
+        "height": 49
+      },
+      "treatment": "engraved-dark",
+      "maskMode": "manual"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Rohit & Priya",
+      "x": 70,
+      "y": 35.7,
+      "width": 40,
+      "height": 11,
+      "size": 0.057,
+      "fontFamily": "Z003",
+      "color": "#352719"
+    }
+  ],
+  "calendar": {
+    "x": 56,
+    "y": 47,
+    "width": 27,
+    "height": 22,
+    "month": "August",
+    "monthX": 69,
+    "monthY": 43,
+    "day": 21
+  },
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

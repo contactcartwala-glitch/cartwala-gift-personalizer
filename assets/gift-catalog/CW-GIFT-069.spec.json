@@ -1,0 +1,64 @@
+{
+  "sku": "CW-GIFT-069",
+  "title": "Cartwala Family Tree Photo Collage LED Lamp",
+  "productId": "gid://shopify/Product/8700012200121",
+  "handle": "cartwala-personalised-acrylic-led-photo-frame-069",
+  "source": "sources/CW-GIFT-069.webp",
+  "background": "CW-GIFT-069-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 21,
+        "y": 11,
+        "width": 59,
+        "height": 34
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-2",
+      "label": "Photo 2",
+      "guide": {
+        "x": 21,
+        "y": 46,
+        "width": 27,
+        "height": 25
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    },
+    {
+      "id": "photo-3",
+      "label": "Photo 3",
+      "guide": {
+        "x": 50,
+        "y": 46,
+        "width": 30,
+        "height": 25
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "optional-name",
+      "label": "Optional name",
+      "sample": "Your name",
+      "x": 50,
+      "y": 74,
+      "width": 45,
+      "height": 8,
+      "size": 0.04,
+      "fontFamily": "Z003",
+      "color": "#fff2bc",
+      "hidden": true
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

@@ -1,0 +1,121 @@
+{
+  "sku": "CW-GIFT-067",
+  "title": "Cartwala Friends Like Family Photo Collage LED Lamp",
+  "productId": "gid://shopify/Product/8700011086009",
+  "handle": "cartwala-personalised-acrylic-led-photo-frame-067",
+  "source": "sources/CW-GIFT-067.webp",
+  "background": "CW-GIFT-067-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 23.3,
+        "y": 13.1,
+        "width": 47.9,
+        "height": 33.6
+      },
+      "treatment": "printed",
+      "maskMode": "polygon",
+      "polygon": [
+        [
+          294,
+          166
+        ],
+        [
+          891,
+          230
+        ],
+        [
+          891,
+          583
+        ],
+        [
+          294,
+          581
+        ]
+      ],
+      "preserveSourcePosition": true
+    },
+    {
+      "id": "photo-2",
+      "label": "Photo 2",
+      "guide": {
+        "x": 23.3,
+        "y": 48.6,
+        "width": 25,
+        "height": 24.8
+      },
+      "treatment": "printed",
+      "maskMode": "polygon",
+      "polygon": [
+        [
+          294,
+          612
+        ],
+        [
+          603,
+          612
+        ],
+        [
+          603,
+          897
+        ],
+        [
+          294,
+          918
+        ]
+      ],
+      "preserveSourcePosition": true
+    },
+    {
+      "id": "photo-3",
+      "label": "Photo 3",
+      "guide": {
+        "x": 49.8,
+        "y": 48.7,
+        "width": 21.4,
+        "height": 23
+      },
+      "treatment": "printed",
+      "maskMode": "polygon",
+      "polygon": [
+        [
+          627,
+          613
+        ],
+        [
+          891,
+          613
+        ],
+        [
+          891,
+          879
+        ],
+        [
+          627,
+          897
+        ]
+      ],
+      "preserveSourcePosition": true
+    }
+  ],
+  "textFields": [
+    {
+      "id": "optional-name",
+      "label": "Optional name",
+      "sample": "Your name",
+      "x": 50,
+      "y": 74,
+      "width": 45,
+      "height": 8,
+      "size": 0.04,
+      "fontFamily": "Z003",
+      "color": "#fff2bc",
+      "hidden": true
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

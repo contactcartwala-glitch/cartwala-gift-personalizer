@@ -1,3 +1,4 @@
 sources/
 *-background.png
-CW-GIFT-026/
+CW-GIFT-*/
+*.generation.json

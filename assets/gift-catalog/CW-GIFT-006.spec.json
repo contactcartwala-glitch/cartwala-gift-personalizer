@@ -1,0 +1,38 @@
+{
+  "sku": "CW-GIFT-006",
+  "title": "Cartwala Heart Acrylic Party Keychain",
+  "productId": "gid://shopify/Product/8699976351929",
+  "handle": "cartwala-heart-acrylic-keychain-party-design-006",
+  "source": "sources/CW-GIFT-006.webp",
+  "background": "CW-GIFT-006-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "CJP",
+      "x": 62,
+      "y": 56,
+      "width": 35,
+      "height": 11,
+      "size": 0.12,
+      "fontFamily": "DejaVu Serif",
+      "color": "#fff2bc"
+    },
+    {
+      "id": "message",
+      "label": "Message",
+      "sample": "PARTY",
+      "x": 62,
+      "y": 64,
+      "width": 35,
+      "height": 8,
+      "size": 0.08,
+      "fontFamily": "DejaVu Serif",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

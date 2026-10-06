@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-029",
+  "title": "Cartwala Floral Bouquet Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8699989950649",
+  "handle": "cartwala-floral-bouquet-night-light-029",
+  "source": "sources/CW-GIFT-029.webp",
+  "background": "CW-GIFT-029-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Siddharth",
+      "x": 50,
+      "y": 71.9,
+      "width": 68,
+      "height": 11,
+      "size": 0.083,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

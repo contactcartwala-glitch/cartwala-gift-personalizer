@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-030",
+  "title": "Cartwala Floral Crescent Couple Name LED Lamp with Wooden Base",
+  "productId": "gid://shopify/Product/8699990638777",
+  "handle": "cartwala-couple-keepsake-display-030",
+  "source": "sources/CW-GIFT-030.webp",
+  "background": "CW-GIFT-030-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Nishith & Kashvi",
+      "x": 66,
+      "y": 43,
+      "width": 36,
+      "height": 9,
+      "size": 0.04,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

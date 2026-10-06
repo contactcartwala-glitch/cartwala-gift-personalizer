@@ -1,0 +1,53 @@
+{
+  "sku": "CW-GIFT-063",
+  "title": "Cartwala True Friend Sunflower Acrylic Desk Plaque",
+  "productId": "gid://shopify/Product/8700008825017",
+  "handle": "cartwala-clear-acrylic-gift-display-063",
+  "source": "sources/CW-GIFT-063.webp",
+  "background": "CW-GIFT-063-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "message-1",
+      "label": "Title",
+      "sample": "A True Friend",
+      "x": 51,
+      "y": 20,
+      "width": 64,
+      "height": 10,
+      "size": 0.06,
+      "fontFamily": "DejaVu Serif",
+      "fontWeight": "bold",
+      "color": "#352719"
+    },
+    {
+      "id": "message-2",
+      "label": "Message",
+      "sample": "IS HARD TO FIND\nTHEY ARE RARE & ONE OF A KIND.\nI DON'T CARE\nIF I ONLY HAVE A FEW.\nI KNOW I HAVE ONE OF\nTHE BEST",
+      "x": 52,
+      "y": 53,
+      "width": 63,
+      "height": 33,
+      "size": 0.027,
+      "fontFamily": "DejaVu Sans",
+      "fontWeight": "normal",
+      "color": "#352719"
+    },
+    {
+      "id": "message-3",
+      "label": "Footer",
+      "sample": "That friend is you!",
+      "x": 52,
+      "y": 76,
+      "width": 66,
+      "height": 12,
+      "size": 0.059,
+      "fontFamily": "Z003",
+      "fontWeight": "normal",
+      "color": "#352719"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

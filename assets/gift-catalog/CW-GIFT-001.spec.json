@@ -1,0 +1,60 @@
+{
+  "sku": "CW-GIFT-001",
+  "title": "Cartwala Wedding Photo Calendar LED Lamp",
+  "productId": "gid://shopify/Product/8699974254777",
+  "handle": "cartwala-photo-keepsake-with-names-and-date-001",
+  "source": "sources/CW-GIFT-001.webp",
+  "background": "CW-GIFT-001-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 52,
+        "y": 28,
+        "width": 35,
+        "height": 46
+      },
+      "treatment": "printed",
+      "maskMode": "detect-grey"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Radha & Krishna",
+      "x": 68,
+      "y": 25,
+      "width": 34,
+      "height": 8,
+      "size": 0.044,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    },
+    {
+      "id": "message",
+      "label": "Message",
+      "sample": "Thank you for making me\nlaugh and smile every single\nday since the day we met",
+      "x": 31,
+      "y": 66,
+      "width": 36,
+      "height": 15,
+      "size": 0.027,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": {
+    "x": 17,
+    "y": 31,
+    "width": 31,
+    "height": 22,
+    "month": "January",
+    "monthX": 23,
+    "monthY": 26,
+    "day": 17
+  },
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

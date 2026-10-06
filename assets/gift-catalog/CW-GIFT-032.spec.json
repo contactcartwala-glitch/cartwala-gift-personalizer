@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-032",
+  "title": "Cartwala Raccoon and Tree Personalised Name Night Lamp",
+  "productId": "gid://shopify/Product/8699991261369",
+  "handle": "cartwala-woodland-raccoon-gift-display-032",
+  "source": "sources/CW-GIFT-032.webp",
+  "background": "CW-GIFT-032-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Mia",
+      "x": 33,
+      "y": 56,
+      "width": 36,
+      "height": 12,
+      "size": 0.098,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

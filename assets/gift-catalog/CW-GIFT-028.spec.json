@@ -1,0 +1,51 @@
+{
+  "sku": "CW-GIFT-028",
+  "title": "Cartwala Floral Wedding Couple Photo LED Lamp",
+  "productId": "gid://shopify/Product/8699989196985",
+  "handle": "cartwala-clear-acrylic-couple-lamp-028",
+  "source": "sources/CW-GIFT-028.webp",
+  "background": "CW-GIFT-028-background.png",
+  "photos": [
+    {
+      "id": "photo-1",
+      "label": "Photo 1",
+      "guide": {
+        "x": 37,
+        "y": 26,
+        "width": 38,
+        "height": 33
+      },
+      "treatment": "cutout",
+      "maskMode": "manual"
+    }
+  ],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Anushka & Rohit",
+      "x": 52,
+      "y": 68,
+      "width": 58,
+      "height": 10,
+      "size": 0.058,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    },
+    {
+      "id": "date",
+      "label": "Date",
+      "sample": "14.02.2026",
+      "x": 52,
+      "y": 83,
+      "width": 41,
+      "height": 5,
+      "size": 0.03,
+      "fontFamily": "DejaVu Sans",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}

@@ -1,0 +1,26 @@
+{
+  "sku": "CW-GIFT-034",
+  "title": "Cartwala Rectangular Happy Birthday Name LED Lamp",
+  "productId": "gid://shopify/Product/8699992178873",
+  "handle": "cartwala-personalised-birthday-acrylic-led-lamp-034",
+  "source": "sources/CW-GIFT-034.webp",
+  "background": "CW-GIFT-034-background.png",
+  "photos": [],
+  "textFields": [
+    {
+      "id": "name",
+      "label": "Name",
+      "sample": "Sweety",
+      "x": 57,
+      "y": 49,
+      "width": 65,
+      "height": 18,
+      "size": 0.13,
+      "fontFamily": "Z003",
+      "color": "#fff2bc"
+    }
+  ],
+  "calendar": null,
+  "reviewStatus": "authoring",
+  "productionArtworkStatus": "mockup-only"
+}
