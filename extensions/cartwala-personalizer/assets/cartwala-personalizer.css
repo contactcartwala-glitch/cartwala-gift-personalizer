@@ -1212,3 +1212,99 @@ body.cw-personalization-complete
     height: min(55vh, 450px);
   }
 }
+
+
+/* Photo Cube Clock: dedicated four-side upload UI */
+.cw-photo-cube-clock .cw-personalizer__workspace{
+  grid-template-columns:minmax(0,1.25fr) minmax(340px,420px);
+}
+.cw-photo-cube-clock .cw-personalizer__controls-pane{
+  background:#fffaf6;
+  padding:22px;
+}
+.cw-photo-cube-clock .cw-clock-upload-heading{
+  display:grid;
+  gap:4px;
+  margin-bottom:16px;
+  padding-bottom:12px;
+  border-bottom:1px solid #f0ded2;
+}
+.cw-photo-cube-clock .cw-clock-upload-heading strong{
+  font-size:20px;
+  color:#2b211c;
+}
+.cw-photo-cube-clock .cw-clock-upload-heading span{
+  font-size:13px;
+  color:#6a5c54;
+}
+.cw-photo-cube-clock .cw-personalizer__fields{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.cw-photo-cube-clock .cw-personalizer__field.cw-field-photo,
+.cw-photo-cube-clock .cw-personalizer__field--clock-photo{
+  display:grid !important;
+  gap:8px;
+  padding:12px;
+  border:1px solid #f2d3c1;
+  border-radius:12px;
+  background:#fff;
+}
+.cw-photo-cube-clock .cw-personalizer__field--clock-photo .cw-personalizer__field-title{
+  order:2;
+  margin:0;
+  text-align:center;
+  font-size:13px;
+  color:#2d211c;
+}
+.cw-photo-cube-clock .cw-clock-upload-card{
+  order:1;
+  display:grid !important;
+  min-height:112px;
+  place-items:center;
+  border:1.5px dashed #d9b39c;
+  border-radius:10px;
+  background:#fffdfb;
+  color:#ff6200;
+  font-size:13px;
+}
+.cw-photo-cube-clock .cw-clock-upload-card::before{
+  content:"↥";
+  display:grid;
+  place-items:center;
+  width:46px;
+  height:46px;
+  margin-bottom:5px;
+  border-radius:50%;
+  border:2px solid #ff6200;
+  font-size:25px;
+  line-height:1;
+}
+.cw-photo-cube-clock .cw-personalizer__photo-controls{
+  order:3;
+  grid-column:1/-1;
+}
+.cw-photo-cube-clock .cw-personalizer__photo-controls:not([hidden]){
+  display:grid;
+}
+.cw-photo-cube-clock .cw-personalizer__stage{
+  background:#f8f3ef;
+  border-radius:12px;
+}
+.cw-photo-cube-clock .cw-personalizer__slot{
+  display:none !important;
+}
+@media (max-width:749px){
+  .cw-photo-cube-clock .cw-personalizer__workspace{
+    grid-template-columns:1fr;
+  }
+  .cw-photo-cube-clock .cw-personalizer__controls-pane{
+    max-height:none;
+  }
+  .cw-photo-cube-clock .cw-personalizer__fields{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .cw-photo-cube-clock .cw-clock-upload-card{
+    min-height:96px;
+  }
+}
