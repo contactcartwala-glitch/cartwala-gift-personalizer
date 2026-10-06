@@ -2181,3 +2181,50 @@ body.cw-personalization-complete
     font-size:15px;
   }
 }
+
+
+/* Clock-only: fixed Front/Bottom are the real clock faces, not images inside another frame */
+@keyframes cwClockFixedFaceGlow{
+  0%,100%{box-shadow:0 0 26px rgba(255,255,255,.55)}
+  16%{box-shadow:0 0 30px rgba(255,229,86,.58)}
+  32%{box-shadow:0 0 30px rgba(255,153,82,.52)}
+  48%{box-shadow:0 0 32px rgba(93,232,125,.55)}
+  64%{box-shadow:0 0 32px rgba(91,183,255,.55)}
+  80%{box-shadow:0 0 32px rgba(191,126,255,.5)}
+  92%{box-shadow:0 0 30px rgba(255,121,184,.48)}
+}
+.cw-clock-product-face--front,
+.cw-clock-product-face--bottom,
+.cw-clock-modal-face--front,
+.cw-clock-modal-face--bottom{
+  border:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  overflow:visible !important;
+  animation:cwClockFixedFaceGlow 9s linear infinite !important;
+}
+.cw-clock-product-face--front::after,
+.cw-clock-product-face--bottom::after,
+.cw-clock-modal-face--front::after,
+.cw-clock-modal-face--bottom::after{
+  display:none !important;
+}
+.cw-clock-product-face--front img,
+.cw-clock-product-face--bottom img,
+.cw-clock-modal-face--front img,
+.cw-clock-modal-face--bottom img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  object-position:center !important;
+  transform:none !important;
+  border-radius:34px;
+}
+@media(max-width:749px){
+  .cw-clock-product-face--front img,
+  .cw-clock-product-face--bottom img,
+  .cw-clock-modal-face--front img,
+  .cw-clock-modal-face--bottom img{
+    border-radius:26px;
+  }
+}
