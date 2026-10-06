@@ -1509,3 +1509,283 @@ body.cw-personalization-complete
   .cw-photo-cube-clock .cw-clock-front-screen strong{font-size:56px}
   .cw-photo-cube-clock .cw-clock-front-screen span{font-size:16px}
 }
+
+
+/* Photo Cube Clock: product-page 3D viewer + crop editing */
+.cw-photo-cube-clock .cw-clock-crop-box{
+  position:relative;
+  width:100%;
+  aspect-ratio:1/1;
+  overflow:hidden;
+  border-radius:14px;
+  background:#111;
+  touch-action:none;
+  cursor:grab;
+}
+.cw-photo-cube-clock .cw-clock-crop-box:active{cursor:grabbing}
+.cw-photo-cube-clock .cw-clock-crop-box[hidden]{display:none!important}
+.cw-photo-cube-clock .cw-clock-crop-box img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  transform-origin:center;
+  pointer-events:none;
+}
+.cw-photo-cube-clock .cw-clock-crop-box>span{
+  position:absolute;
+  left:50%;
+  bottom:9px;
+  transform:translateX(-50%);
+  z-index:2;
+  padding:5px 9px;
+  border-radius:999px;
+  background:rgba(0,0,0,.66);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  white-space:nowrap;
+  pointer-events:none;
+}
+.cw-photo-cube-clock .cw-personalizer__photo-controls{
+  margin-top:2px;
+}
+.cw-photo-cube-clock .cw-personalizer__photo-controls label{
+  font-size:12px;
+}
+.cw-photo-cube-clock .cw-personalizer__photo-controls input[type="range"]{
+  width:100%;
+}
+.cw-clock-product-preview{
+  position:relative;
+  margin:22px 0;
+  padding:22px;
+  border:1px solid #ebe5e1;
+  border-radius:20px;
+  background:linear-gradient(180deg,#fff 0%,#fbf8f5 100%);
+  box-shadow:0 16px 42px rgba(35,24,17,.08);
+}
+.cw-clock-product-preview[hidden]{display:none!important}
+.cw-clock-product-preview__head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:10px;
+}
+.cw-clock-product-preview__head p{
+  margin:0 0 3px;
+  color:#ff6200;
+  font-size:11px;
+  line-height:1.2;
+  font-weight:800;
+  letter-spacing:.14em;
+}
+.cw-clock-product-preview__head h2{
+  margin:0;
+  color:#211a16;
+  font-size:clamp(22px,3vw,32px);
+  line-height:1.08;
+}
+.cw-clock-product-preview__head span{
+  display:block;
+  margin-top:7px;
+  color:#70645d;
+  font-size:13px;
+}
+.cw-clock-product-preview__badge{
+  display:grid;
+  place-items:center;
+  min-width:68px;
+  min-height:68px;
+  border:0;
+  border-radius:50%;
+  background:#ff6200;
+  color:#fff;
+  cursor:pointer;
+  box-shadow:0 9px 24px rgba(255,98,0,.28);
+}
+.cw-clock-product-preview__badge span{
+  margin:0;
+  color:inherit;
+  font-size:24px;
+  line-height:1;
+}
+.cw-clock-product-preview__badge strong{
+  font-size:12px;
+  line-height:1;
+}
+.cw-clock-product-preview__stage{
+  display:grid;
+  place-items:center;
+  width:100%;
+  min-height:500px;
+  margin:6px 0 14px;
+  overflow:hidden;
+  perspective:1200px;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 50% 34%,rgba(255,255,255,.98),rgba(245,240,235,.95) 54%,rgba(232,224,216,.95) 100%);
+  touch-action:none;
+  cursor:grab;
+  outline:none;
+}
+.cw-clock-product-preview__stage.is-dragging{cursor:grabbing}
+.cw-clock-product-cube{
+  --cw-clock-size:min(340px,72vw);
+  position:relative;
+  width:var(--cw-clock-size);
+  height:var(--cw-clock-size);
+  transform-style:preserve-3d;
+  transform:rotateX(-18deg) rotateY(28deg);
+  transition:transform .18s ease-out;
+  filter:drop-shadow(0 28px 24px rgba(34,25,20,.22));
+}
+.cw-clock-product-preview__stage.is-dragging .cw-clock-product-cube{transition:none}
+.cw-clock-product-face{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  box-sizing:border-box;
+  border:16px solid #fafafa;
+  border-radius:34px;
+  background:#f8f8f8;
+  box-shadow:
+    inset 0 0 0 2px rgba(0,0,0,.055),
+    inset 0 9px 16px rgba(255,255,255,.65);
+  backface-visibility:hidden;
+}
+.cw-clock-product-face img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  transform-origin:center;
+}
+.cw-clock-product-face--front{transform:translateZ(calc(var(--cw-clock-size)/2))}
+.cw-clock-product-face--back{transform:rotateY(180deg) translateZ(calc(var(--cw-clock-size)/2))}
+.cw-clock-product-face--right{transform:rotateY(90deg) translateZ(calc(var(--cw-clock-size)/2))}
+.cw-clock-product-face--left{transform:rotateY(-90deg) translateZ(calc(var(--cw-clock-size)/2))}
+.cw-clock-product-face--top{transform:rotateX(90deg) translateZ(calc(var(--cw-clock-size)/2))}
+.cw-clock-product-face--bottom{transform:rotateX(-90deg) translateZ(calc(var(--cw-clock-size)/2));background:#eee}
+.cw-clock-product-face--bottom img{
+  object-fit:cover;
+  object-position:center;
+}
+.cw-clock-product-screen{
+  display:flex;
+  width:100%;
+  height:100%;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.23),transparent 28%),
+    #9fa58c;
+  color:#10110d;
+  text-shadow:0 1px 0 rgba(255,255,255,.25);
+}
+.cw-clock-product-screen strong{
+  font:700 clamp(54px,8vw,82px)/1 monospace;
+  letter-spacing:-.08em;
+}
+.cw-clock-product-screen span{
+  font:700 clamp(15px,2.4vw,22px)/1.2 monospace;
+}
+.cw-clock-product-preview__views{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  margin:0 0 18px;
+}
+.cw-clock-product-preview__views button{
+  min-width:76px;
+  padding:9px 13px;
+  border:1px solid #ddd5cf;
+  border-radius:999px;
+  background:#fff;
+  color:#312821;
+  font-size:12px;
+  font-weight:750;
+  cursor:pointer;
+}
+.cw-clock-product-preview__views button:hover{
+  border-color:#ff6200;
+  color:#ff6200;
+}
+.cw-clock-product-preview__photos{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.cw-clock-product-thumb{
+  display:flex;
+  min-width:0;
+  align-items:center;
+  gap:9px;
+  padding:8px;
+  border:1px solid #e6ddd7;
+  border-radius:12px;
+  background:#fff;
+  text-align:left;
+  cursor:pointer;
+}
+.cw-clock-product-thumb:hover{border-color:#ff6200}
+.cw-clock-product-thumb__image{
+  flex:0 0 52px;
+  width:52px;
+  height:52px;
+  overflow:hidden;
+  border-radius:9px;
+  background:#f0ece8;
+}
+.cw-clock-product-thumb__image img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  transform-origin:center;
+}
+.cw-clock-product-thumb__copy{
+  display:grid;
+  min-width:0;
+  gap:2px;
+}
+.cw-clock-product-thumb__copy strong{
+  overflow:hidden;
+  color:#2d241f;
+  font-size:12px;
+  text-overflow:ellipsis;
+}
+.cw-clock-product-thumb__copy small{
+  color:#ff6200;
+  font-size:10px;
+  font-weight:700;
+}
+@media (max-width:749px){
+  .cw-clock-product-preview{
+    margin:16px 0;
+    padding:14px;
+    border-radius:16px;
+  }
+  .cw-clock-product-preview__head{
+    align-items:center;
+  }
+  .cw-clock-product-preview__head span{font-size:12px}
+  .cw-clock-product-preview__badge{
+    min-width:58px;
+    min-height:58px;
+  }
+  .cw-clock-product-preview__stage{
+    min-height:390px;
+  }
+  .cw-clock-product-cube{
+    --cw-clock-size:min(245px,66vw);
+  }
+  .cw-clock-product-face{border-width:12px;border-radius:26px}
+  .cw-clock-product-preview__photos{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
