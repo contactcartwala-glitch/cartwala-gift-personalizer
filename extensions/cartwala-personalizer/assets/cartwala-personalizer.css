@@ -1640,7 +1640,8 @@ body.cw-personalization-complete
   transform-style:preserve-3d;
   transform:rotateX(-18deg) rotateY(28deg);
   transition:transform .18s ease-out;
-  filter:drop-shadow(0 28px 24px rgba(34,25,20,.22));
+  will-change:transform;
+  transform-origin:center center;
 }
 .cw-clock-product-preview__stage.is-dragging .cw-clock-product-cube{transition:none}
 .cw-clock-product-face{
@@ -1848,7 +1849,8 @@ body.cw-personalization-complete
   transform-style:preserve-3d;
   transform:rotateX(-18deg) rotateY(28deg);
   transition:transform .18s ease-out;
-  filter:drop-shadow(0 28px 28px rgba(0,0,0,.24));
+  will-change:transform;
+  transform-origin:center center;
 }
 .cw-clock-modal__stage.is-dragging .cw-clock-modal-cube{transition:none}
 .cw-clock-modal-face{
@@ -2021,3 +2023,23 @@ body.cw-personalization-complete
     animation:none;
   }
 }
+
+/* clock 3D shadow without filter: filters flatten preserve-3d descendants */
+.cw-clock-product-preview__stage::after,
+.cw-clock-modal__stage::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:8%;
+  width:min(280px,58%);
+  height:34px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:rgba(35,25,20,.18);
+  filter:blur(16px);
+  pointer-events:none;
+}
+.cw-clock-product-preview__stage,
+.cw-clock-modal__stage{position:relative}
+.cw-clock-product-cube,
+.cw-clock-modal-cube{z-index:2}
