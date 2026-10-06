@@ -2200,7 +2200,7 @@ body.cw-personalization-complete
   border:0 !important;
   background:transparent !important;
   box-shadow:none !important;
-  overflow:visible !important;
+  overflow:hidden !important;
   animation:cwClockFixedFaceGlow 9s linear infinite !important;
 }
 .cw-clock-product-face--front::after,
@@ -2215,9 +2215,9 @@ body.cw-personalization-complete
 .cw-clock-modal-face--bottom img{
   width:100% !important;
   height:100% !important;
-  object-fit:contain !important;
+  object-fit:cover !important;
   object-position:center !important;
-  transform:none !important;
+  transform:scale(1.03) !important;
   border-radius:34px;
 }
 @media(max-width:749px){
