@@ -1402,6 +1402,20 @@
         let activePhoto = 0;
         const pointers = new Map();
         let gesture = null;
+        const isPhotoCubeClock =
+          String(root.dataset.productId) === "15416028364985";
+
+        if (isPhotoCubeClock) {
+          root.classList.add("cw-photo-cube-clock");
+          const controlsPane = root.querySelector(".cw-personalizer__controls-pane");
+          if (controlsPane && !controlsPane.querySelector(".cw-clock-upload-heading")) {
+            const heading = document.createElement("div");
+            heading.className = "cw-clock-upload-heading";
+            heading.innerHTML =
+              '<strong>Upload Your Photos</strong><span>Add 4 photos for each side (Top, Left, Right, Back)</span>';
+            controlsPane.insertBefore(heading, fields);
+          }
+        }
 
         const photoStates = config.photos.map((field, index) => {
           const viewport = document.createElement("div");
@@ -1431,6 +1445,8 @@
           const card = document.createElement("section");
           card.className = "cw-personalizer__field";
           card.dataset.photoIndex = String(index);
+          if (isPhotoCubeClock)
+            card.classList.add("cw-personalizer__field--clock-photo");
           const title = document.createElement("div");
           title.className = "cw-personalizer__field-title";
           title.textContent =
@@ -1463,7 +1479,11 @@
           stage.appendChild(slot);
           const fileLabel = document.createElement("label");
           fileLabel.className = "cw-personalizer__file";
-          fileLabel.textContent = root.dataset.labelUpload || "Upload photo";
+          fileLabel.textContent = isPhotoCubeClock
+            ? "Click to Upload"
+            : root.dataset.labelUpload || "Upload photo";
+          if (isPhotoCubeClock)
+            fileLabel.classList.add("cw-clock-upload-card");
           const fileInput = document.createElement("input");
           fileInput.type = "file";
           fileInput.accept = "image/jpeg,image/png,image/webp";
@@ -1500,8 +1520,9 @@
           changeLabel.appendChild(changeInput);
           controls.append(resetButton, zoomLabel, rotationLabel, changeLabel);
           card.append(title, controls);
-          fileLabel.hidden = true;
+          fileLabel.hidden = !isPhotoCubeClock;
           card.append(fileLabel);
+          if (isPhotoCubeClock) slot.hidden = true;
           slot.addEventListener("click", () => {
             selectPhoto(index);
             if (!photoStates[index]?.file) fileInput.click();
@@ -1537,14 +1558,17 @@
           activePhoto = index;
           photoStates.forEach((state, stateIndex) => {
             const active = stateIndex === index;
-            state.card.hidden = !active;
+            state.card.hidden = isPhotoCubeClock ? false : !active;
             state.card.classList.toggle("is-active", active);
             state.viewport.classList.toggle(
               "is-active",
               active && Boolean(state.file),
             );
             state.controls.hidden = !active || !state.file;
-            state.slot.hidden = Boolean(state.file);
+            state.fileLabel.hidden = isPhotoCubeClock
+              ? Boolean(state.file)
+              : true;
+            state.slot.hidden = isPhotoCubeClock ? true : Boolean(state.file);
             state.slot.classList.toggle("is-active", active);
           });
           positionSlots?.();
@@ -1859,7 +1883,8 @@
           state.angle = 0;
           state.zoom.value = "100";
           state.rotation.value = "0";
-          state.slot.hidden = false;
+          state.slot.hidden = isPhotoCubeClock;
+          state.fileLabel.hidden = isPhotoCubeClock ? false : true;
           invalidate();
           selectPhoto(state.index);
           positionSlots();
@@ -2026,6 +2051,10 @@
         );
 
         root.querySelector("[data-cw-open]").addEventListener("click", () => {
+          if (isPhotoCubeClock) {
+            const firstMissing = photoStates.findIndex((state) => !state.file);
+            selectPhoto(firstMissing >= 0 ? firstMissing : 0);
+          }
           dialog.showModal();
           refreshTextSizes();
           positionSlots();
