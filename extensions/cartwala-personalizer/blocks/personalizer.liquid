@@ -118,6 +118,27 @@
           {% endfor %}
         </div>
       </section>
+      <dialog class="cw-clock-modal" data-cw-clock-modal aria-label="Custom photo clock 3D preview">
+        <div class="cw-clock-modal__panel">
+          <header>
+            <h2>CUSTOM PHOTO CLOCK 3D</h2>
+            <button type="button" data-cw-clock-modal-close aria-label="Close">×</button>
+          </header>
+          <div class="cw-clock-modal__stage" data-cw-clock-modal-stage tabindex="0">
+            <div class="cw-clock-modal-cube" data-cw-clock-modal-cube>
+              <div class="cw-clock-modal-face cw-clock-modal-face--front">
+                <div class="cw-clock-modal-screen"><strong>12:12</strong><span>THU&nbsp;&nbsp;8/1&nbsp;&nbsp;&nbsp;27°C</span></div>
+              </div>
+              <div class="cw-clock-modal-face cw-clock-modal-face--back"><img data-cw-clock-modal-face-image="back" alt=""></div>
+              <div class="cw-clock-modal-face cw-clock-modal-face--left"><img data-cw-clock-modal-face-image="left" alt=""></div>
+              <div class="cw-clock-modal-face cw-clock-modal-face--right"><img data-cw-clock-modal-face-image="right" alt=""></div>
+              <div class="cw-clock-modal-face cw-clock-modal-face--top"><img data-cw-clock-modal-face-image="top" alt=""></div>
+              <div class="cw-clock-modal-face cw-clock-modal-face--bottom"><img src="https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-cube-clock-bottom-side.jpg?v=1791288117" alt="Clock bottom"></div>
+            </div>
+          </div>
+          <p>Drag in any direction to view the top, bottom and all photo sides</p>
+        </div>
+      </dialog>
     {% endif %}
     {% if mug_product %}
       <section class="cw-mug-preview cw-mug-preview--{{ mug_model }}" data-cw-mug-preview data-cw-render-fallback="{{ 'mug_preview.render_fallback' | t | escape }}" hidden>
