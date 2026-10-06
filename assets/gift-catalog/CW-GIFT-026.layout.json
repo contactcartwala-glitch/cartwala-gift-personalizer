@@ -1,0 +1,19 @@
+{
+  "sku": "CW-GIFT-026",
+  "productId": "gid://shopify/Product/8699987329209",
+  "handle": "cartwala-birthday-acrylic-led-lamp-026",
+  "background": "CW-GIFT-026-background.png",
+  "backgroundUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-026-background.png?v=1791258557",
+  "source": "sources/CW-GIFT-026.webp",
+  "sourceUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/lpgsw_512.webp?v=1789277270",
+  "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-026-overlay.png?v=1791258565",
+  "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-026-photo-mask.png?v=1791258572",
+  "photo": {"sourceCrop": {"left": 286, "top": 134, "width": 113, "height": 116}, "polygon": [[813, 373], [1143, 379], [1128, 718], [805, 711]]},
+  "textFields": [
+    {"id": "name", "label": "Name", "placeholder": "Your name", "sample": "Sakshi", "x": 33.2, "y": 49.7, "width": 31, "height": 9, "fontSize": 66, "fontFamily": "Georgia", "color": "#fff3bc"},
+    {"id": "date", "label": "Date", "placeholder": "DD.MM.YYYY", "sample": "30.05.1999", "x": 33.2, "y": 59.2, "width": 31, "height": 7, "fontSize": 46, "fontFamily": "Georgia", "color": "#fff3bc"}
+  ],
+  "reviewStatus": "draft",
+  "productionArtworkStatus": "not-verified",
+  "notes": "Photographic mockup only. Original source is 512 by 392 pixels. Do not advertise this as production-resolution artwork or publish before comparison and storefront verification."
+}
