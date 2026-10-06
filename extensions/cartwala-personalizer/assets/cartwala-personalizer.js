@@ -1637,8 +1637,8 @@
           const clockModal = root.querySelector("[data-cw-clock-modal]");
           const modalStage = clockModal?.querySelector("[data-cw-clock-modal-stage]");
           const modalCube = clockModal?.querySelector("[data-cw-clock-modal-cube]");
-          let productRx = -18;
-          let productRy = 28;
+          let productRx = -20;
+          let productRy = -28;
           let productDragging = false;
           let productStartX = 0;
           let productStartY = 0;
@@ -1740,8 +1740,8 @@
             });
           });
           productClockPreview?.querySelector("[data-cw-clock-focus-3d]")?.addEventListener("click", () => {
-            productRx = -18;
-            productRy = 28;
+            productRx = -20;
+            productRy = -28;
             refreshClockPreview();
             rotateProductClock();
             if (clockModal && !clockModal.open) {
@@ -2167,6 +2167,7 @@
           state.slot.hidden = true;
           selectPhoto(state.index);
           reset(state);
+          if (isPhotoCubeClock) refreshClockPreview();
           updateReady();
         };
         const clearPhoto = (state) => {
