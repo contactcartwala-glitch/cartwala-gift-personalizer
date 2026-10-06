@@ -1140,6 +1140,41 @@
           ) ||
           root.closest("section") ||
           document;
+        // The Photo Cube clock uses Cartwala's four-side live editor.
+        // Hide the older generic gift-personalization form on this product so
+        // customers only see Top / Left / Right / Back uploads in one editor.
+        const hideClockLegacyGiftForm = () => {
+          if (String(root.dataset.productId) !== "15416028364985") return;
+          const candidates = [...productArea.querySelectorAll("section,fieldset,div")]
+            .filter((element) => !root.contains(element) && !element.contains(root))
+            .filter((element) => {
+              const text = String(element.textContent || "")
+                .replace(/\s+/g, " ")
+                .trim()
+                .toLowerCase();
+              return (
+                text.includes("personalize this gift") &&
+                text.includes("name to print") &&
+                text.includes("custom message")
+              );
+            })
+            .sort(
+              (left, right) =>
+                left.querySelectorAll("*").length -
+                right.querySelectorAll("*").length,
+            );
+          const legacy = candidates[0];
+          if (!legacy) return;
+          legacy.hidden = true;
+          legacy.style.display = "none";
+          legacy.dataset.cwLegacyHidden = "true";
+        };
+        hideClockLegacyGiftForm();
+        new MutationObserver(hideClockLegacyGiftForm).observe(productArea, {
+          childList: true,
+          subtree: true,
+        });
+
         const productForm =
           productArea.querySelector('form[action*="/cart/add"]') ||
           document.querySelector('form[action*="/cart/add"]');
