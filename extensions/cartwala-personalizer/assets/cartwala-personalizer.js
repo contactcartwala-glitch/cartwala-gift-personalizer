@@ -1619,6 +1619,9 @@
 
           const pageStage = productClockPreview?.querySelector("[data-cw-clock-product-stage]");
           const pageCube = productClockPreview?.querySelector("[data-cw-clock-product-cube]");
+          const clockModal = root.querySelector("[data-cw-clock-modal]");
+          const modalStage = clockModal?.querySelector("[data-cw-clock-modal-stage]");
+          const modalCube = clockModal?.querySelector("[data-cw-clock-modal-cube]");
           let productRx = -18;
           let productRy = 28;
           let productDragging = false;
@@ -1628,8 +1631,9 @@
           let productStartRy = productRy;
 
           const rotateProductClock = () => {
-            if (pageCube)
-              pageCube.style.transform = `rotateX(${productRx}deg) rotateY(${productRy}deg)`;
+            const transform = `rotateX(${productRx}deg) rotateY(${productRy}deg)`;
+            if (pageCube) pageCube.style.transform = transform;
+            if (modalCube) modalCube.style.transform = transform;
           };
 
           const applyCropToPreviewImage = (img, state) => {
@@ -1655,6 +1659,10 @@
               );
               applyCropToPreviewImage(
                 productClockPreview.querySelector(`[data-cw-clock-thumb-image="${side}"]`),
+                state,
+              );
+              applyCropToPreviewImage(
+                clockModal?.querySelector(`[data-cw-clock-modal-face-image="${side}"]`),
                 state,
               );
             });
