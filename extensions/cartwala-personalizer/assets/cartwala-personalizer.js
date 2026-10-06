@@ -1090,6 +1090,7 @@
         const saveLabel = save.textContent;
         const result = root.querySelector("[data-cw-result]");
         const resultImage = root.querySelector("[data-cw-result-image]");
+        const productClockPreview = root.querySelector("[data-cw-clock-product-preview]");
         let saved = false;
         let busy = false;
         let previewUrl = null;
@@ -1315,6 +1316,7 @@
           saved = false;
           setPurchaseReady(false);
           result.hidden = true;
+          if (productClockPreview) productClockPreview.hidden = true;
         };
         let selectedVariantId = root.querySelector("[data-cw-acrylic]")?.dataset.selectedVariant || document.querySelector("[data-cw-product-group]")?.dataset.variant;
         if (root.dataset.cwAcrylicProduct === "true") {
@@ -1536,10 +1538,23 @@
           changeInput.type = "file";
           changeInput.accept = "image/jpeg,image/png,image/webp";
           changeLabel.appendChild(changeInput);
+          const cropBox = document.createElement("div");
+          cropBox.className = "cw-clock-crop-box";
+          cropBox.hidden = true;
+          const cropImage = document.createElement("img");
+          cropImage.alt = field.label + " crop";
+          cropBox.appendChild(cropImage);
+          const cropHint = document.createElement("span");
+          cropHint.textContent = "Drag photo to crop";
+          cropBox.appendChild(cropHint);
           controls.append(resetButton, zoomLabel, rotationLabel, changeLabel);
-          card.append(title, controls);
-          fileLabel.hidden = !isPhotoCubeClock;
-          card.append(fileLabel);
+          if (isPhotoCubeClock) {
+            card.append(title, fileLabel, cropBox, controls);
+          } else {
+            card.append(title, controls);
+            fileLabel.hidden = true;
+            card.append(fileLabel);
+          }
           if (isPhotoCubeClock) slot.hidden = true;
           slot.addEventListener("click", () => {
             selectPhoto(index);
@@ -1564,8 +1579,12 @@
             zoom,
             rotation,
             resetButton,
+            cropBox,
+            cropImage,
             x: 0,
             y: 0,
+            relativeX: 0,
+            relativeY: 0,
             scale: 1,
             angle: 0,
             file: null,
@@ -1595,137 +1614,173 @@
         if (isPhotoCubeClock) {
           const canvasPane = root.querySelector(".cw-personalizer__canvas-pane");
           const stageTip = root.querySelector(".cw-personalizer__tip");
-          const panel = document.createElement("section");
-          panel.className = "cw-clock-preview-panel";
-          panel.hidden = true;
-          panel.innerHTML = `
-            <div class="cw-clock-preview-head">
-              <div>
-                <strong>Your Clock Preview</strong>
-                <span>Drag to rotate and check every side.</span>
-              </div>
-              <button type="button" data-cw-clock-back>Edit Photos</button>
-            </div>
-            <div class="cw-clock-scene" data-cw-clock-scene tabindex="0">
-              <div class="cw-clock-cube" data-cw-clock-cube>
-                <div class="cw-clock-face cw-clock-face--front">
-                  <div class="cw-clock-front-screen">
-                    <strong>12:12</strong>
-                    <span>THU&nbsp;&nbsp;8/1&nbsp;&nbsp;&nbsp;27°C</span>
-                  </div>
-                </div>
-                <div class="cw-clock-face cw-clock-face--back" data-cw-clock-face="back"></div>
-                <div class="cw-clock-face cw-clock-face--left" data-cw-clock-face="left"></div>
-                <div class="cw-clock-face cw-clock-face--right" data-cw-clock-face="right"></div>
-                <div class="cw-clock-face cw-clock-face--top" data-cw-clock-face="top"></div>
-                <div class="cw-clock-face cw-clock-face--bottom"></div>
-              </div>
-            </div>
-            <div class="cw-clock-preview-views">
-              <button type="button" data-cw-view="front">Front</button>
-              <button type="button" data-cw-view="top">Top</button>
-              <button type="button" data-cw-view="left">Left</button>
-              <button type="button" data-cw-view="right">Right</button>
-              <button type="button" data-cw-view="back">Back</button>
-            </div>`;
-          canvasPane?.appendChild(panel);
+          if (canvasPane) canvasPane.hidden = true;
+          if (stageTip) stageTip.hidden = true;
 
-          const scene = panel.querySelector("[data-cw-clock-scene]");
-          const cube = panel.querySelector("[data-cw-clock-cube]");
-          let rx = -18;
-          let ry = 28;
-          let drag = false;
-          let px = 0;
-          let py = 0;
-          let startRx = rx;
-          let startRy = ry;
+          const pageStage = productClockPreview?.querySelector("[data-cw-clock-product-stage]");
+          const pageCube = productClockPreview?.querySelector("[data-cw-clock-product-cube]");
+          let productRx = -18;
+          let productRy = 28;
+          let productDragging = false;
+          let productStartX = 0;
+          let productStartY = 0;
+          let productStartRx = productRx;
+          let productStartRy = productRy;
 
-          const applyClockRotation = () => {
-            if (cube) cube.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+          const rotateProductClock = () => {
+            if (pageCube)
+              pageCube.style.transform = `rotateX(${productRx}deg) rotateY(${productRy}deg)`;
+          };
+
+          const applyCropToPreviewImage = (img, state) => {
+            if (!img || !state?.image?.src) return;
+            img.src = state.image.src;
+            img.hidden = false;
+            const ox = Number.isFinite(state.relativeX) ? state.relativeX : 0;
+            const oy = Number.isFinite(state.relativeY) ? state.relativeY : 0;
+            img.style.objectPosition = `calc(50% + ${ox * 100}%) calc(50% + ${oy * 100}%)`;
+            img.style.transform = `scale(${state.scale || 1})`;
           };
 
           refreshClockPreview = () => {
+            if (!productClockPreview) return;
             const states = Object.fromEntries(
               photoStates.map((state) => [state.field.id, state]),
             );
             ["top", "left", "right", "back"].forEach((side) => {
               const state = states[`clock-${side}`];
-              const face = panel.querySelector(`[data-cw-clock-face="${side}"]`);
-              if (!face) return;
-              if (state?.image?.src) {
-                face.style.backgroundImage = `url("${state.image.src}")`;
-                face.classList.add("has-photo");
-              } else {
-                face.style.backgroundImage = "none";
-                face.classList.remove("has-photo");
-              }
+              applyCropToPreviewImage(
+                productClockPreview.querySelector(`[data-cw-clock-product-face-image="${side}"]`),
+                state,
+              );
+              applyCropToPreviewImage(
+                productClockPreview.querySelector(`[data-cw-clock-thumb-image="${side}"]`),
+                state,
+              );
             });
           };
 
           showClockPreview = () => {
-            if (!photoStates.every((state) => state.file)) return;
+            if (!productClockPreview || !photoStates.every((state) => state.file)) return;
             refreshClockPreview();
-            const editPane = root.querySelector(".cw-personalizer__controls-pane");
-            if (editPane) editPane.hidden = true;
-            if (stage) stage.hidden = true;
-            if (stageTip) stageTip.hidden = true;
-            panel.hidden = false;
-            root.classList.add("is-clock-previewing");
-            applyClockRotation();
+            productClockPreview.hidden = false;
+            dialog.close();
+            rotateProductClock();
+            requestAnimationFrame(() =>
+              productClockPreview.scrollIntoView({ behavior: "smooth", block: "center" }),
+            );
           };
 
           hideClockPreview = () => {
-            const editPane = root.querySelector(".cw-personalizer__controls-pane");
-            if (editPane) editPane.hidden = false;
-            panel.hidden = true;
-            if (stageTip) stageTip.hidden = true;
-            if (stage) stage.hidden = true;
-            root.classList.remove("is-clock-previewing");
+            // Product-page preview remains visible until the customer edits a photo.
           };
 
-          panel.querySelector("[data-cw-clock-back]")?.addEventListener("click", hideClockPreview);
-          clock3dButton?.addEventListener("click", showClockPreview);
+          pageStage?.addEventListener("pointerdown", (event) => {
+            if (event.button !== 0) return;
+            productDragging = true;
+            productStartX = event.clientX;
+            productStartY = event.clientY;
+            productStartRx = productRx;
+            productStartRy = productRy;
+            pageStage.setPointerCapture?.(event.pointerId);
+            pageStage.classList.add("is-dragging");
+          });
+          pageStage?.addEventListener("pointermove", (event) => {
+            if (!productDragging) return;
+            productRy = productStartRy + (event.clientX - productStartX) * 0.7;
+            productRx = Math.max(
+              -110,
+              Math.min(110, productStartRx - (event.clientY - productStartY) * 0.55),
+            );
+            rotateProductClock();
+          });
+          const stopProductDrag = (event) => {
+            productDragging = false;
+            pageStage?.classList.remove("is-dragging");
+            if (pageStage?.hasPointerCapture?.(event.pointerId))
+              pageStage.releasePointerCapture(event.pointerId);
+          };
+          pageStage?.addEventListener("pointerup", stopProductDrag);
+          pageStage?.addEventListener("pointercancel", stopProductDrag);
+          pageStage?.addEventListener("lostpointercapture", stopProductDrag);
 
-          panel.querySelectorAll("[data-cw-view]").forEach((button) => {
+          productClockPreview?.querySelectorAll("[data-cw-clock-product-view]").forEach((button) => {
             button.addEventListener("click", () => {
-              const view = button.dataset.cwView;
-              if (view === "front") { rx = -5; ry = 0; }
-              if (view === "top") { rx = -72; ry = 0; }
-              if (view === "left") { rx = -5; ry = 90; }
-              if (view === "right") { rx = -5; ry = -90; }
-              if (view === "back") { rx = -5; ry = 180; }
-              applyClockRotation();
+              const view = button.dataset.cwClockProductView;
+              if (view === "front") { productRx = -5; productRy = 0; }
+              if (view === "top") { productRx = -90; productRy = 0; }
+              if (view === "left") { productRx = -5; productRy = 90; }
+              if (view === "right") { productRx = -5; productRy = -90; }
+              if (view === "back") { productRx = -5; productRy = 180; }
+              if (view === "bottom") { productRx = 90; productRy = 0; }
+              rotateProductClock();
+            });
+          });
+          productClockPreview?.querySelector("[data-cw-clock-focus-3d]")?.addEventListener("click", () => {
+            productRx = -18;
+            productRy = 28;
+            rotateProductClock();
+            pageStage?.focus();
+          });
+
+          productClockPreview?.querySelectorAll("[data-cw-clock-edit-side]").forEach((button) => {
+            button.addEventListener("click", () => {
+              const side = button.dataset.cwClockEditSide;
+              const index = photoStates.findIndex((state) => state.field.id === `clock-${side}`);
+              if (index < 0) return;
+              productClockPreview.hidden = true;
+              selectPhoto(index);
+              dialog.showModal();
+              requestAnimationFrame(() => {
+                photoStates[index].card.scrollIntoView({ behavior: "smooth", block: "center" });
+              });
             });
           });
 
-          scene?.addEventListener("pointerdown", (event) => {
-            if (event.button !== 0) return;
-            drag = true;
-            px = event.clientX;
-            py = event.clientY;
-            startRx = rx;
-            startRy = ry;
-            scene.setPointerCapture?.(event.pointerId);
+          // Drag directly inside each square crop preview.
+          photoStates.forEach((state) => {
+            let cropDragging = false;
+            let cropStartX = 0;
+            let cropStartY = 0;
+            let cropStartOx = 0;
+            let cropStartOy = 0;
+            state.cropBox?.addEventListener("pointerdown", (event) => {
+              if (event.target.closest("label,button,input")) return;
+              cropDragging = true;
+              cropStartX = event.clientX;
+              cropStartY = event.clientY;
+              cropStartOx = Number.isFinite(state.relativeX) ? state.relativeX : 0;
+              cropStartOy = Number.isFinite(state.relativeY) ? state.relativeY : 0;
+              state.cropBox.setPointerCapture?.(event.pointerId);
+              selectPhoto(state.index);
+            });
+            state.cropBox?.addEventListener("pointermove", (event) => {
+              if (!cropDragging) return;
+              event.preventDefault();
+              const rect = state.cropBox.getBoundingClientRect();
+              if (!rect.width || !rect.height) return;
+              state.relativeX = clamp(
+                cropStartOx + (event.clientX - cropStartX) / rect.width,
+                -0.45,
+                0.45,
+                0,
+              );
+              state.relativeY = clamp(
+                cropStartOy + (event.clientY - cropStartY) / rect.height,
+                -0.45,
+                0.45,
+                0,
+              );
+              apply(state);
+            });
+            const endCrop = (event) => {
+              cropDragging = false;
+              if (state.cropBox?.hasPointerCapture?.(event.pointerId))
+                state.cropBox.releasePointerCapture(event.pointerId);
+            };
+            state.cropBox?.addEventListener("pointerup", endCrop);
+            state.cropBox?.addEventListener("pointercancel", endCrop);
           });
-          scene?.addEventListener("pointermove", (event) => {
-            if (!drag) return;
-            ry = startRy + (event.clientX - px) * 0.55;
-            rx = Math.max(-85, Math.min(45, startRx - (event.clientY - py) * 0.45));
-            applyClockRotation();
-          });
-          const endDrag = (event) => {
-            drag = false;
-            if (scene?.hasPointerCapture?.(event.pointerId))
-              scene.releasePointerCapture(event.pointerId);
-          };
-          scene?.addEventListener("pointerup", endDrag);
-          scene?.addEventListener("pointercancel", endDrag);
-
-          // In edit mode this product intentionally shows only four equal upload cards.
-          if (canvasPane) {
-            stage.hidden = true;
-            if (stageTip) stageTip.hidden = true;
-          }
         }
 
         const fontNames = [
@@ -1964,11 +2019,21 @@
         const apply = (state) => {
           invalidate();
           state.scale = clamp(state.scale, 1, 5, 1);
-          constrainPhoto(state);
-          const objectOffsetX = state.x / state.scale;
-          const objectOffsetY = state.y / state.scale;
-          state.image.style.objectPosition = `calc(50% + ${objectOffsetX}px) calc(50% + ${objectOffsetY}px)`;
+          if (!isPhotoCubeClock) constrainPhoto(state);
+          const objectOffsetX = isPhotoCubeClock
+            ? (Number.isFinite(state.relativeX) ? state.relativeX * 100 : 0)
+            : state.x / state.scale;
+          const objectOffsetY = isPhotoCubeClock
+            ? (Number.isFinite(state.relativeY) ? state.relativeY * 100 : 0)
+            : state.y / state.scale;
+          state.image.style.objectPosition = isPhotoCubeClock
+            ? `calc(50% + ${objectOffsetX}%) calc(50% + ${objectOffsetY}%)`
+            : `calc(50% + ${objectOffsetX}px) calc(50% + ${objectOffsetY}px)`;
           state.image.style.transform = `scale(${state.scale}) rotate(${state.angle}deg)`;
+          if (state.cropImage) {
+            state.cropImage.style.objectPosition = `calc(50% + ${objectOffsetX}%) calc(50% + ${objectOffsetY}%)`;
+            state.cropImage.style.transform = `scale(${state.scale})`;
+          }
           state.image.dataset.cwX = String(state.x);
           state.image.dataset.cwY = String(state.y);
           state.image.dataset.cwScale = String(state.scale);
@@ -1979,6 +2044,8 @@
         const reset = (state) => {
           state.x = 0;
           state.y = 0;
+          state.relativeX = 0;
+          state.relativeY = 0;
           state.scale = 1;
           state.angle = 0;
           apply(state);
@@ -2018,6 +2085,12 @@
           state.image.src = state.objectUrl;
           state.image.style.display = "block";
           state.image.style.objectFit = "cover";
+          if (state.cropImage) {
+            state.cropImage.src = state.objectUrl;
+            state.cropImage.style.display = "block";
+            state.cropImage.style.objectFit = "cover";
+          }
+          if (state.cropBox) state.cropBox.hidden = false;
           state.fileLabel.hidden = true;
           state.slot.hidden = true;
           selectPhoto(state.index);
@@ -2033,8 +2106,15 @@
           state.image.removeAttribute("src");
           state.image.style.display = "none";
           state.image.style.transform = "";
+          if (state.cropImage) {
+            state.cropImage.removeAttribute("src");
+            state.cropImage.style.transform = "";
+          }
+          if (state.cropBox) state.cropBox.hidden = true;
           state.x = 0;
           state.y = 0;
+          state.relativeX = 0;
+          state.relativeY = 0;
           state.scale = 1;
           state.angle = 0;
           state.zoom.value = "100";
@@ -2067,7 +2147,9 @@
               apply(state);
             }
           });
-          state.resetButton.addEventListener("click", () => clearPhoto(state));
+          state.resetButton.addEventListener("click", () =>
+            isPhotoCubeClock ? reset(state) : clearPhoto(state),
+          );
         });
         textStates.forEach((state) => {
           const refresh = () => {
@@ -2208,6 +2290,7 @@
 
         root.querySelector("[data-cw-open]").addEventListener("click", () => {
           if (isPhotoCubeClock) {
+            if (productClockPreview) productClockPreview.hidden = true;
             hideClockPreview();
             const firstMissing = photoStates.findIndex((state) => !state.file);
             selectPhoto(firstMissing >= 0 ? firstMissing : 0);
@@ -2628,8 +2711,10 @@
             putText(productForm, "_Cartwala Personalization", "Completed");
             root.querySelector("[data-cw-open]").textContent =
               root.dataset.labelEdit || "Edit Again";
-            if (isPhotoCubeClock) showClockPreview();
-            else dialog.close();
+            if (isPhotoCubeClock) {
+              refreshClockPreview();
+              showClockPreview();
+            } else dialog.close();
           } catch (error) {
             console.error("Cartwala personalizer preview failed", error);
             window.alert(
@@ -2788,8 +2873,9 @@
               loadPhoto(s, stored.file);
               s.scale = stored.scale;
               s.angle = stored.angle;
-              s.relativeX = stored.x;
-              s.relativeY = stored.y;
+              s.relativeX = Number.isFinite(Number(stored.x)) ? Number(stored.x) : 0;
+              s.relativeY = Number.isFinite(Number(stored.y)) ? Number(stored.y) : 0;
+              apply(s);
             });
             textStates.forEach((s, i) => {
               const stored = record.texts[i] || {};
@@ -2887,6 +2973,10 @@
             }
             root.querySelector("[data-cw-open]").textContent =
               root.dataset.labelEdit || "Edit Again";
+            if (isPhotoCubeClock && isReady()) {
+              refreshClockPreview();
+              productClockPreview.hidden = false;
+            }
             updateReady();
           })
           .catch((error) =>
