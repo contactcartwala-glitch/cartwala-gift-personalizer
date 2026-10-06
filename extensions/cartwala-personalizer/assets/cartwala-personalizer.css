@@ -2043,3 +2043,141 @@ body.cw-personalization-complete
 .cw-clock-modal__stage{position:relative}
 .cw-clock-product-cube,
 .cw-clock-modal-cube{z-index:2}
+
+
+/* Clock-only Customize Now artwork layout */
+.cw-photo-cube-clock .cw-clock-upload-heading{
+  margin:0 auto 20px;
+  max-width:760px;
+  text-align:center;
+}
+.cw-photo-cube-clock .cw-clock-upload-heading strong{
+  display:block;
+  font-size:24px;
+  color:#2d2d2d;
+}
+.cw-photo-cube-clock .cw-clock-upload-heading span{
+  display:block;
+  margin-top:5px;
+  color:#6f7378;
+  font-size:13px;
+}
+.cw-photo-cube-clock .cw-personalizer__fields{
+  width:min(100%,760px);
+  margin:0 auto;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px 28px;
+}
+.cw-photo-cube-clock .cw-personalizer__field--clock-photo{
+  display:grid !important;
+  grid-template-rows:auto 1fr auto;
+  gap:8px;
+  padding:0 !important;
+  border:0 !important;
+  background:transparent !important;
+}
+.cw-photo-cube-clock .cw-personalizer__field--clock-photo .cw-personalizer__field-title{
+  order:2;
+  margin:0;
+  text-align:center;
+  color:#34373b;
+  font-size:18px;
+  font-weight:800;
+}
+.cw-photo-cube-clock .cw-clock-upload-card,
+.cw-photo-cube-clock .cw-clock-crop-box{
+  order:1;
+  min-height:0 !important;
+  width:100%;
+  aspect-ratio:1/1;
+  border:3px solid #c7ccd1 !important;
+  border-radius:28px !important;
+  background:#fff !important;
+  box-sizing:border-box;
+  overflow:hidden;
+}
+.cw-photo-cube-clock .cw-clock-upload-card{
+  display:grid !important;
+  place-items:center;
+  align-content:center;
+  color:#6f7378 !important;
+  font-size:14px !important;
+  font-weight:700;
+}
+.cw-photo-cube-clock .cw-clock-upload-card::before{
+  content:"＋";
+  width:54px;
+  height:54px;
+  margin-bottom:10px;
+  display:grid;
+  place-items:center;
+  border:2px solid #b6bbc0 !important;
+  border-radius:50%;
+  color:#60656a;
+  font-size:30px;
+}
+.cw-photo-cube-clock .cw-clock-crop-box{
+  cursor:grab;
+}
+.cw-photo-cube-clock .cw-clock-crop-box img{
+  border-radius:24px;
+}
+.cw-photo-cube-clock .cw-personalizer__photo-controls{
+  order:3;
+  margin-top:4px;
+  padding:10px;
+  border:1px solid #e2e5e8;
+  border-radius:12px;
+  background:#fff;
+}
+.cw-photo-cube-clock .cw-clock-front-reference{
+  width:min(100%,760px);
+  margin:26px auto 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  padding:12px 16px;
+  border-top:1px solid #eceff1;
+}
+.cw-photo-cube-clock .cw-clock-front-reference img{
+  width:110px;
+  height:110px;
+  object-fit:contain;
+  background:transparent;
+}
+.cw-photo-cube-clock .cw-clock-front-reference div{
+  display:grid;
+  gap:4px;
+}
+.cw-photo-cube-clock .cw-clock-front-reference strong{
+  font-size:18px;
+  color:#31353a;
+}
+.cw-photo-cube-clock .cw-clock-front-reference span{
+  font-size:12px;
+  color:#7a7f84;
+}
+@media(max-width:749px){
+  .cw-photo-cube-clock .cw-personalizer__fields{
+    gap:12px 14px;
+  }
+  .cw-photo-cube-clock .cw-personalizer__field--clock-photo .cw-personalizer__field-title{
+    font-size:15px;
+  }
+  .cw-photo-cube-clock .cw-clock-upload-card,
+  .cw-photo-cube-clock .cw-clock-crop-box{
+    border-radius:20px !important;
+  }
+  .cw-photo-cube-clock .cw-clock-front-reference{
+    gap:10px;
+    padding:10px 4px;
+  }
+  .cw-photo-cube-clock .cw-clock-front-reference img{
+    width:82px;
+    height:82px;
+  }
+  .cw-photo-cube-clock .cw-clock-front-reference strong{
+    font-size:15px;
+  }
+}
