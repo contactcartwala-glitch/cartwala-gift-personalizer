@@ -80,7 +80,7 @@ export default function AcrylicMockupEditor({ sizes, templates, digest }: Props)
       <div className="cw-mockup-output">
         <div className="cw-mockup-stage" style={{ aspectRatio: template?.mockupAspect || 1, backgroundImage: template ? undefined : 'url("/acrylic-preview-room.jpg")' }}>
           <div className={`cw-mockup-photo ${!template && thickness === "5mm" ? "cw-mockup-photo--studs" : ""}`} style={{ left: `${template?.x ?? 50}%`, top: `${template?.y ?? 34}%`, width: `${template?.width ?? dimensions.width / 60 * 78}%`, height: `${template?.height ?? dimensions.height / 60 * 78}%` }}>
-            {photo ? <img src={photo} alt="Your test photo" style={{ transform: `scale(${zoom})` }} onError={() => setPhotoError("This photo could not be opened. Try another JPG or PNG.")} /> : <span>Test photo</span>}
+            {photo ? <img src={photo} alt="Your test upload" style={{ transform: `scale(${zoom})` }} onError={() => setPhotoError("This photo could not be opened. Try another JPG or PNG.")} /> : <span>Test photo</span>}
           </div>
           {template && <img className="cw-mockup-overlay" src={template.mockup} alt="Selected master mockup" />}
         </div>

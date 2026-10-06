@@ -1,0 +1,69 @@
+{% if collection.handle == 'custom-sipper-bottles' %}{% render 'custom-sipper-filter' %}{% elsif collection.handle == 'customised-straw-water-bottles' %}{% render 'custom-straw-bottles' %}{% elsif collection.handle == 'sipper-birthday-designs' or collection.handle == 'sipper-love-designs' or collection.handle == 'sipper-anniversary-designs' or collection.handle == 'sipper-occasion-designs' or collection.handle == 'sipper-family-designs' %}{% render 'custom-sipper-bottles' %}{% elsif collection.handle == 'customised-bottles' %}{% render 'customised-bottles' %}{% else %}
+{% if collection.handle == 'photo-frames' %}
+<section class="cw-frame-hub"><div class="page-width"><nav class="cw-crumb"><a href="/">Home</a> / <span>Photo Frames</span></nav><div class="cw-frame-head"><span>PERSONALISED FOR YOU</span><h1>Photo Frames</h1><p>Choose a special moment and create a personalised photo frame made for the people you love.</p></div><div class="cw-frame-grid">
+{% assign frame_handles = 'birthday-photo-frames,love-couple-photo-frames,wedding-anniversary-photo-frames,family-photo-frames,baby-kids-photo-frames,mom-dad-parents-photo-frames,friends-photo-frames,all-personalised-photo-frames' | split: ',' %}
+{% assign frame_labels = 'Birthday Frames|Love & Couple Frames|Wedding & Anniversary Frames|Family Frames|Baby & Kids Frames|Mom, Dad & Parents Frames|Friends Frames|All Photo Frames' | split: '|' %}
+{% for h in frame_handles %}{% assign c = collections[h] %}{% assign label = frame_labels[forloop.index0] %}<a class="cw-frame-card" href="{{ c.url }}"><div class="cw-frame-img">{% if c.image %}{{ c.image | image_url: width: 800 | image_tag: loading: 'lazy', alt: c.image.alt | default: label }}{% endif %}</div><div class="cw-frame-info"><h2>{{ label }}</h2><span>Explore Collection →</span></div></a>{% endfor %}
+</div></div></section>
+<style>.cw-frame-hub{padding:36px 0 52px;background:#fff}.cw-crumb{font-size:14px;color:#777;margin-bottom:24px}.cw-crumb a{color:#777;text-decoration:none}.cw-frame-head{text-align:center;max-width:720px;margin:0 auto 30px}.cw-frame-head>span{font-size:12px;font-weight:800;letter-spacing:.1em;color:#ff6a00}.cw-frame-head h1{font-size:clamp(36px,5vw,54px);line-height:1.05;margin:8px 0 12px;color:#111}.cw-frame-head p{margin:0;color:#666;font-size:16px;line-height:1.6}.cw-frame-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.cw-frame-card{display:block;text-decoration:none!important;color:#111!important;background:#fff;border:1px solid #e5e5e5;border-radius:16px;overflow:hidden;transition:.2s}.cw-frame-card:hover{border-color:#ff6a00;transform:translateY(-2px)}.cw-frame-img{aspect-ratio:1/1;background:#fff4eb;overflow:hidden}.cw-frame-img img{display:block;width:100%;height:100%;object-fit:cover}.cw-frame-info{padding:14px}.cw-frame-info h2{font-size:16px;line-height:1.3;margin:0 0 6px;color:#111}.cw-frame-info span{font-size:12px;font-weight:800;color:#ff6a00}@media(min-width:750px){.cw-frame-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}.cw-frame-info{padding:16px}.cw-frame-info h2{font-size:17px}}@media(max-width:749px){.cw-frame-hub{padding:26px 0 38px}.cw-frame-head{text-align:left;margin-bottom:22px}.cw-frame-head h1{font-size:38px}.cw-frame-head p{font-size:14px}.cw-frame-grid{gap:10px}.cw-frame-card{border-radius:12px}.cw-frame-info{padding:10px}.cw-frame-info h2{font-size:13px}.cw-frame-info span{font-size:10px}}</style>
+{% else %}
+<div class="section"><div class="page-width"><nav class="breadcrumb"><a href="/">Home</a><span>/</span><span>{{ collection.title }}</span></nav><div class="collection-header"><div><h1>{{ collection.title }}</h1>{% if collection.description != blank %}<div class="text-muted">{{ collection.description }}</div>{% endif %}</div><span class="text-muted">{{ collection.products_count }} products</span></div><div class="grid products-grid" data-cw-infinite>{% assign collection_page_size = 24 %}{% if collection.handle == 'personalised-gift-collection' %}{% assign collection_page_size = 80 %}{% endif %}{% if collection.handle == 'crystal' %}{% assign collection_page_size = 50 %}{% endif %}{% paginate collection.products by collection_page_size %}{% for product in collection.products %}{% render 'product-card', product: product %}{% endfor %}{% if paginate.pages > 1 %}<nav data-cw-pagination style="grid-column:1/-1" aria-label="{{ 'crystal.collection_pages' | t }}">{{ paginate | default_pagination }}</nav>{% endif %}{% endpaginate %}</div></div></div>
+{% endif %}
+
+{% endif %}
+{% javascript %}
+(() => {
+const init = () => {
+document.querySelectorAll('[data-cw-infinite]').forEach((grid) => {
+if (grid.dataset.cwReady || !('IntersectionObserver' in window)) return;
+const pager = grid.querySelector('[data-cw-pagination]');
+let next = pager?.querySelector('.next a');
+if (!pager || !next) return;
+grid.dataset.cwReady = 'true';
+const marker = document.createElement('div');
+marker.style.cssText = 'grid-column:1/-1;height:1px';
+marker.setAttribute('aria-hidden', 'true');
+grid.append(marker);
+pager.hidden = true;
+let busy = false;
+const visited = new Set();
+const observer = new IntersectionObserver(async (entries) => {
+if (!entries.some((entry) => entry.isIntersecting) || busy || !next) return;
+const url = next.href;
+if (visited.has(url)) { observer.disconnect(); return; }
+busy = true;
+grid.setAttribute('aria-busy', 'true');
+try {
+const response = await fetch(url, { credentials: 'same-origin' });
+if (!response.ok) throw new Error('collection');
+const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+const incoming = doc.querySelector('[data-cw-infinite]');
+if (!incoming) throw new Error('grid');
+const incomingPager = incoming.querySelector('[data-cw-pagination]');
+const cards = [...incoming.children].filter((child) => !child.matches('[data-cw-pagination], [data-cw-draft-card]'));
+if (!cards.length) throw new Error('products');
+cards.forEach((card) => grid.insertBefore(document.importNode(card, true), pager));
+visited.add(url);
+pager.innerHTML = incomingPager?.innerHTML || '';
+next = pager.querySelector('.next a');
+if (!next) { observer.disconnect(); marker.remove(); pager.remove(); }
+else { observer.unobserve(marker); observer.observe(marker); }
+} catch {
+observer.disconnect();
+pager.hidden = false;
+marker.remove();
+} finally {
+busy = false;
+grid.removeAttribute('aria-busy');
+}
+}, { rootMargin: '600px 0px' });
+observer.observe(marker);
+});
+};
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+document.addEventListener('shopify:section:load', init);
+})();
+{% endjavascript %}
+{% schema %}{"name":"Collection","settings":[]}{% endschema %}
+

@@ -10,6 +10,7 @@ import { printPngWithDpi } from "../lib/png-print-density.client";
 import { DESIGN_ATTRIBUTE } from "../lib/signature-day.server";
 import { buildSignatureDayPrintPdf } from "../lib/signature-day-print-pdf.client";
 import { orderedShirts } from "../lib/signature-day-print-order";
+import { drawGiftCalendar, type GiftCalendarLayout } from "../lib/gift-calendar";
 type Attribute = { key: string; value: string };
 type PrintItem = {
   orderId: string;
@@ -56,6 +57,11 @@ type Design = {
   o: string;
   p: PhotoDesign[];
   t: TextDesign[];
+  scene?: boolean;
+  photoAboveOverlay?: boolean;
+  photoClip?: [number, number][];
+  fonts?: { name: string; url: string }[];
+  calendar?: { layout: GiftCalendarLayout; value: string } | null;
 };
 type PhotoLayer = {
   name: string;
@@ -507,6 +513,14 @@ const psdTextLayer = (t: TextDesign, width: number, height: number) => {
 };
 async function buildPrint(item: PrintItem, keepLayers = true) {
   const { design, exact, attributes } = getDesign(item);
+  if (design.fonts?.length) {
+    await Promise.all(design.fonts.slice(0, 20).map(async font => {
+      if (!/^https:\/\/cdn\.shopify\.com\//i.test(font.url) || !font.name) return;
+      const face = await new FontFace(font.name, `url("${font.url.replace(/["\\]/g, "")}")`).load();
+      document.fonts.add(face);
+    }));
+    await document.fonts.ready;
+  }
   const missing = missingPhotos(design, attributes);
   if (missing.length || !hasPrintContent(design))
     throw new Error(`Original photos are missing${missing.length ? `: ${missing.map((photo) => photo.l).join(", ")}` : ""}. A complete print file cannot be generated.`);
@@ -514,26 +528,50 @@ async function buildPrint(item: PrintItem, keepLayers = true) {
     const reference = await loadImage(attributes["_Personalised Preview"]);
     design.r = `${reference.naturalWidth}:${reference.naturalHeight}`;
   }
-  const { width, height } = orderedPrintSize(attributes) || documentSize(design.r, item.productTitle),
+  const sceneSize = design.scene ? design.r.split(":").map(Number) : [];
+  const sceneDimensions = sceneSize.length === 2 && sceneSize.every(n => Number.isFinite(n) && n >= 1 && n <= 4000)
+    ? { width: Math.round(sceneSize[0]), height: Math.round(sceneSize[1]) } : null;
+  const { width, height } = sceneDimensions || orderedPrintSize(attributes) || documentSize(design.r, item.productTitle),
     composite = makeCanvas(width, height),
     ctx = composite.getContext("2d");
   if (!ctx) throw new Error("Print canvas is unavailable.");
+  let overlayLayer: { name: string; canvas: HTMLCanvasElement } | null = null;
+  if (design.o) {
+    const overlay = await loadImage(design.o), canvas = makeCanvas(width, height);
+    canvas.getContext("2d")?.drawImage(overlay, 0, 0, width, height);
+    overlayLayer = { name: "Template / Overlay", canvas };
+    if (design.photoAboveOverlay) ctx.drawImage(canvas, 0, 0);
+  }
   const photoLayers: PhotoLayer[] = [];
   for (const photo of design.p) {
     const source = sourceFor(attributes, photo);
     const layer = await renderPhotoLayer(photo, source, width, height);
+    if (design.photoClip && design.photoClip.length >= 3) {
+      for (const target of [{canvas:layer.preview,left:0,top:0},{canvas:layer.mask,left:layer.left,top:layer.top}]) {
+        const clip = makeCanvas(target.canvas.width,target.canvas.height), c=clip.getContext("2d");
+        if (c) {
+          c.beginPath();
+          design.photoClip.forEach(([x,y],i)=>{
+            const method=i===0?"moveTo":"lineTo";
+            c[method](x*width/100-target.left,y*height/100-target.top);
+          });
+          c.closePath();c.fillStyle="#fff";c.fill();
+          const targetContext=target.canvas.getContext("2d");
+          if (targetContext) {targetContext.globalCompositeOperation="destination-in";targetContext.drawImage(clip,0,0);targetContext.globalCompositeOperation="source-over";}
+        }
+      }
+    }
     ctx.drawImage(layer.preview, 0, 0);
     if(keepLayers) photoLayers.push(layer);
     else {layer.preview.width=layer.preview.height=1;layer.canvas.width=layer.canvas.height=1;layer.mask.width=layer.mask.height=1;}
   }
-  let overlayLayer: { name: string; canvas: HTMLCanvasElement } | null = null;
-  if (design.o) {
-    const overlay = await loadImage(design.o),
-      canvas = makeCanvas(width, height),
-      c = canvas.getContext("2d");
-    if (c) c.drawImage(overlay, 0, 0, width, height);
+  if (overlayLayer && !design.photoAboveOverlay) ctx.drawImage(overlayLayer.canvas, 0, 0);
+  let calendarLayer: { name: string; canvas: HTMLCanvasElement } | null = null;
+  if (design.calendar) {
+    const canvas = makeCanvas(width, height);
+    drawGiftCalendar(canvas, design.calendar.layout, design.calendar.value);
     ctx.drawImage(canvas, 0, 0);
-    overlayLayer = { name: "Template / Overlay", canvas };
+    calendarLayer = { name: "Selected date / Calendar", canvas };
   }
   for (const text of design.t)
     if (text.v.trim()) ctx.drawImage(textCanvas(text, width, height), 0, 0);
@@ -546,6 +584,7 @@ async function buildPrint(item: PrintItem, keepLayers = true) {
     composite,
     photoLayers,
     overlayLayer,
+    calendarLayer,
   };
 }
 const canvasBlob = (
@@ -587,8 +626,8 @@ async function downloadPng(item: PrintItem) {
   }
   const p = await buildPrint(item, false);
   downloadBlob(
-    await printPngWithDpi(await canvasBlob(p.composite)),
-    `${safeFile(`${item.orderName}-${item.productTitle}`)}.png`,
+    p.design.scene ? await canvasBlob(p.composite) : await printPngWithDpi(await canvasBlob(p.composite)),
+    `${safeFile(`${item.orderName}-${item.productTitle}`)}${p.design.scene ? '-mockup' : ''}.png`,
   );
 }
 async function downloadPsd(item: PrintItem) {
@@ -601,7 +640,7 @@ async function downloadPsd(item: PrintItem) {
   )
     return;
   const p = await buildPrint(item);
-  if (!p.photoLayers.length)
+  if (!p.photoLayers.length && !p.design.t.some(t => t.v.trim()) && !p.calendarLayer)
     throw new Error(
       "Source photo is missing for this order. A layered PSD cannot be created from the flattened preview alone.",
     );
@@ -627,8 +666,10 @@ async function downloadPsd(item: PrintItem) {
     },
   }));
   const children: any[] = [
-    ...(p.overlayLayer ? [p.overlayLayer] : []),
+    ...(p.design.photoAboveOverlay && p.overlayLayer ? [p.overlayLayer] : []),
     ...photoLayers,
+    ...(!p.design.photoAboveOverlay && p.overlayLayer ? [p.overlayLayer] : []),
+    ...(p.calendarLayer ? [p.calendarLayer] : []),
     ...textLayers,
   ];
   if (!p.exact && p.attributes["_Personalised Preview"]) {
@@ -661,6 +702,7 @@ async function downloadPsd(item: PrintItem) {
           verticalResolution: 300,
           verticalResolutionUnit: "PPI",
           heightUnit: "Inches",
+          ...(p.design.scene ? { horizontalResolution: 72, verticalResolution: 72 } : {}),
         },
       },
       children,
@@ -677,7 +719,7 @@ async function downloadPsd(item: PrintItem) {
     ) as ArrayBuffer;
   downloadBlob(
     new Blob([buffer], { type: "image/vnd.adobe.photoshop" }),
-    `${safeFile(`${item.orderName}-${item.productTitle}`)}.psd`,
+    `${safeFile(`${item.orderName}-${item.productTitle}`)}${p.design.scene ? '-mockup' : ''}.psd`,
   );
 }
 export default function PrintFilesPage() {

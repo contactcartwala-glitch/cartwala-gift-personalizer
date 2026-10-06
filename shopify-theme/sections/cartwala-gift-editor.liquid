@@ -1,0 +1,21 @@
+{% assign gift = product.metafields.cartwala_personalizer.gift_config.value %}
+{% if gift.enabled %}
+  {{ 'cartwala-gift-personalizer.css' | asset_url | stylesheet_tag }}
+  <div class="cw-personalizer" data-cw-gift-personalizer data-product-kind="gift" data-product-id="{{ product.id }}" data-overlay="{{ gift.overlayUrl | escape }}" data-accent="#ff6200">
+    <div data-cw-config="{{ gift | json | escape }}" hidden></div>
+    <button class="cw-personalizer__open" type="button" data-cw-open>{{ 'gift_editor.customize' | t }}</button>
+    <dialog class="cw-personalizer__dialog" data-cw-dialog>
+      <div class="cw-personalizer__panel">
+        <div class="cw-personalizer__header"><strong>{{ 'gift_editor.title' | t }}</strong><button type="button" class="cw-personalizer__close" data-cw-close aria-label="{{ 'gift_editor.close' | t }}">×</button></div>
+        <div class="cw-personalizer__toolbar"><div class="cw-personalizer__toolbar-left"><button type="button" class="cw-personalizer__toolbar-reset" data-cw-reset-all>{{ 'gift_editor.reset' | t }}</button><button type="button" class="cw-personalizer__toolbar-change" data-cw-change-photo>{{ 'gift_editor.change_photo' | t }}</button></div><button type="button" class="cw-personalizer__preview cw-personalizer__preview--top" data-cw-save disabled>{{ 'gift_editor.save' | t }}</button></div>
+        <div class="cw-personalizer__workspace"><div class="cw-personalizer__canvas-pane"><div class="cw-personalizer__stage" data-cw-stage><div class="cw-personalizer__photo-layers" data-cw-photo-layers></div><div class="cw-personalizer__text-layers" data-cw-text-layers></div><img class="cw-personalizer__overlay" data-cw-overlay alt="" aria-hidden="true" width="1200" height="1200"><div class="cw-personalizer__result" data-cw-result hidden><img data-cw-result-image class="cw-personalizer__result-image" alt="{{ 'gift_editor.saved' | t }}" width="800" height="800"></div></div><p>{{ 'gift_editor.help' | t }}</p></div><aside class="cw-personalizer__controls-pane"><div class="cw-personalizer__fields" data-cw-editor-fields></div></aside></div>
+      </div>
+    </dialog>
+  </div>
+  <script src="{{ 'cartwala-gift-photo-processing.js' | asset_url }}" defer></script>
+  <script src="{{ 'cartwala-gift-calendar.js' | asset_url }}" defer></script>
+  <script src="{{ 'cartwala-gift-personalizer.js' | asset_url }}" defer></script>
+{% endif %}
+{% schema %}
+{"name":"Gift photo editor","settings":[],"presets":[{"name":"Gift photo editor"}]}
+{% endschema %}

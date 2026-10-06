@@ -1,0 +1,81 @@
+{
+  "sku": "CW-GIFT-056",
+  "id": "gid://shopify/Product/8700005155001",
+  "config": {
+    "enabled": true,
+    "canvasRatio": "1254:1254",
+    "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-056-overlay.png?v=1791315853",
+    "photoFields": [
+      {
+        "id": "photo-1",
+        "label": "Your photo 1",
+        "x": 41.4274322169059,
+        "y": 47.4481658692185,
+        "width": 20.65390749601276,
+        "height": 29.505582137161085,
+        "treatment": "printed",
+        "rotationEnabled": true,
+        "required": true,
+        "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-056-photo-1-mask.png?v=1791315853"
+      },
+      {
+        "id": "photo-2",
+        "label": "Your photo 2",
+        "x": 61.64274322169059,
+        "y": 47.04944178628389,
+        "width": 18.9792663476874,
+        "height": 28.38915470494418,
+        "treatment": "printed",
+        "rotationEnabled": true,
+        "required": true,
+        "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-056-photo-2-mask.png?v=1791315852"
+      }
+    ],
+    "textFields": [
+      {
+        "id": "name",
+        "label": "Name",
+        "placeholder": "Aniket - Sonia",
+        "defaultValue": "",
+        "maxLength": 250,
+        "maxLines": 2,
+        "color": "#fff2bc",
+        "x": 54,
+        "y": 29.1,
+        "width": 29,
+        "height": 7,
+        "fontSize": 36,
+        "fontFamily": "Z003",
+        "alignment": "center",
+        "fitToBox": true,
+        "allowFontChoice": true,
+        "allowColorChoice": true,
+        "movable": true,
+        "scalable": true,
+        "rotatable": true,
+        "rotation": 0,
+        "required": true
+      }
+    ],
+    "fileFields": [],
+    "linkFields": [],
+    "customFonts": [
+      {
+        "id": "227",
+        "name": "Z003",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/Z003-MediumItalic.otf?v=1791315696"
+      },
+      {
+        "id": "228",
+        "name": "DejaVu Sans",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/DejaVuSans_c4005294-a775-4644-9322-f72d444ef7a1.ttf?v=1791315696"
+      },
+      {
+        "id": "229",
+        "name": "DejaVu Serif",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/DejaVuSerif.ttf?v=1791315696"
+      }
+    ],
+    "previewUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-056-preview.png?v=1791315868"
+  }
+}

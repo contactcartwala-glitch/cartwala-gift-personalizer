@@ -1,0 +1,105 @@
+{
+  "sku": "CW-GIFT-044",
+  "id": "gid://shopify/Product/8699997651129",
+  "config": {
+    "enabled": true,
+    "canvasRatio": "1254:1254",
+    "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-044-overlay.png?v=1791315853",
+    "photoFields": [
+      {
+        "id": "photo-1",
+        "label": "Your photo 1",
+        "x": 41.46730462519936,
+        "y": 28.189792663476872,
+        "width": 19.936204146730464,
+        "height": 20.33492822966507,
+        "treatment": "printed",
+        "rotationEnabled": true,
+        "required": true,
+        "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-044-photo-1-mask.png?v=1791315852"
+      },
+      {
+        "id": "photo-2",
+        "label": "Your photo 2",
+        "x": 61.961722488038276,
+        "y": 28.11004784688995,
+        "width": 20.095693779904305,
+        "height": 20.33492822966507,
+        "treatment": "printed",
+        "rotationEnabled": true,
+        "required": true,
+        "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-044-photo-2-mask.png?v=1791315853"
+      },
+      {
+        "id": "photo-3",
+        "label": "Your photo 3",
+        "x": 41.50717703349282,
+        "y": 48.76395534290271,
+        "width": 19.85645933014354,
+        "height": 20.33492822966507,
+        "treatment": "printed",
+        "rotationEnabled": true,
+        "required": true,
+        "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-044-photo-3-mask.png?v=1791315853"
+      },
+      {
+        "id": "photo-4",
+        "label": "Your photo 4",
+        "x": 61.921850079744814,
+        "y": 48.76395534290271,
+        "width": 20.015948963317385,
+        "height": 20.33492822966507,
+        "treatment": "printed",
+        "rotationEnabled": true,
+        "required": true,
+        "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-044-photo-4-mask.png?v=1791315855"
+      }
+    ],
+    "textFields": [
+      {
+        "id": "optional-name",
+        "label": "Optional name",
+        "placeholder": "Your name",
+        "defaultValue": "",
+        "maxLength": 250,
+        "maxLines": 2,
+        "color": "#fff2bc",
+        "x": 50,
+        "y": 74,
+        "width": 45,
+        "height": 8,
+        "fontSize": 48,
+        "fontFamily": "Z003",
+        "alignment": "center",
+        "fitToBox": true,
+        "allowFontChoice": true,
+        "allowColorChoice": true,
+        "movable": true,
+        "scalable": true,
+        "rotatable": true,
+        "rotation": 0,
+        "required": false
+      }
+    ],
+    "fileFields": [],
+    "linkFields": [],
+    "customFonts": [
+      {
+        "id": "227",
+        "name": "Z003",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/Z003-MediumItalic.otf?v=1791315696"
+      },
+      {
+        "id": "228",
+        "name": "DejaVu Sans",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/DejaVuSans_c4005294-a775-4644-9322-f72d444ef7a1.ttf?v=1791315696"
+      },
+      {
+        "id": "229",
+        "name": "DejaVu Serif",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/DejaVuSerif.ttf?v=1791315696"
+      }
+    ],
+    "previewUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-044-preview.png?v=1791315854"
+  }
+}

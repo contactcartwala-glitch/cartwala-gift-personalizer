@@ -19,7 +19,7 @@ module.exports = {
     commonjs: true,
     es6: true,
   },
-  ignorePatterns: ["!**/.server", "!**/.client"],
+  ignorePatterns: ["!**/.server", "!**/.client", "extensions/cartwala-personalizer/assets/cartwala-gift-photo-processing.js", "shopify-theme/assets/cartwala-gift-photo-processing.js"],
 
   // Base config
   extends: ["eslint:recommended"],

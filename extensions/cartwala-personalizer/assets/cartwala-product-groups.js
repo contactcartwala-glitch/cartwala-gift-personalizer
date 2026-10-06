@@ -12,7 +12,7 @@
     const key=`${Math.min(a,b)}×${Math.max(a,b)}|${/5mm/i.test(t.mockupName||t.mockup)?'5mm':'3mm'}|${a>b?'Landscape':'Portrait'}`;
     templates[key]=t;
    }
-   try{const saved=JSON.parse(panel.dataset.acrylicMockups||'null');if(saved?.version===1)Object.assign(templates,saved.templates||{});}catch{}
+   try{const saved=JSON.parse(panel.dataset.acrylicMockups||'null');if(saved?.version===1)Object.assign(templates,saved.templates||{});}catch{/* Keep catalog defaults when saved mockups are unavailable. */}
    const previews={};
    for(const v of variants){
     const dimensions=option(v,'Size').match(/^(\d+(?:\.\d+)?)\s*[×x]\s*(\d+(?:\.\d+)?)/i);if(!dimensions)continue;

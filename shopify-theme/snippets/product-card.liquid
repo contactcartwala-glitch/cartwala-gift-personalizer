@@ -1,0 +1,48 @@
+{% doc %}
+Renders a responsive product card.
+@param {product} product - Product to display.
+{% enddoc %}
+{%- assign gift_preview = product.metafields.cartwala_personalizer.gift_config.value.previewUrl -%}
+{%- assign variant = product.selected_or_first_available_variant -%}
+{%- assign now_ts = 'now' | date: '%s' -%}
+{%- assign created_ts = product.created_at | date: '%s' -%}
+{%- assign days_since_created = now_ts | minus: created_ts | divided_by: 86400 -%}
+<div class="product-card" data-product-card>
+  <div class="product-card__media">
+    <a href="{{ product.url }}" aria-label="{{ product.title }}">
+      {% if gift_preview %}<img src="{{ gift_preview | escape }}&amp;width=600" alt="{{ product.title | escape }}" loading="lazy" width="600" height="600">{% elsif product.featured_media %}
+        <img
+          src="{{ product.featured_media | image_url: width: 600 }}"
+          srcset="{% for card_width in (1..4) %}{% assign responsive_width = card_width | times: 180 %}{{ product.featured_media | image_url: width: responsive_width }} {{ responsive_width }}w{% unless forloop.last %}, {% endunless %}{% endfor %}"
+          sizes="(min-width: 1024px) 300px, (min-width: 640px) 33vw, calc(50vw - 24px)"
+          alt="{{ product.featured_media.alt | default: product.title | escape }}"
+          loading="lazy"
+          width="600" height="600"
+          onmouseover="if(this.dataset.hover){this.dataset.origSrcset=this.srcset;this.removeAttribute('srcset');this.src=this.dataset.hover}"
+          {% if product.media.size > 1 %}onmouseout="this.src=this.dataset.orig;if(this.dataset.origSrcset)this.srcset=this.dataset.origSrcset" data-orig="{{ product.featured_media | image_url: width: 600 }}" data-hover="{{ product.media[1] | image_url: width: 600 }}"{% endif %}
+        >
+      {% else %}
+        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted-foreground);">{{ product.title | slice: 0 }}</div>
+      {% endif %}
+    </a>
+    {% if product.compare_at_price > product.price %}
+      <span class="badge" style="background:var(--destructive);color:#fff;">Sale</span>
+    {% elsif days_since_created <= 30 %}
+      <span class="badge badge-accent">New</span>
+    {% endif %}
+    {% if product.tags contains 'bestseller' %}<span class="badge badge-accent">Bestseller</span>{% endif %}
+    <button class="icon-btn product-card__wishlist" data-wishlist-toggle aria-label="Add to wishlist">{% render 'icon', name: 'heart', size: 16 %}</button>
+  </div>
+  <div class="product-card__body">
+    {% if product.metafields.custom.occasion %}<span class="text-muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;">{{ product.metafields.custom.occasion }}</span>{% endif %}
+    <h3 class="product-card__title"><a href="{{ product.url }}">{{ product.title }}</a></h3>
+    {% if product.metafields.reviews.rating %}
+      <div class="product-card__rating">
+        {% render 'icon', name: 'star', size: 13 %} {{ product.metafields.reviews.rating.value }} · {{ product.metafields.reviews.rating_count }}
+      </div>
+    {% endif %}
+    {% if product.price == 0 %}<a href="{{ product.url }}">{{ 'simple_shop.choose_options' | t }}</a>{% else %}{% render 'price', product: product, variant: variant %}{% endif %}
+  </div>
+</div>
+
+

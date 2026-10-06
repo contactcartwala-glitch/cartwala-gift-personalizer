@@ -1,0 +1,73 @@
+{
+  "sku": "CW-GIFT-008",
+  "id": "gid://shopify/Product/8699977171129",
+  "config": {
+    "enabled": true,
+    "canvasRatio": "1132:1390",
+    "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-008-calendar-overlay.png?v=1791315696",
+    "photoFields": [
+      {
+        "id": "photo-1",
+        "label": "Your photo 1",
+        "x": 64.53180212014134,
+        "y": 48.992805755395686,
+        "width": 43.02120141342756,
+        "height": 64.02877697841727,
+        "treatment": "engraved-dark",
+        "rotationEnabled": true,
+        "required": true,
+        "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-008-photo-1-mask.png?v=1791315853"
+      }
+    ],
+    "textFields": [
+      {
+        "id": "calendar-date",
+        "label": "Select your special date",
+        "placeholder": "",
+        "defaultValue": "",
+        "calendarControl": true,
+        "maxLines": 1,
+        "maxLength": 10,
+        "x": 50,
+        "y": 50,
+        "width": 20,
+        "height": 5,
+        "fontSize": 16,
+        "fontFamily": "DejaVu Sans",
+        "color": "#fff2bc",
+        "required": true
+      }
+    ],
+    "fileFields": [],
+    "linkFields": [],
+    "customFonts": [
+      {
+        "id": "227",
+        "name": "Z003",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/Z003-MediumItalic.otf?v=1791315696"
+      },
+      {
+        "id": "228",
+        "name": "DejaVu Sans",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/DejaVuSans_c4005294-a775-4644-9322-f72d444ef7a1.ttf?v=1791315696"
+      },
+      {
+        "id": "229",
+        "name": "DejaVu Serif",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/DejaVuSerif.ttf?v=1791315696"
+      }
+    ],
+    "calendar": {
+      "x": 8,
+      "y": 45,
+      "width": 30,
+      "height": 25,
+      "month": "September",
+      "monthX": 21,
+      "monthY": 41,
+      "day": 6,
+      "color": "#503820"
+    },
+    "previewUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-008-preview-reviewed.png?v=1791317411"
+  }
+}

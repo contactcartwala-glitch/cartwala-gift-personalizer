@@ -1,0 +1,105 @@
+{
+  "sku": "CW-GIFT-057",
+  "id": "gid://shopify/Product/8700005580985",
+  "config": {
+    "enabled": true,
+    "canvasRatio": "1254:1254",
+    "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-057-overlay.png?v=1791315853",
+    "photoFields": [
+      {
+        "id": "photo-1",
+        "label": "Your photo 1",
+        "x": 37.280701754385966,
+        "y": 18.700159489633172,
+        "width": 21.451355661881976,
+        "height": 20.65390749601276,
+        "treatment": "printed",
+        "rotationEnabled": true,
+        "required": true,
+        "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-057-photo-1-mask.png?v=1791315853"
+      },
+      {
+        "id": "photo-2",
+        "label": "Your photo 2",
+        "x": 62.878787878787875,
+        "y": 22.288676236044658,
+        "width": 27.99043062200957,
+        "height": 27.51196172248804,
+        "treatment": "printed",
+        "rotationEnabled": true,
+        "required": true,
+        "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-057-photo-2-mask.png?v=1791315853"
+      },
+      {
+        "id": "photo-3",
+        "label": "Your photo 3",
+        "x": 40.590111642743224,
+        "y": 62.878787878787875,
+        "width": 27.59170653907496,
+        "height": 27.033492822966508,
+        "treatment": "printed",
+        "rotationEnabled": true,
+        "required": true,
+        "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-057-photo-3-mask.png?v=1791315853"
+      },
+      {
+        "id": "photo-4",
+        "label": "Your photo 4",
+        "x": 65.66985645933015,
+        "y": 65.82934609250398,
+        "width": 20.015948963317385,
+        "height": 20.015948963317385,
+        "treatment": "printed",
+        "rotationEnabled": true,
+        "required": true,
+        "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-057-photo-4-mask.png?v=1791315852"
+      }
+    ],
+    "textFields": [
+      {
+        "id": "name",
+        "label": "Name",
+        "placeholder": "Bhawna  Kavita  Neha",
+        "defaultValue": "",
+        "maxLength": 250,
+        "maxLines": 2,
+        "color": "#fff2bc",
+        "x": 52,
+        "y": 43.5,
+        "width": 53,
+        "height": 5,
+        "fontSize": 27.599999999999998,
+        "fontFamily": "Z003",
+        "alignment": "center",
+        "fitToBox": true,
+        "allowFontChoice": true,
+        "allowColorChoice": true,
+        "movable": true,
+        "scalable": true,
+        "rotatable": true,
+        "rotation": 0,
+        "required": true
+      }
+    ],
+    "fileFields": [],
+    "linkFields": [],
+    "customFonts": [
+      {
+        "id": "227",
+        "name": "Z003",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/Z003-MediumItalic.otf?v=1791315696"
+      },
+      {
+        "id": "228",
+        "name": "DejaVu Sans",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/DejaVuSans_c4005294-a775-4644-9322-f72d444ef7a1.ttf?v=1791315696"
+      },
+      {
+        "id": "229",
+        "name": "DejaVu Serif",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/DejaVuSerif.ttf?v=1791315696"
+      }
+    ],
+    "previewUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-057-preview.png?v=1791315853"
+  }
+}

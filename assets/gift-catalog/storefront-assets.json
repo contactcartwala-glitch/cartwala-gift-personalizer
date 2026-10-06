@@ -1,0 +1,1689 @@
+[
+  {
+    "sku": "CW-GIFT-001",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638254588089",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-001-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-001",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638254620857",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-001-photo-1-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-001",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638254653625",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-001-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-002",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638254686393",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-002-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-002",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638254719161",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-002-photo-1-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-002",
+    "kind": "mask",
+    "index": 1,
+    "id": "gid://shopify/MediaImage/46638254751929",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-002-photo-2-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-002",
+    "kind": "mask",
+    "index": 2,
+    "id": "gid://shopify/MediaImage/46638254784697",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-002-photo-3-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-002",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638254817465",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-002-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-003",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638254850233",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-003-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-003",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638254883001",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-003-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-003",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638254915769",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-003-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-004",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638254948537",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-004-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-004",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638254981305",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-004-photo-1-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-004",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638255014073",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-004-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-005",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638255046841",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-005-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-005",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638255079609",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-005-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-005",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638255112377",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-005-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-006",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638255145145",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-006-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-006",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638255177913",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-006-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-007",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638255210681",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-007-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-007",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638670217401",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-007-preview-fixed.png?v=1791316488"
+  },
+  {
+    "sku": "CW-GIFT-008",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638255276217",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-008-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-008",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638255308985",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-008-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-008",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638255341753",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-008-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-009",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638255374521",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-009-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-009",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638255407289",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-009-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-010",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638255440057",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-010-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-010",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638255472825",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-010-photo-1-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-010",
+    "kind": "mask",
+    "index": 1,
+    "id": "gid://shopify/MediaImage/46638255505593",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-010-photo-2-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-010",
+    "kind": "mask",
+    "index": 2,
+    "id": "gid://shopify/MediaImage/46638255538361",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-010-photo-3-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-010",
+    "kind": "mask",
+    "index": 3,
+    "id": "gid://shopify/MediaImage/46638255571129",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-010-photo-4-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-010",
+    "kind": "mask",
+    "index": 4,
+    "id": "gid://shopify/MediaImage/46638255603897",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-010-photo-5-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-010",
+    "kind": "mask",
+    "index": 5,
+    "id": "gid://shopify/MediaImage/46638255636665",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-010-photo-6-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-010",
+    "kind": "mask",
+    "index": 6,
+    "id": "gid://shopify/MediaImage/46638255669433",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-010-photo-7-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-010",
+    "kind": "mask",
+    "index": 7,
+    "id": "gid://shopify/MediaImage/46638255702201",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-010-photo-8-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-010",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638255734969",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-010-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-011",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638255767737",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-011-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-011",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638255800505",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-011-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-012",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638255833273",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-012-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-012",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638255866041",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-012-photo-1-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-012",
+    "kind": "mask",
+    "index": 1,
+    "id": "gid://shopify/MediaImage/46638255898809",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-012-photo-2-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-012",
+    "kind": "mask",
+    "index": 2,
+    "id": "gid://shopify/MediaImage/46638255931577",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-012-photo-3-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-012",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638255964345",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-012-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-013",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638255997113",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-013-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-013",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638256029881",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-013-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-014",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638256062649",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-014-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-014",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638256095417",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-014-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-015",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638256128185",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-015-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-015",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638256160953",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-015-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-016",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638256193721",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-016-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-016",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638256226489",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-016-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-016",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638256259257",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-016-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-017",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638256292025",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-017-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-017",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638256324793",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-017-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-018",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638256357561",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-018-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-018",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638256390329",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-018-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-019",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638256423097",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-019-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-019",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638256455865",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-019-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-019",
+    "kind": "mask",
+    "index": 1,
+    "id": "gid://shopify/MediaImage/46638256488633",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-019-photo-2-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-019",
+    "kind": "mask",
+    "index": 2,
+    "id": "gid://shopify/MediaImage/46638256521401",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-019-photo-3-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-019",
+    "kind": "mask",
+    "index": 3,
+    "id": "gid://shopify/MediaImage/46638256554169",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-019-photo-4-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-019",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638256586937",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-019-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-020",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638256619705",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-020-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-020",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638256652473",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-020-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-020",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638256685241",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-020-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-021",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638256718009",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-021-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-021",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638256750777",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-021-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-022",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638256783545",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-022-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-022",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638256816313",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-022-photo-1-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-022",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638256849081",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-022-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-023",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638256881849",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-023-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-023",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638256914617",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-023-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-024",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638256947385",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-024-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-024",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638256980153",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-024-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-024",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638257012921",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-024-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-025",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638257045689",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-025-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-025",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638257078457",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-025-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-025",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638257111225",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-025-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-026",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638257143993",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-026-overlay_ed24d19f-ed08-4275-99bf-a2327f11083c.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-026",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638257176761",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-026-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-026",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638257209529",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-026-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-027",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638257242297",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-027-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-027",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638257275065",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-027-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-028",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638257307833",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-028-overlay.png?v=1791315855"
+  },
+  {
+    "sku": "CW-GIFT-028",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638257340601",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-028-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-028",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638257373369",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-028-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-029",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638257406137",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-029-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-029",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638257438905",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-029-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-030",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638257471673",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-030-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-030",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638257504441",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-030-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-031",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638257537209",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-031-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-031",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638257569977",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-031-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-031",
+    "kind": "mask",
+    "index": 1,
+    "id": "gid://shopify/MediaImage/46638257602745",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-031-photo-2-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-031",
+    "kind": "mask",
+    "index": 2,
+    "id": "gid://shopify/MediaImage/46638257635513",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-031-photo-3-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-031",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638257668281",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-031-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-032",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638257701049",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-032-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-032",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638257733817",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-032-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-033",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638257766585",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-033-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-033",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638257799353",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-033-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-034",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638257832121",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-034-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-034",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638257864889",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-034-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-035",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638257897657",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-035-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-035",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638257930425",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-035-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-036",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638257963193",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-036-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-036",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638257995961",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-036-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-037",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638258028729",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-037-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-037",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638258061497",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-037-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-038",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638258094265",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-038-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-038",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638258127033",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-038-photo-1-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-038",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638258159801",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-038-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-039",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638258192569",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-039-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-039",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638258225337",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-039-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-040",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638258258105",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-040-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-040",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638258290873",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-040-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-041",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638258323641",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-041-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-041",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638258356409",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-041-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-042",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638258389177",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-042-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-042",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638258421945",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-042-photo-1-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-042",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638258454713",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-042-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-043",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638258487481",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-043-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-043",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638258520249",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-043-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-044",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638258553017",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-044-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-044",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638258585785",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-044-photo-1-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-044",
+    "kind": "mask",
+    "index": 1,
+    "id": "gid://shopify/MediaImage/46638258618553",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-044-photo-2-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-044",
+    "kind": "mask",
+    "index": 2,
+    "id": "gid://shopify/MediaImage/46638258651321",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-044-photo-3-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-044",
+    "kind": "mask",
+    "index": 3,
+    "id": "gid://shopify/MediaImage/46638258684089",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-044-photo-4-mask.png?v=1791315855"
+  },
+  {
+    "sku": "CW-GIFT-044",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638258716857",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-044-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-045",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638258749625",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-045-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-045",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638258782393",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-045-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-045",
+    "kind": "mask",
+    "index": 1,
+    "id": "gid://shopify/MediaImage/46638258815161",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-045-photo-2-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-045",
+    "kind": "mask",
+    "index": 2,
+    "id": "gid://shopify/MediaImage/46638258847929",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-045-photo-3-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-045",
+    "kind": "mask",
+    "index": 3,
+    "id": "gid://shopify/MediaImage/46638258880697",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-045-photo-4-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-045",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638258913465",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-045-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-046",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638258946233",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-046-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-046",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638258979001",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-046-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-047",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638259011769",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-047-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-047",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638259044537",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-047-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-047",
+    "kind": "mask",
+    "index": 1,
+    "id": "gid://shopify/MediaImage/46638259077305",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-047-photo-2-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-047",
+    "kind": "mask",
+    "index": 2,
+    "id": "gid://shopify/MediaImage/46638259110073",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-047-photo-3-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-047",
+    "kind": "mask",
+    "index": 3,
+    "id": "gid://shopify/MediaImage/46638259142841",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-047-photo-4-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-047",
+    "kind": "mask",
+    "index": 4,
+    "id": "gid://shopify/MediaImage/46638259175609",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-047-photo-5-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-047",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638259208377",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-047-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-048",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638259241145",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-048-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-048",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638259273913",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-048-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-048",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638259306681",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-048-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-049",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638259339449",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-049-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-049",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638259372217",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-049-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-049",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638259404985",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-049-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-050",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638259437753",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-050-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-050",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638259470521",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-050-photo-1-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-050",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638259503289",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-050-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-051",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638259536057",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-051-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-051",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638259568825",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-051-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-051",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638259601593",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-051-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-052",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638259634361",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-052-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-052",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638259667129",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-052-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-053",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638259699897",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-053-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-053",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638259732665",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-053-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-054",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638259765433",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-054-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-054",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638259798201",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-054-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-054",
+    "kind": "mask",
+    "index": 1,
+    "id": "gid://shopify/MediaImage/46638259830969",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-054-photo-2-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-054",
+    "kind": "mask",
+    "index": 2,
+    "id": "gid://shopify/MediaImage/46638259863737",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-054-photo-3-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-054",
+    "kind": "mask",
+    "index": 3,
+    "id": "gid://shopify/MediaImage/46638259896505",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-054-photo-4-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-054",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638259929273",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-054-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-055",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638259962041",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-055-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-055",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638259994809",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-055-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-056",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638260027577",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-056-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-056",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638260060345",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-056-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-056",
+    "kind": "mask",
+    "index": 1,
+    "id": "gid://shopify/MediaImage/46638260093113",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-056-photo-2-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-056",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638260125881",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-056-preview.png?v=1791315868"
+  },
+  {
+    "sku": "CW-GIFT-057",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638260158649",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-057-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-057",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638260191417",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-057-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-057",
+    "kind": "mask",
+    "index": 1,
+    "id": "gid://shopify/MediaImage/46638260224185",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-057-photo-2-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-057",
+    "kind": "mask",
+    "index": 2,
+    "id": "gid://shopify/MediaImage/46638260256953",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-057-photo-3-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-057",
+    "kind": "mask",
+    "index": 3,
+    "id": "gid://shopify/MediaImage/46638260289721",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-057-photo-4-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-057",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638260322489",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-057-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-058",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638260355257",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-058-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-058",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638260388025",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-058-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-058",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638260420793",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-058-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-059",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638260453561",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-059-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-059",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638260486329",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-059-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-059",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638260519097",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-059-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-060",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638260551865",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-060-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-060",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638260584633",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-060-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-060",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638260617401",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-060-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-061",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638260650169",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-061-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-061",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638260682937",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-061-photo-1-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-061",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638260715705",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-061-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-062",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638260748473",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-062-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-062",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638260781241",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-062-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-063",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638260814009",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-063-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-063",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638260846777",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-063-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-064",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638260879545",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-064-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-064",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638260912313",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-064-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-065",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638260945081",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-065-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-065",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638260977849",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-065-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-065",
+    "kind": "mask",
+    "index": 1,
+    "id": "gid://shopify/MediaImage/46638261010617",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-065-photo-2-mask.png?v=1791315852"
+  },
+  {
+    "sku": "CW-GIFT-065",
+    "kind": "mask",
+    "index": 2,
+    "id": "gid://shopify/MediaImage/46638261043385",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-065-photo-3-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-065",
+    "kind": "mask",
+    "index": 3,
+    "id": "gid://shopify/MediaImage/46638261076153",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-065-photo-4-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-065",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638261108921",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-065-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-066",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638261141689",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-066-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-066",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638261174457",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-066-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-067",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638261207225",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-067-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-067",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638261239993",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-067-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-067",
+    "kind": "mask",
+    "index": 1,
+    "id": "gid://shopify/MediaImage/46638261272761",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-067-photo-2-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-067",
+    "kind": "mask",
+    "index": 2,
+    "id": "gid://shopify/MediaImage/46638261305529",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-067-photo-3-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-067",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638261338297",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-067-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-068",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638261371065",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-068-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-068",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638261403833",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-068-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-069",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638261436601",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-069-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-069",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638261469369",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-069-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-069",
+    "kind": "mask",
+    "index": 1,
+    "id": "gid://shopify/MediaImage/46638261502137",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-069-photo-2-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-069",
+    "kind": "mask",
+    "index": 2,
+    "id": "gid://shopify/MediaImage/46638261534905",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-069-photo-3-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-069",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638261567673",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-069-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-070",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638261600441",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-070-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-070",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638261633209",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-070-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-071",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638261665977",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-071-overlay.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-071",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638261698745",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-071-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-072",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638261731513",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-072-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-072",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638261764281",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-072-preview.png?v=1791315854"
+  },
+  {
+    "sku": "CW-GIFT-073",
+    "kind": "overlay",
+    "id": "gid://shopify/MediaImage/46638261797049",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-073-overlay.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-073",
+    "kind": "mask",
+    "index": 0,
+    "id": "gid://shopify/MediaImage/46638261829817",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-073-photo-1-mask.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-073",
+    "kind": "preview",
+    "id": "gid://shopify/MediaImage/46638261862585",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-073-preview.png?v=1791315853"
+  },
+  {
+    "sku": "CW-GIFT-001",
+    "kind": "calendar-overlay",
+    "id": "gid://shopify/MediaImage/46638165917881",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-001-calendar-overlay.png?v=1791315696"
+  },
+  {
+    "sku": "CW-GIFT-008",
+    "kind": "calendar-overlay",
+    "id": "gid://shopify/MediaImage/46638165950649",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-008-calendar-overlay.png?v=1791315696"
+  },
+  {
+    "sku": "CW-GIFT-051",
+    "kind": "calendar-overlay",
+    "id": "gid://shopify/MediaImage/46638165983417",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-051-calendar-overlay.png?v=1791315696"
+  },
+  {
+    "sku": "CW-GIFT-058",
+    "kind": "calendar-overlay",
+    "id": "gid://shopify/MediaImage/46638166016185",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-058-calendar-overlay.png?v=1791315696"
+  },
+  {
+    "kind": "font",
+    "id": "gid://shopify/GenericFile/46638166048953",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/Z003-MediumItalic.otf?v=1791315696",
+    "name": "Z003"
+  },
+  {
+    "kind": "font",
+    "id": "gid://shopify/GenericFile/46638166081721",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/DejaVuSans_c4005294-a775-4644-9322-f72d444ef7a1.ttf?v=1791315696",
+    "name": "DejaVu Sans"
+  },
+  {
+    "kind": "font",
+    "id": "gid://shopify/GenericFile/46638166114489",
+    "status": "READY",
+    "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/DejaVuSerif.ttf?v=1791315696",
+    "name": "DejaVu Serif"
+  }
+]

@@ -1,0 +1,56 @@
+{
+  "sku": "CW-GIFT-068",
+  "id": "gid://shopify/Product/8700011675833",
+  "config": {
+    "enabled": true,
+    "canvasRatio": "1254:1254",
+    "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-068-overlay.png?v=1791315853",
+    "photoFields": [],
+    "textFields": [
+      {
+        "id": "name",
+        "label": "Name",
+        "placeholder": "Aviray",
+        "defaultValue": "",
+        "maxLength": 250,
+        "maxLines": 2,
+        "color": "#fff2bc",
+        "x": 55,
+        "y": 25,
+        "width": 49,
+        "height": 10,
+        "fontSize": 90,
+        "fontFamily": "Z003",
+        "alignment": "center",
+        "fitToBox": true,
+        "allowFontChoice": true,
+        "allowColorChoice": true,
+        "movable": true,
+        "scalable": true,
+        "rotatable": true,
+        "rotation": 0,
+        "required": true
+      }
+    ],
+    "fileFields": [],
+    "linkFields": [],
+    "customFonts": [
+      {
+        "id": "227",
+        "name": "Z003",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/Z003-MediumItalic.otf?v=1791315696"
+      },
+      {
+        "id": "228",
+        "name": "DejaVu Sans",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/DejaVuSans_c4005294-a775-4644-9322-f72d444ef7a1.ttf?v=1791315696"
+      },
+      {
+        "id": "229",
+        "name": "DejaVu Serif",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/DejaVuSerif.ttf?v=1791315696"
+      }
+    ],
+    "previewUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-068-preview.png?v=1791315854"
+  }
+}

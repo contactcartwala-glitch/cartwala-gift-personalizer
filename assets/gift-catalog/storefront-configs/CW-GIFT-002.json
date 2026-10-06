@@ -1,0 +1,93 @@
+{
+  "sku": "CW-GIFT-002",
+  "id": "gid://shopify/Product/8699974910137",
+  "config": {
+    "enabled": true,
+    "canvasRatio": "1254:1254",
+    "overlayUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-002-overlay.png?v=1791315853",
+    "photoFields": [
+      {
+        "id": "photo-1",
+        "label": "Your photo 1",
+        "x": 60.92503987240829,
+        "y": 33.5725677830941,
+        "width": 45.135566188197764,
+        "height": 31.259968102073366,
+        "treatment": "printed",
+        "rotationEnabled": true,
+        "required": true,
+        "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-002-photo-1-mask.png?v=1791315852"
+      },
+      {
+        "id": "photo-2",
+        "label": "Your photo 2",
+        "x": 48.644338118022326,
+        "y": 61.88197767145135,
+        "width": 20.893141945773525,
+        "height": 22.169059011164276,
+        "treatment": "printed",
+        "rotationEnabled": true,
+        "required": true,
+        "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-002-photo-2-mask.png?v=1791315853"
+      },
+      {
+        "id": "photo-3",
+        "label": "Your photo 3",
+        "x": 71.96969696969697,
+        "y": 62.36044657097289,
+        "width": 23.046251993620416,
+        "height": 23.28548644338118,
+        "treatment": "printed",
+        "rotationEnabled": true,
+        "required": true,
+        "maskUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-002-photo-3-mask.png?v=1791315853"
+      }
+    ],
+    "textFields": [
+      {
+        "id": "message",
+        "label": "Message",
+        "placeholder": "Our greatest blessing, our beautiful daughter.",
+        "defaultValue": "",
+        "maxLength": 250,
+        "maxLines": 2,
+        "color": "#fff2bc",
+        "x": 61,
+        "y": 77,
+        "width": 46,
+        "height": 7,
+        "fontSize": 30,
+        "fontFamily": "Z003",
+        "alignment": "center",
+        "fitToBox": true,
+        "allowFontChoice": true,
+        "allowColorChoice": true,
+        "movable": true,
+        "scalable": true,
+        "rotatable": true,
+        "rotation": 0,
+        "required": true
+      }
+    ],
+    "fileFields": [],
+    "linkFields": [],
+    "customFonts": [
+      {
+        "id": "227",
+        "name": "Z003",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/Z003-MediumItalic.otf?v=1791315696"
+      },
+      {
+        "id": "228",
+        "name": "DejaVu Sans",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/DejaVuSans_c4005294-a775-4644-9322-f72d444ef7a1.ttf?v=1791315696"
+      },
+      {
+        "id": "229",
+        "name": "DejaVu Serif",
+        "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/DejaVuSerif.ttf?v=1791315696"
+      }
+    ],
+    "previewUrl": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/CW-GIFT-002-preview.png?v=1791315854"
+  }
+}

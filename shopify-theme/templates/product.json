@@ -1,0 +1,63 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "cartwala_gift_personalizer_personalizer_7PiMVe": {
+          "type": "shopify://apps/cartwala-gift-personalizer/blocks/personalizer/01a08feb-4d53-7a86-a819-7557fee3a255",
+          "settings": {
+            "accent_color": "#ff6200"
+          }
+        }
+      },
+      "block_order": [
+        "cartwala_gift_personalizer_personalizer_7PiMVe"
+      ],
+      "settings": {}
+    },
+    "related": {
+      "type": "related-products",
+      "settings": {
+        "heading": "You May Also Like",
+        "product_limit": 4
+      }
+    },
+    "faq": {
+      "type": "faq",
+      "blocks": {
+        "q1": {
+          "type": "question",
+          "settings": {
+            "question": "How long does personalization take?",
+            "answer": "<p>Most personalised gifts are crafted within 1–2 business days, then shipped in 3–5 days.</p>"
+          }
+        },
+        "q2": {
+          "type": "question",
+          "settings": {
+            "question": "Can I change my order after placing it?",
+            "answer": "<p>Contact us within 2 hours of ordering and we'll help update the personalisation details.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2"
+      ],
+      "settings": {
+        "eyebrow": "Questions",
+        "heading": "Frequently Asked Questions"
+      }
+    },
+    "gift_editor": {
+      "type": "cartwala-gift-editor",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main",
+    "gift_editor",
+    "related",
+    "faq"
+  ]
+}

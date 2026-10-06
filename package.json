@@ -22,13 +22,16 @@
     "qa": "node scripts/verify-personalizer.mjs && node scripts/verify-mug-preview.mjs && node --check extensions/cartwala-personalizer/assets/cartwala-personalizer.js && node --check extensions/cartwala-personalizer/assets/cartwala-cart-preview.js && node --check extensions/cartwala-personalizer/assets/cartwala-selection-box.js && node scripts/verify-product-groups.mjs && node --check extensions/cartwala-personalizer/assets/cartwala-product-groups.js && node scripts/verify-png-mockups.mjs && node scripts/verify-shared-setup.mjs && node scripts/verify-acrylic-mockups.mjs && node scripts/verify-acrylic-designs.mjs && node scripts/verify-master-navigation.mjs",
     "verify": "npm run lint && npm run typecheck && npm run qa && npm run build && npm run qa:master-render",
     "qa:master-render": "node scripts/verify-master-render.mjs",
-    "qa:order-assets": "node scripts/verify-order-assets.mjs && node scripts/verify-print-recovery.mjs"
+    "qa:order-assets": "node scripts/verify-order-assets.mjs && node scripts/verify-print-recovery.mjs",
+    "build:gift-assets": "node scripts/build-gift-assets.mjs",
+    "qa:gift-catalog": "node scripts/verify-gift-catalog.mjs"
   },
   "type": "module",
   "engines": {
     "node": ">=20.19 <22 || >=22.12"
   },
   "dependencies": {
+    "@pdf-lib/upng": "1.0.1",
     "@prisma/client": "^6.16.3",
     "@react-router/dev": "7.18.2",
     "@react-router/fs-routes": "7.18.2",
@@ -44,10 +47,10 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router": "7.18.2",
-    "vite-tsconfig-paths": "^5.1.4",
-    "@pdf-lib/upng": "1.0.1"
+    "vite-tsconfig-paths": "^5.1.4"
   },
   "devDependencies": {
+    "@imgly/background-removal": "^1.7.0",
     "@preact/signals": "^2.11.2",
     "@shopify/api-codegen-preset": "^1.2.0",
     "@shopify/polaris-types": "^1.0.1",
@@ -58,6 +61,7 @@
     "@types/react-dom": "^18.3.7",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "esbuild": "^0.25.12",
     "eslint": "^8.57.1",
     "eslint-import-resolver-typescript": "^3.10.1",
     "eslint-plugin-import": "^2.32.0",
@@ -67,6 +71,7 @@
     "graphql-config": "^5.1.1",
     "preact": "^10.29.8",
     "prettier": "^3.6.2",
+    "sharp": "^0.34.5",
     "typescript": "^5.9.3",
     "vite": "^6.3.6"
   },

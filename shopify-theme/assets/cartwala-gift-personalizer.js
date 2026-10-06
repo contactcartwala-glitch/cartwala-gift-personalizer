@@ -1078,9 +1078,12 @@
   };
 
   const initialize = () =>
-    document.querySelectorAll("[data-cw-personalizer]").forEach((root) => {
+    document.querySelectorAll("[data-cw-gift-personalizer]").forEach((root) => {
       if (root.dataset.cwReady === "true") return;
       root.dataset.cwReady = "true";
+      root.setAttribute("data-cw-personalizer", "");
+      const purchaseForm = document.querySelector('form[action*="/cart/add"]');
+      if (purchaseForm) purchaseForm.before(root);
       try {
         initializeMugPreview(root);
         const dialog = root.querySelector("[data-cw-dialog]");
