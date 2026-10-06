@@ -1421,8 +1421,15 @@
             const heading = document.createElement("div");
             heading.className = "cw-clock-upload-heading";
             heading.innerHTML =
-              '<strong>Upload 4 Photos</strong><span>Top, Left, Right and Back — one photo for each side.</span>';
+              '<strong>Customize Your Clock</strong><span>Upload one photo for each side: Top, Left, Right and Back.</span>';
             controlsPane.insertBefore(heading, fields);
+          }
+          if (controlsPane && !controlsPane.querySelector(".cw-clock-front-reference")) {
+            const frontReference = document.createElement("div");
+            frontReference.className = "cw-clock-front-reference";
+            frontReference.innerHTML =
+              '<img src="https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-cube-clock-front-fixed.png?v=1791298807" alt="Front clock display"><div><strong>Front = Clock Display</strong><span>Front is fixed and does not need a photo.</span></div>';
+            fields.insertAdjacentElement("afterend", frontReference);
           }
           if (!root.querySelector("[data-cw-clock-3d]")) {
             clock3dButton = document.createElement("button");
@@ -1469,11 +1476,19 @@
             card.classList.add("cw-personalizer__field--clock-photo");
           const title = document.createElement("div");
           title.className = "cw-personalizer__field-title";
-          title.textContent =
-            field.label +
-            (field.required
-              ? ` (${root.dataset.labelRequired || "Required"})`
-              : "");
+          if (isPhotoCubeClock) {
+            const sideName = String(field.label || "")
+              .replace(/\s*Photo\s*/i, "")
+              .replace(/\s*\(.*\)\s*$/, "")
+              .trim();
+            title.textContent = sideName || field.label;
+          } else {
+            title.textContent =
+              field.label +
+              (field.required
+                ? ` (${root.dataset.labelRequired || "Required"})`
+                : "");
+          }
           const slot = document.createElement("button");
           slot.type = "button";
           slot.className = "cw-personalizer__slot";
