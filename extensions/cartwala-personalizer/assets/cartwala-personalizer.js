@@ -1795,6 +1795,47 @@
           modalStage?.addEventListener("pointercancel", stopModalDrag);
           modalStage?.addEventListener("lostpointercapture", stopModalDrag);
 
+          // Clock body colour cycle: JS-driven so it cannot be blocked by older !important CSS.
+          const clockPalette = [
+            [255, 244, 168], // yellow
+            [255, 205, 176], // orange
+            [207, 255, 220], // green
+            [210, 239, 255], // blue
+            [238, 218, 255], // purple
+            [255, 218, 236], // pink
+          ];
+          const clockFaces = () => [
+            ...root.querySelectorAll(".cw-clock-product-face,.cw-clock-modal-face"),
+          ];
+          let clockColorTimer = null;
+          const startClockColorCycle = () => {
+            if (clockColorTimer) return;
+            const cycleMs = 9000;
+            const tick = () => {
+              const now = performance.now();
+              const t = (now % cycleMs) / cycleMs * clockPalette.length;
+              const i = Math.floor(t) % clockPalette.length;
+              const j = (i + 1) % clockPalette.length;
+              const f = t - Math.floor(t);
+              const rgb = clockPalette[i].map((v, k) =>
+                Math.round(v + (clockPalette[j][k] - v) * f),
+              );
+              const bg = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+              const glow = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, .42)`;
+              clockFaces().forEach((face) => {
+                face.style.setProperty("background", bg, "important");
+                face.style.setProperty(
+                  "box-shadow",
+                  `inset 0 0 34px 12px ${glow}, 0 0 18px ${glow}`,
+                  "important",
+                );
+              });
+            };
+            tick();
+            clockColorTimer = window.setInterval(tick, 90);
+          };
+          startClockColorCycle();
+
           productClockPreview?.querySelectorAll("[data-cw-clock-edit-side]").forEach((button) => {
             button.addEventListener("click", () => {
               const side = button.dataset.cwClockEditSide;
