@@ -322,7 +322,8 @@ body.cw-photo-frame-master-page .cw-photo-frame-size-picker > *{
   body select,
   body summary,
   body [role="button"]{
-    min-height:40px;
+    box-sizing:border-box!important;
+    min-height:44px!important;
   }
 
   body .cw-site-sticky-atc__qty button{
@@ -338,5 +339,98 @@ body.cw-photo-frame-master-page .cw-photo-frame-size-picker > *{
 
   body.cw-photo-frame-master-page .cw-photo-frame-size-picker{
     overflow:hidden!important;
+  }
+}
+
+
+/* Final mobile overflow and master-frame containment */
+@media(max-width:749px){
+  html,
+  body{
+    max-width:100%!important;
+    overflow-x:clip!important;
+  }
+
+  .cw-personalizer,
+  .cw-personalizer__open,
+  .cw-personalizer__preview,
+  .cw-delivery-estimate,
+  form[action*="/cart/add"],
+  .product-form,
+  .product-form__buttons{
+    box-sizing:border-box!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+
+  input[name="quantity"],
+  [aria-label="Quantity" i],
+  button[name="add"],
+  [data-add-to-cart],
+  a[aria-label*="menu" i],
+  button[aria-label*="menu" i],
+  summary[aria-label*="menu" i],
+  a[aria-label*="cart" i],
+  button[aria-label*="cart" i],
+  a[aria-label*="search" i],
+  button[aria-label*="search" i]{
+    box-sizing:border-box!important;
+    min-height:44px!important;
+  }
+
+  a[aria-label*="menu" i],
+  button[aria-label*="menu" i],
+  summary[aria-label*="menu" i],
+  a[aria-label*="cart" i],
+  button[aria-label*="cart" i],
+  a[aria-label*="search" i],
+  button[aria-label*="search" i]{
+    min-width:44px!important;
+  }
+
+  body.cw-photo-frame-master-page .product,
+  body.cw-photo-frame-master-page .product__media-wrapper,
+  body.cw-photo-frame-master-page .product__info-wrapper,
+  body.cw-photo-frame-master-page .product__info-container,
+  body.cw-photo-frame-master-page .product__media-list,
+  body.cw-photo-frame-master-page .product__media-item,
+  body.cw-photo-frame-master-page slider-component,
+  body.cw-photo-frame-master-page .slider-mobile-gutter,
+  body.cw-photo-frame-master-page .slider,
+  body.cw-photo-frame-master-page .cw-personalizer{
+    box-sizing:border-box!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+
+  body.cw-photo-frame-master-page .product__info-container > *,
+  body.cw-photo-frame-master-page .product__info-container fieldset,
+  body.cw-photo-frame-master-page .product__info-container .product-form__input{
+    box-sizing:border-box!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+
+  body.cw-photo-frame-master-page fieldset:has(input[type="radio"][value*="8x12"]):has(input[type="radio"][value*="24x36"]),
+  body.cw-photo-frame-master-page .product-form__input:has(input[type="radio"][value*="8x12"]):has(input[type="radio"][value*="24x36"]){
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:9px!important;
+    width:100%!important;
+    max-width:100%!important;
+    padding-inline:0!important;
+    overflow:hidden!important;
+  }
+
+  body.cw-photo-frame-master-page fieldset:has(input[type="radio"][value*="8x12"]):has(input[type="radio"][value*="24x36"]) label,
+  body.cw-photo-frame-master-page .product-form__input:has(input[type="radio"][value*="8x12"]):has(input[type="radio"][value*="24x36"]) label{
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    margin:0!important;
+    padding-inline:8px!important;
+    justify-content:center!important;
+    text-align:center!important;
   }
 }
