@@ -19,18 +19,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          ARTIFACT_ID: "11460505697"
+          ARTIFACT_ID: "11460947853"
         run: |
           gh api "/repos/$REPO/actions/artifacts/$ARTIFACT_ID/zip" > /tmp/qa.zip
           mkdir -p /tmp/qa
           unzip -q /tmp/qa.zip -d /tmp/qa
-          echo "=== SUMMARY.MD ==="
+          echo "=== SUMMARY ==="
           cat /tmp/qa/summary.md
-          echo "=== ISSUE COUNTS JSON ==="
-          jq '{discoveredUrls,checks,criticalCount,warningCount,issueCounts}' /tmp/qa/report.json
-          echo "=== TOP CRITICAL BY CODE ==="
-          jq -r '[.results[] as $r | $r.issues[] | select(.severity=="critical") | {code,url:$r.url,browser:$r.browser,viewport:$r.viewport,message}] | group_by(.code) | map({code:.[0].code,count:length,examples:(.[0:8])}) | sort_by(-.count) | .[] | "CODE=\(.code) COUNT=\(.count)\n" + (.examples|map("  \(.browser) \(.viewport.width)x\(.viewport.height) \(.url) :: \(.message)")|join("\n"))' /tmp/qa/report.json
-          echo "=== TOP WARNINGS BY CODE ==="
-          jq -r '[.results[] as $r | $r.issues[] | select(.severity=="warning") | {code,url:$r.url,browser:$r.browser,viewport:$r.viewport,message}] | group_by(.code) | map({code:.[0].code,count:length,examples:(.[0:5])}) | sort_by(-.count) | .[] | "CODE=\(.code) COUNT=\(.count)\n" + (.examples|map("  \(.browser) \(.viewport.width)x\(.viewport.height) \(.url) :: \(.message)")|join("\n"))' /tmp/qa/report.json
-          echo "=== DETAILED ERROR EXAMPLES ==="
-          jq -r '.results[] as $r | $r.issues[] | select(.code=="page-errors" or .code=="console-errors" or .code=="broken-images" or .code=="frame-second-image" or .code=="small-tap-targets") | "CODE=\(.code)\nURL=\($r.url)\nBROWSER=\($r.browser) \($r.viewport.width)x\($r.viewport.height)\nMESSAGE=\(.message)\nEXAMPLES=\((.examples // [])|tojson)\n---"' /tmp/qa/report.json | head -n 500
+          echo "=== CRITICAL DETAILS ==="
+          jq -r '.results[] as $r | $r.issues[] | select(.severity=="critical") | "CODE=\(.code)\nURL=\($r.url)\nBROWSER=\($r.browser) \($r.viewport.width)x\($r.viewport.height)\nMESSAGE=\(.message)\nEXAMPLES=\((.examples // [])|tojson)\n---"' /tmp/qa/report.json
+          echo "=== WARNING COUNTS ==="
+          jq -r '[.results[] as $r | $r.issues[] | select(.severity=="warning") | .code] | group_by(.) | map({code:.[0],count:length}) | sort_by(-.count) | .[] | "\(.code): \(.count)"' /tmp/qa/report.json
