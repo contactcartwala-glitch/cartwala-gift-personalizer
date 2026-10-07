@@ -56,3 +56,154 @@
   ['shopify:section:load','cart:updated','cart:refresh','product:added'].forEach(name=>document.addEventListener(name,schedule));
   window.addEventListener('pageshow',schedule);schedule();
 })();
+
+
+/* Cartwala site-wide sticky product Add to Cart */
+(()=>{
+  if(window.cartwalaStickyAtcLoaded)return;
+  window.cartwalaStickyAtcLoaded=true;
+  const path=window.location.pathname.replace(/\/+$/,'');
+  if(!/\/products\//.test(path))return;
+
+  let syncTimer=0;
+  const visible=el=>!!(el&&el.getClientRects().length);
+  const productForms=()=>[...document.querySelectorAll('form[action*="/cart/add"]')]
+    .filter(form=>!form.closest('.cw-site-sticky-atc'));
+  const productForm=()=>productForms().find(form=>form.querySelector('[name="id"]'))||productForms()[0]||null;
+  const originalAdd=()=>{
+    const form=productForm();
+    if(!form)return null;
+    return [...form.querySelectorAll('button[name="add"],input[name="add"],button[type="submit"]')]
+      .find(button=>!button.closest('.shopify-payment-button'))||null;
+  };
+  const quantityInput=()=>{
+    const form=productForm();
+    return form?.querySelector('input[name="quantity"]')||
+      document.querySelector('input[name="quantity"]');
+  };
+  const selectedVariantId=()=>String(productForm()?.querySelector('[name="id"]')?.value||'');
+  const optionText=()=>{
+    const form=productForm()||document;
+    const values=[];
+    form.querySelectorAll('select[name^="option"]').forEach(select=>{
+      const text=select.options?.[select.selectedIndex]?.textContent?.trim();
+      if(text&&!values.includes(text))values.push(text);
+    });
+    form.querySelectorAll('input[name^="option"]:checked').forEach(input=>{
+      const label=(input.id&&document.querySelector(`label[for="${CSS.escape(input.id)}"]`))||
+        input.closest('label');
+      const text=(label?.textContent||input.value||'').replace(/\s+/g,' ').trim();
+      if(text&&!values.includes(text))values.push(text);
+    });
+    return values.slice(0,2).join(' · ');
+  };
+  const priceText=()=>{
+    const selectors=[
+      '.product__info-container .price',
+      '.product-info .price',
+      '.product__price',
+      '[data-product-price]',
+      '.price'
+    ];
+    const node=selectors.flatMap(sel=>[...document.querySelectorAll(sel)])
+      .find(el=>visible(el)&&!el.closest('.cw-site-sticky-atc'));
+    const text=(node?.innerText||'').replace(/\s+/g,' ').trim();
+    const matches=text.match(/(?:Rs\.?|₹)\s*[\d,]+(?:\.\d+)?/gi)||[];
+    return {
+      sale:matches[0]||text.split(/SAVE|OFF/i)[0]?.trim()||'',
+      compare:matches[1]||''
+    };
+  };
+
+  const bar=document.createElement('div');
+  bar.className='cw-site-sticky-atc';
+  bar.setAttribute('role','region');
+  bar.setAttribute('aria-label','Quick add to cart');
+  bar.innerHTML=`
+    <div class="cw-site-sticky-atc__inner">
+      <div class="cw-site-sticky-atc__summary">
+        <div class="cw-site-sticky-atc__prices">
+          <s data-cw-sticky-compare hidden></s>
+          <strong data-cw-sticky-price></strong>
+        </div>
+        <small data-cw-sticky-variant></small>
+      </div>
+      <div class="cw-site-sticky-atc__qty" aria-label="Quantity">
+        <button type="button" data-cw-sticky-minus aria-label="Decrease quantity">−</button>
+        <input type="number" min="1" value="1" inputmode="numeric" data-cw-sticky-qty aria-label="Quantity">
+        <button type="button" data-cw-sticky-plus aria-label="Increase quantity">+</button>
+      </div>
+      <button type="button" class="cw-site-sticky-atc__button" data-cw-sticky-add>
+        <span aria-hidden="true">▣</span><strong>Add to Cart</strong>
+      </button>
+    </div>`;
+  document.body.appendChild(bar);
+  document.body.classList.add('cw-site-sticky-atc-active');
+
+  const price=bar.querySelector('[data-cw-sticky-price]');
+  const compare=bar.querySelector('[data-cw-sticky-compare]');
+  const variant=bar.querySelector('[data-cw-sticky-variant]');
+  const qty=bar.querySelector('[data-cw-sticky-qty]');
+  const add=bar.querySelector('[data-cw-sticky-add]');
+  const minus=bar.querySelector('[data-cw-sticky-minus]');
+  const plus=bar.querySelector('[data-cw-sticky-plus]');
+
+  const setQty=value=>{
+    const input=quantityInput();
+    const min=Math.max(1,Number(input?.min)||1);
+    const max=Number(input?.max)||999;
+    const next=Math.min(max,Math.max(min,Math.round(Number(value)||min)));
+    qty.value=String(next);
+    if(input){
+      input.value=String(next);
+      input.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+  };
+
+  const sync=()=>{
+    const form=productForm();
+    if(!form){bar.hidden=true;return}
+    bar.hidden=false;
+    const p=priceText();
+    price.textContent=p.sale||'';
+    compare.textContent=p.compare||'';
+    compare.hidden=!p.compare;
+    const options=optionText();
+    variant.textContent=options||'';
+    const sourceQty=quantityInput();
+    if(sourceQty&&document.activeElement!==qty)qty.value=String(sourceQty.value||1);
+    const sourceAdd=originalAdd();
+    const unavailable=!!sourceAdd&&(sourceAdd.disabled||/sold out|unavailable/i.test(sourceAdd.textContent||sourceAdd.value||''));
+    add.disabled=unavailable;
+    add.querySelector('strong').textContent=unavailable?'Sold Out':'Add to Cart';
+    bar.dataset.variantId=selectedVariantId();
+  };
+  const schedule=()=>{clearTimeout(syncTimer);syncTimer=setTimeout(sync,70)};
+
+  minus.addEventListener('click',()=>setQty(Number(qty.value)-1));
+  plus.addEventListener('click',()=>setQty(Number(qty.value)+1));
+  qty.addEventListener('change',()=>setQty(qty.value));
+  add.addEventListener('click',()=>{
+    if(add.disabled)return;
+    setQty(qty.value);
+    const personalizer=document.querySelector('[data-cw-personalizer]');
+    const customizer=personalizer?.querySelector('[data-cw-open]');
+    if(customizer&&!/edit again/i.test(customizer.textContent||'')){
+      customizer.click();
+      return;
+    }
+    const sourceAdd=originalAdd();
+    if(sourceAdd&&!sourceAdd.disabled){
+      sourceAdd.click();
+      return;
+    }
+    const form=productForm();
+    form?.requestSubmit?.();
+  });
+
+  ['change','variant:change','product:variant-change','shopify:section:load']
+    .forEach(name=>document.addEventListener(name,schedule));
+  new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,characterData:true});
+  window.addEventListener('pageshow',sync);
+  sync();
+})();
