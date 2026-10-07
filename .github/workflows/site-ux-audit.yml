@@ -1,12 +1,6 @@
 name: Cartwala Site UX Audit
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - "qa/site-ux-audit.mjs"
-      - ".github/workflows/site-ux-audit.yml"
   workflow_run:
     workflows:
       - Deploy Shopify app
@@ -23,7 +17,7 @@ on:
 
 concurrency:
   group: cartwala-site-ux-audit
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   audit:
