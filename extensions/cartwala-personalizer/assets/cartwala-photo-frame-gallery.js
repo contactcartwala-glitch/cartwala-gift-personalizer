@@ -1,3 +1,4 @@
+// Cartwala master photo-frame gallery v2 — gallery owns saved-photo mockup rendering.
 (() => {
   if (window.cartwalaPhotoFrameGalleryLoaded) return;
   window.cartwalaPhotoFrameGalleryLoaded = true;
