@@ -50,6 +50,7 @@ body:has(.cw-personalizer[data-product-kind="mug"]) .product-gallery__thumbs but
 
 /* Cartwala sticky Add to Cart bar */
 .cw-site-sticky-atc{
+  box-sizing:border-box;
   position:fixed;
   left:0;
   right:0;
@@ -63,6 +64,7 @@ body:has(.cw-personalizer[data-product-kind="mug"]) .product-gallery__thumbs but
 }
 .cw-site-sticky-atc[hidden]{display:none!important}
 .cw-site-sticky-atc__inner{
+  box-sizing:border-box;
   width:min(1180px,100%);
   margin:0 auto;
   display:grid;
@@ -235,4 +237,54 @@ body.cw-site-sticky-atc-active a[href*="whatsapp"][style*="position: fixed"]{
     width:124px!important;
     max-width:124px!important;
   }
+}
+
+
+/* Cartwala global mobile tap targets */
+@media(max-width:749px){
+  .product-form__buttons button,
+  .product-form__submit,
+  form[action*="/cart/add"] button[name="add"],
+  form[action*="/cart/add"] button[type="submit"],
+  .quick-add__submit,
+  [class*="quick-add" i] button,
+  a.button,
+  button.button,
+  .header__icon,
+  summary.header__icon{
+    min-height:44px!important;
+  }
+
+  .header__icon{
+    min-width:44px!important;
+  }
+
+  quantity-input,
+  .quantity{
+    min-height:44px;
+  }
+
+  /* Never let product controls create sideways scrolling on small phones. */
+  body:has(.cw-site-sticky-atc){
+    max-width:100vw!important;
+    overflow-x:hidden!important;
+  }
+}
+
+/* Stronger containment for the master black-beading photo-frame page. */
+body.cw-photo-frame-master-page main,
+body.cw-photo-frame-master-page .shopify-section,
+body.cw-photo-frame-master-page .product,
+body.cw-photo-frame-master-page .product__info-wrapper,
+body.cw-photo-frame-master-page .product__info-container,
+body.cw-photo-frame-master-page .cw-personalizer,
+body.cw-photo-frame-master-page fieldset{
+  box-sizing:border-box;
+  max-width:100%!important;
+}
+
+body.cw-photo-frame-master-page .cw-photo-frame-size-picker > *{
+  box-sizing:border-box!important;
+  min-width:0!important;
+  max-width:100%!important;
 }
