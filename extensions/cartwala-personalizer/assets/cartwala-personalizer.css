@@ -2580,3 +2580,108 @@ body.cw-photo-frame-master-page .variant-picker input[type="radio"]:checked+labe
 .cw-clock-modal-face--bottom{
   box-shadow:none !important;
 }
+
+
+/* CLOCK ONLY — final body-light correction.
+   The whole plastic body/rim changes colour; not a thin outline. */
+@keyframes cwClockBodyLightFill{
+  0%,100%{
+    border-color:#fff4a8;
+    background:#fff9cf;
+    box-shadow:
+      inset 0 0 34px 12px rgba(255,235,105,.48),
+      0 0 24px rgba(255,223,83,.34);
+  }
+  20%{
+    border-color:#ffc49f;
+    background:#ffe0ca;
+    box-shadow:
+      inset 0 0 34px 12px rgba(255,143,92,.46),
+      0 0 24px rgba(255,126,77,.34);
+  }
+  40%{
+    border-color:#a9f6ba;
+    background:#d8ffe1;
+    box-shadow:
+      inset 0 0 34px 12px rgba(84,226,116,.45),
+      0 0 24px rgba(75,218,107,.34);
+  }
+  60%{
+    border-color:#a9ddff;
+    background:#dff3ff;
+    box-shadow:
+      inset 0 0 34px 12px rgba(81,176,241,.44),
+      0 0 24px rgba(70,170,238,.34);
+  }
+  80%{
+    border-color:#ddb5ff;
+    background:#f0ddff;
+    box-shadow:
+      inset 0 0 34px 12px rgba(181,105,239,.42),
+      0 0 24px rgba(177,100,236,.32);
+  }
+}
+
+/* wipe older thin-line/pseudo glow effects */
+.cw-clock-product-face::before,
+.cw-clock-product-face::after,
+.cw-clock-modal-face::before,
+.cw-clock-modal-face::after{
+  display:none !important;
+  content:none !important;
+}
+
+/* full clock shell around every side */
+.cw-clock-product-face,
+.cw-clock-modal-face{
+  box-sizing:border-box !important;
+  border:28px solid #fff4a8 !important;
+  border-radius:38px !important;
+  background:#fff9cf !important;
+  overflow:hidden !important;
+  animation:cwClockBodyLightFill 7s linear infinite !important;
+}
+
+/* photos sit inside the glowing shell, not edge-to-edge */
+.cw-clock-product-face img,
+.cw-clock-modal-face img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  border-radius:18px !important;
+  transform:none !important;
+}
+
+/* front/bottom keep their fixed face images, with the same illuminated shell */
+.cw-clock-product-face--front,
+.cw-clock-product-face--bottom,
+.cw-clock-modal-face--front,
+.cw-clock-modal-face--bottom{
+  border:28px solid #fff4a8 !important;
+  background:#fff9cf !important;
+  animation:cwClockBodyLightFill 7s linear infinite !important;
+  overflow:hidden !important;
+}
+.cw-clock-product-face--front img,
+.cw-clock-product-face--bottom img,
+.cw-clock-modal-face--front img,
+.cw-clock-modal-face--bottom img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  object-position:center !important;
+  border-radius:18px !important;
+  transform:none !important;
+}
+
+@media(max-width:749px){
+  .cw-clock-product-face,
+  .cw-clock-modal-face,
+  .cw-clock-product-face--front,
+  .cw-clock-product-face--bottom,
+  .cw-clock-modal-face--front,
+  .cw-clock-modal-face--bottom{
+    border-width:20px !important;
+    border-radius:30px !important;
+  }
+}
