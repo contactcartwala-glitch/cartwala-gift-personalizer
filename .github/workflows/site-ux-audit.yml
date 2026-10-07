@@ -1,6 +1,12 @@
 name: Cartwala Site UX Audit
 
 on:
+  push:
+    branches:
+      - master
+    paths:
+      - "qa/site-ux-audit.mjs"
+      - ".github/workflows/site-ux-audit.yml"
   workflow_run:
     workflows:
       - Deploy Shopify app
@@ -23,7 +29,7 @@ jobs:
   audit:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v4
