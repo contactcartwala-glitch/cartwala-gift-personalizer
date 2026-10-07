@@ -35,6 +35,12 @@
     [408, 922],
   ];
 
+  const coreAssetUrls = {
+    "size:8x12": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-frame-8x12-black-beading.png?v=1791315873",
+    guide: "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-frame-size-guide-black-beading.png?v=1791315973",
+    side: "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-frame-side-view-black-beading.png?v=1791315983",
+  };
+
   let artworkUrl = "";
   let generation = 0;
   let scheduled = 0;
@@ -350,6 +356,8 @@
       ensureSavedStatus();
       markPhotoFrameControls();
       rememberTargets();
+      ensureFallbackCoreThumbs();
+      rememberTargets();
       ensureCoreThumbnails();
       startGalleryObserver();
       renderAll();
@@ -370,6 +378,59 @@
         ".product-gallery__thumbs, .thumbnail-list, [class*=\"thumbnail-list\" i], [data-product-thumbnails], [data-thumbnails]"
       )
     );
+  };
+
+  const ensureFallbackCoreThumbs = () => {
+    if (!root()) return null;
+    const gallery = galleryRoot();
+    if (!gallery) return null;
+
+    let strip = gallery.querySelector("[data-cw-frame-core-strip]");
+    if (!strip) {
+      strip = document.createElement("div");
+      strip.className = "cw-frame-core-thumbs";
+      strip.dataset.cwFrameCoreStrip = "true";
+      strip.setAttribute("aria-label", "Photo frame gallery views");
+
+      const hero = mainGalleryImage?.();
+      const anchor =
+        hero?.closest("div,li,figure") ||
+        gallery.querySelector("img")?.parentElement ||
+        gallery.firstElementChild;
+      if (anchor?.parentElement) anchor.insertAdjacentElement("afterend", strip);
+      else gallery.appendChild(strip);
+    }
+
+    const ensureButton = (kind, label) => {
+      let button = strip.querySelector(`[data-cw-custom-thumb-kind="${kind}"]`);
+      if (button) return button;
+
+      button = document.createElement("button");
+      button.type = "button";
+      button.className = "cw-frame-core-thumb";
+      button.dataset.cwCustomThumbKind = kind;
+      button.setAttribute("aria-label", label);
+
+      const img = document.createElement("img");
+      img.alt = label;
+      img.src = coreAssetUrls[kind];
+      img.dataset.cwFrameKind = kind;
+      img.dataset.cwFrameBase = coreAssetUrls[kind];
+      button.appendChild(img);
+
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        showFrameKind(kind);
+      });
+
+      strip.appendChild(button);
+      return button;
+    };
+
+    ensureButton("guide", "View photo frame size guide");
+    ensureButton("side", "View photo frame side view");
+    return strip;
   };
 
   const mainGalleryImage = () => {
@@ -398,8 +459,10 @@
 
   const showFrameKind = (kind) => {
     const gallery = galleryRoot() || document;
-    const source = [...gallery.querySelectorAll(`img[data-cw-frame-kind="${kind}"]`)]
-      .find((img) => img.closest(".product-gallery__thumbs,.thumbnail-list,[class*=\"thumb\" i],[data-thumbnail]")) ||
+    const source =
+      gallery.querySelector(`[data-cw-frame-core-strip] img[data-cw-frame-kind="${kind}"]`) ||
+      [...gallery.querySelectorAll(`img[data-cw-frame-kind="${kind}"]`)]
+        .find((img) => img.closest(".product-gallery__thumbs,.thumbnail-list,[class*=\"thumb\" i],[data-thumbnail],[data-cw-frame-core-strip]")) ||
       document.querySelector(`img[data-cw-frame-kind="${kind}"]`);
     if (!source) return;
 
@@ -422,7 +485,7 @@
     gallery.querySelectorAll("img[data-cw-frame-kind]").forEach((img) => {
       if (
         img === source ||
-        img.closest(".product-gallery__thumbs,.thumbnail-list,[class*=\"thumb\" i],[data-thumbnail]")
+        img.closest(".product-gallery__thumbs,.thumbnail-list,[class*=\"thumb\" i],[data-thumbnail],[data-cw-frame-core-strip]")
       ) return;
       const rect = img.getBoundingClientRect();
       if (
@@ -443,6 +506,7 @@
 
   const ensureCoreThumbnails = () => {
     if (!root()) return;
+    ensureFallbackCoreThumbs();
     const container = thumbContainer();
     if (!container) return;
 
@@ -461,11 +525,13 @@
         .find(Boolean) || null;
 
     const sourceFor = (kind) =>
-      document.querySelector(`img[data-cw-frame-kind="${kind}"]`);
+      document.querySelector(`img[data-cw-frame-kind="${kind}"]`) || null;
 
     const makeThumb = (kind, label) => {
       const source = sourceFor(kind);
-      if (!source) return null;
+      const base = source?.dataset.cwFrameBase || coreAssetUrls[kind] || "";
+      const src = source?.currentSrc || source?.src || base;
+      if (!base || !src) return null;
       const button = document.createElement("button");
       button.type = "button";
       button.className = "cw-frame-core-thumb";
@@ -473,9 +539,9 @@
       button.setAttribute("aria-label", label);
       const img = document.createElement("img");
       img.alt = label;
-      img.src = source.currentSrc || source.src;
+      img.src = src;
       img.dataset.cwFrameKind = kind;
-      img.dataset.cwFrameBase = source.dataset.cwFrameBase || "";
+      img.dataset.cwFrameBase = base;
       button.appendChild(img);
       button.addEventListener("click", (event) => {
         event.preventDefault();
@@ -556,7 +622,7 @@
         gallery.querySelectorAll("img[data-cw-frame-kind]").forEach((img) => {
           if (
             img === clicked ||
-            img.closest(".product-gallery__thumbs,.thumbnail-list,[class*=\"thumb\" i],[data-thumbnail]")
+            img.closest(".product-gallery__thumbs,.thumbnail-list,[class*=\"thumb\" i],[data-thumbnail],[data-cw-frame-core-strip]")
           ) return;
           const rect = img.getBoundingClientRect();
           if (
