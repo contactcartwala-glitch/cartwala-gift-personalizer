@@ -360,7 +360,7 @@
       rememberTargets();
       ensureCoreThumbnails();
       startGalleryObserver();
-      renderAll();
+      renderAll().then(() => showSelectedSize("")).catch(() => undefined);
     });
   };
   const galleryRoot = () =>
@@ -651,15 +651,64 @@
   };
 
 
+  const selectedSizeKey = () => {
+    const picker = document.querySelector(".cw-photo-frame-size-picker") || document;
+    const checked = picker.querySelector?.('input[type="radio"]:checked');
+    const select = picker.querySelector?.('select');
+    const activeButton = [...(picker.querySelectorAll?.("button") || [])].find((button) =>
+      button.matches(".active,.is-active,[aria-pressed='true'],[aria-selected='true']")
+    );
+    return sizeKeyFrom(
+      checked?.value ||
+      select?.value ||
+      activeButton?.value ||
+      activeButton?.textContent ||
+      ""
+    );
+  };
+
+  const showSelectedSize = (value) => {
+    const size = sizeKeyFrom(value) || selectedSizeKey();
+    if (!size || !artworkUrl) return;
+    [0, 100, 280].forEach((delay) =>
+      window.setTimeout(() => showFrameKind(`size:${size}`), delay)
+    );
+  };
+
   document.addEventListener("change", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
     if (
       target.getAttribute("name") === "id" ||
-      /^option[1-3]$/.test(target.getAttribute("name") || "")
-    )
+      /^option[1-3]$/.test(target.getAttribute("name") || "") ||
+      target.closest(".cw-photo-frame-size-picker")
+    ) {
       scheduleRender();
+      showSelectedSize(target.value || target.textContent || "");
+    }
   });
+
+  document.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const control = target?.closest?.(".cw-photo-frame-size-picker button,.cw-photo-frame-size-picker label");
+    if (!control) return;
+    const size = sizeKeyFrom(control.value || control.textContent || "");
+    if (!size) return;
+    window.setTimeout(() => {
+      scheduleRender();
+      showSelectedSize(size);
+    }, 60);
+  }, true);
+
+  ["variant:change", "product:variant-change", "theme:variant:change"].forEach((name) =>
+    document.addEventListener(name, () => {
+      window.setTimeout(() => {
+        rememberTargets();
+        scheduleRender();
+        showSelectedSize("");
+      }, 100);
+    })
+  );
 
   document.addEventListener("shopify:section:load", () => {
     if (!artworkUrl) {
@@ -687,7 +736,12 @@
       scheduleRender();
     } finally {
       maintainingGallery = false;
-      if (artworkUrl) observer.observe(document.body, { childList: true, subtree: true });
+      if (artworkUrl) observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["src", "srcset", "class", "aria-hidden"],
+      });
     }
   };
 
@@ -704,7 +758,12 @@
   const startGalleryObserver = () => {
     if (observerStarted || !artworkUrl || !document.body) return;
     observerStarted = true;
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["src", "srcset", "class", "aria-hidden"],
+    });
   };
 
   const start = () => {
