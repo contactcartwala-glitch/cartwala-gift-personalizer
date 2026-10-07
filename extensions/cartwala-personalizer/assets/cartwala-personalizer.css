@@ -2803,3 +2803,122 @@ body.cw-photo-frame-master-page .variant-picker input[type="radio"]:checked+labe
     border-radius:30px !important;
   }
 }
+
+
+/* CLOCK ONLY — continuous 3D body correction (authoritative final override)
+   Removes the triangular/double border look. Each face is one rounded clock-body panel
+   with the photo/display inset inside it. The full body itself changes colour. */
+@keyframes cwClockBodyCycleV2{
+  0%,100%{
+    background:#fff7c9;
+    box-shadow:inset 0 0 30px rgba(255,232,101,.42);
+  }
+  20%{
+    background:#ffe2cc;
+    box-shadow:inset 0 0 30px rgba(255,139,88,.40);
+  }
+  40%{
+    background:#dfffe5;
+    box-shadow:inset 0 0 30px rgba(79,221,111,.40);
+  }
+  60%{
+    background:#e0f3ff;
+    box-shadow:inset 0 0 30px rgba(74,170,238,.38);
+  }
+  80%{
+    background:#f2e1ff;
+    box-shadow:inset 0 0 30px rgba(179,104,237,.36);
+  }
+}
+
+/* remove every old outline/glow layer */
+.cw-clock-product-face::before,
+.cw-clock-product-face::after,
+.cw-clock-modal-face::before,
+.cw-clock-modal-face::after{
+  content:none !important;
+  display:none !important;
+}
+
+/* full six-sided body */
+.cw-clock-product-face,
+.cw-clock-modal-face,
+.cw-clock-product-face--front,
+.cw-clock-product-face--top,
+.cw-clock-product-face--left,
+.cw-clock-product-face--right,
+.cw-clock-product-face--back,
+.cw-clock-product-face--bottom,
+.cw-clock-modal-face--front,
+.cw-clock-modal-face--top,
+.cw-clock-modal-face--left,
+.cw-clock-modal-face--right,
+.cw-clock-modal-face--back,
+.cw-clock-modal-face--bottom{
+  box-sizing:border-box !important;
+  border:0 !important;
+  padding:16px !important;
+  border-radius:38px !important;
+  background:#fff7c9 !important;
+  overflow:hidden !important;
+  animation:cwClockBodyCycleV2 8s linear infinite !important;
+}
+
+/* uploaded/fixed face content sits INSIDE the body; no double border */
+.cw-clock-product-face > img,
+.cw-clock-modal-face > img,
+.cw-clock-product-face--front > img,
+.cw-clock-product-face--bottom > img,
+.cw-clock-modal-face--front > img,
+.cw-clock-modal-face--bottom > img{
+  width:100% !important;
+  height:100% !important;
+  display:block !important;
+  object-fit:cover !important;
+  object-position:center !important;
+  border-radius:24px !important;
+  transform:none !important;
+  box-shadow:none !important;
+}
+
+/* Front and Bottom fixed artwork already include the real clock face/panel.
+   Keep them visually full, while the surrounding face remains the animated body. */
+.cw-clock-product-face--front,
+.cw-clock-product-face--bottom,
+.cw-clock-modal-face--front,
+.cw-clock-modal-face--bottom{
+  padding:12px !important;
+}
+.cw-clock-product-face--front > img,
+.cw-clock-product-face--bottom > img,
+.cw-clock-modal-face--front > img,
+.cw-clock-modal-face--bottom > img{
+  border-radius:26px !important;
+}
+
+/* keep cube geometry clean */
+.cw-clock-product-cube,
+.cw-clock-modal-cube{
+  transform-style:preserve-3d !important;
+  overflow:visible !important;
+}
+
+@media(max-width:749px){
+  .cw-clock-product-face,
+  .cw-clock-modal-face,
+  .cw-clock-product-face--front,
+  .cw-clock-product-face--top,
+  .cw-clock-product-face--left,
+  .cw-clock-product-face--right,
+  .cw-clock-product-face--back,
+  .cw-clock-product-face--bottom,
+  .cw-clock-modal-face--front,
+  .cw-clock-modal-face--top,
+  .cw-clock-modal-face--left,
+  .cw-clock-modal-face--right,
+  .cw-clock-modal-face--back,
+  .cw-clock-modal-face--bottom{
+    padding:11px !important;
+    border-radius:30px !important;
+  }
+}
