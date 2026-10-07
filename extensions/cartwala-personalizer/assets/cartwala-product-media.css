@@ -501,3 +501,85 @@ body.cw-photo-frame-master-page .cw-frame-core-thumb:focus-visible{
     min-height:66px!important;
   }
 }
+
+
+/* Cartwala sticky purchase UX polish */
+.cw-site-sticky-atc__saving{
+  display:inline-flex;
+  align-items:center;
+  min-height:22px;
+  padding:3px 8px;
+  border-radius:999px;
+  background:#fff0e8;
+  color:#c84b00;
+  font-size:11px;
+  font-weight:800;
+  line-height:1;
+  white-space:nowrap;
+}
+.cw-site-sticky-atc__saving[hidden]{display:none!important}
+.cw-site-sticky-atc__button{
+  transition:transform .14s ease,filter .14s ease,box-shadow .14s ease;
+  box-shadow:0 8px 20px rgba(255,104,0,.22);
+}
+.cw-site-sticky-atc__button:not(:disabled):hover{filter:brightness(.96)}
+.cw-site-sticky-atc__button:not(:disabled):active{transform:translateY(1px)}
+.cw-site-sticky-atc__button:focus-visible,
+.cw-site-sticky-atc__qty button:focus-visible,
+.cw-site-sticky-atc__qty input:focus-visible{
+  outline:2px solid #ff6800;
+  outline-offset:2px;
+}
+.cw-site-sticky-atc--needs-customize .cw-site-sticky-atc__button{
+  background:#1f1b19;
+  box-shadow:0 8px 20px rgba(31,27,25,.18);
+}
+.cw-site-sticky-atc--personalized .cw-site-sticky-atc__summary small{
+  color:#2f6f3e;
+  font-weight:700;
+}
+.cw-site-sticky-atc__button.cw-is-loading{
+  cursor:wait;
+  opacity:.78;
+}
+
+@media(max-width:749px){
+  .cw-site-sticky-atc__saving{
+    min-height:18px;
+    padding:2px 6px;
+    font-size:9px;
+  }
+  .cw-site-sticky-atc__summary small{
+    max-width:100%;
+  }
+}
+
+@media(max-width:359px){
+  .cw-site-sticky-atc__inner{
+    grid-template-columns:minmax(0,1fr) 88px;
+    gap:7px 8px;
+  }
+  .cw-site-sticky-atc__button{
+    grid-column:1 / -1;
+    width:100%;
+    min-height:46px;
+  }
+  .cw-site-sticky-atc__summary small{
+    display:-webkit-box;
+    overflow:hidden;
+    white-space:normal;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    line-height:1.2;
+  }
+  .cw-site-sticky-atc__qty{
+    grid-template-columns:26px 36px 26px;
+  }
+  body.cw-site-sticky-atc-active{
+    padding-bottom:calc(132px + env(safe-area-inset-bottom))!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .cw-site-sticky-atc__button{transition:none}
+}
