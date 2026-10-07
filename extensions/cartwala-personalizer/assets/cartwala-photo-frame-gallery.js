@@ -402,19 +402,52 @@
       if (!desiredKind || !desiredBase || !desiredSrc) return;
 
       const applyToMain = () => {
-        const main = mainGalleryImage();
-        if (!main || main === clicked || !document.contains(main)) return;
-        main.dataset.cwFrameKind = desiredKind;
-        main.dataset.cwFrameBase = desiredBase;
-        replaceImage(main, desiredSrc);
+        const gallery = galleryRoot() || document;
+        const candidates = new Set();
+
+        const primary = mainGalleryImage();
+        if (primary) candidates.add(primary);
+
+        [
+          ".product-gallery__main img[data-cw-frame-kind]",
+          ".product__media-item.is-active img[data-cw-frame-kind]",
+          ".product__media-item[aria-hidden=\"false\"] img[data-cw-frame-kind]",
+          "[data-media-id].is-active img[data-cw-frame-kind]"
+        ].forEach((selector) => {
+          gallery.querySelectorAll(selector).forEach((img) => candidates.add(img));
+        });
+
+        // Some themes do not mark the active media item reliably. In that
+        // case, the large visible image is the actual product hero. Include
+        // all large visible frame images, but never thumbnail-strip images.
+        gallery.querySelectorAll("img[data-cw-frame-kind]").forEach((img) => {
+          if (
+            img === clicked ||
+            img.closest(".product-gallery__thumbs,.thumbnail-list,[class*=\"thumb\" i],[data-thumbnail]")
+          ) return;
+          const rect = img.getBoundingClientRect();
+          if (
+            rect.width >= 180 &&
+            rect.height >= 180 &&
+            getComputedStyle(img).display !== "none" &&
+            getComputedStyle(img).visibility !== "hidden"
+          ) candidates.add(img);
+        });
+
+        candidates.forEach((main) => {
+          if (!main || main === clicked || !document.contains(main)) return;
+          main.dataset.cwFrameKind = desiredKind;
+          main.dataset.cwFrameBase = desiredBase;
+          replaceImage(main, desiredSrc);
+        });
       };
 
       // Let the Shopify theme handle its own media selection first, then
-      // re-apply the personalised media to the main gallery node it selected.
-      window.setTimeout(applyToMain, 0);
-      window.setTimeout(applyToMain, 80);
-      window.setTimeout(applyToMain, 220);
-      window.setTimeout(applyToMain, 500);
+      // re-apply the personalised media after each common gallery update
+      // window. The final late pass covers themes that animate/swizzle media.
+      [0, 80, 220, 500, 900, 1400].forEach((delay) =>
+        window.setTimeout(applyToMain, delay)
+      );
     }, true);
   };
 
