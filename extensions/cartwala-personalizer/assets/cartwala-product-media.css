@@ -46,3 +46,193 @@ body:has(.cw-personalizer[data-product-kind="mug"]) .product-gallery__thumbs but
   object-fit: contain !important;
   object-position: center !important;
 }
+
+
+/* Cartwala sticky Add to Cart bar */
+.cw-site-sticky-atc{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:2147483000;
+  padding:10px max(14px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));
+  border-top:1px solid #e8e2de;
+  background:rgba(255,255,255,.97);
+  box-shadow:0 -8px 28px rgba(0,0,0,.12);
+  backdrop-filter:blur(14px);
+}
+.cw-site-sticky-atc[hidden]{display:none!important}
+.cw-site-sticky-atc__inner{
+  width:min(1180px,100%);
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:minmax(150px,1fr) 118px minmax(220px,320px);
+  gap:14px;
+  align-items:center;
+}
+.cw-site-sticky-atc__summary{min-width:0}
+.cw-site-sticky-atc__prices{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:5px 9px;
+}
+.cw-site-sticky-atc__prices strong{
+  color:#1c1715;
+  font-size:21px;
+  line-height:1;
+}
+.cw-site-sticky-atc__prices s{
+  color:#8b8581;
+  font-size:13px;
+}
+.cw-site-sticky-atc__summary small{
+  display:block;
+  margin-top:5px;
+  overflow:hidden;
+  color:#6a6460;
+  font-size:12px;
+  line-height:1.15;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.cw-site-sticky-atc__qty{
+  display:grid;
+  grid-template-columns:36px 44px 36px;
+  align-items:center;
+  height:44px;
+  overflow:hidden;
+  border:1px solid #ddd7d3;
+  border-radius:12px;
+  background:#fff;
+}
+.cw-site-sticky-atc__qty button,
+.cw-site-sticky-atc__qty input{
+  width:100%;
+  height:42px;
+  min-width:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:#211d1b;
+  text-align:center;
+  font:700 16px/1 inherit;
+}
+.cw-site-sticky-atc__qty input{
+  appearance:textfield;
+  border-left:1px solid #eee8e4;
+  border-right:1px solid #eee8e4;
+}
+.cw-site-sticky-atc__qty input::-webkit-inner-spin-button,
+.cw-site-sticky-atc__qty input::-webkit-outer-spin-button{appearance:none;margin:0}
+.cw-site-sticky-atc__button{
+  min-height:50px;
+  border:0;
+  border-radius:14px;
+  background:#ff6800;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  padding:12px 22px;
+  cursor:pointer;
+  font-size:16px;
+}
+.cw-site-sticky-atc__button strong{
+  font-size:16px;
+  font-weight:850;
+  letter-spacing:.01em;
+}
+.cw-site-sticky-atc__button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+body.cw-site-sticky-atc-active{
+  padding-bottom:calc(86px + env(safe-area-inset-bottom))!important;
+}
+/* Lift common floating WhatsApp buttons above the sticky cart bar. */
+body.cw-site-sticky-atc-active a[href*="wa.me"],
+body.cw-site-sticky-atc-active a[href*="api.whatsapp.com"],
+body.cw-site-sticky-atc-active a[href*="whatsapp"],
+body.cw-site-sticky-atc-active [class*="whatsapp" i]{
+  --cw-sticky-whatsapp-bottom:calc(92px + env(safe-area-inset-bottom));
+}
+body.cw-site-sticky-atc-active a[href*="wa.me"][style*="position: fixed"],
+body.cw-site-sticky-atc-active a[href*="api.whatsapp.com"][style*="position: fixed"],
+body.cw-site-sticky-atc-active a[href*="whatsapp"][style*="position: fixed"]{
+  bottom:var(--cw-sticky-whatsapp-bottom)!important;
+}
+
+@media(max-width:749px){
+  .cw-site-sticky-atc{
+    padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+  }
+  .cw-site-sticky-atc__inner{
+    grid-template-columns:minmax(0,1fr) 72px minmax(145px,1.25fr);
+    gap:8px;
+  }
+  .cw-site-sticky-atc__prices strong{font-size:18px}
+  .cw-site-sticky-atc__prices s{font-size:11px}
+  .cw-site-sticky-atc__summary small{font-size:10px;margin-top:3px}
+  .cw-site-sticky-atc__qty{
+    grid-template-columns:22px 28px 22px;
+    height:46px;
+    border-radius:11px;
+  }
+  .cw-site-sticky-atc__qty button,
+  .cw-site-sticky-atc__qty input{
+    height:44px;
+    font-size:15px;
+  }
+  .cw-site-sticky-atc__button{
+    min-height:48px;
+    padding:10px 10px;
+    border-radius:12px;
+  }
+  .cw-site-sticky-atc__button strong{font-size:14px}
+  body.cw-site-sticky-atc-active{
+    padding-bottom:calc(78px + env(safe-area-inset-bottom))!important;
+  }
+
+  /* Photo-frame master: keep the product page compact, readable and inside viewport. */
+  body.cw-photo-frame-master-page{
+    overflow-x:hidden!important;
+  }
+  body.cw-photo-frame-master-page main h1,
+  body.cw-photo-frame-master-page .product__title,
+  body.cw-photo-frame-master-page [class*="product-title" i]{
+    max-width:100%!important;
+    margin-bottom:12px!important;
+    font-size:clamp(27px,7vw,34px)!important;
+    line-height:1.08!important;
+    letter-spacing:-.025em!important;
+    overflow-wrap:anywhere!important;
+  }
+  body.cw-photo-frame-master-page .cw-photo-frame-size-picker{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:9px!important;
+    width:100%!important;
+    max-width:100%!important;
+    overflow:visible!important;
+  }
+  body.cw-photo-frame-master-page .cw-photo-frame-size-picker label,
+  body.cw-photo-frame-master-page .cw-photo-frame-size-picker button{
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    justify-content:center!important;
+    text-align:center!important;
+  }
+  body.cw-photo-frame-master-page .cw-personalizer__open{
+    width:auto!important;
+    min-width:0!important;
+    padding:9px 15px!important;
+    font-size:13px!important;
+  }
+  body.cw-photo-frame-master-page .cw-photo-frame-quantity{
+    width:124px!important;
+    max-width:124px!important;
+  }
+}
