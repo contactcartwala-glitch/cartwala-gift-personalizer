@@ -24,7 +24,9 @@ body.cw-personalization-complete
 }
 .cw-personalizer__open,
 .cw-personalizer__preview {
+  box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
   border: 0;
   border-radius: 10px;
   padding: 14px 20px;
