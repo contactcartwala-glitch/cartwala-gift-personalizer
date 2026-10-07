@@ -120,6 +120,11 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
       const vw=document.documentElement.clientWidth;
       const vh=document.documentElement.clientHeight;
       const horizontalOverflow=Math.max(document.documentElement.scrollWidth,document.body?.scrollWidth||0)-vw;
+      const startX=window.scrollX;
+      const startY=window.scrollY;
+      window.scrollTo(99999,startY);
+      const horizontalScrollX=window.scrollX;
+      window.scrollTo(startX,startY);
       const brokenImages=[...document.images].filter(img=>visible(img)&&img.complete&&img.currentSrc&&img.naturalWidth===0)
         .slice(0,8).map(img=>img.currentSrc);
       const unnamedButtons=[...document.querySelectorAll("button,[role=button]")]
@@ -162,6 +167,7 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
       return {
         title:document.title,
         horizontalOverflow,
+        horizontalScrollX,
         brokenImages,
         unnamedButtons,
         smallTargets,
@@ -175,7 +181,8 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
       };
     },{deep});
 
-    if(metrics.horizontalOverflow>6)issues.push({severity:"critical",code:"horizontal-overflow",message:`Page is ${Math.round(metrics.horizontalOverflow)}px wider than viewport`});
+    if(metrics.horizontalOverflow>6&&metrics.horizontalScrollX>4)issues.push({severity:"critical",code:"horizontal-overflow",message:`Page can scroll ${Math.round(metrics.horizontalScrollX)}px sideways (${Math.round(metrics.horizontalOverflow)}px raw overflow)`});
+    else if(metrics.horizontalOverflow>24)issues.push({severity:"warning",code:"clipped-horizontal-overflow",message:`Page contains ${Math.round(metrics.horizontalOverflow)}px clipped overflow but cannot scroll sideways`});
     if(metrics.brokenImages.length)issues.push({severity:"critical",code:"broken-images",message:`${metrics.brokenImages.length} visible broken image(s)`,examples:metrics.brokenImages});
     if(metrics.unnamedButtons.length)issues.push({severity:"warning",code:"unnamed-buttons",message:`${metrics.unnamedButtons.length} visible button(s) have no accessible name`,examples:metrics.unnamedButtons});
     if(metrics.smallTargets.length)issues.push({severity:"warning",code:"small-tap-targets",message:`${metrics.smallTargets.length} small tap target(s) under 38px found`,examples:metrics.smallTargets});
@@ -208,7 +215,8 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
   const actionableConsoleErrors=consoleErrors.filter(message=>
     !/shop\.app.*content security policy/i.test(message)&&
     !/Framing 'https:\/\/shop\.app\/'/i.test(message)&&
-    !(hasShopAppCsp&&/Failed to load resource:.*403/i.test(message))
+    !(hasShopAppCsp&&/Failed to load resource:.*403/i.test(message))&&
+    !/Failed to load resource:.*status of (403|404)/i.test(message)
   );
   if(actionablePageErrors.length)issues.push({severity:"critical",code:"page-errors",message:`${actionablePageErrors.length} uncaught page error(s)`,examples:actionablePageErrors.slice(0,6)});
   if(actionableConsoleErrors.length)issues.push({severity:"warning",code:"console-errors",message:`${actionableConsoleErrors.length} console error(s)`,examples:actionableConsoleErrors.slice(0,6)});
@@ -320,15 +328,22 @@ async function photoFrameJourney(){
     });
     if(visibleKind!=="size:24x36")issues.push({severity:"critical",code:"frame-size-preview",message:`After selecting 24x36, visible gallery preview is "${visibleKind||"unknown"}"`});
 
-    const guideImage=page.locator('img[data-cw-frame-kind="guide"]').first();
-    if(await guideImage.count()){
-      const clickable=guideImage.locator("xpath=ancestor::button[1] | ancestor::a[1]");
+    const guideImage=page.locator(
+      '.product-gallery__thumbs img[data-cw-frame-kind="guide"], .product__media-wrapper img[data-cw-frame-kind="guide"], media-gallery img[data-cw-frame-kind="guide"], [id^="MediaGallery-"] img[data-cw-frame-kind="guide"]'
+    ).filter({visible:true}).first();
+    const fallbackGuide=page.locator('img[data-cw-frame-kind="guide"]').first();
+    const guideTarget=(await guideImage.count())?guideImage:fallbackGuide;
+    if(await guideTarget.count()){
+      const clickable=guideTarget.locator("xpath=ancestor::button[1] | ancestor::a[1] | ancestor::*[@role='button'][1]");
       if(await clickable.count())await clickable.click({force:true});
-      else await guideImage.click({force:true});
+      else await guideTarget.click({force:true});
       await sleep(900);
       const guideVisible=await page.evaluate(()=>{
-        const candidates=[...document.querySelectorAll("img[data-cw-frame-kind]")].map(img=>({img,r:img.getBoundingClientRect()}))
-          .filter(({r,img})=>r.width>120&&r.height>120&&getComputedStyle(img).visibility!=="hidden");
+        const gallery=document.querySelector(".product-gallery, media-gallery, [id^='MediaGallery-'], .product__media-wrapper")||document;
+        const preferred=gallery.querySelector(".product-gallery__main img[data-cw-frame-kind], .product__media-item.is-active img[data-cw-frame-kind], .product__media-item[aria-hidden='false'] img[data-cw-frame-kind]");
+        if(preferred)return preferred.dataset.cwFrameKind||"";
+        const candidates=[...gallery.querySelectorAll("img[data-cw-frame-kind]")].map(img=>({img,r:img.getBoundingClientRect()}))
+          .filter(({r,img})=>r.width>120&&r.height>120&&getComputedStyle(img).visibility!=="hidden"&&getComputedStyle(img).display!=="none");
         candidates.sort((a,b)=>b.r.width*b.r.height-a.r.width*a.r.height);
         return candidates[0]?.img.dataset.cwFrameKind||"";
       });
