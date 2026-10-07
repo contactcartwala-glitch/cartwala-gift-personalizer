@@ -39,6 +39,7 @@
   let generation = 0;
   let scheduled = 0;
   let renderedUrls = [];
+  const renderedMeta = new Map();
 
   const root = () =>
     document.querySelector(
@@ -48,7 +49,7 @@
   const markPhotoFrameControls = () => {
     const sizes = new Set(["8x12","10x15","12x18","16x24","20x30","24x36"]);
     const controls = [...document.querySelectorAll("label,button")]
-      .filter((node) => sizes.has(String(node.textContent || "").replace(/\s+/g, "").toLowerCase()));
+      .filter((node) => sizes.has(String(node.textContent || "").replace(/[×X]/g, "x").replace(/\s+/g, "").toLowerCase()));
 
     let best = null;
     let bestScore = Infinity;
@@ -56,7 +57,7 @@
       let current = node.parentElement;
       for (let depth = 0; current && depth < 5; depth += 1, current = current.parentElement) {
         const count = [...current.querySelectorAll("label,button")]
-          .filter((candidate) => sizes.has(String(candidate.textContent || "").replace(/\s+/g, "").toLowerCase())).length;
+          .filter((candidate) => sizes.has(String(candidate.textContent || "").replace(/[×X]/g, "x").replace(/\s+/g, "").toLowerCase())).length;
         if (count >= 4) {
           const score = current.querySelectorAll("*").length;
           if (score < bestScore) {
@@ -115,10 +116,18 @@
         return;
       }
 
-      // A generated blob is our personalised result. Keep the previously
-      // remembered Shopify base image so it can be re-rendered after resize
-      // or another gallery update.
-      if (String(image.currentSrc || image.src).startsWith("blob:")) return;
+      // A generated blob is our personalised result. When the theme reuses
+      // the main gallery <img> after a thumbnail click, recover the exact
+      // mockup kind/base from the blob so Guide/Side/Size never falls back
+      // to the previously selected size.
+      if (String(image.currentSrc || image.src).startsWith("blob:")) {
+        const meta = renderedMeta.get(String(image.currentSrc || image.src));
+        if (meta) {
+          image.dataset.cwFrameBase = meta.baseUrl;
+          image.dataset.cwFrameKind = meta.key;
+        }
+        return;
+      }
 
       // If the theme reused this node for an unrelated image, do not let the
       // stale 8x12 (or other) mapping pull it back to the old mockup.
@@ -249,7 +258,10 @@
     const art = await loadImage(artworkUrl).catch(() => null);
     if (!art || token !== generation) return;
 
-    renderedUrls.forEach((url) => URL.revokeObjectURL(url));
+    renderedUrls.forEach((url) => {
+      renderedMeta.delete(url);
+      URL.revokeObjectURL(url);
+    });
     renderedUrls = [];
 
     const targets = [...document.querySelectorAll("img[data-cw-frame-kind]")];
@@ -272,6 +284,7 @@
           return;
         }
         renderedUrls.push(url);
+        renderedMeta.set(url, { key, baseUrl });
         images.forEach((image) => replaceImage(image, url));
       } catch (error) {
         console.warn("Cartwala photo-frame gallery preview unavailable", error);
