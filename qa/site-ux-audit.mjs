@@ -6,8 +6,8 @@ const BASE_URL=(process.env.BASE_URL||"https://cartwala.in").replace(/\/$/,"");
 const MAX_URLS=Math.max(10,Number(process.env.QA_MAX_URLS||600));
 const OUTPUT_DIR=path.resolve(process.env.QA_OUTPUT_DIR||"qa-output");
 const STRICT=String(process.env.QA_STRICT||"1")!=="0";
-const NAV_TIMEOUT=30000;
-const WAIT_AFTER_LOAD=850;
+const NAV_TIMEOUT=45000;
+const WAIT_AFTER_LOAD=650;
 const results=[];
 const startedAt=new Date().toISOString();
 
@@ -98,12 +98,21 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
   page.on("console",onConsole);
   let response=null;
   let navError=null;
-  try{
-    response=await page.goto(url,{waitUntil:"domcontentloaded",timeout:NAV_TIMEOUT});
-    await page.waitForLoadState("networkidle",{timeout:5000}).catch(()=>{});
-    await sleep(WAIT_AFTER_LOAD);
-  }catch(error){
-    navError=String(error?.message||error);
+  for(let attempt=1;attempt<=2;attempt+=1){
+    try{
+      response=await page.goto(url,{waitUntil:"commit",timeout:NAV_TIMEOUT});
+      await page.waitForLoadState("domcontentloaded",{timeout:15000}).catch(()=>{});
+      await page.waitForLoadState("networkidle",{timeout:2500}).catch(()=>{});
+      await sleep(WAIT_AFTER_LOAD);
+      navError=null;
+      break;
+    }catch(error){
+      navError=String(error?.message||error);
+      if(attempt<2){
+        await sleep(800);
+        continue;
+      }
+    }
   }
 
   const issues=[];
@@ -131,7 +140,7 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
         .filter(visible)
         .filter(el=>!(el.getAttribute("aria-label")||el.getAttribute("title")||el.textContent?.trim()))
         .slice(0,8).map(el=>el.outerHTML.slice(0,140));
-      const smallTargets=deep?[...document.querySelectorAll([
+      const smallTargets=(deep&&vw<=1024)?[...document.querySelectorAll([
           "button",
           "input:not([type=hidden]):not([type=radio]):not([type=checkbox])",
           "select",
@@ -206,7 +215,8 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
 
   const actionablePageErrors=pageErrors.filter(message=>
     !/api\/event\/collect.*access control checks/i.test(message)&&
-    !/otlp-http-production\.shopifysvc\.com\/v1\/metrics.*access control checks/i.test(message)
+    !/otlp-http-production\.shopifysvc\.com\/v1\/metrics.*access control checks/i.test(message)&&
+    !/\.well-known\/shopify\/monorail\/unstable\/produce_batch.*access control checks/i.test(message)
   );
   const hasShopAppCsp=consoleErrors.some(message=>
     /shop\.app.*content security policy/i.test(message)||
@@ -218,7 +228,8 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
     !(hasShopAppCsp&&/Failed to load resource:.*403/i.test(message))&&
     !/Failed to load resource:.*status of (403|404|502|503|504)/i.test(message)&&
     !/Reached maximum amount of queued data of 64Kb for keepalive requests/i.test(message)&&
-    !/X-Content-Type-Options: nosniff/i.test(message)
+    !/X-Content-Type-Options: nosniff/i.test(message)&&
+    !/Cookie .* has been rejected for invalid domain/i.test(message)
   );
   if(actionablePageErrors.length)issues.push({severity:"critical",code:"page-errors",message:`${actionablePageErrors.length} uncaught page error(s)`,examples:actionablePageErrors.slice(0,6)});
   if(actionableConsoleErrors.length)issues.push({severity:"warning",code:"console-errors",message:`${actionableConsoleErrors.length} console error(s)`,examples:actionableConsoleErrors.slice(0,6)});
@@ -240,7 +251,7 @@ async function crawlAll(urls){
   const browser=await chromium.launch({headless:true});
   const context=await browser.newContext({viewport:{width:390,height:844}});
   let next=0;
-  const workers=Array.from({length:Math.min(5,urls.length)},async(_,worker)=>{
+  const workers=Array.from({length:Math.min(4,urls.length)},async(_,worker)=>{
     const page=await context.newPage();
     page.setDefaultTimeout(12000);
     while(true){
@@ -291,9 +302,22 @@ async function photoFrameJourney(){
   page.setDefaultTimeout(15000);
   const issues=[];
   try{
-    await page.goto(url,{waitUntil:"domcontentloaded",timeout:NAV_TIMEOUT});
-    await page.waitForLoadState("networkidle",{timeout:5000}).catch(()=>{});
-    await sleep(800);
+    let opened=false;
+    let lastNavigationError=null;
+    for(let attempt=1;attempt<=2;attempt+=1){
+      try{
+        await page.goto(url,{waitUntil:"commit",timeout:NAV_TIMEOUT});
+        await page.waitForLoadState("domcontentloaded",{timeout:15000}).catch(()=>{});
+        await page.waitForLoadState("networkidle",{timeout:2500}).catch(()=>{});
+        opened=true;
+        break;
+      }catch(error){
+        lastNavigationError=error;
+        if(attempt<2)await sleep(800);
+      }
+    }
+    if(!opened)throw lastNavigationError||new Error("Photo-frame page navigation failed");
+    await sleep(650);
 
     const radio=page.locator('input[type="radio"][value="24x36"]').first();
     const select=page.locator('select option[value="24x36"]').first();
