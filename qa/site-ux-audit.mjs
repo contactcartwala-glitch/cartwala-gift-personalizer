@@ -6,7 +6,7 @@ const BASE_URL=(process.env.BASE_URL||"https://cartwala.in").replace(/\/$/,"");
 const MAX_URLS=Math.max(10,Number(process.env.QA_MAX_URLS||600));
 const OUTPUT_DIR=path.resolve(process.env.QA_OUTPUT_DIR||"qa-output");
 const STRICT=String(process.env.QA_STRICT||"1")!=="0";
-const NAV_TIMEOUT=45000;
+const NAV_TIMEOUT=18000;
 const WAIT_AFTER_LOAD=650;
 const results=[];
 const startedAt=new Date().toISOString();
@@ -276,20 +276,27 @@ async function responsiveMatrix(urls){
     {width:1366,height:768,name:"desktop"}
   ];
   const engines=[["chromium",chromium],["webkit",webkit],["firefox",firefox]];
-  for(const [browserName,type] of engines){
+
+  // Run the three browser engines in parallel. Each engine keeps its own
+  // viewport loop sequential so we reduce wall-clock time without creating
+  // an excessive number of simultaneous storefront requests.
+  await Promise.all(engines.map(async([browserName,type])=>{
     const browser=await type.launch({headless:true});
-    for(const vp of viewports){
-      const context=await browser.newContext({viewport:{width:vp.width,height:vp.height}});
-      const page=await context.newPage();
-      page.setDefaultTimeout(12000);
-      for(const url of urls){
-        process.stdout.write(`[matrix ${browserName} ${vp.name}] ${url}\n`);
-        await auditPage(page,url,{browserName,viewport:{width:vp.width,height:vp.height},label:vp.name,deep:true});
+    try{
+      for(const vp of viewports){
+        const context=await browser.newContext({viewport:{width:vp.width,height:vp.height}});
+        const page=await context.newPage();
+        page.setDefaultTimeout(10000);
+        for(const url of urls){
+          process.stdout.write(`[matrix ${browserName} ${vp.name}] ${url}\n`);
+          await auditPage(page,url,{browserName,viewport:{width:vp.width,height:vp.height},label:vp.name,deep:true});
+        }
+        await context.close();
       }
-      await context.close();
+    }finally{
+      await browser.close();
     }
-    await browser.close();
-  }
+  }));
 }
 
 const PHOTO_FIXTURE_BASE64="iVBORw0KGgoAAAANSUhEUgAAAMgAAAEsCAIAAAAJmGvpAAAE8klEQVR4nO3csW1bSRRAUXrhfNvYIhy5JgUuYQPVtJGLcBlyBxsQIGRYEiSZV5w3/5xYJN9g7p9PfAH89PDwcIJr++vWA7AnYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBaJz3/y4q93P641B2v67/6f973QiUVCWCSERUJYJIRFQlgkhEXij55jPefdDz+4las/knRikRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkUh+H2sPf3+/e82f/fxyX08ykbB+8cqYnnuJyC6EdTq9q6eX30dhhw7rWj298M6HLeygYXVJPflBB8zrcGF9WFK/f+ih8jrW44abVLXIp3+wo5xYi2zqcY6uQ5xYi1R1sdo8hf3DWnMX15zqina+FS6+eXvfFrc9sRav6mLKnG+1Z1izdmvWtK+0YVgT92nizC/bMCxWsFtYcy/9uZM/aauwpu/N9Pkf2yesPXZlj1WcdgqLpWwS1jYX+mmXtewQ1h478dgGK9ohLBY0PqwNLu4nTV/X+LBY0+ywpl/WLxu9utlhsSxhkRgc1ug7xSvNXePgsFiZsEhMDWvuPeKthq50algsTlgkhEViZFhDv3a828T1jgyL9QmLhLBICIuEsEgIi4SwSAiLhLBICIuEsEgIi8TIsHb9QdjnTFzvyLBYn7BICIvE1LAmfu14n6ErnRoWixMWicFhDb1HvMncNQ4Oi5UJi8TssObeKV5j9Opmh8Wyxoc1+rJ+wfR1jQ+LNe0Q1vSL+3cbrGiHsE5b7MTFHmvZJCxWs09Ye1zoe6zitFNYp/m7Mn3+x7YK6zR5b+ZO/qTdwmIRG4Y18dKfOPPLNgzrNG2fZk37SnuGdZqzW1PmfKvPtx4gdN6zZX8ZdtekzrY9sS7W3L81p7qi/cM6rbeLq81T2PlW+Ngit8UjJHV2iBPr4rb7epyqTsc5sS5ucnQdKqmzw4V19mF5HTCps4OGdXbZ9asXdtieLg4d1sW1CtPThbB+8biMV0YmpicJ61mK+RPHetzAhxEWCWGREBYJYZEQFglhkRAWiQ0fkN59//fWI7zH/Zdvtx7hmpxYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRF4vOtB7i++y/fbj0CTiwawiIhLBLCIiEsEsIiISwSwiIhLBLCIiEsEsn/Cr/e/SjelkGcWCSERUJYJIRFQlgkhEVCWCQ+PTw83HoGNuTEIiEsEsIiISwSwiIhLBLCIiEsEsIiISwSwiIhLBLCIiEsEsIiISwSwiIhLBL/A2a5t6g0uYznAAAAAElFTkSuQmCC";
