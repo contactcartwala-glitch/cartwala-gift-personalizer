@@ -6,6 +6,8 @@ const BASE_URL=(process.env.BASE_URL||"https://cartwala.in").replace(/\/$/,"");
 const MAX_URLS=Math.max(10,Number(process.env.QA_MAX_URLS||600));
 const OUTPUT_DIR=path.resolve(process.env.QA_OUTPUT_DIR||"qa-output");
 const STRICT=String(process.env.QA_STRICT||"1")!=="0";
+const QA_MODE=String(process.env.QA_MODE||"full").toLowerCase();
+const QA_BROWSER=String(process.env.QA_BROWSER||"all").toLowerCase();
 const NAV_TIMEOUT=18000;
 const WAIT_AFTER_LOAD=650;
 const results=[];
@@ -275,11 +277,12 @@ async function responsiveMatrix(urls){
     {width:768,height:1024,name:"tablet"},
     {width:1366,height:768,name:"desktop"}
   ];
-  const engines=[["chromium",chromium],["webkit",webkit],["firefox",firefox]];
+  const allEngines=[["chromium",chromium],["webkit",webkit],["firefox",firefox]];
+  const engines=QA_BROWSER==="all"?allEngines:allEngines.filter(([name])=>name===QA_BROWSER);
+  if(!engines.length)throw new Error(`Unknown QA_BROWSER: ${QA_BROWSER}`);
 
-  // Run the three browser engines in parallel. Each engine keeps its own
-  // viewport loop sequential so we reduce wall-clock time without creating
-  // an excessive number of simultaneous storefront requests.
+  // Actions normally runs one browser engine per job. "all" remains available
+  // for local/manual runs.
   await Promise.all(engines.map(async([browserName,type])=>{
     const browser=await type.launch({headless:true});
     try{
@@ -406,6 +409,8 @@ async function writeReport(discovered,representative){
   for(const issue of issueRows)byCode[issue.code]=(byCode[issue.code]||0)+1;
   const report={
     baseUrl:BASE_URL,
+    mode:QA_MODE,
+    browser:QA_BROWSER,
     startedAt,
     finishedAt:new Date().toISOString(),
     discoveredUrls:discovered.length,
@@ -422,7 +427,8 @@ async function writeReport(discovered,representative){
     "# Cartwala Website UI/UX QA",
     "",
     `- Base URL: ${BASE_URL}`,
-    `- URLs discovered/audited in full-site mobile crawl: **${discovered.length}**`,
+    `- QA mode: **${QA_MODE}**${QA_BROWSER!=="all"?` (${QA_BROWSER})`:""}`,
+    `- URLs discovered: **${discovered.length}**`,
     `- Total browser/viewport checks: **${results.length}**`,
     `- Critical issues: **${critical.length}**`,
     `- Warnings: **${warnings.length}**`,
@@ -456,10 +462,22 @@ async function main(){
   await ensureOutput();
   const urls=await discoverUrls();
   const reps=representativeUrls(urls);
-  console.log(`Discovered ${urls.length} URLs; responsive matrix will cover ${reps.length} representative routes.`);
-  await crawlAll(urls);
-  await responsiveMatrix(reps);
-  await photoFrameJourney();
+  console.log(`QA mode=${QA_MODE}; browser=${QA_BROWSER}; discovered ${urls.length} URLs; representative routes=${reps.length}.`);
+
+  if(QA_MODE==="crawl"){
+    await crawlAll(urls);
+  }else if(QA_MODE==="matrix"){
+    await responsiveMatrix(reps);
+  }else if(QA_MODE==="frame"){
+    await photoFrameJourney();
+  }else if(QA_MODE==="full"){
+    await crawlAll(urls);
+    await responsiveMatrix(reps);
+    await photoFrameJourney();
+  }else{
+    throw new Error(`Unknown QA_MODE: ${QA_MODE}`);
+  }
+
   const {critical,warnings}=await writeReport(urls,reps);
   console.log(`QA complete: ${critical.length} critical, ${warnings.length} warnings.`);
   if(STRICT&&critical.length)process.exitCode=1;

@@ -1,6 +1,12 @@
 name: Cartwala Site UX Audit
 
 on:
+  push:
+    branches:
+      - master
+    paths:
+      - "qa/site-ux-audit.mjs"
+      - ".github/workflows/site-ux-audit.yml"
   workflow_run:
     workflows:
       - Deploy Shopify app
@@ -15,22 +21,18 @@ on:
         required: false
         default: "600"
 
-concurrency:
-  group: cartwala-site-ux-audit
-  cancel-in-progress: false
-
 jobs:
-  audit:
+  full_crawl:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: master
 
-      - name: Setup isolated Playwright runner
+      - name: Setup Chromium
         shell: bash
         run: |
           rm -rf /tmp/cartwala-ux-qa
@@ -39,51 +41,180 @@ jobs:
           cd /tmp/cartwala-ux-qa
           npm init -y
           npm install --no-save --package-lock=false @playwright/test@latest
-          npx playwright install --with-deps chromium firefox webkit
+          npx playwright install --with-deps chromium
 
-      - name: Audit live Cartwala website
+      - name: Audit all storefront URLs
         id: ux_audit
         continue-on-error: true
         shell: bash
         env:
           BASE_URL: https://cartwala.in
           QA_MAX_URLS: ${{ github.event.inputs.max_urls || '600' }}
-          QA_OUTPUT_DIR: ${{ github.workspace }}/qa-output
+          QA_OUTPUT_DIR: ${{ github.workspace }}/qa-output-crawl
           QA_STRICT: "1"
+          QA_MODE: crawl
+          QA_BROWSER: chromium
         run: |
           cd /tmp/cartwala-ux-qa
           node site-ux-audit.mjs
 
-      - name: Publish QA summary
+      - name: Publish crawl summary
         if: always()
         shell: bash
         run: |
-          if [ -f qa-output/summary.md ]; then
-            cat qa-output/summary.md >> "$GITHUB_STEP_SUMMARY"
-          elif [ -f qa-output/fatal.txt ]; then
-            {
-              echo "# Cartwala Website UI/UX QA"
-              echo
-              echo "The audit runner failed before producing a report."
-              echo
-              echo '~~~'
-              cat qa-output/fatal.txt
-              echo '~~~'
-            } >> "$GITHUB_STEP_SUMMARY"
+          if [ -f qa-output-crawl/summary.md ]; then
+            cat qa-output-crawl/summary.md >> "$GITHUB_STEP_SUMMARY"
+          elif [ -f qa-output-crawl/fatal.txt ]; then
+            cat qa-output-crawl/fatal.txt >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Upload QA report and screenshots
+      - name: Upload crawl report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cartwala-ui-ux-report-${{ github.run_number }}
-          path: qa-output
+          name: cartwala-ui-ux-crawl-${{ github.run_number }}
+          path: qa-output-crawl
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Mark critical UX failures
+      - name: Mark crawl critical failures
         if: steps.ux_audit.outcome == 'failure'
+        run: exit 1
+
+  browser_matrix:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Setup ${{ matrix.browser }}
         shell: bash
         run: |
-          echo "Critical UI/UX issues were detected. Open the job summary and artifact for exact pages, devices and screenshots."
-          exit 1
+          rm -rf /tmp/cartwala-ux-qa
+          mkdir -p /tmp/cartwala-ux-qa
+          cp qa/site-ux-audit.mjs /tmp/cartwala-ux-qa/site-ux-audit.mjs
+          cd /tmp/cartwala-ux-qa
+          npm init -y
+          npm install --no-save --package-lock=false @playwright/test@latest
+          npx playwright install --with-deps "${{ matrix.browser }}"
+
+      - name: Responsive matrix — ${{ matrix.browser }}
+        id: ux_audit
+        continue-on-error: true
+        shell: bash
+        env:
+          BASE_URL: https://cartwala.in
+          QA_MAX_URLS: ${{ github.event.inputs.max_urls || '600' }}
+          QA_OUTPUT_DIR: ${{ github.workspace }}/qa-output-${{ matrix.browser }}
+          QA_STRICT: "1"
+          QA_MODE: matrix
+          QA_BROWSER: ${{ matrix.browser }}
+        run: |
+          cd /tmp/cartwala-ux-qa
+          node site-ux-audit.mjs
+
+      - name: Publish matrix summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "qa-output-${{ matrix.browser }}/summary.md" ]; then
+            cat "qa-output-${{ matrix.browser }}/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          elif [ -f "qa-output-${{ matrix.browser }}/fatal.txt" ]; then
+            cat "qa-output-${{ matrix.browser }}/fatal.txt" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload matrix report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cartwala-ui-ux-${{ matrix.browser }}-${{ github.run_number }}
+          path: qa-output-${{ matrix.browser }}
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Mark matrix critical failures
+        if: steps.ux_audit.outcome == 'failure'
+        run: exit 1
+
+  frame_journey:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Setup Chromium
+        shell: bash
+        run: |
+          rm -rf /tmp/cartwala-ux-qa
+          mkdir -p /tmp/cartwala-ux-qa
+          cp qa/site-ux-audit.mjs /tmp/cartwala-ux-qa/site-ux-audit.mjs
+          cd /tmp/cartwala-ux-qa
+          npm init -y
+          npm install --no-save --package-lock=false @playwright/test@latest
+          npx playwright install --with-deps chromium
+
+      - name: Photo Frame personalization journey
+        id: ux_audit
+        continue-on-error: true
+        shell: bash
+        env:
+          BASE_URL: https://cartwala.in
+          QA_MAX_URLS: ${{ github.event.inputs.max_urls || '600' }}
+          QA_OUTPUT_DIR: ${{ github.workspace }}/qa-output-frame
+          QA_STRICT: "1"
+          QA_MODE: frame
+          QA_BROWSER: chromium
+        run: |
+          cd /tmp/cartwala-ux-qa
+          node site-ux-audit.mjs
+
+      - name: Publish frame summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f qa-output-frame/summary.md ]; then
+            cat qa-output-frame/summary.md >> "$GITHUB_STEP_SUMMARY"
+          elif [ -f qa-output-frame/fatal.txt ]; then
+            cat qa-output-frame/fatal.txt >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload frame report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cartwala-ui-ux-frame-${{ github.run_number }}
+          path: qa-output-frame
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Mark frame critical failures
+        if: steps.ux_audit.outcome == 'failure'
+        run: exit 1
+
+  final_status:
+    if: always()
+    needs: [full_crawl, browser_matrix, frame_journey]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Final UX status
+        shell: bash
+        run: |
+          echo "Full crawl: ${{ needs.full_crawl.result }}"
+          echo "Browser matrix: ${{ needs.browser_matrix.result }}"
+          echo "Photo Frame journey: ${{ needs.frame_journey.result }}"
+          if [ "${{ needs.full_crawl.result }}" != "success" ] ||              [ "${{ needs.browser_matrix.result }}" != "success" ] ||              [ "${{ needs.frame_journey.result }}" != "success" ]; then
+            exit 1
+          fi
+          echo "Cartwala UX audit passed."
