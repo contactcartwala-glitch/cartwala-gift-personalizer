@@ -62,11 +62,16 @@
 (()=>{
   if(window.cartwalaStickyAtcLoaded)return;
   window.cartwalaStickyAtcLoaded=true;
-  const path=window.location.pathname.replace(/\/+$/,'');
-  if(!/\/products\//.test(path))return;
+  const pagePath=window.location.pathname.replace(/\/+$/,'');
+  if(!/\/products\//.test(pagePath))return;
 
   let syncTimer=0;
+  let productData=null;
+  let productDataPromise=null;
+  const routeRoot=window.Shopify?.routes?.root||'/';
   const visible=el=>!!(el&&el.getClientRects().length);
+  const normaliseOption=value=>String(value||'').replace(/\s+/g,' ').trim();
+
   const productForms=()=>[...document.querySelectorAll('form[action*="/cart/add"]')]
     .filter(form=>!form.closest('.cw-site-sticky-atc'));
   const productForm=()=>productForms().find(form=>form.querySelector('[name="id"]'))||productForms()[0]||null;
@@ -78,25 +83,84 @@
   };
   const quantityInput=()=>{
     const form=productForm();
-    return form?.querySelector('input[name="quantity"]')||
-      document.querySelector('input[name="quantity"]');
+    return form?.querySelector('input[name="quantity"]')||document.querySelector('input[name="quantity"]');
   };
-  const selectedVariantId=()=>String(productForm()?.querySelector('[name="id"]')?.value||'');
+
+  const selectedOptions=()=>{
+    const scope=productForm()||document;
+    const byIndex=new Map();
+    scope.querySelectorAll('select[name^="option"]').forEach(select=>{
+      const match=String(select.name||'').match(/option(\d+)/i);
+      const index=match?Number(match[1]):byIndex.size+1;
+      const value=select.value||select.options?.[select.selectedIndex]?.value||select.options?.[select.selectedIndex]?.textContent;
+      if(value)byIndex.set(index,normaliseOption(value));
+    });
+    scope.querySelectorAll('input[name^="option"]:checked').forEach(input=>{
+      const match=String(input.name||'').match(/option(\d+)/i);
+      const index=match?Number(match[1]):byIndex.size+1;
+      if(input.value)byIndex.set(index,normaliseOption(input.value));
+    });
+    return [...byIndex.entries()].sort((a,b)=>a[0]-b[0]).map(([,value])=>value);
+  };
+
+  const urlVariantId=()=>new URLSearchParams(window.location.search).get('variant')||'';
+  const formVariantId=()=>String(productForm()?.querySelector('[name="id"]')?.value||'');
+
+  const matchingProductVariant=()=>{
+    if(!productData?.variants?.length)return null;
+    const explicit=String(formVariantId()||urlVariantId()||'');
+    if(explicit){
+      const found=productData.variants.find(v=>String(v.id)===explicit);
+      if(found)return found;
+    }
+    const options=selectedOptions();
+    if(options.length){
+      const found=productData.variants.find(v=>{
+        const candidate=[v.option1,v.option2,v.option3].filter(Boolean).map(normaliseOption);
+        return options.every((value,index)=>candidate[index]===value);
+      });
+      if(found)return found;
+    }
+    return productData.variants.find(v=>v.available)||productData.variants[0]||null;
+  };
+
+  const selectedVariantId=()=>String(formVariantId()||urlVariantId()||matchingProductVariant()?.id||'');
+  const selectedVariant=()=>{
+    const id=selectedVariantId();
+    return productData?.variants?.find(v=>String(v.id)===id)||matchingProductVariant();
+  };
+
+  const loadProductData=()=>{
+    if(productDataPromise)return productDataPromise;
+    productDataPromise=fetch(pagePath+'.js',{headers:{Accept:'application/json'},cache:'no-store'})
+      .then(response=>response.ok?response.json():null)
+      .then(data=>{productData=data;return data})
+      .catch(()=>null)
+      .finally(()=>schedule());
+    return productDataPromise;
+  };
+
   const optionText=()=>{
-    const form=productForm()||document;
-    const values=[];
-    form.querySelectorAll('select[name^="option"]').forEach(select=>{
-      const text=select.options?.[select.selectedIndex]?.textContent?.trim();
-      if(text&&!values.includes(text))values.push(text);
-    });
-    form.querySelectorAll('input[name^="option"]:checked').forEach(input=>{
-      const label=(input.id&&document.querySelector(`label[for="${CSS.escape(input.id)}"]`))||
-        input.closest('label');
-      const text=(label?.textContent||input.value||'').replace(/\s+/g,' ').trim();
-      if(text&&!values.includes(text))values.push(text);
-    });
-    return values.slice(0,2).join(' · ');
+    const values=selectedOptions();
+    if(values.length)return values.slice(0,2).join(' · ');
+    const title=selectedVariant()?.title;
+    return title&&title!=='Default Title'?title:'';
   };
+
+  const formatMoney=cents=>{
+    if(cents==null||Number.isNaN(Number(cents)))return '';
+    const currency=window.Shopify?.currency?.active||'INR';
+    try{
+      return new Intl.NumberFormat('en-IN',{
+        style:'currency',
+        currency,
+        maximumFractionDigits:Number(cents)%100===0?0:2
+      }).format(Number(cents)/100);
+    }catch{
+      return '₹'+(Number(cents)/100).toFixed(0);
+    }
+  };
+
   const priceText=()=>{
     const selectors=[
       '.product__info-container .price',
@@ -109,9 +173,12 @@
       .find(el=>visible(el)&&!el.closest('.cw-site-sticky-atc'));
     const text=(node?.innerText||'').replace(/\s+/g,' ').trim();
     const matches=text.match(/(?:Rs\.?|₹)\s*[\d,]+(?:\.\d+)?/gi)||[];
+    if(matches.length)return {sale:matches[0],compare:matches[1]||''};
+    const current=selectedVariant();
     return {
-      sale:matches[0]||text.split(/SAVE|OFF/i)[0]?.trim()||'',
-      compare:matches[1]||''
+      sale:formatMoney(current?.price),
+      compare:current?.compare_at_price&&Number(current.compare_at_price)>Number(current.price)
+        ?formatMoney(current.compare_at_price):''
     };
   };
 
@@ -133,7 +200,7 @@
         <input type="number" min="1" value="1" inputmode="numeric" data-cw-sticky-qty aria-label="Quantity">
         <button type="button" data-cw-sticky-plus aria-label="Increase quantity">+</button>
       </div>
-      <button type="button" class="cw-site-sticky-atc__button" data-cw-sticky-add>
+      <button type="button" class="cw-site-sticky-atc__button" data-cw-sticky-add disabled>
         <span aria-hidden="true">▣</span><strong>Add to Cart</strong>
       </button>
     </div>`;
@@ -160,30 +227,117 @@
     }
   };
 
+  const fixedAncestor=node=>{
+    let current=node;
+    while(current&&current!==document.body){
+      if(current.closest?.('.cw-site-sticky-atc'))return null;
+      const style=getComputedStyle(current);
+      if(style.position==='fixed'||style.position==='sticky')return current;
+      current=current.parentElement;
+    }
+    return null;
+  };
+
+  const moveFloatingWhatsApp=()=>{
+    const stickyRect=bar.getBoundingClientRect();
+    if(!stickyRect.height)return;
+    const selectors=[
+      'a[href*="wa.me"]',
+      'a[href*="api.whatsapp.com"]',
+      'a[href*="whatsapp"]',
+      'iframe[src*="whatsapp"]',
+      '[class*="whatsapp" i]',
+      '[id*="whatsapp" i]',
+      '[aria-label*="whatsapp" i]'
+    ];
+    const candidates=[...new Set(selectors.flatMap(selector=>[...document.querySelectorAll(selector)]))];
+    const fixed=[...new Set(candidates.map(fixedAncestor).filter(Boolean))];
+    fixed.forEach(node=>{
+      const rect=node.getBoundingClientRect();
+      const overlaps=
+        Math.max(0,Math.min(stickyRect.right,rect.right)-Math.max(stickyRect.left,rect.left))>2&&
+        Math.max(0,Math.min(stickyRect.bottom,rect.bottom)-Math.max(stickyRect.top,rect.top))>2;
+      if(overlaps||rect.bottom>stickyRect.top-8){
+        node.dataset.cwRaisedForSticky='true';
+        node.style.setProperty('bottom',`calc(${Math.ceil(stickyRect.height)+14}px + env(safe-area-inset-bottom))`,'important');
+        node.style.setProperty('z-index','2147482999','important');
+      }
+    });
+  };
+
+  const removeInvalidLiquidImages=()=>{
+    document.querySelectorAll('img').forEach(img=>{
+      const raw=String(img.getAttribute('src')||img.currentSrc||'');
+      let decoded=raw;
+      try{decoded=decodeURIComponent(raw)}catch{}
+      if(/Liquid error .*invalid url input/i.test(decoded)){
+        img.setAttribute('aria-hidden','true');
+        img.style.setProperty('display','none','important');
+        img.removeAttribute('srcset');
+      }
+    });
+  };
+
   const sync=()=>{
-    const form=productForm();
-    if(!form){bar.hidden=true;return}
     bar.hidden=false;
     const p=priceText();
     price.textContent=p.sale||'';
     compare.textContent=p.compare||'';
     compare.hidden=!p.compare;
-    const options=optionText();
-    variant.textContent=options||'';
+    variant.textContent=optionText();
+
     const sourceQty=quantityInput();
     if(sourceQty&&document.activeElement!==qty)qty.value=String(sourceQty.value||1);
+
     const sourceAdd=originalAdd();
-    const unavailable=!!sourceAdd&&(sourceAdd.disabled||/sold out|unavailable/i.test(sourceAdd.textContent||sourceAdd.value||''));
-    add.disabled=unavailable;
+    const current=selectedVariant();
+    const unavailable=
+      (!!sourceAdd&&(sourceAdd.disabled||/sold out|unavailable/i.test(sourceAdd.textContent||sourceAdd.value||'')))||
+      (!!current&&current.available===false);
+    const haveVariant=!!selectedVariantId();
+    add.disabled=unavailable||!haveVariant;
     add.querySelector('strong').textContent=unavailable?'Sold Out':'Add to Cart';
     bar.dataset.variantId=selectedVariantId();
+
+    removeInvalidLiquidImages();
+    moveFloatingWhatsApp();
   };
-  const schedule=()=>{clearTimeout(syncTimer);syncTimer=setTimeout(sync,70)};
+
+  const schedule=()=>{
+    clearTimeout(syncTimer);
+    syncTimer=setTimeout(sync,70);
+  };
+
+  const fallbackAdd=async()=>{
+    const id=selectedVariantId();
+    if(!id)return;
+    add.disabled=true;
+    const label=add.querySelector('strong');
+    const old=label.textContent;
+    label.textContent='Adding…';
+    try{
+      const response=await fetch(routeRoot+'cart/add.js',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body:JSON.stringify({items:[{id:Number(id),quantity:Number(qty.value)||1}]})
+      });
+      if(!response.ok)throw new Error('Cart add failed');
+      document.dispatchEvent(new CustomEvent('cart:refresh',{bubbles:true}));
+      document.dispatchEvent(new CustomEvent('cart:updated',{bubbles:true}));
+      document.dispatchEvent(new CustomEvent('product:added',{bubbles:true}));
+      label.textContent='Added ✓';
+      setTimeout(()=>{label.textContent='Add to Cart';schedule()},1200);
+    }catch(error){
+      console.warn('Cartwala quick add unavailable',error);
+      label.textContent=old||'Add to Cart';
+      add.disabled=false;
+    }
+  };
 
   minus.addEventListener('click',()=>setQty(Number(qty.value)-1));
   plus.addEventListener('click',()=>setQty(Number(qty.value)+1));
   qty.addEventListener('change',()=>setQty(qty.value));
-  add.addEventListener('click',()=>{
+  add.addEventListener('click',async()=>{
     if(add.disabled)return;
     setQty(qty.value);
     const personalizer=document.querySelector('[data-cw-personalizer]');
@@ -198,12 +352,19 @@
       return;
     }
     const form=productForm();
-    form?.requestSubmit?.();
+    if(form?.requestSubmit){
+      form.requestSubmit();
+      return;
+    }
+    await fallbackAdd();
   });
 
-  ['change','variant:change','product:variant-change','shopify:section:load']
+  ['change','input','variant:change','product:variant-change','shopify:section:load']
     .forEach(name=>document.addEventListener(name,schedule));
-  new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,characterData:true});
-  window.addEventListener('pageshow',sync);
+  const observer=new MutationObserver(schedule);
+  observer.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class','style','src','srcset','value','checked']});
+  window.addEventListener('resize',schedule,{passive:true});
+  window.addEventListener('pageshow',schedule);
+  loadProductData();
   sync();
 })();
