@@ -73,12 +73,30 @@
   const rememberTargets = () => {
     if (!root()) return;
     document.querySelectorAll("img").forEach((image) => {
-      if (image.dataset.cwFrameBase && image.dataset.cwFrameKind) return;
       const candidate = cleanUrl(image.currentSrc || image.src);
       const descriptor = descriptorFor(candidate);
-      if (!descriptor) return;
-      image.dataset.cwFrameBase = candidate;
-      image.dataset.cwFrameKind = descriptor.key;
+
+      // Product themes often reuse the SAME <img> element when a customer
+      // clicks another gallery thumbnail or changes a variant. If the element
+      // was first tagged as 8x12, keeping that old dataset makes every later
+      // image render back into the 8x12 mockup. Refresh the stored base/kind
+      // whenever Shopify swaps this element to another known master asset.
+      if (descriptor) {
+        image.dataset.cwFrameBase = candidate;
+        image.dataset.cwFrameKind = descriptor.key;
+        return;
+      }
+
+      // A generated blob is our personalised result. Keep the previously
+      // remembered Shopify base image so it can be re-rendered after resize
+      // or another gallery update.
+      if (String(image.currentSrc || image.src).startsWith("blob:")) return;
+
+      // If the theme reused this node for an unrelated image, do not let the
+      // stale 8x12 (or other) mapping pull it back to the old mockup.
+      delete image.dataset.cwFrameBase;
+      delete image.dataset.cwFrameKind;
+      delete image.dataset.cwFramePreview;
     });
   };
 
