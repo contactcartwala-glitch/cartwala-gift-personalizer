@@ -37,15 +37,32 @@
 
   const coreAssetUrls = {
     "size:8x12": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-frame-8x12-black-beading.png?v=1791315873",
+    "size:10x15": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-frame-10x15-black-beading.png?v=1791315884",
+    "size:12x18": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-frame-12x18-black-beading.png?v=1791315894",
+    "size:16x24": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-frame-16x24-black-beading.png?v=1791315907",
+    "size:20x30": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-frame-20x30-black-beading.png?v=1791315916",
+    "size:24x36": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-frame-24x36-black-beading.png?v=1791315927",
     guide: "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-frame-size-guide-black-beading.png?v=1791315973",
     side: "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-frame-side-view-black-beading.png?v=1791315983",
   };
+  const galleryOrder = [
+    "size:8x12",
+    "guide",
+    "side",
+    "size:10x15",
+    "size:12x18",
+    "size:16x24",
+    "size:20x30",
+    "size:24x36",
+  ];
 
   let artworkUrl = "";
   let generation = 0;
   let scheduled = 0;
   let renderedUrls = [];
   const renderedMeta = new Map();
+  const personalizedByKind = new Map();
+  let activePersonalizedKind = "";
 
   const root = () =>
     document.querySelector(
@@ -285,7 +302,6 @@
   const renderAll = async () => {
     if (!artworkUrl || !root()) return;
     const token = ++generation;
-    rememberTargets();
     const art = await loadImage(artworkUrl).catch(() => null);
     if (!art || token !== generation) return;
 
@@ -294,19 +310,11 @@
       URL.revokeObjectURL(url);
     });
     renderedUrls = [];
-    ensureCoreThumbnails();
+    personalizedByKind.clear();
 
-    const targets = [...document.querySelectorAll("img[data-cw-frame-kind]")];
-    const groups = new Map();
-    for (const image of targets) {
-      const key = image.dataset.cwFrameKind;
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key).push(image);
-    }
-
-    for (const [key, images] of groups) {
+    for (const kind of galleryOrder) {
       if (token !== generation) return;
-      const baseUrl = images[0]?.dataset.cwFrameBase;
+      const baseUrl = coreAssetUrls[kind];
       const descriptor = descriptorFor(baseUrl);
       if (!baseUrl || !descriptor) continue;
       try {
@@ -316,12 +324,15 @@
           return;
         }
         renderedUrls.push(url);
-        renderedMeta.set(url, { key, baseUrl });
-        images.forEach((image) => replaceImage(image, url));
+        renderedMeta.set(url, { key: kind, baseUrl });
+        personalizedByKind.set(kind, url);
       } catch (error) {
         console.warn("Cartwala photo-frame gallery preview unavailable", error);
       }
     }
+
+    if (token !== generation) return;
+    mountPersonalizedGallery();
   };
 
   const scheduleRender = () => {
@@ -355,18 +366,101 @@
       artworkUrl = url;
       ensureSavedStatus();
       markPhotoFrameControls();
-      rememberTargets();
-      ensureFallbackCoreThumbs();
-      rememberTargets();
-      ensureCoreThumbnails();
-      startGalleryObserver();
-      renderAll().then(() => showSelectedSize("")).catch(() => undefined);
+      renderAll().catch(() => undefined);
     });
   };
   const galleryRoot = () =>
     document.querySelector(
       ".product-gallery, media-gallery, [id^=\"MediaGallery-\"], .product__media-wrapper, .product-media, [data-product-gallery]"
     );
+  const ensurePersonalizedGalleryStyles = () => {
+    if (document.getElementById("cw-frame-personalized-gallery-style")) return;
+    const style = document.createElement("style");
+    style.id = "cw-frame-personalized-gallery-style";
+    style.textContent = `
+      .cw-frame-personalized-gallery{width:100%;margin:0 0 18px;box-sizing:border-box}
+      .cw-frame-personalized-gallery__main{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:10px;overflow:hidden}
+      .cw-frame-personalized-gallery__main img{width:100%;height:100%;display:block;object-fit:contain}
+      .cw-frame-personalized-gallery__thumbs{display:flex;gap:8px;overflow-x:auto;padding:10px 1px 3px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+      .cw-frame-personalized-gallery__thumb{flex:0 0 72px;width:72px;height:72px;padding:0;border:2px solid transparent;border-radius:8px;background:#fff;overflow:hidden;cursor:pointer}
+      .cw-frame-personalized-gallery__thumb.is-active{border-color:#ff6200}
+      .cw-frame-personalized-gallery__thumb img{width:100%;height:100%;display:block;object-fit:cover}
+      @media(max-width:749px){.cw-frame-personalized-gallery__thumb{flex-basis:64px;width:64px;height:64px}.cw-frame-personalized-gallery__thumbs{gap:7px}}
+    `;
+    document.head.appendChild(style);
+  };
+
+  const galleryLabel = (kind) => {
+    if (kind === "guide") return "Size Guide";
+    if (kind === "side") return "Side View";
+    return kind.replace("size:", "");
+  };
+
+  const setPersonalizedGalleryKind = (kind) => {
+    const gallery = document.querySelector("[data-cw-frame-personalized-gallery]");
+    const url = personalizedByKind.get(kind);
+    if (!gallery || !url) return;
+    activePersonalizedKind = kind;
+    const main = gallery.querySelector("[data-cw-frame-personalized-main]");
+    if (main) {
+      main.src = url;
+      main.alt = `Personalized photo frame ${galleryLabel(kind)}`;
+    }
+    gallery.querySelectorAll("[data-cw-frame-personalized-thumb]").forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.kind === kind);
+      button.setAttribute("aria-current", button.dataset.kind === kind ? "true" : "false");
+    });
+  };
+
+  const mountPersonalizedGallery = () => {
+    const original = galleryRoot();
+    if (!original || !personalizedByKind.size) return;
+    ensurePersonalizedGalleryStyles();
+
+    let gallery = document.querySelector("[data-cw-frame-personalized-gallery]");
+    if (!gallery) {
+      gallery = document.createElement("section");
+      gallery.className = "cw-frame-personalized-gallery";
+      gallery.dataset.cwFramePersonalizedGallery = "true";
+      gallery.setAttribute("aria-label", "Personalized photo frame previews");
+      gallery.innerHTML =
+        '<div class="cw-frame-personalized-gallery__main"><img data-cw-frame-personalized-main alt="Personalized photo frame"></div>' +
+        '<div class="cw-frame-personalized-gallery__thumbs" data-cw-frame-personalized-thumbs></div>';
+      original.insertAdjacentElement("beforebegin", gallery);
+    }
+
+    original.dataset.cwFrameOriginalGalleryHidden = "true";
+    original.style.setProperty("display", "none", "important");
+
+    const thumbs = gallery.querySelector("[data-cw-frame-personalized-thumbs]");
+    if (thumbs) {
+      thumbs.replaceChildren();
+      galleryOrder.forEach((kind) => {
+        const url = personalizedByKind.get(kind);
+        if (!url) return;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "cw-frame-personalized-gallery__thumb";
+        button.dataset.cwFramePersonalizedThumb = "true";
+        button.dataset.kind = kind;
+        button.setAttribute("aria-label", `View ${galleryLabel(kind)}`);
+        const image = document.createElement("img");
+        image.src = url;
+        image.alt = galleryLabel(kind);
+        button.appendChild(image);
+        button.addEventListener("click", () => setPersonalizedGalleryKind(kind));
+        thumbs.appendChild(button);
+      });
+    }
+
+    const size = selectedSizeKey();
+    const preferred = size ? `size:${size}` : "";
+    const nextKind =
+      (preferred && personalizedByKind.has(preferred) && preferred) ||
+      (activePersonalizedKind && personalizedByKind.has(activePersonalizedKind) && activePersonalizedKind) ||
+      "size:8x12";
+    setPersonalizedGalleryKind(nextKind);
+  };
 
   const thumbContainer = () => {
     const gallery = galleryRoot() || document;
@@ -670,9 +764,14 @@
   const showSelectedSize = (value) => {
     const size = sizeKeyFrom(value) || selectedSizeKey();
     if (!size || !artworkUrl) return;
-    [0, 100, 280].forEach((delay) =>
-      window.setTimeout(() => showFrameKind(`size:${size}`), delay)
-    );
+    const kind = `size:${size}`;
+    if (personalizedByKind.has(kind)) {
+      [0, 80, 220].forEach((delay) =>
+        window.setTimeout(() => setPersonalizedGalleryKind(kind), delay)
+      );
+      return;
+    }
+    scheduleRender();
   };
 
   document.addEventListener("change", (event) => {
@@ -711,14 +810,8 @@
   );
 
   document.addEventListener("shopify:section:load", () => {
-    if (!artworkUrl) {
-      markPhotoFrameControls();
-      rememberTargets();
-      return;
-    }
-    rememberTargets();
-    ensureCoreThumbnails();
-    startGalleryObserver();
+    markPhotoFrameControls();
+    if (!artworkUrl) return;
     scheduleRender();
   });
 
