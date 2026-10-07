@@ -25,7 +25,11 @@ jobs:
   full_crawl:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,10 +54,12 @@ jobs:
         env:
           BASE_URL: https://cartwala.in
           QA_MAX_URLS: ${{ github.event.inputs.max_urls || '600' }}
-          QA_OUTPUT_DIR: ${{ github.workspace }}/qa-output-crawl
+          QA_OUTPUT_DIR: ${{ github.workspace }}/qa-output-crawl-${{ matrix.shard }}
           QA_STRICT: "1"
           QA_MODE: crawl
           QA_BROWSER: chromium
+          QA_SHARD_INDEX: ${{ matrix.shard }}
+          QA_SHARD_TOTAL: "4"
         run: |
           cd /tmp/cartwala-ux-qa
           node site-ux-audit.mjs
@@ -62,18 +68,18 @@ jobs:
         if: always()
         shell: bash
         run: |
-          if [ -f qa-output-crawl/summary.md ]; then
-            cat qa-output-crawl/summary.md >> "$GITHUB_STEP_SUMMARY"
-          elif [ -f qa-output-crawl/fatal.txt ]; then
-            cat qa-output-crawl/fatal.txt >> "$GITHUB_STEP_SUMMARY"
+          if [ -f "qa-output-crawl-${{ matrix.shard }}/summary.md" ]; then
+            cat "qa-output-crawl-${{ matrix.shard }}/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          elif [ -f "qa-output-crawl-${{ matrix.shard }}/fatal.txt" ]; then
+            cat "qa-output-crawl-${{ matrix.shard }}/fatal.txt" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload crawl report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cartwala-ui-ux-crawl-${{ github.run_number }}
-          path: qa-output-crawl
+          name: cartwala-ui-ux-crawl-${{ matrix.shard }}-${{ github.run_number }}
+          path: qa-output-crawl-${{ matrix.shard }}
           if-no-files-found: warn
           retention-days: 14
 
@@ -147,7 +153,7 @@ jobs:
   frame_journey:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4

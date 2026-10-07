@@ -8,6 +8,8 @@ const OUTPUT_DIR=path.resolve(process.env.QA_OUTPUT_DIR||"qa-output");
 const STRICT=String(process.env.QA_STRICT||"1")!=="0";
 const QA_MODE=String(process.env.QA_MODE||"full").toLowerCase();
 const QA_BROWSER=String(process.env.QA_BROWSER||"all").toLowerCase();
+const QA_SHARD_INDEX=Math.max(0,Number(process.env.QA_SHARD_INDEX||0));
+const QA_SHARD_TOTAL=Math.max(1,Number(process.env.QA_SHARD_TOTAL||1));
 const NAV_TIMEOUT=18000;
 const WAIT_AFTER_LOAD=650;
 const results=[];
@@ -253,7 +255,7 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
 }
 
 async function crawlAll(urls){
-  const browser=await chromium.launch({headless:true});
+  const browser=await frameStep("launch-browser",()=>chromium.launch({headless:true}),30000);
   const context=await browser.newContext({viewport:{width:390,height:844}});
   let next=0;
   const workers=Array.from({length:Math.min(4,urls.length)},async(_,worker)=>{
@@ -307,6 +309,21 @@ async function responsiveMatrix(urls){
 
 const PHOTO_FIXTURE_BASE64="iVBORw0KGgoAAAANSUhEUgAAAMgAAAEsCAIAAAAJmGvpAAAE8klEQVR4nO3csW1bSRRAUXrhfNvYIhy5JgUuYQPVtJGLcBlyBxsQIGRYEiSZV5w3/5xYJN9g7p9PfAH89PDwcIJr++vWA7AnYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBaJz3/y4q93P641B2v67/6f973QiUVCWCSERUJYJIRFQlgkhEXij55jPefdDz+4las/knRikRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkUh+H2sPf3+/e82f/fxyX08ykbB+8cqYnnuJyC6EdTq9q6eX30dhhw7rWj298M6HLeygYXVJPflBB8zrcGF9WFK/f+ih8jrW44abVLXIp3+wo5xYi2zqcY6uQ5xYi1R1sdo8hf3DWnMX15zqina+FS6+eXvfFrc9sRav6mLKnG+1Z1izdmvWtK+0YVgT92nizC/bMCxWsFtYcy/9uZM/aauwpu/N9Pkf2yesPXZlj1WcdgqLpWwS1jYX+mmXtewQ1h478dgGK9ohLBY0PqwNLu4nTV/X+LBY0+ywpl/WLxu9utlhsSxhkRgc1ug7xSvNXePgsFiZsEhMDWvuPeKthq50algsTlgkhEViZFhDv3a828T1jgyL9QmLhLBICIuEsEgIi4SwSAiLhLBICIuEsEgIi8TIsHb9QdjnTFzvyLBYn7BICIvE1LAmfu14n6ErnRoWixMWicFhDb1HvMncNQ4Oi5UJi8TssObeKV5j9Opmh8Wyxoc1+rJ+wfR1jQ+LNe0Q1vSL+3cbrGiHsE5b7MTFHmvZJCxWs09Ye1zoe6zitFNYp/m7Mn3+x7YK6zR5b+ZO/qTdwmIRG4Y18dKfOPPLNgzrNG2fZk37SnuGdZqzW1PmfKvPtx4gdN6zZX8ZdtekzrY9sS7W3L81p7qi/cM6rbeLq81T2PlW+Ngit8UjJHV2iBPr4rb7epyqTsc5sS5ucnQdKqmzw4V19mF5HTCps4OGdXbZ9asXdtieLg4d1sW1CtPThbB+8biMV0YmpicJ61mK+RPHetzAhxEWCWGREBYJYZEQFglhkRAWiQ0fkN59//fWI7zH/Zdvtx7hmpxYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRF4vOtB7i++y/fbj0CTiwawiIhLBLCIiEsEsIiISwSwiIhLBLCIiEsEsn/Cr/e/SjelkGcWCSERUJYJIRFQlgkhEVCWCQ+PTw83HoGNuTEIiEsEsIiISwSwiIhLBLCIiEsEsIiISwSwiIhLBLCIiEsEsIiISwSwiIhLBL/A2a5t6g0uYznAAAAAElFTkSuQmCC";
 
+async function frameStep(name,fn,timeoutMs=20000){
+  console.log(`[frame] ${name} start`);
+  let timer;
+  try{
+    const value=await Promise.race([
+      Promise.resolve().then(fn),
+      new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(`Frame step timed out: ${name}`)),timeoutMs)})
+    ]);
+    console.log(`[frame] ${name} ok`);
+    return value;
+  }finally{
+    if(timer)clearTimeout(timer);
+  }
+}
+
 async function photoFrameJourney(){
   const url=BASE_URL+"/products/customized-photo-frame-black-beading";
   const browser=await chromium.launch({headless:true});
@@ -332,14 +349,15 @@ async function photoFrameJourney(){
     if(!opened)throw lastNavigationError||new Error("Photo-frame page navigation failed");
     await sleep(650);
 
+    console.log("[frame] page-opened");
     const radio=page.locator('input[type="radio"][value="24x36"]').first();
     const select=page.locator('select option[value="24x36"]').first();
     if(await radio.count()){
-      await radio.evaluate(el=>{
+      await frameStep("select-24x36",()=>radio.evaluate(el=>{
         el.checked=true;
         el.dispatchEvent(new Event("input",{bubbles:true}));
         el.dispatchEvent(new Event("change",{bubbles:true}));
-      });
+      }),15000);
     }else if(await select.count()){
       await select.evaluate(option=>{const s=option.parentElement;s.value=option.value;s.dispatchEvent(new Event("change",{bubbles:true}))});
     }else{
@@ -351,24 +369,24 @@ async function photoFrameJourney(){
 
     const open=page.locator('[data-cw-personalizer][data-cw-photo-frame-master="true"] [data-cw-open]').first();
     if(!(await open.count()))throw new Error("Customize button not found on master photo frame");
-    await open.click({force:true});
+    await frameStep("open-personalizer",()=>open.click({force:true}),15000);
     const file=page.locator('[data-cw-personalizer][data-cw-photo-frame-master="true"] input[type="file"]').first();
     if(!(await file.count()))throw new Error("Photo upload input not found");
-    await file.setInputFiles({name:"cartwala-qa-photo.png",mimeType:"image/png",buffer:Buffer.from(PHOTO_FIXTURE_BASE64,"base64")});
-    await page.waitForFunction(()=>{const b=document.querySelector('[data-cw-personalizer][data-cw-photo-frame-master="true"] [data-cw-save]');return b&&!b.disabled},{timeout:12000});
-    await page.locator('[data-cw-personalizer][data-cw-photo-frame-master="true"] [data-cw-save]').click({force:true});
-    await page.waitForFunction(()=>document.body.classList.contains("cw-photo-frame-personalized"),{timeout:15000});
+    await frameStep("upload-photo",()=>file.setInputFiles({name:"cartwala-qa-photo.png",mimeType:"image/png",buffer:Buffer.from(PHOTO_FIXTURE_BASE64,"base64")}),20000);
+    await frameStep("wait-save-enabled",()=>page.waitForFunction(()=>{const b=document.querySelector('[data-cw-personalizer][data-cw-photo-frame-master="true"] [data-cw-save]');return b&&!b.disabled},{timeout:12000}),15000);
+    await frameStep("preview-save",()=>page.locator('[data-cw-personalizer][data-cw-photo-frame-master="true"] [data-cw-save]').click({force:true}),15000);
+    await frameStep("wait-personalized",()=>page.waitForFunction(()=>document.body.classList.contains("cw-photo-frame-personalized"),{timeout:15000}),18000);
     await sleep(1200);
 
     const sticky=await page.locator(".cw-site-sticky-atc").isVisible().catch(()=>false);
     if(!sticky)issues.push({severity:"critical",code:"frame-sticky-atc",message:"Sticky Add to Cart is not visible after personalization"});
 
-    const visibleKind=await page.evaluate(()=>{
+    const visibleKind=await frameStep("check-size-preview",()=>page.evaluate(()=>{
       const candidates=[...document.querySelectorAll("img[data-cw-frame-kind]")].map(img=>({img,r:img.getBoundingClientRect()}))
         .filter(({r,img})=>r.width>120&&r.height>120&&getComputedStyle(img).visibility!=="hidden");
       candidates.sort((a,b)=>b.r.width*b.r.height-a.r.width*a.r.height);
       return candidates[0]?.img.dataset.cwFrameKind||"";
-    });
+    }),15000);
     if(visibleKind!=="size:24x36")issues.push({severity:"critical",code:"frame-size-preview",message:`After selecting 24x36, visible gallery preview is "${visibleKind||"unknown"}"`});
 
     const guideImage=page.locator(
@@ -378,10 +396,10 @@ async function photoFrameJourney(){
     const guideTarget=(await guideImage.count())?guideImage:fallbackGuide;
     if(await guideTarget.count()){
       const clickable=guideTarget.locator("xpath=ancestor::button[1] | ancestor::a[1] | ancestor::*[@role='button'][1]");
-      if(await clickable.count())await clickable.click({force:true});
-      else await guideTarget.click({force:true});
+      if(await clickable.count())await frameStep("click-guide",()=>clickable.click({force:true}),15000);
+      else await frameStep("click-guide",()=>guideTarget.click({force:true}),15000);
       await sleep(900);
-      const guideVisible=await page.evaluate(()=>{
+      const guideVisible=await frameStep("check-guide-preview",()=>page.evaluate(()=>{
         const gallery=document.querySelector(".product-gallery, media-gallery, [id^='MediaGallery-'], .product__media-wrapper")||document;
         const preferred=gallery.querySelector(".product-gallery__main img[data-cw-frame-kind], .product__media-item.is-active img[data-cw-frame-kind], .product__media-item[aria-hidden='false'] img[data-cw-frame-kind]");
         if(preferred)return preferred.dataset.cwFrameKind||"";
@@ -389,7 +407,7 @@ async function photoFrameJourney(){
           .filter(({r,img})=>r.width>120&&r.height>120&&getComputedStyle(img).visibility!=="hidden"&&getComputedStyle(img).display!=="none");
         candidates.sort((a,b)=>b.r.width*b.r.height-a.r.width*a.r.height);
         return candidates[0]?.img.dataset.cwFrameKind||"";
-      });
+      }),15000);
       if(guideVisible!=="guide")issues.push({severity:"critical",code:"frame-second-image",message:`Clicking size-guide thumbnail opened "${guideVisible||"unknown"}" instead of the second image`});
     }else{
       issues.push({severity:"critical",code:"frame-guide-thumb",message:"Size-guide thumbnail was not found"});
@@ -468,7 +486,9 @@ async function main(){
   console.log(`QA mode=${QA_MODE}; browser=${QA_BROWSER}; discovered ${urls.length} URLs; representative routes=${reps.length}.`);
 
   if(QA_MODE==="crawl"){
-    await crawlAll(urls);
+    const shardUrls=urls.filter((_,index)=>index%QA_SHARD_TOTAL===QA_SHARD_INDEX);
+    console.log(`[crawl-shard] ${QA_SHARD_INDEX+1}/${QA_SHARD_TOTAL}: ${shardUrls.length} URLs`);
+    await crawlAll(shardUrls);
   }else if(QA_MODE==="matrix"){
     await responsiveMatrix(reps);
   }else if(QA_MODE==="frame"){
