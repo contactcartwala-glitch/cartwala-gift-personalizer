@@ -19,7 +19,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          ARTIFACT_ID: "11460947853"
+          ARTIFACT_ID: "11463593872"
         run: |
           set -e
           gh api "/repos/$REPO/actions/artifacts/$ARTIFACT_ID/zip" > /tmp/qa.zip
