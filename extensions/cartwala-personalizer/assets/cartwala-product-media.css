@@ -434,3 +434,36 @@ body.cw-photo-frame-master-page .cw-photo-frame-size-picker > *{
     text-align:center!important;
   }
 }
+
+
+/* Cartwala tablet tap-target pass */
+@media(max-width:1024px){
+  button:not(.cw-site-sticky-atc__qty button),
+  input:not([type="hidden"]):not([type="radio"]):not([type="checkbox"]),
+  select,
+  summary,
+  [role="button"],
+  .product-form__submit,
+  button[name="add"],
+  [data-add-to-cart],
+  .quick-add__submit,
+  [aria-label*="open menu" i],
+  [aria-label*="search" i],
+  [aria-label*="cart" i]{
+    box-sizing:border-box!important;
+    min-height:44px!important;
+  }
+
+  [aria-label*="open menu" i],
+  [aria-label*="search" i],
+  [aria-label*="cart" i],
+  .header__icon{
+    min-width:44px!important;
+  }
+
+  input[name="quantity"],
+  quantity-input,
+  .quantity{
+    min-height:44px!important;
+  }
+}
