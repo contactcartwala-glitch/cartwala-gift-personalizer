@@ -354,42 +354,67 @@
     if (document.documentElement.dataset.cwFrameGalleryClickBound === "true") return;
     document.documentElement.dataset.cwFrameGalleryClickBound = "true";
 
-    document.addEventListener("click", (event) => {
-      if (!artworkUrl || !root()) return;
-      const clicked = event.target?.closest?.("img[data-cw-frame-kind]");
-      if (!clicked) return;
+    const galleryRoot = () =>
+      document.querySelector(
+        ".product-gallery, media-gallery, [id^=\"MediaGallery-\"], .product__media-wrapper, .product-media, [data-product-gallery]"
+      );
 
-      const clickedRect = clicked.getBoundingClientRect();
-      const visibleTargets = [...document.querySelectorAll("img[data-cw-frame-kind]")]
+    const mainGalleryImage = () => {
+      const gallery = galleryRoot() || document;
+      const preferred = [
+        ".product-gallery__main img[data-cw-frame-kind]",
+        ".product__media-item.is-active img[data-cw-frame-kind]",
+        ".product__media-item[aria-hidden=\"false\"] img[data-cw-frame-kind]",
+        "[data-media-id].is-active img[data-cw-frame-kind]"
+      ];
+      for (const selector of preferred) {
+        const image = gallery.querySelector(selector);
+        if (image) return image;
+      }
+      const visible = [...gallery.querySelectorAll("img[data-cw-frame-kind]")]
         .map((img) => ({ img, rect: img.getBoundingClientRect() }))
         .filter(({ rect, img }) =>
-          rect.width > 80 &&
-          rect.height > 80 &&
+          rect.width > 100 &&
+          rect.height > 100 &&
           getComputedStyle(img).display !== "none" &&
           getComputedStyle(img).visibility !== "hidden"
         )
         .sort((a, b) => b.rect.width * b.rect.height - a.rect.width * a.rect.height);
+      return visible[0]?.img || null;
+    };
 
-      const main = visibleTargets[0]?.img;
-      if (!main || main === clicked) return;
-      const mainRect = main.getBoundingClientRect();
-      if (clickedRect.width * clickedRect.height > mainRect.width * mainRect.height * 0.65) return;
+    document.addEventListener("click", (event) => {
+      if (!artworkUrl || !root()) return;
+
+      const direct = event.target?.closest?.("img[data-cw-frame-kind]");
+      const interactive = event.target?.closest?.(
+        "button, a, [role=\"button\"], li, [data-media-id], [data-thumbnail]"
+      );
+      const clicked = direct || interactive?.querySelector?.("img[data-cw-frame-kind]");
+      if (!clicked) return;
+
+      const gallery = galleryRoot();
+      if (gallery && !gallery.contains(clicked)) return;
 
       const desiredKind = clicked.dataset.cwFrameKind;
       const desiredBase = clicked.dataset.cwFrameBase;
       const desiredSrc = clicked.currentSrc || clicked.src;
       if (!desiredKind || !desiredBase || !desiredSrc) return;
 
-      const force = () => {
-        if (!document.contains(main)) return;
+      const applyToMain = () => {
+        const main = mainGalleryImage();
+        if (!main || main === clicked || !document.contains(main)) return;
         main.dataset.cwFrameKind = desiredKind;
         main.dataset.cwFrameBase = desiredBase;
         replaceImage(main, desiredSrc);
       };
 
-      window.setTimeout(force, 0);
-      window.setTimeout(force, 90);
-      window.setTimeout(force, 220);
+      // Let the Shopify theme handle its own media selection first, then
+      // re-apply the personalised media to the main gallery node it selected.
+      window.setTimeout(applyToMain, 0);
+      window.setTimeout(applyToMain, 80);
+      window.setTimeout(applyToMain, 220);
+      window.setTimeout(applyToMain, 500);
     }, true);
   };
 
