@@ -288,6 +288,7 @@
       URL.revokeObjectURL(url);
     });
     renderedUrls = [];
+    ensureCoreThumbnails();
 
     const targets = [...document.querySelectorAll("img[data-cw-frame-kind]")];
     const groups = new Map();
@@ -350,38 +351,154 @@
       renderAll();
     });
   };
+  const galleryRoot = () =>
+    document.querySelector(
+      ".product-gallery, media-gallery, [id^=\"MediaGallery-\"], .product__media-wrapper, .product-media, [data-product-gallery]"
+    );
+
+  const thumbContainer = () => {
+    const gallery = galleryRoot() || document;
+    return (
+      gallery.querySelector(
+        ".product-gallery__thumbs, .thumbnail-list, [class*=\"thumbnail-list\" i], [data-product-thumbnails], [data-thumbnails]"
+      ) ||
+      document.querySelector(
+        ".product-gallery__thumbs, .thumbnail-list, [class*=\"thumbnail-list\" i], [data-product-thumbnails], [data-thumbnails]"
+      )
+    );
+  };
+
+  const mainGalleryImage = () => {
+    const gallery = galleryRoot() || document;
+    const preferred = [
+      ".product-gallery__main img[data-cw-frame-kind]",
+      ".product__media-item.is-active img[data-cw-frame-kind]",
+      ".product__media-item[aria-hidden=\"false\"] img[data-cw-frame-kind]",
+      "[data-media-id].is-active img[data-cw-frame-kind]"
+    ];
+    for (const selector of preferred) {
+      const image = gallery.querySelector(selector);
+      if (image) return image;
+    }
+    const visible = [...gallery.querySelectorAll("img[data-cw-frame-kind]")]
+      .map((img) => ({ img, rect: img.getBoundingClientRect() }))
+      .filter(({ rect, img }) =>
+        rect.width > 100 &&
+        rect.height > 100 &&
+        getComputedStyle(img).display !== "none" &&
+        getComputedStyle(img).visibility !== "hidden"
+      )
+      .sort((a, b) => b.rect.width * b.rect.height - a.rect.width * a.rect.height);
+    return visible[0]?.img || null;
+  };
+
+  const showFrameKind = (kind) => {
+    const gallery = galleryRoot() || document;
+    const source = [...gallery.querySelectorAll(`img[data-cw-frame-kind="${kind}"]`)]
+      .find((img) => img.closest(".product-gallery__thumbs,.thumbnail-list,[class*=\"thumb\" i],[data-thumbnail]")) ||
+      document.querySelector(`img[data-cw-frame-kind="${kind}"]`);
+    if (!source) return;
+
+    const desiredBase = source.dataset.cwFrameBase;
+    const desiredSrc = source.currentSrc || source.src;
+    if (!desiredBase || !desiredSrc) return;
+
+    const candidates = new Set();
+    const primary = mainGalleryImage();
+    if (primary) candidates.add(primary);
+    [
+      ".product-gallery__main img[data-cw-frame-kind]",
+      ".product__media-item.is-active img[data-cw-frame-kind]",
+      ".product__media-item[aria-hidden=\"false\"] img[data-cw-frame-kind]",
+      "[data-media-id].is-active img[data-cw-frame-kind]"
+    ].forEach((selector) => {
+      gallery.querySelectorAll(selector).forEach((img) => candidates.add(img));
+    });
+
+    gallery.querySelectorAll("img[data-cw-frame-kind]").forEach((img) => {
+      if (
+        img === source ||
+        img.closest(".product-gallery__thumbs,.thumbnail-list,[class*=\"thumb\" i],[data-thumbnail]")
+      ) return;
+      const rect = img.getBoundingClientRect();
+      if (
+        rect.width >= 180 &&
+        rect.height >= 180 &&
+        getComputedStyle(img).display !== "none" &&
+        getComputedStyle(img).visibility !== "hidden"
+      ) candidates.add(img);
+    });
+
+    candidates.forEach((main) => {
+      if (!main || main === source || !document.contains(main)) return;
+      main.dataset.cwFrameKind = kind;
+      main.dataset.cwFrameBase = desiredBase;
+      replaceImage(main, desiredSrc);
+    });
+  };
+
+  const ensureCoreThumbnails = () => {
+    if (!root()) return;
+    const container = thumbContainer();
+    if (!container) return;
+
+    const wrapperFor = (img) =>
+      img?.closest("button,a,[role=\"button\"],li,[data-thumbnail],[data-media-id]") ||
+      img?.parentElement ||
+      null;
+
+    const findThumb = (kind) =>
+      [...container.querySelectorAll(`img[data-cw-frame-kind="${kind}"]`)]
+        .map(wrapperFor)
+        .find(Boolean) || null;
+
+    const sourceFor = (kind) =>
+      document.querySelector(`img[data-cw-frame-kind="${kind}"]`);
+
+    const makeThumb = (kind, label) => {
+      const source = sourceFor(kind);
+      if (!source) return null;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "cw-frame-core-thumb";
+      button.dataset.cwCustomThumbKind = kind;
+      button.setAttribute("aria-label", label);
+      const img = document.createElement("img");
+      img.alt = label;
+      img.src = source.currentSrc || source.src;
+      img.dataset.cwFrameKind = kind;
+      img.dataset.cwFrameBase = source.dataset.cwFrameBase || "";
+      button.appendChild(img);
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        showFrameKind(kind);
+      });
+      return button;
+    };
+
+    const firstSize = findThumb("size:8x12");
+    let guide = findThumb("guide");
+    let side = findThumb("side");
+
+    if (!guide) {
+      guide = container.querySelector('[data-cw-custom-thumb-kind="guide"]') ||
+        makeThumb("guide", "View photo frame size guide");
+    }
+    if (!side) {
+      side = container.querySelector('[data-cw-custom-thumb-kind="side"]') ||
+        makeThumb("side", "View photo frame side view");
+    }
+
+    const firstChild = container.firstElementChild;
+    if (firstSize && firstSize !== firstChild) container.insertBefore(firstSize, firstChild);
+    if (guide) container.insertBefore(guide, firstSize?.nextElementSibling || container.children[1] || null);
+    if (side) container.insertBefore(side, guide?.nextElementSibling || container.children[2] || null);
+  };
+
   const bindGalleryClicks = () => {
     if (document.documentElement.dataset.cwFrameGalleryClickBound === "true") return;
     document.documentElement.dataset.cwFrameGalleryClickBound = "true";
-
-    const galleryRoot = () =>
-      document.querySelector(
-        ".product-gallery, media-gallery, [id^=\"MediaGallery-\"], .product__media-wrapper, .product-media, [data-product-gallery]"
-      );
-
-    const mainGalleryImage = () => {
-      const gallery = galleryRoot() || document;
-      const preferred = [
-        ".product-gallery__main img[data-cw-frame-kind]",
-        ".product__media-item.is-active img[data-cw-frame-kind]",
-        ".product__media-item[aria-hidden=\"false\"] img[data-cw-frame-kind]",
-        "[data-media-id].is-active img[data-cw-frame-kind]"
-      ];
-      for (const selector of preferred) {
-        const image = gallery.querySelector(selector);
-        if (image) return image;
-      }
-      const visible = [...gallery.querySelectorAll("img[data-cw-frame-kind]")]
-        .map((img) => ({ img, rect: img.getBoundingClientRect() }))
-        .filter(({ rect, img }) =>
-          rect.width > 100 &&
-          rect.height > 100 &&
-          getComputedStyle(img).display !== "none" &&
-          getComputedStyle(img).visibility !== "hidden"
-        )
-        .sort((a, b) => b.rect.width * b.rect.height - a.rect.width * a.rect.height);
-      return visible[0]?.img || null;
-    };
 
     document.addEventListener("click", (event) => {
       if (!artworkUrl || !root()) return;
@@ -470,6 +587,7 @@
   const observer = new MutationObserver(() => {
     markPhotoFrameControls();
     rememberTargets();
+    ensureCoreThumbnails();
     scheduleRender();
   });
   const start = () => {
@@ -479,6 +597,7 @@
     bindPreviewEvent();
     bindGalleryClicks();
     rememberTargets();
+    ensureCoreThumbnails();
     observer.observe(document.body, { childList: true, subtree: true });
   };
   if (document.readyState === "loading")
