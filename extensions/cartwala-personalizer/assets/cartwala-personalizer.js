@@ -2804,6 +2804,10 @@
         const showProductPreview = (url) => {
           if (root.dataset.productKind === "mug") return;
           if (isPhotoCubeClock) return;
+          // Master photo frames use the dedicated gallery compositor so the
+          // saved customer photo stays inside the black frame mockups instead
+          // of replacing the main product image with the raw artwork.
+          if (root.dataset.cwPhotoFrameMaster === "true") return;
           // Acrylic designs are mounted inside the main product gallery by the
           // frame selector, which also supplies the selected size and studs.
           if (root.dataset.cwAcrylicProduct === "true") return;
