@@ -46,28 +46,53 @@
       '[data-cw-personalizer][data-cw-photo-frame-master="true"]',
     );
 
+  const sizeKeyFrom = (value) => {
+    const compact = String(value || "")
+      .toLowerCase()
+      .replace(/[×X]/g, "x")
+      .replace(/inches?|inch|"/g, "")
+      .replace(/\s+/g, "");
+    return ["8x12","10x15","12x18","16x24","20x30","24x36"]
+      .find((size) => compact.includes(size)) || "";
+  };
+
   const markPhotoFrameControls = () => {
-    const sizes = new Set(["8x12","10x15","12x18","16x24","20x30","24x36"]);
-    const controls = [...document.querySelectorAll("label,button")]
-      .filter((node) => sizes.has(String(node.textContent || "").replace(/[×X]/g, "x").replace(/\s+/g, "").toLowerCase()));
+    const sizeNodes = [
+      ...document.querySelectorAll('input[type="radio"][value], option[value], label, button')
+    ].filter((node) => sizeKeyFrom(node.value || node.textContent));
 
     let best = null;
     let bestScore = Infinity;
-    controls.forEach((node) => {
+
+    sizeNodes.forEach((node) => {
+      const directFieldset = node.closest?.("fieldset");
+      const candidates = directFieldset ? [directFieldset] : [];
       let current = node.parentElement;
-      for (let depth = 0; current && depth < 5; depth += 1, current = current.parentElement) {
-        const count = [...current.querySelectorAll("label,button")]
-          .filter((candidate) => sizes.has(String(candidate.textContent || "").replace(/[×X]/g, "x").replace(/\s+/g, "").toLowerCase())).length;
-        if (count >= 4) {
-          const score = current.querySelectorAll("*").length;
-          if (score < bestScore) {
-            best = current;
-            bestScore = score;
-          }
-        }
+      for (let depth = 0; current && depth < 7; depth += 1, current = current.parentElement) {
+        candidates.push(current);
       }
+
+      candidates.forEach((candidate) => {
+        const found = new Set(
+          [...candidate.querySelectorAll('input[type="radio"][value], option[value], label, button')]
+            .map((child) => sizeKeyFrom(child.value || child.textContent))
+            .filter(Boolean)
+        );
+        if (found.size < 4) return;
+        const score = candidate.querySelectorAll("*").length;
+        if (score < bestScore) {
+          best = candidate;
+          bestScore = score;
+        }
+      });
     });
-    best?.classList.add("cw-photo-frame-size-picker");
+
+    if (best) {
+      best.classList.add("cw-photo-frame-size-picker");
+      best.style.setProperty("max-width", "100%", "important");
+      best.style.setProperty("width", "100%", "important");
+      best.style.setProperty("box-sizing", "border-box", "important");
+    }
 
     const qty = document.querySelector('input[name="quantity"]');
     const qtyWrap = qty?.closest("quantity-input,.quantity,.product-form__quantity") || qty?.parentElement;
@@ -325,6 +350,49 @@
       renderAll();
     });
   };
+  const bindGalleryClicks = () => {
+    if (document.documentElement.dataset.cwFrameGalleryClickBound === "true") return;
+    document.documentElement.dataset.cwFrameGalleryClickBound = "true";
+
+    document.addEventListener("click", (event) => {
+      if (!artworkUrl || !root()) return;
+      const clicked = event.target?.closest?.("img[data-cw-frame-kind]");
+      if (!clicked) return;
+
+      const clickedRect = clicked.getBoundingClientRect();
+      const visibleTargets = [...document.querySelectorAll("img[data-cw-frame-kind]")]
+        .map((img) => ({ img, rect: img.getBoundingClientRect() }))
+        .filter(({ rect, img }) =>
+          rect.width > 80 &&
+          rect.height > 80 &&
+          getComputedStyle(img).display !== "none" &&
+          getComputedStyle(img).visibility !== "hidden"
+        )
+        .sort((a, b) => b.rect.width * b.rect.height - a.rect.width * a.rect.height);
+
+      const main = visibleTargets[0]?.img;
+      if (!main || main === clicked) return;
+      const mainRect = main.getBoundingClientRect();
+      if (clickedRect.width * clickedRect.height > mainRect.width * mainRect.height * 0.65) return;
+
+      const desiredKind = clicked.dataset.cwFrameKind;
+      const desiredBase = clicked.dataset.cwFrameBase;
+      const desiredSrc = clicked.currentSrc || clicked.src;
+      if (!desiredKind || !desiredBase || !desiredSrc) return;
+
+      const force = () => {
+        if (!document.contains(main)) return;
+        main.dataset.cwFrameKind = desiredKind;
+        main.dataset.cwFrameBase = desiredBase;
+        replaceImage(main, desiredSrc);
+      };
+
+      window.setTimeout(force, 0);
+      window.setTimeout(force, 90);
+      window.setTimeout(force, 220);
+    }, true);
+  };
+
 
   document.addEventListener("change", (event) => {
     const target = event.target;
@@ -351,6 +419,7 @@
     document.body.classList.add("cw-photo-frame-master-page");
     markPhotoFrameControls();
     bindPreviewEvent();
+    bindGalleryClicks();
     rememberTargets();
     observer.observe(document.body, { childList: true, subtree: true });
   };
