@@ -238,17 +238,17 @@
     scheduled = window.setTimeout(renderAll, 80);
   };
 
-  document.addEventListener("cartwala:preview-ready", (event) => {
-    const host =
-      event.target instanceof Element
-        ? event.target.closest("[data-cw-personalizer]")
-        : null;
-    if (!host || host.dataset.cwPhotoFrameMaster !== "true") return;
-    const url = event.detail?.url;
-    if (!url) return;
-    artworkUrl = url;
-    renderAll();
-  });
+  const bindPreviewEvent = () => {
+    const host = root();
+    if (!host || host.dataset.cwFramePreviewBound === "true") return;
+    host.dataset.cwFramePreviewBound = "true";
+    host.addEventListener("cartwala:preview-ready", (event) => {
+      const url = event.detail?.url;
+      if (!url) return;
+      artworkUrl = url;
+      renderAll();
+    });
+  };
 
   document.addEventListener("change", (event) => {
     const target = event.target;
@@ -271,6 +271,7 @@
   });
   const start = () => {
     if (!root()) return;
+    bindPreviewEvent();
     rememberTargets();
     observer.observe(document.body, { childList: true, subtree: true });
   };
