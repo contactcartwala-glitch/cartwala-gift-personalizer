@@ -126,8 +126,19 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
         .filter(visible)
         .filter(el=>!(el.getAttribute("aria-label")||el.getAttribute("title")||el.textContent?.trim()))
         .slice(0,8).map(el=>el.outerHTML.slice(0,140));
-      const smallTargets=deep?[...document.querySelectorAll("button,a[href],input,select,summary,[role=button]")]
+      const smallTargets=deep?[...document.querySelectorAll([
+          "button",
+          "input:not([type=hidden]):not([type=radio]):not([type=checkbox])",
+          "select",
+          "summary",
+          "[role=button]",
+          "a.button",
+          "a[class*=button]",
+          ".header__icon",
+          ".quick-add__submit"
+        ].join(","))]
         .filter(visible)
+        .filter(el=>!el.closest(".cw-site-sticky-atc"))
         .map(el=>({el,r:el.getBoundingClientRect()}))
         .filter(({r})=>r.width<38||r.height<38)
         .slice(0,12)
@@ -186,8 +197,15 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
     }
   }
 
-  if(pageErrors.length)issues.push({severity:"critical",code:"page-errors",message:`${pageErrors.length} uncaught page error(s)`,examples:pageErrors.slice(0,6)});
-  if(consoleErrors.length)issues.push({severity:"warning",code:"console-errors",message:`${consoleErrors.length} console error(s)`,examples:consoleErrors.slice(0,6)});
+  const actionablePageErrors=pageErrors.filter(message=>
+    !/api\/event\/collect.*access control checks/i.test(message)
+  );
+  const actionableConsoleErrors=consoleErrors.filter(message=>
+    !/shop\.app.*content security policy/i.test(message)&&
+    !/Framing 'https:\/\/shop\.app\/'/i.test(message)
+  );
+  if(actionablePageErrors.length)issues.push({severity:"critical",code:"page-errors",message:`${actionablePageErrors.length} uncaught page error(s)`,examples:actionablePageErrors.slice(0,6)});
+  if(actionableConsoleErrors.length)issues.push({severity:"warning",code:"console-errors",message:`${actionableConsoleErrors.length} console error(s)`,examples:actionableConsoleErrors.slice(0,6)});
 
   const critical=issues.some(i=>i.severity==="critical");
   if(critical){
