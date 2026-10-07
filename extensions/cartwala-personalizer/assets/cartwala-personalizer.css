@@ -221,6 +221,27 @@ body.cw-personalization-complete
   border-radius: 0;
   box-shadow: none;
 }
+/* Master black-beading photo frame: show the frame shape inside the
+   editor without baking it into the customer's printable artwork. */
+.cw-personalizer[data-cw-photo-frame-master="true"] .cw-personalizer__stage {
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,.16);
+}
+.cw-personalizer[data-cw-photo-frame-master="true"] .cw-personalizer__stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  box-sizing: border-box;
+  border: clamp(10px, 2.2vw, 24px) solid #111;
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,.08),
+    inset 0 0 12px rgba(0,0,0,.35);
+}
+.cw-personalizer[data-cw-photo-frame-master="true"] .cw-personalizer__photo-selection {
+  z-index: 8;
+}
 .cw-personalizer__tip {
   margin-top: 8px;
   font-size: 12px;
