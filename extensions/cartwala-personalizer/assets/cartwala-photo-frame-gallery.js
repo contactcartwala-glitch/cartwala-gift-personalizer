@@ -45,6 +45,34 @@
       '[data-cw-personalizer][data-cw-photo-frame-master="true"]',
     );
 
+  const markPhotoFrameControls = () => {
+    const sizes = new Set(["8x12","10x15","12x18","16x24","20x30","24x36"]);
+    const controls = [...document.querySelectorAll("label,button")]
+      .filter((node) => sizes.has(String(node.textContent || "").replace(/\s+/g, "").toLowerCase()));
+
+    let best = null;
+    let bestScore = Infinity;
+    controls.forEach((node) => {
+      let current = node.parentElement;
+      for (let depth = 0; current && depth < 5; depth += 1, current = current.parentElement) {
+        const count = [...current.querySelectorAll("label,button")]
+          .filter((candidate) => sizes.has(String(candidate.textContent || "").replace(/\s+/g, "").toLowerCase())).length;
+        if (count >= 4) {
+          const score = current.querySelectorAll("*").length;
+          if (score < bestScore) {
+            best = current;
+            bestScore = score;
+          }
+        }
+      }
+    });
+    best?.classList.add("cw-photo-frame-size-picker");
+
+    const qty = document.querySelector('input[name="quantity"]');
+    const qtyWrap = qty?.closest("quantity-input,.quantity,.product-form__quantity") || qty?.parentElement;
+    qtyWrap?.classList.add("cw-photo-frame-quantity");
+  };
+
   const cleanUrl = (value) => {
     try {
       const url = new URL(value, window.location.href);
@@ -301,12 +329,14 @@
   });
 
   const observer = new MutationObserver(() => {
+    markPhotoFrameControls();
     rememberTargets();
     scheduleRender();
   });
   const start = () => {
     if (!root()) return;
     document.body.classList.add("cw-photo-frame-master-page");
+    markPhotoFrameControls();
     bindPreviewEvent();
     rememberTargets();
     observer.observe(document.body, { childList: true, subtree: true });
