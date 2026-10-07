@@ -467,3 +467,37 @@ body.cw-photo-frame-master-page .cw-photo-frame-size-picker > *{
     min-height:44px!important;
   }
 }
+
+
+/* Master photo-frame guaranteed core thumbnails */
+body.cw-photo-frame-master-page .cw-frame-core-thumb{
+  box-sizing:border-box;
+  flex:0 0 auto;
+  width:74px;
+  height:74px;
+  padding:3px;
+  border:1px solid #ddd7d3;
+  border-radius:9px;
+  background:#fff;
+  cursor:pointer;
+  overflow:hidden;
+}
+body.cw-photo-frame-master-page .cw-frame-core-thumb img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:6px;
+}
+body.cw-photo-frame-master-page .cw-frame-core-thumb:focus-visible{
+  outline:2px solid #ff6800;
+  outline-offset:2px;
+}
+@media(max-width:749px){
+  body.cw-photo-frame-master-page .cw-frame-core-thumb{
+    width:66px;
+    height:66px;
+    min-width:66px!important;
+    min-height:66px!important;
+  }
+}
