@@ -442,10 +442,14 @@
     const container = thumbContainer();
     if (!container) return;
 
-    const wrapperFor = (img) =>
-      img?.closest("button,a,[role=\"button\"],li,[data-thumbnail],[data-media-id]") ||
-      img?.parentElement ||
-      null;
+    const wrapperFor = (img) => {
+      if (!img) return null;
+      let node = img;
+      while (node && node.parentElement && node.parentElement !== container) {
+        node = node.parentElement;
+      }
+      return node?.parentElement === container ? node : null;
+    };
 
     const findThumb = (kind) =>
       [...container.querySelectorAll(`img[data-cw-frame-kind="${kind}"]`)]
@@ -490,10 +494,18 @@
         makeThumb("side", "View photo frame side view");
     }
 
-    const firstChild = container.firstElementChild;
-    if (firstSize && firstSize !== firstChild) container.insertBefore(firstSize, firstChild);
-    if (guide) container.insertBefore(guide, firstSize?.nextElementSibling || container.children[1] || null);
-    if (side) container.insertBefore(side, guide?.nextElementSibling || container.children[2] || null);
+    const placeAfter = (node, previous) => {
+      if (!node || node.parentElement !== container) return;
+      const expected = previous
+        ? previous.nextElementSibling
+        : container.firstElementChild;
+      if (node === expected) return;
+      container.insertBefore(node, expected || null);
+    };
+
+    placeAfter(firstSize, null);
+    placeAfter(guide, firstSize || null);
+    placeAfter(side, guide || firstSize || null);
   };
 
   const bindGalleryClicks = () => {
@@ -584,18 +596,39 @@
     scheduleRender();
   });
 
-  const observer = new MutationObserver(() => {
-    markPhotoFrameControls();
-    rememberTargets();
-    ensureCoreThumbnails();
-    scheduleRender();
-  });
+  let maintenanceTimer = 0;
+  let maintainingGallery = false;
+
+  const runGalleryMaintenance = () => {
+    if (!root() || maintainingGallery) return;
+    maintainingGallery = true;
+    observer.disconnect();
+    try {
+      markPhotoFrameControls();
+      rememberTargets();
+      ensureCoreThumbnails();
+      scheduleRender();
+    } finally {
+      maintainingGallery = false;
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+  };
+
+  const scheduleGalleryMaintenance = () => {
+    if (!root() || maintenanceTimer) return;
+    maintenanceTimer = window.setTimeout(() => {
+      maintenanceTimer = 0;
+      runGalleryMaintenance();
+    }, 140);
+  };
+
+  const observer = new MutationObserver(scheduleGalleryMaintenance);
   const start = () => {
     if (!root()) return;
     document.body.classList.add("cw-photo-frame-master-page");
-    markPhotoFrameControls();
     bindPreviewEvent();
     bindGalleryClicks();
+    markPhotoFrameControls();
     rememberTargets();
     ensureCoreThumbnails();
     observer.observe(document.body, { childList: true, subtree: true });
