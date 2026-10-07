@@ -288,3 +288,55 @@ body.cw-photo-frame-master-page .cw-photo-frame-size-picker > *{
   min-width:0!important;
   max-width:100%!important;
 }
+
+
+/* Cartwala narrow-phone overflow containment */
+@media(max-width:359px){
+  body.cw-site-sticky-atc-active .product,
+  body.cw-site-sticky-atc-active .product__media-wrapper,
+  body.cw-site-sticky-atc-active .product__info-wrapper,
+  body.cw-site-sticky-atc-active .product__info-container,
+  body.cw-site-sticky-atc-active .product__media-list,
+  body.cw-site-sticky-atc-active .product__media-item,
+  body.cw-site-sticky-atc-active slider-component,
+  body.cw-site-sticky-atc-active .slider-mobile-gutter,
+  body.cw-site-sticky-atc-active .slider{
+    box-sizing:border-box!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin-left:0!important;
+    margin-right:0!important;
+  }
+
+  body.cw-site-sticky-atc-active .product__media-list,
+  body.cw-site-sticky-atc-active .slider{
+    padding-left:0!important;
+    padding-right:0!important;
+  }
+}
+
+/* Mobile controls should meet a comfortable tap-target size without changing desktop density. */
+@media(max-width:749px){
+  body button:not(.cw-site-sticky-atc__qty button),
+  body input:not([type="hidden"]):not([type="radio"]):not([type="checkbox"]),
+  body select,
+  body summary,
+  body [role="button"]{
+    min-height:40px;
+  }
+
+  body .cw-site-sticky-atc__qty button{
+    min-height:44px;
+  }
+
+  body.cw-photo-frame-master-page .product-form__input,
+  body.cw-photo-frame-master-page fieldset,
+  body.cw-photo-frame-master-page [class*="variant" i]{
+    box-sizing:border-box!important;
+    max-width:100%!important;
+  }
+
+  body.cw-photo-frame-master-page .cw-photo-frame-size-picker{
+    overflow:hidden!important;
+  }
+}
