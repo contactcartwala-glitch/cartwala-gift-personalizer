@@ -2295,3 +2295,124 @@ body.cw-personalization-complete
   transform:none !important;
   border-radius:22px !important;
 }
+
+
+/* Master photo-frame product-page UX */
+.cw-photo-frame-saved-status{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:8px 0 2px;
+  color:#356b3d;
+  font-size:12px;
+  line-height:1.25;
+  text-align:center;
+}
+.cw-photo-frame-saved-status>span:first-child{
+  display:grid;
+  place-items:center;
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  background:#e9f7ec;
+  color:#1d7b2d;
+  font-weight:900;
+}
+.cw-photo-frame-saved-status strong{font-weight:800}
+.cw-photo-frame-saved-status span:last-child{color:#6a6a6a}
+
+body.cw-photo-frame-master-page .cw-personalizer{
+  margin:10px 0 8px;
+}
+body.cw-photo-frame-master-page .cw-personalizer__open{
+  width:auto;
+  min-width:132px;
+  padding:10px 18px;
+  border:1.5px solid #ff6200;
+  border-radius:999px;
+  background:#fff;
+  color:#e85600;
+  font-size:14px;
+  font-weight:800;
+}
+body.cw-photo-frame-master-page .cw-personalizer__open:hover{
+  background:#fff6f0;
+}
+body.cw-photo-frame-master-page.cw-photo-frame-personalized .cw-personalizer__open{
+  box-shadow:none;
+}
+
+/* Keep the size pills clear and unmistakable on the master frame. */
+body.cw-photo-frame-master-page .product-form__input input[type="radio"]+label,
+body.cw-photo-frame-master-page variant-radios input[type="radio"]+label,
+body.cw-photo-frame-master-page .variant-picker input[type="radio"]+label{
+  border-radius:999px !important;
+  transition:border-color .15s ease,background .15s ease,color .15s ease,box-shadow .15s ease;
+}
+body.cw-photo-frame-master-page .product-form__input input[type="radio"]:checked+label,
+body.cw-photo-frame-master-page variant-radios input[type="radio"]:checked+label,
+body.cw-photo-frame-master-page .variant-picker input[type="radio"]:checked+label{
+  border-color:#c85d16 !important;
+  background:#fff7f1 !important;
+  color:#a7470d !important;
+  box-shadow:0 0 0 1px rgba(200,93,22,.12);
+}
+
+@media(max-width:749px){
+  /* Price: prevent compare-price and discount badge from colliding. */
+  body.cw-photo-frame-master-page .price,
+  body.cw-photo-frame-master-page .product__price,
+  body.cw-photo-frame-master-page [data-product-price]{
+    display:flex !important;
+    align-items:center !important;
+    flex-wrap:wrap !important;
+    gap:6px 9px !important;
+    line-height:1.25 !important;
+  }
+  body.cw-photo-frame-master-page .price-item,
+  body.cw-photo-frame-master-page .price__sale,
+  body.cw-photo-frame-master-page .price__regular,
+  body.cw-photo-frame-master-page s,
+  body.cw-photo-frame-master-page del{
+    margin:0 !important;
+  }
+
+  /* Edit is secondary; Add to Cart remains the strongest action. */
+  body.cw-photo-frame-master-page .cw-personalizer__open{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:auto !important;
+    min-height:42px;
+    margin-top:2px;
+    padding:9px 16px;
+  }
+
+  /* Compact quantity instead of a wide empty control. */
+  body.cw-photo-frame-master-page quantity-input,
+  body.cw-photo-frame-master-page .quantity,
+  body.cw-photo-frame-master-page .product-form__quantity .quantity{
+    width:132px !important;
+    max-width:132px !important;
+    min-width:132px !important;
+  }
+  body.cw-photo-frame-master-page input[name="quantity"]{
+    max-width:64px !important;
+    text-align:center !important;
+  }
+
+  /* Strong primary order action and tighter vertical rhythm. */
+  body.cw-photo-frame-master-page form[action*="/cart/add"] button[name="add"],
+  body.cw-photo-frame-master-page form[action*="/cart/add"] button[type="submit"]:not(.shopify-payment-button__button){
+    min-height:52px !important;
+    border-radius:999px !important;
+    font-size:16px !important;
+    font-weight:800 !important;
+  }
+  body.cw-photo-frame-master-page .cw-delivery-estimate{
+    margin-top:10px;
+    padding:13px 8px;
+  }
+}
