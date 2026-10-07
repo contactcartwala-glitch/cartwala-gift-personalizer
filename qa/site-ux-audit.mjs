@@ -198,11 +198,17 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
   }
 
   const actionablePageErrors=pageErrors.filter(message=>
-    !/api\/event\/collect.*access control checks/i.test(message)
+    !/api\/event\/collect.*access control checks/i.test(message)&&
+    !/otlp-http-production\.shopifysvc\.com\/v1\/metrics.*access control checks/i.test(message)
+  );
+  const hasShopAppCsp=consoleErrors.some(message=>
+    /shop\.app.*content security policy/i.test(message)||
+    /Framing 'https:\/\/shop\.app\/'/i.test(message)
   );
   const actionableConsoleErrors=consoleErrors.filter(message=>
     !/shop\.app.*content security policy/i.test(message)&&
-    !/Framing 'https:\/\/shop\.app\/'/i.test(message)
+    !/Framing 'https:\/\/shop\.app\/'/i.test(message)&&
+    !(hasShopAppCsp&&/Failed to load resource:.*403/i.test(message))
   );
   if(actionablePageErrors.length)issues.push({severity:"critical",code:"page-errors",message:`${actionablePageErrors.length} uncaught page error(s)`,examples:actionablePageErrors.slice(0,6)});
   if(actionableConsoleErrors.length)issues.push({severity:"warning",code:"console-errors",message:`${actionableConsoleErrors.length} console error(s)`,examples:actionableConsoleErrors.slice(0,6)});
