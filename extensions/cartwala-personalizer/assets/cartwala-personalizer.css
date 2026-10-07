@@ -2473,3 +2473,62 @@ body.cw-photo-frame-master-page .variant-picker input[type="radio"]:checked+labe
 .cw-clock-modal-face img{
   z-index:1;
 }
+
+
+/* FINAL clock-only lighting correction: one clean LED rim, no double colour */
+@keyframes cwClockSingleLedCycle{
+  0%,100%{
+    box-shadow:
+      inset 0 0 0 5px rgba(255,236,120,.92),
+      0 0 20px rgba(255,222,92,.50);
+  }
+  20%{
+    box-shadow:
+      inset 0 0 0 5px rgba(255,164,110,.92),
+      0 0 20px rgba(255,121,80,.50);
+  }
+  40%{
+    box-shadow:
+      inset 0 0 0 5px rgba(141,246,166,.94),
+      0 0 20px rgba(72,220,108,.50);
+  }
+  60%{
+    box-shadow:
+      inset 0 0 0 5px rgba(139,211,255,.94),
+      0 0 20px rgba(72,169,240,.50);
+  }
+  80%{
+    box-shadow:
+      inset 0 0 0 5px rgba(219,166,255,.94),
+      0 0 20px rgba(177,102,238,.48);
+  }
+}
+.cw-clock-product-face,
+.cw-clock-modal-face,
+.cw-clock-product-face--front,
+.cw-clock-product-face--bottom,
+.cw-clock-modal-face--front,
+.cw-clock-modal-face--bottom{
+  animation:none !important;
+  background:#f8f8f8 !important;
+  box-shadow:none !important;
+}
+.cw-clock-product-face::after,
+.cw-clock-modal-face::after{
+  display:none !important;
+}
+.cw-clock-product-face::before,
+.cw-clock-modal-face::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:4;
+  pointer-events:none;
+  border-radius:inherit;
+  animation:cwClockSingleLedCycle 7s linear infinite !important;
+}
+.cw-clock-product-face img,
+.cw-clock-modal-face img{
+  position:relative;
+  z-index:1;
+}
