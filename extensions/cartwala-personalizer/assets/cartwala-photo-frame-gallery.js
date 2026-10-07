@@ -348,6 +348,10 @@
       if (!url) return;
       artworkUrl = url;
       ensureSavedStatus();
+      markPhotoFrameControls();
+      rememberTargets();
+      ensureCoreThumbnails();
+      startGalleryObserver();
       renderAll();
     });
   };
@@ -592,7 +596,14 @@
   });
 
   document.addEventListener("shopify:section:load", () => {
+    if (!artworkUrl) {
+      markPhotoFrameControls();
+      rememberTargets();
+      return;
+    }
     rememberTargets();
+    ensureCoreThumbnails();
+    startGalleryObserver();
     scheduleRender();
   });
 
@@ -610,12 +621,12 @@
       scheduleRender();
     } finally {
       maintainingGallery = false;
-      observer.observe(document.body, { childList: true, subtree: true });
+      if (artworkUrl) observer.observe(document.body, { childList: true, subtree: true });
     }
   };
 
   const scheduleGalleryMaintenance = () => {
-    if (!root() || maintenanceTimer) return;
+    if (!artworkUrl || !root() || maintenanceTimer) return;
     maintenanceTimer = window.setTimeout(() => {
       maintenanceTimer = 0;
       runGalleryMaintenance();
@@ -623,6 +634,13 @@
   };
 
   const observer = new MutationObserver(scheduleGalleryMaintenance);
+  let observerStarted = false;
+  const startGalleryObserver = () => {
+    if (observerStarted || !artworkUrl || !document.body) return;
+    observerStarted = true;
+    observer.observe(document.body, { childList: true, subtree: true });
+  };
+
   const start = () => {
     if (!root()) return;
     document.body.classList.add("cw-photo-frame-master-page");
@@ -630,8 +648,6 @@
     bindGalleryClicks();
     markPhotoFrameControls();
     rememberTargets();
-    ensureCoreThumbnails();
-    observer.observe(document.body, { childList: true, subtree: true });
   };
   if (document.readyState === "loading")
     document.addEventListener("DOMContentLoaded", start, { once: true });
