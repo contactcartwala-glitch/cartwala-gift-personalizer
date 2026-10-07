@@ -257,6 +257,21 @@
     scheduled = window.setTimeout(renderAll, 80);
   };
 
+  const ensureSavedStatus = () => {
+    const host = root();
+    if (!host) return;
+    let status = host.querySelector("[data-cw-frame-saved-status]");
+    if (!status) {
+      status = document.createElement("div");
+      status.className = "cw-photo-frame-saved-status";
+      status.dataset.cwFrameSavedStatus = "true";
+      status.setAttribute("role", "status");
+      status.innerHTML = "<span aria-hidden=\"true\">✓</span><strong>Photo saved</strong><span>You can edit it before ordering.</span>";
+      host.querySelector("[data-cw-open]")?.insertAdjacentElement("afterend", status);
+    }
+    document.body.classList.add("cw-photo-frame-personalized");
+  };
+
   const bindPreviewEvent = () => {
     const host = root();
     if (!host || host.dataset.cwFramePreviewBound === "true") return;
@@ -265,6 +280,7 @@
       const url = event.detail?.url;
       if (!url) return;
       artworkUrl = url;
+      ensureSavedStatus();
       renderAll();
     });
   };
@@ -290,6 +306,7 @@
   });
   const start = () => {
     if (!root()) return;
+    document.body.classList.add("cw-photo-frame-master-page");
     bindPreviewEvent();
     rememberTargets();
     observer.observe(document.body, { childList: true, subtree: true });
