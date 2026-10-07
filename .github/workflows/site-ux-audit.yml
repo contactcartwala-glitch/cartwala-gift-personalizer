@@ -1,0 +1,89 @@
+name: Cartwala Site UX Audit
+
+on:
+  workflow_run:
+    workflows:
+      - Deploy Shopify app
+    types:
+      - completed
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+    inputs:
+      max_urls:
+        description: Maximum sitemap URLs to scan
+        required: false
+        default: "600"
+
+concurrency:
+  group: cartwala-site-ux-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Setup isolated Playwright runner
+        shell: bash
+        run: |
+          rm -rf /tmp/cartwala-ux-qa
+          mkdir -p /tmp/cartwala-ux-qa
+          cp qa/site-ux-audit.mjs /tmp/cartwala-ux-qa/site-ux-audit.mjs
+          cd /tmp/cartwala-ux-qa
+          npm init -y
+          npm install --no-save --package-lock=false @playwright/test@latest
+          npx playwright install --with-deps chromium firefox webkit
+
+      - name: Audit live Cartwala website
+        id: ux_audit
+        continue-on-error: true
+        shell: bash
+        env:
+          BASE_URL: https://cartwala.in
+          QA_MAX_URLS: ${{ github.event.inputs.max_urls || '600' }}
+          QA_OUTPUT_DIR: ${{ github.workspace }}/qa-output
+          QA_STRICT: "1"
+        run: |
+          cd /tmp/cartwala-ux-qa
+          node site-ux-audit.mjs
+
+      - name: Publish QA summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f qa-output/summary.md ]; then
+            cat qa-output/summary.md >> "$GITHUB_STEP_SUMMARY"
+          elif [ -f qa-output/fatal.txt ]; then
+            {
+              echo "# Cartwala Website UI/UX QA"
+              echo
+              echo "The audit runner failed before producing a report."
+              echo
+              echo '~~~'
+              cat qa-output/fatal.txt
+              echo '~~~'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload QA report and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cartwala-ui-ux-report-${{ github.run_number }}
+          path: qa-output
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Mark critical UX failures
+        if: steps.ux_audit.outcome == 'failure'
+        shell: bash
+        run: |
+          echo "Critical UI/UX issues were detected. Open the job summary and artifact for exact pages, devices and screenshots."
+          exit 1
