@@ -14,6 +14,9 @@ const results=[];
 const startedAt=new Date().toISOString();
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function closeBrowserNoWait(browser){
+  try{ browser.close().catch(()=>{}); }catch{}
+}
 const safeName=(value)=>String(value).replace(/^https?:\/\//,"").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"").slice(0,110)||"page";
 const sameOrigin=url=>{try{return new URL(url).origin===new URL(BASE_URL).origin}catch{return false}};
 const normalizeUrl=url=>{try{const u=new URL(url,BASE_URL);u.hash="";return u.href}catch{return null}};
@@ -266,7 +269,7 @@ async function crawlAll(urls){
     await page.close();
   });
   await Promise.all(workers);
-  await browser.close();
+  closeBrowserNoWait(browser);
 }
 
 async function responsiveMatrix(urls){
@@ -297,7 +300,7 @@ async function responsiveMatrix(urls){
         await context.close();
       }
     }finally{
-      await browser.close();
+      closeBrowserNoWait(browser);
     }
   }));
 }
@@ -392,13 +395,13 @@ async function photoFrameJourney(){
       issues.push({severity:"critical",code:"frame-guide-thumb",message:"Size-guide thumbnail was not found"});
     }
 
-    await page.screenshot({path:path.join(OUTPUT_DIR,"screenshots","photo-frame-personalization-journey.png"),fullPage:true});
+    await page.screenshot({path:path.join(OUTPUT_DIR,"screenshots","photo-frame-personalization-journey.png"),fullPage:true,timeout:15000}).catch(()=>{});
   }catch(error){
     issues.push({severity:"critical",code:"frame-journey-error",message:String(error?.message||error).slice(0,320)});
-    await page.screenshot({path:path.join(OUTPUT_DIR,"screenshots","photo-frame-personalization-failure.png"),fullPage:true}).catch(()=>{});
+    await page.screenshot({path:path.join(OUTPUT_DIR,"screenshots","photo-frame-personalization-failure.png"),fullPage:true,timeout:15000}).catch(()=>{});
   }
   results.push({url,browser:"chromium",viewport:{width:390,height:844},label:"photo-frame-journey",issues});
-  await browser.close();
+  closeBrowserNoWait(browser);
 }
 
 async function writeReport(discovered,representative){
@@ -483,9 +486,12 @@ async function main(){
   if(STRICT&&critical.length)process.exitCode=1;
 }
 
-main().catch(async error=>{
+main().then(()=>{
+  const code=process.exitCode||0;
+  setTimeout(()=>process.exit(code),250);
+}).catch(async error=>{
   console.error(error);
   await fs.mkdir(OUTPUT_DIR,{recursive:true}).catch(()=>{});
   await fs.writeFile(path.join(OUTPUT_DIR,"fatal.txt"),String(error?.stack||error)).catch(()=>{});
-  process.exitCode=1;
+  setTimeout(()=>process.exit(1),250);
 });
