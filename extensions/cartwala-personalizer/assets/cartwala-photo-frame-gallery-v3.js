@@ -460,8 +460,8 @@
     const size = selectedSizeKey();
     const preferred = size ? `size:${size}` : "";
     const nextKind =
-      (preferred && personalizedByKind.has(preferred) && preferred) ||
       (activePersonalizedKind && personalizedByKind.has(activePersonalizedKind) && activePersonalizedKind) ||
+      (preferred && personalizedByKind.has(preferred) && preferred) ||
       "size:8x12";
     setPersonalizedGalleryKind(nextKind);
   };
