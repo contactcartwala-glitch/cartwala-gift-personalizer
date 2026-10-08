@@ -7,7 +7,7 @@ import {
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
 
-// Match shopify.app.toml even when Render has a missing or outdated SCOPES value.
+// Match the active shopify.app.live.toml even when SCOPES is missing or outdated.
 const requiredScopes = [
   "read_files",
   "read_orders",
@@ -15,6 +15,9 @@ const requiredScopes = [
   "write_files",
   "write_products",
   "write_app_proxy",
+  "read_draft_orders",
+  "write_draft_orders",
+  "write_orders",
 ];
 const scopes = [...new Set([
   ...requiredScopes,
