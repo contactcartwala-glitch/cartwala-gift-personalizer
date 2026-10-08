@@ -73,5 +73,11 @@
     "delivered": "Delivered",
     "ready_to_dispatch": "Ready to dispatch",
     "estimated_delivery": "Estimated delivery"
+  },
+  "google_reviews": {
+    "more": "Show more reviews",
+    "view_google": "View on Google Maps",
+    "anonymous": "Google reviewer",
+    "label": "Google reviews"
   }
 }
