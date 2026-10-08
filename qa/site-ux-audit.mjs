@@ -379,6 +379,20 @@ async function photoFrameJourney(){
     await sleep(650);
 
     console.log("[frame] page-opened");
+    const squareBefore=await frameStep("check-square-gallery-before-personalization",()=>page.evaluate(()=>{
+      const gallery=document.querySelector(".product-gallery, media-gallery, [id^='MediaGallery-'], .product__media-wrapper, .product-media, [data-product-gallery]")||document;
+      const candidates=[...gallery.querySelectorAll("img")].map(img=>({img,r:img.getBoundingClientRect()}))
+        .filter(({r,img})=>r.width>180&&r.height>180&&getComputedStyle(img).display!=="none"&&getComputedStyle(img).visibility!=="hidden");
+      candidates.sort((a,b)=>b.r.width*b.r.height-a.r.width*a.r.height);
+      const target=candidates[0];
+      if(!target)return {ok:false,width:0,height:0,ratio:0};
+      const item=target.img.closest(".product__media-item,[id*='Slide-'],.slider__slide,[data-media-id]")||target.img.parentElement;
+      const r=(item||target.img).getBoundingClientRect();
+      const ratio=r.height? r.width/r.height : 0;
+      return {ok:ratio>=0.94&&ratio<=1.06,width:Math.round(r.width),height:Math.round(r.height),ratio};
+    }),15000);
+    if(!squareBefore?.ok)issues.push({severity:"critical",code:"frame-gallery-square",message:`Initial product gallery is not 1:1 (measured ${squareBefore?.width||0}×${squareBefore?.height||0})`});
+
     const radio=page.locator('input[type="radio"][value="24x36"]').first();
     const select=page.locator('select option[value="24x36"]').first();
     if(await frameStep("count-size-radio",()=>radio.count(),5000)){
@@ -440,6 +454,30 @@ async function photoFrameJourney(){
       if(guideVisible!=="guide")issues.push({severity:"critical",code:"frame-second-image",message:`Clicking size-guide thumbnail opened "${guideVisible||"unknown"}" instead of the second image`});
     }else{
       issues.push({severity:"critical",code:"frame-guide-thumb",message:"Size-guide thumbnail was not found"});
+    }
+
+    const sideImage=page.locator('img[data-cw-frame-kind="side"]').filter({visible:true}).first();
+    const sideTarget=(await frameStep("count-side-target",()=>sideImage.count(),5000))?sideImage:page.locator('img[data-cw-frame-kind="side"]').first();
+    if(await frameStep("count-side-fallback",()=>sideTarget.count(),5000)){
+      const sideClickable=sideTarget.locator("xpath=ancestor::button[1] | ancestor::a[1] | ancestor::*[@role='button'][1]");
+      if(await frameStep("count-side-clickable",()=>sideClickable.count(),5000))await frameStep("click-side",()=>sideClickable.click({force:true}),15000);
+      else await frameStep("click-side",()=>sideTarget.click({force:true}),15000);
+      await sleep(500);
+      const sideVisible=await frameStep("check-side-preview",()=>page.evaluate(()=>{
+        const custom=document.querySelector("[data-cw-frame-v5]");
+        if(custom){
+          const main=custom.querySelector("[data-cw-frame-v5-base][data-cw-frame-kind]");
+          if(main)return main.dataset.cwFrameKind||"";
+        }
+        const gallery=document.querySelector(".product-gallery, media-gallery, [id^='MediaGallery-'], .product__media-wrapper")||document;
+        const candidates=[...gallery.querySelectorAll("img[data-cw-frame-kind]")].map(img=>({img,r:img.getBoundingClientRect()}))
+          .filter(({r,img})=>r.width>120&&r.height>120&&getComputedStyle(img).visibility!=="hidden"&&getComputedStyle(img).display!=="none");
+        candidates.sort((a,b)=>b.r.width*b.r.height-a.r.width*a.r.height);
+        return candidates[0]?.img.dataset.cwFrameKind||"";
+      }),15000);
+      if(sideVisible!=="side")issues.push({severity:"critical",code:"frame-third-image",message:`Clicking side-view thumbnail opened "${sideVisible||"unknown"}" instead of the third image`});
+    }else{
+      issues.push({severity:"critical",code:"frame-side-thumb",message:"Side-view thumbnail was not found"});
     }
 
     await page.screenshot({path:path.join(OUTPUT_DIR,"screenshots","photo-frame-personalization-journey.png"),fullPage:true,timeout:15000}).catch(()=>{});
