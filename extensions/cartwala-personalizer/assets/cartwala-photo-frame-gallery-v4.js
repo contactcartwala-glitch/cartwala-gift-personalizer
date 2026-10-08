@@ -169,16 +169,19 @@
         document.querySelector(".product-gallery, [id^='MediaGallery-'], .product__media-wrapper") ||
         document;
 
-      const large = [...gallery.querySelectorAll("img")].find((img) => {
+      // Locate the actual product-media slide even when it is currently hidden.
+      // Hidden slides have a 0x0 rect, so visibility-based lookup incorrectly misses
+      // the Size Guide / Side View and leaves the selected-size slide active.
+      const mediaImage = [...gallery.querySelectorAll(
+        ".product__media-item img, [id*='Slide-'] img, li[id*='media'] img, .slider__slide img, [data-media-id] img"
+      )].find((img) => {
         if (img.hasAttribute("data-cw-frame-live-overlay")) return false;
         const d = descriptorFor(img.currentSrc || img.src);
-        if (!d || d.key !== descriptor.key) return false;
-        const r = img.getBoundingClientRect();
-        return r.width > 120 && r.height > 120;
+        return !!d && d.key === descriptor.key;
       });
 
       const item =
-        large?.closest(".product__media-item, [id*='Slide-'], li[id*='media'], .slider__slide, [data-media-id]") ||
+        mediaImage?.closest(".product__media-item, [id*='Slide-'], li[id*='media'], .slider__slide, [data-media-id]") ||
         null;
 
       if (item) {
@@ -205,6 +208,9 @@
             scroller.scrollTo({ left: item.offsetLeft, behavior: "auto" });
           } catch {}
         }
+        try {
+          item.scrollIntoView({ block: "nearest", inline: "start", behavior: "auto" });
+        } catch {}
       }
 
       apply();
