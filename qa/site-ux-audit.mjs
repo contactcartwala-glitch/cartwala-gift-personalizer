@@ -380,6 +380,12 @@ async function photoFrameJourney(){
 
     console.log("[frame] page-opened");
     const squareBefore=await frameStep("check-square-gallery-before-personalization",()=>page.evaluate(()=>{
+      const customStage=document.querySelector("[data-cw-frame-v5] [data-cw-frame-v5-stage]");
+      if(customStage){
+        const r=customStage.getBoundingClientRect();
+        const ratio=r.height? r.width/r.height : 0;
+        return {ok:r.width>180&&r.height>180&&ratio>=0.94&&ratio<=1.06,width:Math.round(r.width),height:Math.round(r.height),ratio};
+      }
       const gallery=document.querySelector(".product-gallery, media-gallery, [id^='MediaGallery-'], .product__media-wrapper, .product-media, [data-product-gallery]")||document;
       const candidates=[...gallery.querySelectorAll("img")].map(img=>({img,r:img.getBoundingClientRect()}))
         .filter(({r,img})=>r.width>180&&r.height>180&&getComputedStyle(img).display!=="none"&&getComputedStyle(img).visibility!=="hidden");
