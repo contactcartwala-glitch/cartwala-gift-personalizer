@@ -189,7 +189,7 @@
   };
 
   const mount = () => {
-    if (!artworkUrl || mounted) return;
+    if (mounted) return;
     const original=originalGallery();
     if (!original) return;
     ensureStyles();
@@ -233,6 +233,11 @@
     host.dataset.cwFrameV5Bound="true";
     document.body.classList.add("cw-photo-frame-master-page");
     ensureStyles();
+
+    // Always use the deterministic square gallery from first page load.
+    // This avoids theme-specific portrait media wrappers before personalization.
+    mount();
+    if (mounted) render(`size:${selectedSize()}`);
 
     host.addEventListener("cartwala:preview-ready",(event)=>{
       if (!event.detail?.url) return;
