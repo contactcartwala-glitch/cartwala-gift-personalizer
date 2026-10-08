@@ -153,6 +153,7 @@ export default function App() {
         <s-link href="/app">Personalizer</s-link>
         <s-link href="/app/master-products">Master Products</s-link>
         <s-link href="/app/print-files">Print Files</s-link>
+        <s-link href="/app/advance-cod">Advance COD</s-link>
       </s-app-nav>
       {navigation.state === "loading" ? <s-page heading="Loading"><s-spinner accessibilityLabel="Loading page" /></s-page> : <Outlet />}
     </AppProvider>
