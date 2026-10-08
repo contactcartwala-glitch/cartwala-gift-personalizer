@@ -28,6 +28,60 @@
   let raf = 0;
   let timer = 0;
 
+  const ensureSquareGalleryStyles = () => {
+    if (document.getElementById("cw-photo-frame-square-gallery-style")) return;
+    const style = document.createElement("style");
+    style.id = "cw-photo-frame-square-gallery-style";
+    style.textContent = `
+      body.cw-photo-frame-master-page
+      :is(.product-gallery, media-gallery, [id^="MediaGallery-"], .product__media-wrapper)
+      :is(.product__media-item, [id*="Slide-"], .slider__slide, [data-media-id]) {
+        aspect-ratio: 1 / 1;
+        min-height: 0 !important;
+      }
+
+      body.cw-photo-frame-master-page
+      :is(.product-gallery, media-gallery, [id^="MediaGallery-"], .product__media-wrapper)
+      :is(.product__media-item, [id*="Slide-"], .slider__slide, [data-media-id])
+      > :is(div,figure,a) {
+        width: 100%;
+        height: 100%;
+      }
+
+      body.cw-photo-frame-master-page
+      :is(.product-gallery, media-gallery, [id^="MediaGallery-"], .product__media-wrapper)
+      img[data-cw-frame-kind] {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: none !important;
+        object-fit: contain !important;
+        object-position: center center !important;
+      }
+
+      body.cw-photo-frame-master-page
+      :is(.thumbnail-list,[class*="thumb" i],[data-product-thumbnails],[data-thumbnails])
+      :is(button,a,li) {
+        aspect-ratio: 1 / 1;
+      }
+
+      body.cw-photo-frame-master-page
+      :is(.thumbnail-list,[class*="thumb" i],[data-product-thumbnails],[data-thumbnails])
+      img[data-cw-frame-kind] {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+      }
+
+      @media (max-width: 749px) {
+        body.cw-photo-frame-master-page
+        :is(.product-gallery, media-gallery, [id^="MediaGallery-"], .product__media-wrapper) {
+          margin-bottom: 10px !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  };
+
   const root = () =>
     document.querySelector('[data-cw-personalizer][data-cw-photo-frame-master="true"]');
 
@@ -230,6 +284,8 @@
     const host=root();
     if (!host || host.dataset.cwFrameV4Bound==="true") return;
     host.dataset.cwFrameV4Bound="true";
+    document.body.classList.add("cw-photo-frame-master-page");
+    ensureSquareGalleryStyles();
 
     host.addEventListener("cartwala:preview-ready",(event)=>{
       if (!event.detail?.url) return;
