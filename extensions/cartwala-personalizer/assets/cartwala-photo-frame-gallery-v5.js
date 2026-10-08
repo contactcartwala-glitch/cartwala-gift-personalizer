@@ -1,4 +1,5 @@
 // Cartwala master photo-frame gallery v5 — deterministic custom personalized gallery.
+// storefront-square-v5.1
 (() => {
   if (window.cartwalaPhotoFrameGalleryV5Loaded) return;
   window.cartwalaPhotoFrameGalleryV5Loaded = true;
