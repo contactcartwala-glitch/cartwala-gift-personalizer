@@ -74,6 +74,43 @@
     const style=document.createElement("style");
     style.id="cw-frame-v5-style";
     style.textContent=`
+      body.cw-photo-frame-master-page
+      :is(.product-gallery, media-gallery, [id^="MediaGallery-"], .product__media-wrapper, .product-media, [data-product-gallery])
+      :is(.product__media-item, [id*="Slide-"], .slider__slide, [data-media-id]) {
+        aspect-ratio: 1 / 1 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: hidden !important;
+      }
+
+      body.cw-photo-frame-master-page
+      :is(.product-gallery, media-gallery, [id^="MediaGallery-"], .product__media-wrapper, .product-media, [data-product-gallery])
+      :is(.product__media-item, [id*="Slide-"], .slider__slide, [data-media-id])
+      > :is(div,figure,a,picture) {
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 0 !important;
+      }
+
+      body.cw-photo-frame-master-page
+      :is(.product-gallery, media-gallery, [id^="MediaGallery-"], .product__media-wrapper, .product-media, [data-product-gallery])
+      :is(.product__media-item, [id*="Slide-"], .slider__slide, [data-media-id])
+      img {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: none !important;
+        object-fit: contain !important;
+        object-position: center center !important;
+      }
+
+      body.cw-photo-frame-master-page
+      :is(.thumbnail-list,[class*="thumb" i],[data-product-thumbnails],[data-thumbnails])
+      :is(button,a,li) {
+        aspect-ratio: 1 / 1 !important;
+        height: auto !important;
+      }
+
       .cw-frame-v5{width:100%;margin:0 0 14px;box-sizing:border-box}
       .cw-frame-v5__stage{position:relative;width:100%;aspect-ratio:1/1;background:#fff;border-radius:10px;overflow:hidden}
       .cw-frame-v5__base{width:100%;height:100%;display:block;object-fit:contain;object-position:center}
@@ -193,6 +230,8 @@
     const host=root();
     if (!host || host.dataset.cwFrameV5Bound==="true") return;
     host.dataset.cwFrameV5Bound="true";
+    document.body.classList.add("cw-photo-frame-master-page");
+    ensureStyles();
 
     host.addEventListener("cartwala:preview-ready",(event)=>{
       if (!event.detail?.url) return;
