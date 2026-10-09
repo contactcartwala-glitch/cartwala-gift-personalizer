@@ -113,7 +113,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
             "_Cartwala Design ID",
             "_Personalised Preview",
             "_Cartwala Design JSON",
-          ].includes(a.key),
+          ].includes(a.key) || /^_Album print \d+-/.test(a.key),
         )
       )
         continue;
@@ -152,8 +152,34 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }]));
   return { items, signatureOrders: uniqueSignatureOrders, designs, loadError };
 };
+// Shopify file properties can be serialized [thumbnail, original] pairs.
+// Preserve other JSON properties (especially the saved layer layout).
+const originalAssetUrl = (value: string) => {
+  const valid = (url: unknown): url is string =>
+    typeof url === "string" && /^https?:\/\//i.test(url);
+  if (valid(value)) return value;
+  try {
+    const urls: unknown = JSON.parse(value || "null");
+    if (Array.isArray(urls)) return [...urls].reverse().find(valid) || "";
+  } catch { /* Not a serialized file property. */ }
+  return "";
+};
 const attrMap = (a: Attribute[]) =>
-  Object.fromEntries(a.map((x) => [x.key, x.value]));
+  Object.fromEntries(a.map((x) => [x.key, originalAssetUrl(x.value) || x.value]));
+type AlbumPage = { name: string; url: string; index: number };
+const albumPrintPages = (attributes: Record<string, string>): AlbumPage[] =>
+  Object.entries(attributes).flatMap(([key, value]) => {
+    const match = /^_Album print (\d+-(?:front-cover|page|back-cover)\.(?:jpe?g|png))$/i.exec(key);
+    if (!match) return [];
+    return [{ name: match[1], index: Number(match[1].split("-")[0]), url: originalAssetUrl(value) }];
+  }).sort((a, b) => a.index - b.index);
+const albumPrintProblem = (pages: AlbumPage[], attributes: Record<string, string>) => {
+  const expected = Number(attributes["Album print pages"] || 0);
+  if (!pages.length || (expected > 0 && pages.length !== expected) ||
+    pages.some((page, index) => !page.url || page.index !== index))
+    return "Some album print pages are missing. Download is unavailable until all pages are saved.";
+  return "";
+};
 const numeric = (v: unknown, f: number) => {
   if (v === null || v === undefined || v === "") return f;
   const n = Number(v);
@@ -571,7 +597,7 @@ const downloadBlob = (blob: Blob, filename: string) => {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(u), 2000);
+  setTimeout(() => URL.revokeObjectURL(u), 60_000);
 };
 async function downloadPng(item: PrintItem) {
   const saved = getDesign(item);
@@ -683,6 +709,7 @@ async function downloadPsd(item: PrintItem) {
 export default function PrintFilesPage() {
   const { items, signatureOrders, designs, loadError } = useLoaderData<typeof loader>();
   const [working, setWorking] = useState("");
+  const [albumProgress, setAlbumProgress] = useState("");
   const grouped = useMemo(() => {
     const m = new Map<string, PrintItem[]>();
     for (const i of items)
@@ -700,7 +727,19 @@ export default function PrintFilesPage() {
       );
     } finally {
       setWorking("");
+      setAlbumProgress("");
     }
+  };
+  const downloadAlbum = async (item: PrintItem, format: "zip" | "pdf") => {
+    const attributes = attrMap(item.attributes), pages = albumPrintPages(attributes);
+    const problem = albumPrintProblem(pages, attributes);
+    if (problem) throw new Error(problem);
+    const { buildAlbumPrintExport } = await import("../lib/album-print-export.client");
+    const bytes = await buildAlbumPrintExport(pages, format, `${item.orderName} ${item.productTitle}`,
+      (done, total) => setAlbumProgress(`Preparing ${done}/${total} pages…`));
+    downloadBlob(new Blob([new Uint8Array(bytes)], {
+      type: format === "zip" ? "application/zip" : "application/pdf",
+    }), `${safeFile(`${item.orderName}-${item.productTitle}`)}-print-pages.${format}`);
   };
   const downloadSignaturePdf = async (orderName: string, design: typeof designs[string]) => {
     const pdf = await buildSignatureDayPrintPdf(design);
@@ -762,6 +801,9 @@ export default function PrintFilesPage() {
           >
             {orderItems.map((item) => {
               const { design, exact, attributes } = getDesign(item);
+              const albumPages = albumPrintPages(attributes);
+              const isAlbum = albumPages.length > 0 || Boolean(attributes["Album print pages"]);
+              const albumProblem = isAlbum ? albumPrintProblem(albumPages, attributes) : "";
               const missing = missingPhotos(design, attributes);
               const hasSource = design.p.length > 0 && missing.length === 0;
               const complete = hasPrintContent(design) && missing.length === 0;
@@ -787,11 +829,38 @@ export default function PrintFilesPage() {
                     style={{ color: "#666", fontSize: 13, marginBottom: 12 }}
                   >
                     Qty {item.quantity} ·{" "}
-                    {exact && complete
+                    {isAlbum
+                      ? albumProblem || `${albumPages.length} album print pages ready · Covers included`
+                      : exact && complete
                       ? "Layer data ready"
                       : hasSource ? "Recovery PSD only — check layout before printing" : "Original photos missing — print export unavailable"}
-                    {missing.length > 0 ? ` (${missing.length}/${design.p.length})` : ""}
+                    {!isAlbum && missing.length > 0 ? ` (${missing.length}/${design.p.length})` : ""}
                   </div>
+                  {isAlbum ? <>
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      {(["zip", "pdf"] as const).map((format) => <button
+                        key={format} type="button"
+                        disabled={Boolean(working) || Boolean(albumProblem)}
+                        onClick={() => run(`${item.lineItemId}:${format}`, () => downloadAlbum(item, format))}
+                        style={{ background: format === "zip" ? "#ff6200" : "#111", color: "white",
+                          border: 0, borderRadius: 8, padding: "11px 18px", fontWeight: 700,
+                          cursor: "pointer", opacity: albumProblem ? 0.45 : 1 }}
+                      >{working === `${item.lineItemId}:${format}`
+                          ? albumProgress || "Preparing album…"
+                          : format === "zip" ? "Download All Print Pages (ZIP)" : "Download Print PDF"}</button>)}
+                    </div>
+                    <p style={{ fontSize: 13, color: "#666" }}>
+                      Full-resolution saved artwork, in page order. PDF uses 300 DPI. These pages are flattened images; editable PSD layers were not saved.
+                    </p>
+                    <details>
+                      <summary style={{ cursor: "pointer" }}>View {albumPages.length} saved pages</summary>
+                      <ol style={{ maxHeight: 260, overflow: "auto", lineHeight: 1.8 }}>
+                        {albumPages.map((page) => <li key={page.name}>
+                          {page.url ? <a href={page.url} target="_blank" rel="noreferrer">{page.name}</a> : `${page.name} — missing`}
+                        </li>)}
+                      </ol>
+                    </details>
+                  </> : <>
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                     <button
                       type="button"
@@ -827,6 +896,7 @@ export default function PrintFilesPage() {
                       {working === sk ? "Generating PSD…" : "Download PSD"}
                     </button>
                   </div>
+                  </>}
                 </div>
               );
             })}

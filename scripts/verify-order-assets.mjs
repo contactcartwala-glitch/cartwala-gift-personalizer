@@ -39,7 +39,7 @@ await assert.rejects(context.prepare(new FormData(), new Map([["Photo", failedFi
 assert.equal(cache.has(failedFile), false);
 
 const route = fs.readFileSync("app/routes/app.print-files.tsx", "utf8");
-const helpers = route.slice(route.indexOf("const attrMap ="), route.indexOf("const documentSize ="));
+const helpers = route.slice(route.indexOf("const originalAssetUrl ="), route.indexOf("const documentSize ="));
 const build = route.slice(route.indexOf("async function buildPrint("), route.indexOf("const canvasBlob ="));
 const printContext = vm.createContext({});
 vm.runInContext(ts.transpileModule(`${helpers}\n${build}\nthis.build = buildPrint;`,

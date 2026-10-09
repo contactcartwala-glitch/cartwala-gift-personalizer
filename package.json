@@ -22,13 +22,14 @@
     "qa": "node scripts/verify-personalizer.mjs && node scripts/verify-mug-preview.mjs && node --check extensions/cartwala-personalizer/assets/cartwala-personalizer.js && node --check extensions/cartwala-personalizer/assets/cartwala-cart-preview.js && node --check extensions/cartwala-personalizer/assets/cartwala-selection-box.js && node scripts/verify-product-groups.mjs && node --check extensions/cartwala-personalizer/assets/cartwala-product-groups.js && node scripts/verify-png-mockups.mjs && node scripts/verify-shared-setup.mjs && node scripts/verify-acrylic-mockups.mjs && node scripts/verify-acrylic-designs.mjs && node scripts/verify-master-navigation.mjs && node --check extensions/cartwala-personalizer/assets/cartwala-photo-frame-gallery.js",
     "verify": "npm run lint && npm run typecheck && npm run qa && npm run build && npm run qa:master-render",
     "qa:master-render": "node scripts/verify-master-render.mjs",
-    "qa:order-assets": "node scripts/verify-order-assets.mjs && node scripts/verify-print-recovery.mjs"
+    "qa:order-assets": "node scripts/verify-order-assets.mjs && node scripts/verify-print-recovery.mjs && node scripts/verify-album-print.mjs"
   },
   "type": "module",
   "engines": {
     "node": ">=20.19 <22 || >=22.12"
   },
   "dependencies": {
+    "@pdf-lib/upng": "1.0.1",
     "@prisma/client": "^6.16.3",
     "@react-router/dev": "7.18.2",
     "@react-router/fs-routes": "7.18.2",
@@ -38,14 +39,14 @@
     "@shopify/shopify-app-react-router": "^1.2.1",
     "@shopify/shopify-app-session-storage-prisma": "^9.0.0",
     "ag-psd": "^29.1.0",
+    "fflate": "0.8.2",
     "isbot": "^5.1.31",
     "pdf-lib": "^1.17.1",
     "prisma": "^6.16.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router": "7.18.2",
-    "vite-tsconfig-paths": "^5.1.4",
-    "@pdf-lib/upng": "1.0.1"
+    "vite-tsconfig-paths": "^5.1.4"
   },
   "devDependencies": {
     "@preact/signals": "^2.11.2",
