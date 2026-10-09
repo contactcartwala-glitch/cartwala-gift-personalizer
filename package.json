@@ -19,8 +19,9 @@
     "graphql-codegen": "graphql-codegen",
     "vite": "vite",
     "typecheck": "react-router typegen && tsc --noEmit",
-    "qa": "node scripts/verify-personalizer.mjs && node scripts/verify-mug-preview.mjs && node --check extensions/cartwala-personalizer/assets/cartwala-personalizer.js && node --check extensions/cartwala-personalizer/assets/cartwala-cart-preview.js && node --check extensions/cartwala-personalizer/assets/cartwala-selection-box.js",
-    "verify": "npm run lint && npm run typecheck && npm run qa && npm run build"
+    "qa": "node scripts/verify-personalizer.mjs && node scripts/verify-mug-preview.mjs && node --check extensions/cartwala-personalizer/assets/cartwala-personalizer.js && node --check extensions/cartwala-personalizer/assets/cartwala-cart-preview.js && node --check extensions/cartwala-personalizer/assets/cartwala-selection-box.js && npm run qa:album-archive",
+    "verify": "npm run lint && npm run typecheck && npm run qa && npm run build",
+    "qa:album-archive": "node scripts/verify-album-archive.mjs"
   },
   "type": "module",
   "engines": {
