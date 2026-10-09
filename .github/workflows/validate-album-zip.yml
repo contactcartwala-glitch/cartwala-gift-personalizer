@@ -1,0 +1,36 @@
+name: Validate album ZIP hotfix
+
+on:
+  pull_request:
+    branches:
+      - release/render-live-baseline-20261009
+    paths:
+      - "app/lib/album-archive.server.ts"
+      - "app/lib/shopify-files.server.ts"
+      - "app/routes/signature-day.ts"
+      - "scripts/verify-album-archive.mjs"
+      - "package.json"
+      - ".github/workflows/validate-album-zip.yml"
+  push:
+    branches:
+      - hotfix/album-zip-from-render-live-20261009
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Validate album ZIP format
+        run: npm run qa:album-archive
+      - name: Check TypeScript types
+        run: npm run typecheck
