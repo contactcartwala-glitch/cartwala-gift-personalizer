@@ -1,10 +1,24 @@
-import type { ActionFunctionArgs } from "react-router";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { PDFDocument } from "pdf-lib";
 import prisma from "../db.server";
 import { uploadAlbumArchiveAsset, uploadImageAsset, uploadImageAssets, uploadPdfAsset } from "../lib/shopify-files.server";
 import { validateAlbumPrintArchive } from "../lib/album-archive.server";
 import { isShopifyFileUrl, validateDesign } from "../lib/signature-day.server";
 import { authenticate } from "../shopify.server";
+
+// Until the album ZIP backend has a private storage and order-access review,
+// enable uploads ONLY in the separate Shopify development store.
+const ALBUM_TEST_SHOP = "cartwala-app-test-store.myshopify.com";
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const { admin, session } = await authenticate.public.appProxy(request);
+  if (!admin || !session) return Response.json({ error: "App is unavailable" }, { status: 503 });
+  const intent = new URL(request.url).searchParams.get("intent");
+  if (intent !== "album_archive_status") return Response.json({ error: "Not found" }, { status: 404 });
+  return Response.json({
+    shop: session.shop,
+    albumArchiveUpload: { enabled: session.shop === ALBUM_TEST_SHOP, maxBytes: 9 * 1024 * 1024 },
+  }, { headers: { "Cache-Control": "no-store" } });
+};
 
 // Storefront requests arrive through Shopify's signed app proxy. The page only
 // receives an opaque design ID; a later paid order must contain that ID.
@@ -16,6 +30,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     if (contentType.includes("multipart/form-data")) {
       const form = await request.formData();
       if (form.get("intent") === "album_archive_upload") {
+        if (session.shop !== ALBUM_TEST_SHOP) {
+          return Response.json({ error: "Album ZIP upload is only enabled for the development store" },
+            { status: 403, headers: { "Cache-Control": "no-store" } });
+        }
         const archive = form.get("file");
         if (!(archive instanceof File) || !(await validateAlbumPrintArchive(archive))) {
           return Response.json({ error: "Invalid album ZIP. Please prepare the album again." },
