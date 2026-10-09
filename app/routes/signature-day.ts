@@ -1,7 +1,8 @@
 import type { ActionFunctionArgs } from "react-router";
 import { PDFDocument } from "pdf-lib";
 import prisma from "../db.server";
-import { uploadImageAsset, uploadImageAssets, uploadPdfAsset } from "../lib/shopify-files.server";
+import { uploadAlbumArchiveAsset, uploadImageAsset, uploadImageAssets, uploadPdfAsset } from "../lib/shopify-files.server";
+import { validateAlbumPrintArchive } from "../lib/album-archive.server";
 import { isShopifyFileUrl, validateDesign } from "../lib/signature-day.server";
 import { authenticate } from "../shopify.server";
 
@@ -14,6 +15,19 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const contentType = request.headers.get("content-type") || "";
     if (contentType.includes("multipart/form-data")) {
       const form = await request.formData();
+      if (form.get("intent") === "album_archive_upload") {
+        const archive = form.get("file");
+        if (!(archive instanceof File) || !(await validateAlbumPrintArchive(archive))) {
+          return Response.json({ error: "Invalid album ZIP. Please prepare the album again." },
+            { status: 400, headers: { "Cache-Control": "no-store" } });
+        }
+        // Random names prevent filename collisions across different customer albums.
+        // Content is restricted to the JPG + manifest ZIP format produced by the editor.
+        const safeFile = new File([archive], `cartwala-album-${crypto.randomUUID()}.zip`,
+          { type: "application/zip" });
+        const asset = await uploadAlbumArchiveAsset(admin, safeFile);
+        return Response.json({ url: asset.url }, { headers: { "Cache-Control": "no-store" } });
+      }
       if (form.get("intent") === "assemble_front_batch") {
         const baseUrl = form.get("baseUrl");
         const tiles = form.getAll("tile");
