@@ -247,6 +247,17 @@ export async function uploadImageAsset(
   return uploadToShopifyFiles(admin, file, "IMAGE", 20);
 }
 
+export async function uploadAlbumArchiveAsset(
+  admin: AdminApiContext,
+  file: File,
+): Promise<ShopifyFileAsset> {
+  if (file.type !== "application/zip" || !/\.zip$/i.test(file.name) ||
+      file.size < 100 || file.size > 9 * 1024 * 1024) {
+    throw new ShopifyFileUploadError("Album print ZIP must be smaller than 9 MB");
+  }
+  return uploadToShopifyFiles(admin, file, "FILE", 30);
+}
+
 export async function uploadPdfAsset(
   admin: AdminApiContext,
   file: File,
