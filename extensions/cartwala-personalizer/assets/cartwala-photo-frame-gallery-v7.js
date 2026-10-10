@@ -197,8 +197,6 @@
     };
     const sync = () => {
       const next = selected(); if (!next) return;
-      const nextOrientation = /landscape/i.test(fixedOrientation || next.options[orientationIndex] || '') ? 'landscape' : 'portrait';
-      if (nextOrientation !== orientation()) artwork = '';
       variant = next; panel.dataset.selectedVariant = String(variant.id); setPrintDimensions();
       host.dispatchEvent(new CustomEvent('cw:photo-frame-selection', { detail: { variantId: String(variant.id), ratio: orientation() === 'landscape' ? '3:2' : '2:3' } }));
       render();

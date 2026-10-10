@@ -1090,6 +1090,8 @@
         const saveLabel = save.textContent;
         const result = root.querySelector("[data-cw-result]");
         const resultImage = root.querySelector("[data-cw-result-image]");
+        const customizeButton = root.querySelector("[data-cw-open]");
+        const customizeLabel = customizeButton.textContent;
         const productClockPreview = root.querySelector("[data-cw-clock-product-preview]");
         let saved = false;
         let busy = false;
@@ -1215,7 +1217,12 @@
                 !button.closest(".shopify-payment-button") &&
                 !button.closest("[data-cw-personalizer]"),
             );
-        const setPurchaseReady = (ready) =>
+        const setPurchaseReady = (ready) => {
+          if (framePanel) {
+            root.dataset.cwPurchaseReady = String(ready);
+            const label = ready ? root.dataset.labelEdit || "Edit Again" : customizeLabel;
+            if (customizeButton.textContent !== label) customizeButton.textContent = label;
+          }
           purchaseButtons().forEach((button) => {
             if (button.dataset.cwDisplay === undefined)
               button.dataset.cwDisplay = button.style.display || "";
@@ -1224,6 +1231,7 @@
             button.disabled = !ready;
             button.setAttribute("aria-hidden", ready ? "false" : "true");
           });
+        };
         const lockButtons = () => {
           if (!saved) setPurchaseReady(false);
         };
@@ -1348,6 +1356,13 @@
             }
           });
         }
+        let framePreviewRequested = false;
+        let framePreviewActive = false;
+        const refreshFramePreview = () => {
+          if (!framePreviewRequested || busy || dialog.open) return;
+          framePreviewRequested = false;
+          void attach(true);
+        };
         if (framePanel) {
           root.addEventListener("cw:photo-frame-selection", (event) => {
             const { ratio, variantId } = event.detail || {};
@@ -1360,7 +1375,10 @@
             const variantInput = productForm?.querySelector('[name="id"]');
             if (variantInput) variantInput.value = frameVariantId;
             if (saved && !cartSubmitting) setPurchaseReady(true);
-            if (!ratioChanged) return;
+            if (!ratioChanged) {
+              if (framePreviewActive) framePreviewRequested = true;
+              return;
+            }
             config.ratio = ratio;
             root.style.setProperty("--cw-ratio", ratio.replace(":", "/"));
             const [width, height] = ratio.split(":").map(Number);
@@ -1375,6 +1393,8 @@
             requestAnimationFrame(() => {
               photoStates.forEach(apply);
               positionSlots();
+              framePreviewRequested = photoStates.some((state) => state.file) && isReady();
+              refreshFramePreview();
             });
           });
         }
@@ -1433,9 +1453,10 @@
               }, 50);
               setTimeout(() => showCartPreview(previewUrl, designId), 300);
               cartSubmitting = false;
+              setPurchaseReady(saved && !busy);
             } catch (error) {
               cartSubmitting = false;
-              setPurchaseReady(true);
+              setPurchaseReady(saved && !busy);
               window.alert(
                 error instanceof Error
                   ? error.message
@@ -2447,6 +2468,10 @@
         );
 
         root.querySelector("[data-cw-open]").addEventListener("click", () => {
+          if (framePanel) {
+            framePreviewRequested = false;
+            if (framePreviewActive) invalidate();
+          }
           if (isPhotoCubeClock) {
             if (productClockPreview) productClockPreview.hidden = true;
             hideClockPreview();
@@ -2605,8 +2630,10 @@
           x: Number.isFinite(state.relativeX) ? state.relativeX : (Number(state.x) || 0) / (stage.clientWidth || lastStageWidth || 1),
           y: Number.isFinite(state.relativeY) ? state.relativeY : (Number(state.y) || 0) / (stage.clientHeight || lastStageHeight || 1),
         });
-        const attach = async () => {
+        const attach = async (automatic = false) => {
           if (!productForm || !isReady() || busy) return;
+          automatic = automatic === true;
+          framePreviewActive = Boolean(framePanel && automatic);
           if (stage.clientWidth) lastStageWidth = stage.clientWidth;
           if (stage.clientHeight) lastStageHeight = stage.clientHeight;
           busy = true;
@@ -2792,13 +2819,19 @@
                   state.input.value.trim(),
                 );
             });
-            if (startRevision !== revision)
+            if (startRevision !== revision) {
+              if (automatic) return;
               throw new Error(
                 "Design changed while rendering. Please preview again.",
               );
+            }
             const blob = await new Promise((resolve) =>
               canvas.toBlob(resolve, "image/png"),
             );
+            if (startRevision !== revision) {
+              if (automatic) return;
+              throw new Error("Design changed while rendering. Please preview again.");
+            }
             if (!blob) throw new Error("Preview could not be generated");
             if (previewUrl) URL.revokeObjectURL(previewUrl);
             previewUrl = URL.createObjectURL(blob);
@@ -2881,8 +2914,10 @@
             );
           } finally {
             busy = false;
+            framePreviewActive = false;
             save.textContent = saveLabel;
             updateReady();
+            if (framePreviewRequested) requestAnimationFrame(refreshFramePreview);
           }
         };
 
