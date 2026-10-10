@@ -80,6 +80,10 @@
     "landscape": "Landscape",
     "sample": "Sample photo · Customise with your own photo",
     "product_photo": "Product photo",
-    "room_preview": "Room preview"
+    "room_preview": "Room preview",
+    "size_guide": "Compare frame sizes",
+    "side_view": "Frame side view",
+    "previous": "Previous image",
+    "next": "Next image"
   }
 }

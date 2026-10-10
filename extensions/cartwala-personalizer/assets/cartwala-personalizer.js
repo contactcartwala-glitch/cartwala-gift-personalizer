@@ -1112,7 +1112,7 @@
           const frameOptions = JSON.parse(framePanel.dataset.options || "[]");
           const frameVariant = frameVariants.find((item) => String(item.id) === frameVariantId);
           const orientationIndex = frameOptions.findIndex((name) => name.toLowerCase() === "orientation");
-          config.ratio = /landscape/i.test(frameVariant?.options?.[orientationIndex] || "") ? "3:2" : "2:3";
+          config.ratio = /landscape/i.test(framePanel.dataset.fixedOrientation || frameVariant?.options?.[orientationIndex] || "") ? "3:2" : "2:3";
         }
 
         try {

@@ -1,3 +1,5 @@
+import { syncPhotoFrameDesign, syncLinkedPhotoFrameDesigns } from "../lib/photo-frame-design.server";
+import { PHOTO_FRAME_MASTER_ID } from "../lib/personalizer-config";
 import { syncAcrylicDesign } from "../lib/acrylic-design.server";
 import type { ActionFunctionArgs } from "react-router";
 import { authenticate } from "../shopify.server";
@@ -10,6 +12,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     ((payload as { id?: number }).id ? `gid://shopify/Product/${(payload as { id: number }).id}` : null);
   if (!id) return new Response();
   try {
+    if (id === PHOTO_FRAME_MASTER_ID) { await syncLinkedPhotoFrameDesigns(admin); return new Response(); }
+    if (await syncPhotoFrameDesign(admin, id)) return new Response();
     if (await syncAcrylicDesign(admin, id)) return new Response();
     const product = await loadGroupProduct(admin, id);
     const settings = await loadGroupSettings(admin, product ? [product] : []);

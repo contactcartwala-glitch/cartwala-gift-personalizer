@@ -1,3 +1,4 @@
+import { validatePhotoFrameDesign } from "../lib/photo-frame-design.server";
 import { MasterProductNavigation } from "../components/MasterProducts";
 import { ACRYLIC_MASTER_ID } from "../lib/acrylic-design";
 import { validateAcrylicDesign } from "../lib/acrylic-design.server";
@@ -11,6 +12,7 @@ import { replaceSetupTag } from "../lib/product-groups";
 import { loadGroupSettings, syncProductSetup } from "../lib/product-groups.server";
 import type { loader as appLoader } from "./app";
 import {
+  PHOTO_FRAME_MASTER_ID,
   MAX_FIELDS,
   blankFile,
   blankLink,
@@ -313,6 +315,7 @@ async function handlePsdImport(
     const maskFiles = data.getAll("maskFiles");
     const imported = normalizeConfig(JSON.parse(String(data.get("config") || "{}")));
     await validateAcrylicDesign(admin, productId, imported);
+    await validatePhotoFrameDesign(admin, productId, imported);
     if (!(overlayFile instanceof File) || !overlayFile.size)
       throw new Error("The PSD overlay could not be generated.");
     if (
@@ -609,7 +612,7 @@ async function handleSave(
   if (!productId) return { ok: false, error: "Choose a product first." };
   if (!productId.startsWith("gid://shopify/Product/"))
     return { ok: false, error: "The selected product is invalid." };
-  try { await validateAcrylicDesign(admin, productId, config); }
+  try { await validateAcrylicDesign(admin, productId, config); await validatePhotoFrameDesign(admin, productId, config); }
   catch(e){return {ok:false,error:e instanceof Error?e.message:"Invalid acrylic design."};}
   const setupSettings=data.has("setupTag")?await loadGroupSettings(admin):null;
   try { if(setupSettings)replaceSetupTag([],setupSettings.state.groups,String(data.get("setupTag")||"")); }
@@ -831,7 +834,7 @@ async function handleSave(
 
 type FieldKind = "photoFields" | "textFields" | "fileFields" | "linkFields";
 
-export function PersonalizerHome({ masterMode = false }: { masterMode?: boolean }) {
+export function PersonalizerHome({ masterMode = false, masterKind = "acrylic" }: { masterMode?: boolean; masterKind?: "acrylic" | "frame" }) {
   const { products } = useRouteLoaderData<typeof appLoader>("routes/app")!;
   const saveFetcher = useFetcher<typeof action>();
   const fontFetcher = useFetcher<typeof action>();
@@ -841,7 +844,10 @@ export function PersonalizerHome({ masterMode = false }: { masterMode?: boolean 
   const restoreFetcher = useFetcher<typeof action>();
   const shopify = useAppBridge();
   const [searchParams] = useSearchParams();
-  const designProducts = products.filter(p => p.id !== ACRYLIC_MASTER_ID && (p.tags.includes("cw-acrylic-frame") || normalizeConfig(p.personalizer?.jsonValue).acrylicDesign));
+  const frameMode = masterKind === "frame";
+  const designProducts = products.filter(p => frameMode
+    ? p.id !== PHOTO_FRAME_MASTER_ID && Boolean(normalizeConfig(p.personalizer?.jsonValue).photoFrameDesign)
+    : p.id !== ACRYLIC_MASTER_ID && (p.tags.includes("cw-acrylic-frame") || normalizeConfig(p.personalizer?.jsonValue).acrylicDesign));
   const requestedProduct = (masterMode ? designProducts : products).find(p => p.id === searchParams.get("product")) ?? (masterMode ? designProducts[0] : products[0]) ?? null;
   const [selected, setSelected] = useState<Product | null>(requestedProduct);
   const [mugSetup, setMugSetup] = useState<MugSetup>(() =>
@@ -1030,14 +1036,19 @@ export function PersonalizerHome({ masterMode = false }: { masterMode?: boolean 
     const product =
       products.find((item) => item.id === selection?.[0]?.id) ?? null;
     if (product) {
-      if (masterMode && (product.id === ACRYLIC_MASTER_ID || product.tags.includes("cw-mug"))) {
-        shopify.toast.show("Choose an acrylic design product. Master photos are managed in Sizes, prices & master photos.", { isError: true });
+      if (masterMode && (product.id === ACRYLIC_MASTER_ID || product.id === PHOTO_FRAME_MASTER_ID || product.tags.includes("cw-mug"))) {
+        shopify.toast.show("Choose a separate design product to link. Keep the master product plain.", { isError: true });
         return;
       }
       const next = normalizeConfig(
         product.personalizer?.jsonValue ?? emptyConfig,
       );
-      if (masterMode && !next.acrylicDesign) {
+      if (masterMode && frameMode && !next.photoFrameDesign) {
+        if (next.acrylicDesign) { shopify.toast.show("This design is already linked to Acrylic Master. Choose another product.", { isError: true }); return; }
+        next.photoFrameDesign = { masterProductId: PHOTO_FRAME_MASTER_ID, orientation: "Portrait" };
+        next.canvasRatio = "2:3";
+      }
+      if (masterMode && !frameMode && !next.acrylicDesign) {
         next.acrylicDesign = { masterProductId: ACRYLIC_MASTER_ID, orientation: "Portrait" };
         next.canvasRatio = "2:3";
       }
@@ -1582,9 +1593,9 @@ export function PersonalizerHome({ masterMode = false }: { masterMode?: boolean 
       >
         Save configuration
       </s-button>
-      {masterMode && <MasterProductNavigation designs canNavigate={() => confirmDiscardIfDirty("Discard unsaved design changes and switch master settings?")} />}
-      {masterMode && <s-section heading="Acrylic designs">
-        <s-paragraph>Choose a linked design below, or choose another product to link. Upload its PSD, select Portrait only or Landscape only, then save. Sizes and 3mm / 5mm prices come from the master.</s-paragraph>
+      {masterMode && <MasterProductNavigation designs frame={frameMode} canNavigate={() => confirmDiscardIfDirty("Discard unsaved design changes and switch master settings?")} />}
+      {masterMode && <s-section heading={frameMode ? "Black frame designs" : "Acrylic designs"}>
+        <s-paragraph>{frameMode ? "Link a design to Black Frame Master. Choose Portrait only or Landscape only and upload matching artwork. Sizes, prices, swipe previews and the description preview come from the master." : "Choose a linked design below, or choose another product to link. Upload its PSD, select Portrait only or Landscape only, then save. Sizes and 3mm / 5mm prices come from the master."}</s-paragraph>
         <label>Design product <select value={selected?.id || ""} onChange={event => {
           if (!confirmDiscardIfDirty("Discard unsaved changes and open another design?")) return;
           const product = designProducts.find(p => p.id === event.currentTarget.value);
@@ -1593,7 +1604,7 @@ export function PersonalizerHome({ masterMode = false }: { masterMode?: boolean 
           skipNextDirtyCheck.current = true;
           setSelected(product); setConfig(next); setMugSetup(mugSetupForProduct(product));
           setActiveSlot(next.photoFields[0]?.id ?? null); setDirty(false);
-        }}><option value="" disabled>Choose an acrylic design</option>{designProducts.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></label>
+        }}><option value="" disabled>{frameMode ? "Choose a black frame design" : "Choose an acrylic design"}</option>{designProducts.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></label>
         {selected && <s-button href={`https://cartwala.in/products/${selected.handle}`} target="_blank">Open customer preview</s-button>}
       </s-section>}
       <s-section heading={masterMode ? "Design artwork and photo slots" : "Product template"}>
@@ -1722,11 +1733,24 @@ export function PersonalizerHome({ masterMode = false }: { masterMode?: boolean 
         </s-stack>
       </s-section>
 
-      <s-section heading="Acrylic design setup">
+      <s-section heading="Frame design setup">
         {config.sourcePsdUrl && <a href={config.sourcePsdUrl} target="_blank" rel="noreferrer">Download original PSD</a>}
-        <label>Master product <select value={config.acrylicDesign ? "acrylic" : ""} onChange={event => setConfig(current => ({ ...current, acrylicDesign: event.target.value ? { masterProductId: ACRYLIC_MASTER_ID, orientation: "Portrait" } : undefined }))}>
-          <option value="">No acrylic master link</option><option value="acrylic">Acrylic Photo Frame Master</option>
+        <label>Master product <select value={config.photoFrameDesign ? "frame" : config.acrylicDesign ? "acrylic" : ""} onChange={event => {
+          const value = event.target.value;
+          setConfig(current => ({ ...current,
+            acrylicDesign: value === "acrylic" ? { masterProductId: ACRYLIC_MASTER_ID, orientation: "Portrait" } : undefined,
+            photoFrameDesign: value === "frame" ? { masterProductId: PHOTO_FRAME_MASTER_ID, orientation: "Portrait" } : undefined,
+          }));
+        }}>
+          <option value="">No master link</option><option value="acrylic">Acrylic Photo Frame Master</option><option value="frame">Black Beading Photo Frame Master</option>
         </select></label>
+        {config.photoFrameDesign && <>
+          <label>Customer orientation <select value={config.photoFrameDesign.orientation} onChange={event => setConfig(current => ({ ...current, photoFrameDesign: { masterProductId: PHOTO_FRAME_MASTER_ID, orientation: event.target.value as "Portrait" | "Landscape" } }))}>
+            <option value="Portrait">Portrait only</option><option value="Landscape">Landscape only</option>
+          </select></label>
+          <s-paragraph>Portrait artwork uses 2:3; Landscape artwork uses 3:2. Customers see only the chosen orientation. Matching sizes and prices come from Black Frame Master. The gallery and description show the customer's saved design.</s-paragraph>
+          <s-button href="https://cartwala.in/products/customized-photo-frame-black-beading" target="_blank">Open Black Frame Master</s-button>
+        </>}
         {config.acrylicDesign && <>
           <label>Customer orientation <select value={config.acrylicDesign.orientation} onChange={event => setConfig(current => ({ ...current, acrylicDesign: { masterProductId: ACRYLIC_MASTER_ID, orientation: event.target.value as "Portrait" | "Landscape" } }))}>
             <option value="Portrait">Portrait only</option><option value="Landscape">Landscape only</option>

@@ -1,3 +1,4 @@
+import { syncPhotoFrameDesign } from "./photo-frame-design.server";
 import { syncAcrylicDesign } from "./acrylic-design.server";
 import db from "../db.server";
 import preparedShopSetups from "../data/shop-setup-imports.json";
@@ -182,6 +183,7 @@ async function addMissingVariants(admin:Admin,g:ProductGroup,p:CatalogProduct) {
 /** Design saves immediately reuse the product's published tag setup. */
 export async function syncProductSetup(admin:Admin,productId:string) {
  if(await syncAcrylicDesign(admin,productId))return undefined;
+ if(await syncPhotoFrameDesign(admin,productId))return undefined;
  const product=await loadGroupProduct(admin,productId);if(!product)return "Product no longer exists.";
  const settings=await loadGroupSettings(admin,[product]);
  const result=await syncGroupProduct(admin,settings.state.published,product);
