@@ -223,23 +223,18 @@ body.cw-personalization-complete
   border-radius: 0;
   box-shadow: none;
 }
-/* Master black-beading photo frame: show the frame shape inside the
-   editor without baking it into the customer's printable artwork. */
+/* Keep the beading outside the artwork. Stage dimensions remain the print
+   dimensions used by photo/text positioning, so no artwork is obscured. */
 .cw-personalizer[data-cw-photo-frame-master="true"] .cw-personalizer__stage {
+  --cw-frame-beading: clamp(10px, 2.2vw, 24px);
+  --cw-frame-stage-height: 70dvh;
+  width: min(calc(100% - 2 * var(--cw-frame-beading)), 760px, calc((var(--cw-frame-stage-height) - 2 * var(--cw-frame-beading)) * var(--cw-stage-ratio, 1)));
+  max-height: calc(var(--cw-frame-stage-height) - 2 * var(--cw-frame-beading));
+  margin-block: var(--cw-frame-beading);
   background: #fff;
-  box-shadow: 0 8px 24px rgba(0,0,0,.16);
-}
-.cw-personalizer[data-cw-photo-frame-master="true"] .cw-personalizer__stage::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 7;
-  pointer-events: none;
-  box-sizing: border-box;
-  border: clamp(10px, 2.2vw, 24px) solid #111;
   box-shadow:
-    inset 0 0 0 2px rgba(255,255,255,.08),
-    inset 0 0 12px rgba(0,0,0,.35);
+    0 0 0 var(--cw-frame-beading) #111,
+    0 8px 24px var(--cw-frame-beading) rgba(0,0,0,.16);
 }
 .cw-personalizer[data-cw-photo-frame-master="true"] .cw-personalizer__photo-selection {
   z-index: 8;
@@ -843,6 +838,9 @@ body.cw-personalization-complete
     width: min(100%, 760px, calc((95vh - 210px) * var(--cw-stage-ratio, 1)));
     max-height: calc(95vh - 210px);
   }
+  .cw-personalizer[data-cw-photo-frame-master="true"] .cw-personalizer__stage {
+    --cw-frame-stage-height: calc(95vh - 210px);
+  }
 }
 @media (max-width: 900px) {
   .cw-personalizer__dialog {
@@ -902,6 +900,10 @@ body.cw-personalization-complete
   .cw-personalizer__stage {
     width: 100%;
     max-width: 560px;
+    max-height: none;
+  }
+  .cw-personalizer[data-cw-photo-frame-master="true"] .cw-personalizer__stage {
+    width: min(calc(100% - 2 * var(--cw-frame-beading)), 560px);
     max-height: none;
   }
   .cw-personalizer__photo-selection-handle {
