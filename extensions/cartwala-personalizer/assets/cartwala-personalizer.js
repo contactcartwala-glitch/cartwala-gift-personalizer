@@ -1360,6 +1360,7 @@
             const variantInput = productForm?.querySelector('[name="id"]');
             if (variantInput) variantInput.value = frameVariantId;
             if (saved && !cartSubmitting) setPurchaseReady(true);
+            if (!ratioChanged) return;
             config.ratio = ratio;
             root.style.setProperty("--cw-ratio", ratio.replace(":", "/"));
             const [width, height] = ratio.split(":").map(Number);
