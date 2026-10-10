@@ -183,6 +183,11 @@
         <div class="cw-mug-modal__panel">
           <header><h2 id="cw-mug-modal-title-{{ block.id }}">{{ 'mug_preview.modal_title' | t }}</h2><button type="button" data-cw-mug-close aria-label="{{ 'personalizer.close' | t | escape }}">×</button></header>
           <div class="cw-mug-modal__stage" data-cw-mug-stage tabindex="0" role="img" aria-label="{{ 'mug_preview.stage_label' | t | escape }}"><div class="cw-mug-preview__scene" data-cw-mug-scene data-cw-rotation-y="25" data-cw-rotation-x="-22"></div></div>
+          <div class="cw-mug-modal__controls" role="group" aria-label="{{ 'mug_preview.view_controls' | t | escape }}">
+            <button type="button" data-cw-mug-zoom="out" aria-label="{{ 'mug_preview.zoom_out' | t | escape }}">−</button>
+            <button type="button" data-cw-mug-reset>{{ 'mug_preview.reset_view' | t }}</button>
+            <button type="button" data-cw-mug-zoom="in" aria-label="{{ 'mug_preview.zoom_in' | t | escape }}">+</button>
+          </div>
           {% if mug_model == 'magic' %}
             <button class="cw-mug-preview__heat" type="button" data-cw-magic-toggle data-cold-label="{{ 'mug_preview.pour_hot_water' | t | escape }}" data-hot-label="{{ 'mug_preview.cool_magic_mug' | t | escape }}" aria-pressed="false">{{ 'mug_preview.pour_hot_water' | t }}</button>
           {% endif %}
@@ -193,7 +198,7 @@
     <dialog class="cw-personalizer__dialog" data-cw-dialog>
       <div class="cw-personalizer__panel">
         <div class="cw-personalizer__header"><div class="cw-personalizer__brand"><span class="cw-personalizer__brand-mark">C</span><strong>Cartwala Customizer</strong></div><button type="button" class="cw-personalizer__close" data-cw-close aria-label="{{ 'personalizer.close' | t }}">×</button></div>
-        <div class="cw-personalizer__toolbar"><div class="cw-personalizer__toolbar-left"><button type="button" class="cw-personalizer__toolbar-reset" data-cw-reset-all>↻ Reset</button><button type="button" class="cw-personalizer__toolbar-change" data-cw-change-photo>▣ Change Photo</button></div><button type="button" class="cw-personalizer__preview cw-personalizer__preview--top" data-cw-save disabled>Preview &amp; Save</button></div>
+        <div class="cw-personalizer__toolbar"><div class="cw-personalizer__toolbar-left"><button type="button" class="cw-personalizer__toolbar-reset" data-cw-reset-all>↻ Reset</button><button type="button" class="cw-personalizer__toolbar-change" data-cw-change-photo>▣ Change Photo</button></div>{% if mug_product %}<div class="cw-personalizer__toolbar-actions"><button type="button" class="cw-mug-editor-preview" data-cw-mug-editor-preview data-loading-label="{{ 'mug_preview.preparing' | t | escape }}" disabled>{{ 'mug_preview.editor_preview' | t }}</button>{% endif %}<button type="button" class="cw-personalizer__preview cw-personalizer__preview--top" data-cw-save disabled>Preview &amp; Save</button>{% if mug_product %}</div>{% endif %}</div>
         <div class="cw-personalizer__workspace"><div class="cw-personalizer__canvas-pane"><div class="cw-personalizer__stage" data-cw-stage><div class="cw-personalizer__photo-layers" data-cw-photo-layers></div><div class="cw-personalizer__text-layers" data-cw-text-layers></div><img class="cw-personalizer__overlay" data-cw-overlay alt="" aria-hidden="true" width="1200" height="1200"><div class="cw-personalizer__result" data-cw-result hidden><img data-cw-result-image class="cw-personalizer__result-image" alt="{{ 'personalizer.saved_preview' | t }}" width="800" height="800"></div></div><div class="cw-personalizer__tip"><strong>Tip:</strong> To Move - Swipe / Drag &nbsp; · &nbsp; To Zoom - Pinch in/out / Corners</div></div><aside class="cw-personalizer__controls-pane"><div class="cw-personalizer__fields" data-cw-editor-fields></div></aside></div>
       </div>
     </dialog>

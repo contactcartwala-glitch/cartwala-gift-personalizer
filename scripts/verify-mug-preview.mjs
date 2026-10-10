@@ -159,4 +159,40 @@ assert.equal(noGLScene.dataset.cwRenderState, "fallback");
 assert.equal(noGLScene.children[1].src, "fallback-design");
 assert.equal(noGLScene.children[1].hidden, false);
 fallbackRenderer.dispose();
+// Devices without WebGL must still render rotatable, textured geometry.
+let raster;
+const softwareContext = {
+  document: { createElement: () => ({
+    setAttribute() {},
+    getContext: () => ({
+      createImageData: (width, height) => ({ width, height, data: new Uint8ClampedArray(width * height * 4) }),
+      putImageData: (value) => { raster = value; },
+      drawImage() {},
+      getImageData: () => ({ width: 2, height: 2, data: new Uint8ClampedArray([240,60,30,255, 30,160,210,255, 50,210,70,255, 240,210,30,255]) }),
+    }),
+  }) },
+};
+const makeSoftware = vm.runInNewContext(`(() => { ${helpers}; return createMugSoftwareRenderer; })()`, softwareContext);
+const visiblePixels = () => raster.data.reduce((sum, value, index) => sum + (index % 4 === 3 && value > 0 ? 1 : 0), 0);
+const colourPixels = () => raster.data.reduce((sum, value, index) => sum + (index % 4 === 0 && raster.data[index + 3] && Math.abs(value - raster.data[index + 1]) > 30 ? 1 : 0), 0);
+const testImage = { naturalWidth: 2, naturalHeight: 2 };
+for (const model of ["white", "magic", "red", "love-handle"]) {
+  const softwareScene = { dataset: {}, append() {}, getBoundingClientRect: () => ({ width: 140, height: 160 }) };
+  const software = makeSoftware(softwareScene, model, createMugGeometry(model));
+  const sample = { ...state, heated: true, innerColour: model === "red" ? "#d41c2b" : "#fff" };
+  assert.equal(software.render(sample, testImage), true);
+  assert.ok(visiblePixels() > 5000, `${model} must produce a visible 3D mug without WebGL`);
+  assert.ok(colourPixels() > 1000, `${model} must show the uploaded artwork`);
+  const front = raster.data.slice();
+  software.render({ ...sample, rotationY: 130 }, testImage);
+  assert.notDeepEqual(raster.data, front, "Rotation must change the rendered view");
+  for (const rotationX of [-90, 90]) {
+    software.render({ ...sample, rotationX }, testImage);
+    assert.ok(visiblePixels() > 1000, "The cavity and underside must remain visible");
+  }
+  if (model === "magic") {
+    software.render({ ...sample, heated: false }, testImage);
+    assert.equal(colourPixels(), 0, "A cold magic mug must hide all coloured artwork");
+  }
+}
 console.log("Mug preview geometry, hollow interior, framing, handles, hot/cold state, texture loading, fallback and context recovery regressions passed.");

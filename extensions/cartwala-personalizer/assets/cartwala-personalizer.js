@@ -433,6 +433,108 @@
     };
   };
 
+  const createMugSoftwareRenderer = (scene, mugModel, geometry) => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    if (!context?.createImageData || !context?.putImageData) return null;
+    canvas.className = "cw-mug-preview__canvas";
+    canvas.setAttribute("aria-hidden", "true");
+    scene.append(canvas);
+    let cachedImage, artwork;
+    const colour = (value) => {
+      let hex = value.replace("#", "");
+      if (hex.length === 3) hex = hex.split("").map(c => c + c).join("");
+      return [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
+    };
+    return {
+      canvas,
+      render(state, image) {
+        const bounds = scene.getBoundingClientRect();
+        if (!state || !bounds.width || !bounds.height) return false;
+        const ratio = Math.min(1.5, 720 / Math.max(bounds.width, bounds.height));
+        const width = Math.max(1, Math.round(bounds.width * ratio));
+        const height = Math.max(1, Math.round(bounds.height * ratio));
+        if (canvas.width !== width || canvas.height !== height) {
+          canvas.width = width;
+          canvas.height = height;
+        }
+        if (image !== cachedImage && image?.naturalWidth) {
+          const texture = document.createElement("canvas");
+          const scale = Math.min(1, 1600 / image.naturalWidth);
+          texture.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          texture.height = Math.max(1, Math.round(image.naturalHeight * scale));
+          const ink = texture.getContext("2d", { willReadFrequently: true });
+          ink.drawImage(image, 0, 0, texture.width, texture.height);
+          artwork = ink.getImageData(0, 0, texture.width, texture.height);
+          cachedImage = image;
+        }
+        const rotation = mugRotationMatrix(state.rotationX, state.rotationY);
+        const frame = mugFrame(geometry.vertices, rotation, width / height,
+          Boolean(scene.closest?.(".cw-mug-preview__views")),
+          Number(scene.dataset.cwRotationY) === 90 ? 2.05 : 3.05);
+        const scale = frame.scale * (state.zoom || 1) * height / 2;
+        const mesh = geometry.vertices;
+        const points = new Float32Array(mesh.length / 9 * 6);
+        for (let i = 0, j = 0; i < mesh.length; i += 9, j += 6) {
+          const transform = offset => [0, 1, 2].map(k =>
+            rotation[k] * mesh[i + offset] + rotation[k + 3] * mesh[i + offset + 1] + rotation[k + 6] * mesh[i + offset + 2]);
+          const p = transform(0), n = transform(3);
+          points.set([width / 2 + (p[0] - frame.center[0]) * scale,
+            height / 2 - (p[1] - frame.center[1]) * scale, p[2], ...n], j);
+        }
+        const pixels = context.createImageData(width, height);
+        const depth = new Float32Array(width * height).fill(-Infinity);
+        const cold = mugModel === "magic" && !state.heated;
+        const palettes = [colour(cold ? "#171717" : "#ffffff"), colour(state.innerColour), colour(state.handleColour), [240,240,240]];
+        for (let i = 0; i < geometry.indices.length; i += 3) {
+          const ids = Array.from(geometry.indices.slice(i, i + 3));
+          const p = ids.map(id => points.subarray(id * 6, id * 6 + 6));
+          const material = mesh[ids[0] * 9 + 8];
+          let nx = p[0][3] + p[1][3] + p[2][3], ny = p[0][4] + p[1][4] + p[2][4], nz = p[0][5] + p[1][5] + p[2][5];
+          if (nz <= 0) continue;
+          const length = Math.hypot(nx, ny, nz) || 1;
+          nx /= length; ny /= length; nz /= length;
+          const light = (0.64 + 0.36 * Math.max(0, (-0.6 * nx + 1.1 * ny + 1.8 * nz) / 2.193)) * (material === 1 ? 0.88 : 1);
+          const shine = 35 * Math.pow(Math.max(0, (-0.143 * nx + 0.262 * ny + 0.954 * nz)), 65);
+          const [a, b, c] = p;
+          const denominator = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1]);
+          if (Math.abs(denominator) < 0.00001) continue;
+          const minX = Math.max(0, Math.floor(Math.min(a[0], b[0], c[0]))), maxX = Math.min(width - 1, Math.ceil(Math.max(a[0], b[0], c[0])));
+          const minY = Math.max(0, Math.floor(Math.min(a[1], b[1], c[1]))), maxY = Math.min(height - 1, Math.ceil(Math.max(a[1], b[1], c[1])));
+          for (let y = minY; y <= maxY; y++) for (let x = minX; x <= maxX; x++) {
+            const w0 = ((b[1] - c[1]) * (x + 0.5 - c[0]) + (c[0] - b[0]) * (y + 0.5 - c[1])) / denominator;
+            const w1 = ((c[1] - a[1]) * (x + 0.5 - c[0]) + (a[0] - c[0]) * (y + 0.5 - c[1])) / denominator;
+            const w2 = 1 - w0 - w1;
+            if (w0 < -0.00001 || w1 < -0.00001 || w2 < -0.00001) continue;
+            const z = w0 * a[2] + w1 * b[2] + w2 * c[2], index = y * width + x;
+            if (z <= depth[index]) continue;
+            const interpolate = offset => w0 * mesh[ids[0] * 9 + offset] + w1 * mesh[ids[1] * 9 + offset] + w2 * mesh[ids[2] * 9 + offset];
+            if (material === 2 && interpolate(0) ** 2 + interpolate(2) ** 2 < 1) continue;
+            let rgb = palettes[material];
+            if (material === 0 && artwork && !cold) {
+              const u = interpolate(6), v = interpolate(7);
+              if (u > 0.075 && u < 0.925 && v > 0.018 && v < 0.982) {
+                const tx = Math.min(artwork.width - 1, Math.max(0, Math.floor((0.925 - u) / 0.85 * artwork.width)));
+                const ty = Math.min(artwork.height - 1, Math.max(0, Math.floor((1 - (v - 0.018) / 0.964) * artwork.height)));
+                const at = (ty * artwork.width + tx) * 4, alpha = artwork.data[at + 3] / 255;
+                rgb = [0,1,2].map(k => 255 * (1 - alpha) + artwork.data[at + k] * alpha);
+              }
+            }
+            depth[index] = z;
+            const at = index * 4;
+            pixels.data[at] = rgb[0] * light + shine;
+            pixels.data[at + 1] = rgb[1] * light + shine;
+            pixels.data[at + 2] = rgb[2] * light + shine;
+            pixels.data[at + 3] = 255;
+          }
+        }
+        context.putImageData(pixels, 0, 0);
+        canvas.hidden = false;
+        return true;
+      },
+    };
+  };
+
   const createMugRenderer = (scene, mugModel, geometry, fallbackLabel) => {
     const canvas = document.createElement("canvas");
     canvas.className = "cw-mug-preview__canvas";
@@ -454,8 +556,19 @@
     let imageVersion = 0;
     let textureReady = false;
     let disposed = false;
+    let software;
     const showFallback = () => {
       canvas.hidden = true;
+      if (latestState && !disposed) {
+        try {
+          software ??= createMugSoftwareRenderer(scene, mugModel, geometry);
+          if (software?.render(latestState, image)) {
+            fallback.hidden = true;
+            scene.dataset.cwRenderState = "software";
+            return;
+          }
+        } catch { /* Preserve the design even if neither renderer is available. */ }
+      }
       fallback.hidden = !image;
       scene.dataset.cwRenderState = "fallback";
     };
@@ -484,6 +597,7 @@
       );
       textureReady = true;
       canvas.hidden = false;
+      if (software) software.canvas.hidden = true;
       fallback.hidden = true;
       scene.dataset.cwRenderState = "ready";
     };
@@ -664,7 +778,11 @@
     };
     const render = (state = latestState) => {
       latestState = state;
-      if (disposed || !state || !gl || !program || gl.isContextLost()) return;
+      if (disposed || !state) return;
+      if (!gl || !program || gl.isContextLost()) {
+        showFallback();
+        return;
+      }
       const { width, height } = scene.getBoundingClientRect();
       if (!width || !height) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -690,8 +808,8 @@
       gl.uniform2fv(locations.uCenter, frame.center);
       gl.uniform2f(
         locations.uScale,
-        frame.scale / (width / height),
-        frame.scale,
+        (frame.scale * (state.zoom || 1)) / (width / height),
+        frame.scale * (state.zoom || 1),
       );
       gl.uniform3fv(
         locations.uBody,
@@ -794,8 +912,7 @@
     if (!mugDialog || !stage || !open || !close || !sceneElements.length)
       return;
 
-    const mountPreviewInGallery = () => {
-      if (preview.dataset.cwGalleryMounted === "true") return;
+    const galleryHost = () => {
       const scope = root.closest("main") || document;
       const images = Array.from(
         scope.querySelectorAll(
@@ -807,11 +924,18 @@
           !preview.contains(candidate) && candidate.offsetParent !== null,
       );
       if (!image) return;
-      const host =
+      return (
         image.closest(
           ".product__media-item,[data-product-media],.product-media-container,.product__media",
-        ) || image.parentElement;
+        ) || image.parentElement
+      );
+    };
+    let catalogButton;
+    const mountPreviewInGallery = () => {
+      if (preview.dataset.cwGalleryMounted === "true") return;
+      const host = galleryHost();
       if (!host) return;
+      catalogButton?.remove();
       host.classList.add("cw-mug-gallery-host");
       host.querySelectorAll("[data-cw-mug-preview]").forEach((existing) => {
         if (existing !== preview) existing.hidden = true;
@@ -840,6 +964,7 @@
     });
     const interactive = scenes.find(({ scene }) => stage.contains(scene));
     if (!interactive) return;
+    interactive.zoom = 1;
 
     const colourMap = {
       white: "#ffffff",
@@ -907,6 +1032,9 @@
       });
     };
 
+    const pointers = new Map();
+    let pinchStart = 0;
+    let zoomStart = 1;
     let pointerStartX = 0;
     let pointerStartY = 0;
     let rotationStartX = interactive.rotationX;
@@ -971,11 +1099,22 @@
         source.onerror = () => resolve(url);
         source.src = url;
       });
-    const applyTexture = async (url) => {
+    let textureRevision = 0;
+    let savedTexture = "";
+    const applyTexture = async (url, draft = false) => {
       if (typeof url !== "string" || !url) return;
+      const currentRevision = ++textureRevision;
       const textureUrl = usesThreeViewArtwork()
         ? await threeViewTexture(url)
         : url;
+      if (currentRevision !== textureRevision) return;
+      if (draft) {
+        interactive.renderer.setTexture(textureUrl);
+        setHeated(mugModel === "magic");
+        openMugDialog();
+        return;
+      }
+      savedTexture = textureUrl;
       scenes.forEach(({ renderer }) => renderer.setTexture(textureUrl));
       mountPreviewInGallery();
       preview.hidden = false;
@@ -1004,13 +1143,38 @@
     magicToggles.forEach((toggle) =>
       toggle.addEventListener("click", () => setHeated(!heated)),
     );
+    const setZoom = (value) => {
+      interactive.zoom = Math.max(0.65, Math.min(1.8, value));
+      renderScene(interactive);
+    };
+    mugDialog.querySelectorAll("[data-cw-mug-zoom]").forEach((button) => {
+      button.addEventListener("click", () =>
+        setZoom(interactive.zoom + (button.dataset.cwMugZoom === "in" ? 0.15 : -0.15)),
+      );
+    });
+    mugDialog.querySelector("[data-cw-mug-reset]")?.addEventListener("click", () => {
+      interactive.rotationX = -22;
+      interactive.rotationY = 25;
+      setZoom(1);
+    });
+    mugDialog.addEventListener("close", () => {
+      textureRevision += 1;
+      pointers.clear();
+      dragging = false;
+      stage.classList.remove("is-dragging");
+      if (savedTexture) interactive.renderer.setTexture(savedTexture);
+    });
+    stage.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      setZoom(interactive.zoom * Math.exp(-event.deltaY * 0.001));
+    }, { passive: false });
     preview.addEventListener("click", (event) => event.stopPropagation());
     mugDialog.addEventListener("click", (event) => {
       if (event.target === mugDialog) closeMugDialog();
     });
     stage.addEventListener("keydown", (event) => {
       if (
-        !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
+        !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "+", "=", "-", "Home"].includes(event.key)
       )
         return;
       event.preventDefault();
@@ -1020,20 +1184,44 @@
         interactive.rotationX = Math.max(-110, interactive.rotationX - 8);
       if (event.key === "ArrowDown")
         interactive.rotationX = Math.min(110, interactive.rotationX + 8);
+      if (event.key === "+" || event.key === "=") setZoom(interactive.zoom + 0.15);
+      if (event.key === "-") setZoom(interactive.zoom - 0.15);
+      if (event.key === "Home") {
+        interactive.rotationX = -22;
+        interactive.rotationY = 25;
+        interactive.zoom = 1;
+      }
       renderScene(interactive);
     });
-    stage.addEventListener("pointerdown", (event) => {
-      if (!event.isPrimary || event.button !== 0) return;
-      dragging = true;
-      pointerStartX = event.clientX;
-      pointerStartY = event.clientY;
+    const startGesture = () => {
+      const active = Array.from(pointers.values());
+      dragging = active.length > 0;
+      if (!dragging) return;
+      pointerStartX = active[0].x;
+      pointerStartY = active[0].y;
       rotationStartX = interactive.rotationX;
       rotationStartY = interactive.rotationY;
+      if (active.length > 1) {
+        pinchStart = Math.hypot(active[1].x - active[0].x, active[1].y - active[0].y);
+        zoomStart = interactive.zoom;
+      }
+    };
+    stage.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      startGesture();
       stage.setPointerCapture?.(event.pointerId);
       stage.classList.add("is-dragging");
     });
     stage.addEventListener("pointermove", (event) => {
-      if (!dragging) return;
+      if (!dragging || !pointers.has(event.pointerId)) return;
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      const active = Array.from(pointers.values());
+      if (active.length > 1) {
+        const distance = Math.hypot(active[1].x - active[0].x, active[1].y - active[0].y);
+        if (pinchStart > 0) setZoom(zoomStart * distance / pinchStart);
+        return;
+      }
       interactive.rotationY =
         rotationStartY + (event.clientX - pointerStartX) * 0.75;
       interactive.rotationX = Math.max(
@@ -1043,11 +1231,11 @@
       renderScene(interactive);
     });
     const stopDragging = (event) => {
-      if (!dragging) return;
-      dragging = false;
+      pointers.delete(event.pointerId);
+      startGesture();
       if (stage.hasPointerCapture?.(event.pointerId))
         stage.releasePointerCapture(event.pointerId);
-      stage.classList.remove("is-dragging");
+      if (!dragging) stage.classList.remove("is-dragging");
     };
     stage.addEventListener("pointerup", stopDragging);
     stage.addEventListener("pointercancel", stopDragging);
@@ -1061,6 +1249,7 @@
         document.removeEventListener("variant:change", applyColour);
         document.removeEventListener("product:variant-change", applyColour);
         if (!root.contains(preview)) preview.remove();
+        catalogButton?.remove();
       },
       { once: true },
     );
@@ -1070,8 +1259,28 @@
     root.addEventListener("cartwala:preview-ready", (event) => {
       applyTexture(event.detail?.url);
     });
+    root.addEventListener("cartwala:mug-draft-preview", (event) => {
+      applyTexture(event.detail?.url, true);
+    });
     applyColour();
     render();
+    // Let shoppers inspect the product artwork before entering their own photos.
+    const host = galleryHost();
+    if (host) {
+      host.classList.add("cw-mug-catalog-host");
+      catalogButton = open.cloneNode(true);
+      ["onclick", "command", "commandfor", "data-cw-mug-open"].forEach(name =>
+        catalogButton.removeAttribute(name),
+      );
+      catalogButton.classList.add("cw-mug-catalog-open");
+      catalogButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (root.dataset.overlay) applyTexture(root.dataset.overlay, true);
+        else openMugDialog();
+      });
+      host.appendChild(catalogButton);
+    }
   };
 
   const initialize = () =>
@@ -1087,6 +1296,8 @@
         const fields = root.querySelector("[data-cw-editor-fields]");
         const overlay = root.querySelector("[data-cw-overlay]");
         const save = root.querySelector("[data-cw-save]");
+        const mug3dButton = root.querySelector("[data-cw-mug-editor-preview]");
+        let mugPreviewBusy = false;
         const saveLabel = save.textContent;
         const result = root.querySelector("[data-cw-result]");
         const resultImage = root.querySelector("[data-cw-result-image]");
@@ -2244,8 +2455,9 @@
             0;
         const updateReady = () => {
           const ready = isReady();
-          save.disabled = busy || !ready;
+          save.disabled = busy || mugPreviewBusy || !ready;
           if (clock3dButton) clock3dButton.disabled = busy || !ready;
+          if (mug3dButton) mug3dButton.disabled = busy || mugPreviewBusy || !ready;
         };
         const loadPhoto = (state, file) => {
           if (!file) return;
@@ -2630,6 +2842,192 @@
           x: Number.isFinite(state.relativeX) ? state.relativeX : (Number(state.x) || 0) / (stage.clientWidth || lastStageWidth || 1),
           y: Number.isFinite(state.relativeY) ? state.relativeY : (Number(state.y) || 0) / (stage.clientHeight || lastStageHeight || 1),
         });
+        const composeDesignCanvas = async (recordProperties = false) => {
+          const dimensions = canvasDimensions();
+          const canvas = document.createElement("canvas");
+          canvas.width = dimensions.width;
+          canvas.height = dimensions.height;
+          const context = canvas.getContext("2d");
+          if (!context) throw new Error("Canvas is unavailable");
+          for (const state of photoStates) {
+            if (!state.file) continue;
+            if (recordProperties) putFile(productForm, state.field.label, state.file);
+            const layer = document.createElement("canvas");
+            layer.width = dimensions.width;
+            layer.height = dimensions.height;
+            const layerContext = layer.getContext("2d");
+            const base = new Image();
+            base.src = state.image.src;
+            if (typeof base.decode === "function") {
+              try {
+                await base.decode();
+              } catch (error) {
+                await new Promise((resolve, reject) => {
+                  base.onload = resolve;
+                  base.onerror = reject;
+                });
+              }
+            }
+            const slotW = (dimensions.width * state.field.width) / 100;
+            const slotH = (dimensions.height * state.field.height) / 100;
+            const slotX = (dimensions.width * state.field.x) / 100;
+            const slotY = (dimensions.height * state.field.y) / 100;
+            layerContext.save();
+            layerContext.beginPath();
+            layerContext.rect(
+              slotX - slotW / 2,
+              slotY - slotH / 2,
+              slotW,
+              slotH,
+            );
+            layerContext.clip();
+            const offset = photoOffset(state);
+            layerContext.translate(
+              slotX + offset.x * dimensions.width,
+              slotY + offset.y * dimensions.height,
+            );
+            layerContext.rotate((state.angle * Math.PI) / 180);
+            layerContext.scale(state.scale, state.scale);
+            const fit = Math.max(slotW / base.width, slotH / base.height);
+            layerContext.drawImage(
+              base,
+              (-base.width * fit) / 2,
+              (-base.height * fit) / 2,
+              base.width * fit,
+              base.height * fit,
+            );
+            layerContext.restore();
+            if (state.field.maskUrl) {
+              const mask = await loadRemote(state.field.maskUrl);
+              layerContext.globalCompositeOperation = "destination-in";
+              layerContext.drawImage(
+                mask,
+                slotX - slotW / 2,
+                slotY - slotH / 2,
+                slotW,
+                slotH,
+              );
+              layerContext.globalCompositeOperation = "source-over";
+            }
+            context.drawImage(layer, 0, 0);
+            if (recordProperties) putText(
+              productForm,
+              `_${state.field.label} Position`,
+              `Slot ${state.field.x}%,${state.field.y}% ${state.field.width}%×${state.field.height}% · photo offset ${Math.round(state.x)},${Math.round(state.y)} · zoom ${Math.round(state.scale * 100)}% · rotation ${Math.round(state.angle)}°`,
+            );
+          }
+          if (root.dataset.overlay && !isPhotoCubeClock) {
+            const frame = await loadRemote(root.dataset.overlay);
+            context.drawImage(
+              frame,
+              0,
+              0,
+              dimensions.width,
+              dimensions.height,
+            );
+          }
+          for (const state of textStates) {
+            const value = state.input.value.trim();
+            if (!value) continue;
+            const font = state.fontSelect?.value || state.field.fontFamily;
+            if (recordProperties) putText(productForm, state.field.label, value);
+            if (recordProperties) putText(productForm, `_${state.field.label} Font`, font);
+            if (recordProperties) putText(
+              productForm,
+              `_${state.field.label} Style`,
+              JSON.stringify({
+                x: state.x,
+                y: state.y,
+                width: state.width,
+                height: state.height,
+                alignment: state.field.alignment,
+                fitToBox: state.field.fitToBox,
+                fontSize: state.fittedFontSize,
+                rotation: state.angle,
+                color: state.color,
+              }),
+            );
+            try {
+              await document.fonts?.load(`${state.fontSize}px "${font}"`);
+            } catch (error) {
+              console.warn("Cartwala font preload skipped", error);
+            }
+            context.save();
+            context.translate(
+              (dimensions.width * state.x) / 100,
+              (dimensions.height * state.y) / 100,
+            );
+            context.rotate((state.angle * Math.PI) / 180);
+            context.fillStyle = state.color;
+            const boxWidth = (dimensions.width * state.width) / 100;
+            const boxHeight = (dimensions.height * state.height) / 100;
+            const baseSize =
+              ((state.fittedFontSize || state.fontSize) * dimensions.width) /
+              1200;
+            context.font = `700 ${baseSize}px "${font}", sans-serif`;
+            const lines = value
+              .replace(/\r/g, "")
+              .split("\n")
+              .slice(0, state.field.maxLines || 1);
+            const measuredWidth = Math.max(
+              1,
+              ...lines.map((line) => context.measureText(line).width),
+            );
+            const lineHeight = baseSize * 1.08;
+            const fittedSize = Math.max(
+              1,
+              baseSize *
+                (state.field.fitToBox
+                  ? Math.min(
+                      1,
+                      boxWidth / measuredWidth,
+                      boxHeight / (lineHeight * lines.length),
+                    )
+                  : 1),
+            );
+            context.textAlign = state.field.fitToBox
+              ? state.field.alignment
+              : "center";
+            context.textBaseline = "middle";
+            context.font = `700 ${fittedSize}px "${font}", sans-serif`;
+            const textX = !state.field.fitToBox
+              ? 0
+              : state.field.alignment === "left"
+                ? -boxWidth / 2
+                : state.field.alignment === "right"
+                  ? boxWidth / 2
+                  : 0;
+            const fittedLineHeight = fittedSize * 1.08;
+            const firstLineY = -((lines.length - 1) * fittedLineHeight) / 2;
+            lines.forEach((line, index) =>
+              context.fillText(line, textX, firstLineY + index * fittedLineHeight),
+            );
+            context.restore();
+          }
+          return canvas;
+        };
+        mug3dButton?.addEventListener("click", async () => {
+          if (busy || mugPreviewBusy || !isReady()) return;
+          const label = mug3dButton.textContent;
+          const startRevision = revision;
+          mugPreviewBusy = true;
+          mug3dButton.textContent = mug3dButton.dataset.loadingLabel;
+          updateReady();
+          try {
+            const canvas = await composeDesignCanvas();
+            if (startRevision !== revision || !dialog.open) return;
+            root.dispatchEvent(new CustomEvent("cartwala:mug-draft-preview", {
+              detail: { url: canvas.toDataURL("image/png") },
+            }));
+          } catch (error) {
+            console.error("Cartwala mug preview failed", error);
+            window.alert("3D preview could not be prepared. Please try again.");
+          } finally {
+            mugPreviewBusy = false;
+            mug3dButton.textContent = label;
+            updateReady();
+          }
+        });
         const attach = async (automatic = false) => {
           if (!productForm || !isReady() || busy) return;
           automatic = automatic === true;
@@ -2647,167 +3045,7 @@
               .querySelectorAll("[data-cw-property],[data-cw-text-property]")
               .forEach((input) => input.remove());
             stagedFiles.clear();
-            const dimensions = canvasDimensions();
-            const canvas = document.createElement("canvas");
-            canvas.width = dimensions.width;
-            canvas.height = dimensions.height;
-            const context = canvas.getContext("2d");
-            if (!context) throw new Error("Canvas is unavailable");
-            for (const state of photoStates) {
-              if (!state.file) continue;
-              putFile(productForm, state.field.label, state.file);
-              const layer = document.createElement("canvas");
-              layer.width = dimensions.width;
-              layer.height = dimensions.height;
-              const layerContext = layer.getContext("2d");
-              const base = new Image();
-              base.src = state.image.src;
-              if (typeof base.decode === "function") {
-                try {
-                  await base.decode();
-                } catch (error) {
-                  await new Promise((resolve, reject) => {
-                    base.onload = resolve;
-                    base.onerror = reject;
-                  });
-                }
-              }
-              const slotW = (dimensions.width * state.field.width) / 100;
-              const slotH = (dimensions.height * state.field.height) / 100;
-              const slotX = (dimensions.width * state.field.x) / 100;
-              const slotY = (dimensions.height * state.field.y) / 100;
-              layerContext.save();
-              layerContext.beginPath();
-              layerContext.rect(
-                slotX - slotW / 2,
-                slotY - slotH / 2,
-                slotW,
-                slotH,
-              );
-              layerContext.clip();
-              const offset = photoOffset(state);
-              layerContext.translate(
-                slotX + offset.x * dimensions.width,
-                slotY + offset.y * dimensions.height,
-              );
-              layerContext.rotate((state.angle * Math.PI) / 180);
-              layerContext.scale(state.scale, state.scale);
-              const fit = Math.max(slotW / base.width, slotH / base.height);
-              layerContext.drawImage(
-                base,
-                (-base.width * fit) / 2,
-                (-base.height * fit) / 2,
-                base.width * fit,
-                base.height * fit,
-              );
-              layerContext.restore();
-              if (state.field.maskUrl) {
-                const mask = await loadRemote(state.field.maskUrl);
-                layerContext.globalCompositeOperation = "destination-in";
-                layerContext.drawImage(
-                  mask,
-                  slotX - slotW / 2,
-                  slotY - slotH / 2,
-                  slotW,
-                  slotH,
-                );
-                layerContext.globalCompositeOperation = "source-over";
-              }
-              context.drawImage(layer, 0, 0);
-              putText(
-                productForm,
-                `_${state.field.label} Position`,
-                `Slot ${state.field.x}%,${state.field.y}% ${state.field.width}%×${state.field.height}% · photo offset ${Math.round(state.x)},${Math.round(state.y)} · zoom ${Math.round(state.scale * 100)}% · rotation ${Math.round(state.angle)}°`,
-              );
-            }
-            if (root.dataset.overlay && !isPhotoCubeClock) {
-              const frame = await loadRemote(root.dataset.overlay);
-              context.drawImage(
-                frame,
-                0,
-                0,
-                dimensions.width,
-                dimensions.height,
-              );
-            }
-            for (const state of textStates) {
-              const value = state.input.value.trim();
-              if (!value) continue;
-              const font = state.fontSelect?.value || state.field.fontFamily;
-              putText(productForm, state.field.label, value);
-              putText(productForm, `_${state.field.label} Font`, font);
-              putText(
-                productForm,
-                `_${state.field.label} Style`,
-                JSON.stringify({
-                  x: state.x,
-                  y: state.y,
-                  width: state.width,
-                  height: state.height,
-                  alignment: state.field.alignment,
-                  fitToBox: state.field.fitToBox,
-                  fontSize: state.fittedFontSize,
-                  rotation: state.angle,
-                  color: state.color,
-                }),
-              );
-              try {
-                await document.fonts?.load(`${state.fontSize}px "${font}"`);
-              } catch (error) {
-                console.warn("Cartwala font preload skipped", error);
-              }
-              context.save();
-              context.translate(
-                (dimensions.width * state.x) / 100,
-                (dimensions.height * state.y) / 100,
-              );
-              context.rotate((state.angle * Math.PI) / 180);
-              context.fillStyle = state.color;
-              const boxWidth = (dimensions.width * state.width) / 100;
-              const boxHeight = (dimensions.height * state.height) / 100;
-              const baseSize =
-                ((state.fittedFontSize || state.fontSize) * dimensions.width) /
-                1200;
-              context.font = `700 ${baseSize}px "${font}", sans-serif`;
-              const lines = value
-                .replace(/\r/g, "")
-                .split("\n")
-                .slice(0, state.field.maxLines || 1);
-              const measuredWidth = Math.max(
-                1,
-                ...lines.map((line) => context.measureText(line).width),
-              );
-              const lineHeight = baseSize * 1.08;
-              const fittedSize = Math.max(
-                1,
-                baseSize *
-                  (state.field.fitToBox
-                    ? Math.min(
-                        1,
-                        boxWidth / measuredWidth,
-                        boxHeight / (lineHeight * lines.length),
-                      )
-                    : 1),
-              );
-              context.textAlign = state.field.fitToBox
-                ? state.field.alignment
-                : "center";
-              context.textBaseline = "middle";
-              context.font = `700 ${fittedSize}px "${font}", sans-serif`;
-              const textX = !state.field.fitToBox
-                ? 0
-                : state.field.alignment === "left"
-                  ? -boxWidth / 2
-                  : state.field.alignment === "right"
-                    ? boxWidth / 2
-                    : 0;
-              const fittedLineHeight = fittedSize * 1.08;
-              const firstLineY = -((lines.length - 1) * fittedLineHeight) / 2;
-              lines.forEach((line, index) =>
-                context.fillText(line, textX, firstLineY + index * fittedLineHeight),
-              );
-              context.restore();
-            }
+            const canvas = await composeDesignCanvas(true);
             fileStates.forEach((state) =>
               putFile(productForm, state.field.label, state.file),
             );
