@@ -1354,8 +1354,12 @@
             if (!["2:3", "3:2"].includes(ratio) || !variantId) return;
             if (ratio === config.ratio && String(variantId) === frameVariantId) return;
             const ratioChanged = ratio !== config.ratio;
-            invalidate();
+            if (ratioChanged || !saved) invalidate();
+            else revision++;
             frameVariantId = String(variantId);
+            const variantInput = productForm?.querySelector('[name="id"]');
+            if (variantInput) variantInput.value = frameVariantId;
+            if (saved && !cartSubmitting) setPurchaseReady(true);
             config.ratio = ratio;
             root.style.setProperty("--cw-ratio", ratio.replace(":", "/"));
             const [width, height] = ratio.split(":").map(Number);
