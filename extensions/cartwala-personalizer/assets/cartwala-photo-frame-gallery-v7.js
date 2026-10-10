@@ -128,6 +128,7 @@
       .cw-frame-v7__thumb img{width:76px;height:76px;object-fit:contain}
       .cw-frame-v7__thumb span{font-size:12px;line-height:1.4}
       .cw-frame-v7__hint{font-size:12px;text-align:center;color:#666;margin:12px 0 0}
+      body.cw-photo-frame-master-page [data-cw-personalizer] [data-cw-open].cw-ux-edit-source-hidden{display:block!important}
       [data-cw-frame-original-hidden="true"]{display:none!important}
     `;
     document.head.appendChild(style);
