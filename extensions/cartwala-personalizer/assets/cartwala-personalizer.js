@@ -1105,6 +1105,16 @@
           console.error("Cartwala configuration is invalid", error);
         }
         const config = normalize(raw);
+        const framePanel = root.querySelector("[data-cw-photo-frame-data]");
+        let frameVariantId = framePanel?.dataset.selectedVariant || "";
+        if (framePanel) {
+          const frameVariants = JSON.parse(framePanel.dataset.variants || "[]");
+          const frameOptions = JSON.parse(framePanel.dataset.options || "[]");
+          const frameVariant = frameVariants.find((item) => String(item.id) === frameVariantId);
+          const orientationIndex = frameOptions.findIndex((name) => name.toLowerCase() === "orientation");
+          config.ratio = /landscape/i.test(frameVariant?.options?.[orientationIndex] || "") ? "3:2" : "2:3";
+        }
+
         try {
           const groupPanel = document.querySelector(`[data-cw-product-group][data-product-id="${root.dataset.productId}"]`);
           const group = JSON.parse(groupPanel?.dataset.config || "{}");
@@ -1338,6 +1348,31 @@
             }
           });
         }
+        if (framePanel) {
+          root.addEventListener("cw:photo-frame-selection", (event) => {
+            const { ratio, variantId } = event.detail || {};
+            if (!["2:3", "3:2"].includes(ratio) || !variantId) return;
+            if (ratio === config.ratio && String(variantId) === frameVariantId) return;
+            const ratioChanged = ratio !== config.ratio;
+            invalidate();
+            frameVariantId = String(variantId);
+            config.ratio = ratio;
+            root.style.setProperty("--cw-ratio", ratio.replace(":", "/"));
+            const [width, height] = ratio.split(":").map(Number);
+            root.style.setProperty("--cw-stage-ratio", String(width / height));
+            if (ratioChanged) photoStates.forEach((state) => {
+              state.x = 0;
+              state.y = 0;
+              state.relativeX = 0;
+              state.relativeY = 0;
+              state.scale = 1;
+            });
+            requestAnimationFrame(() => {
+              photoStates.forEach(apply);
+              positionSlots();
+            });
+          });
+        }
         let cartSubmitting = false;
         productForm?.addEventListener(
           "submit",
@@ -1347,6 +1382,10 @@
             if (root.dataset.cwAcrylicProduct === "true") {
               const variantInput = productForm.querySelector('input[name="id"]');
               if (variantInput && selectedVariantId) variantInput.value = selectedVariantId;
+            }
+            if (framePanel && frameVariantId) {
+              const variantInput = productForm.querySelector('[name="id"]');
+              if (variantInput) variantInput.value = frameVariantId;
             }
             if (!saved || busy) {
               dialog.showModal();
@@ -2984,6 +3023,7 @@
           )
           .then((record) => {
             if (!record || Date.now() - record.updated > 7 * 86400000) return;
+            if (framePanel && record.printDesign?.r !== config.ratio) return;
             designId = record.designId;
             photoStates.forEach((s, i) => {
               const stored = record.photos[i];
@@ -3100,6 +3140,7 @@
           .catch((error) =>
             console.warn("Cartwala draft restore unavailable", error),
           );
+        if (framePanel) root.dispatchEvent(new CustomEvent("cw:photo-frame-ready"));
         root.querySelector("[data-cw-open]").addEventListener("click", () => {
           photoStates.forEach((s) => {
             if (s.relativeX !== undefined) {

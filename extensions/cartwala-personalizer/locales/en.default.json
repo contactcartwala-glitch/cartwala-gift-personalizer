@@ -73,5 +73,11 @@
     "delivered": "Delivered",
     "ready_to_dispatch": "Ready to dispatch",
     "estimated_delivery": "Estimated delivery"
+  },
+  "photo_frame": {
+    "gallery": "Personalized photo frame gallery",
+    "portrait": "Portrait (2:3)",
+    "landscape": "Landscape (3:2)",
+    "sample": "Sample photo · Customise with your own photo"
   }
 }
