@@ -39,6 +39,14 @@
       const short = Math.min(...values), long = Math.max(...values);
       return orientation() === 'landscape' ? [long, short] : [short, long];
     };
+    const beading = (width, height) => ({ '8x12': 1, '10x15': 1, '12x18': 1, '16x24': 1.5, '20x30': 1.5, '24x36': 2 })[`${Math.min(width, height)}x${Math.max(width, height)}`] || 1;
+    const sizeFrame = (frame, width, height, scale) => {
+      const border = beading(width, height);
+      frame.style.width = `${width * scale}cqw`;
+      frame.style.height = `${height * scale}cqw`;
+      frame.style.borderWidth = `${border * scale}cqw`;
+      frame.dataset.beadingInches = String(border);
+    };
     const setPrintDimensions = () => {
       const form = scope.querySelector('form[action*="/cart/add"]');
       if (!form) return;
@@ -77,8 +85,6 @@
     const roomFrame = makeFrame(roomSlide, 'cw-frame-v7__frame--room');
     const sizeLabel = document.createElement('p'); sizeLabel.className = 'cw-frame-v7__size'; sizeLabel.setAttribute('aria-live', 'polite'); roomSlide.appendChild(sizeLabel);
     const productSlide = makeSlide('product', panel.dataset.productLabel);
-    const productImage = document.createElement('img'); productImage.className = 'cw-frame-v7__sample'; productImage.alt = panel.dataset.productLabel;
-    productImage.width = productImage.height = 1254; productImage.loading = 'lazy'; productImage.draggable = false; productSlide.appendChild(productImage);
     const productFrame = makeFrame(productSlide, 'cw-frame-v7__frame--product');
     const guideSlide = makeSlide('guide', panel.dataset.guideLabel);
     const guideTitle = document.createElement('h3'); guideTitle.textContent = panel.dataset.guideLabel; guideSlide.appendChild(guideTitle);
@@ -116,13 +122,13 @@
       .cw-frame-v7__track::-webkit-scrollbar{display:none}
       .cw-frame-v7__track:focus-visible{outline:2px solid #ff6200;outline-offset:-3px}
       .cw-frame-v7__slide{position:relative;flex:0 0 100%;height:100%;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;user-select:none}
-      .cw-frame-v7__sample,.cw-frame-v7__room{position:absolute!important;inset:0!important;display:block;width:100%!important;height:100%!important;max-height:none!important;object-fit:contain!important;pointer-events:none}
-      .cw-frame-v7__frame{position:relative;box-sizing:content-box;border:.85cqw solid #181818;box-shadow:inset 0 0 0 1px #393939,.5cqw .75cqw 1.2cqw #0005;overflow:hidden;background:#faf8f4;transition:width .25s ease,height .25s ease}
+      .cw-frame-v7__room{position:absolute!important;inset:0!important;display:block;width:100%!important;height:100%!important;max-height:none!important;object-fit:contain!important;pointer-events:none}
+      .cw-frame-v7__frame{position:relative;box-sizing:content-box;border:0 solid #181818;box-shadow:inset 0 0 0 1px #393939,.5cqw .75cqw 1.2cqw #0005;overflow:hidden;background:#faf8f4;transition:width .25s ease,height .25s ease,border-width .25s ease}
       .cw-frame-v7__frame--room{position:absolute;left:45%;top:31.5%;transform:translate(-50%,-50%)}
       .cw-frame-v7__frame img,.cw-frame-v7__sample-photo{display:block;position:absolute;inset:0;width:100%!important;height:100%!important;object-fit:cover!important;max-height:none!important;background-repeat:no-repeat;background-position:50% 50%;pointer-events:none}
       .cw-frame-v7__sample-photo{background-size:auto 130%}
       .cw-frame-v7__frame[data-orientation="landscape"] .cw-frame-v7__sample-photo{background-size:123% auto;background-position:50% 49%}
-      .cw-frame-v7__frame--product,.cw-frame-v7__frame--side,.cw-frame-v7__frame--description{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);border-width:1.7cqw;box-shadow:1cqw 1.5cqw 2.2cqw #0005}
+      .cw-frame-v7__frame--product,.cw-frame-v7__frame--side,.cw-frame-v7__frame--description{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);box-shadow:1cqw 1.5cqw 2.2cqw #0005}
       .cw-frame-v7__frame--side{transform:translate(-50%,-50%) perspective(900px) rotateY(-22deg) rotateZ(3deg);box-shadow:1.3cqw .25cqw 0 #080808,2cqw 2cqw 3cqw #0004}
       .cw-frame-v7__size{position:absolute;top:1.4%;left:50%;transform:translateX(-50%);margin:0;padding:.7cqw 3cqw;border-radius:20cqw;background:#35291fee;color:#fff;font-size:4.6cqw;font-weight:750;line-height:1.35;white-space:nowrap}
       .cw-frame-v7 [hidden],.cw-frame-v7__description [hidden]{display:none!important}
@@ -133,7 +139,7 @@
       .cw-frame-v7__guide{position:absolute;left:5%;right:5%;top:15%;bottom:10%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:4%}
       .cw-frame-v7__guide-cell{display:flex;flex-direction:column;min-width:0;justify-content:flex-end;align-items:center;gap:2cqw}
       .cw-frame-v7__guide-holder{width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center}
-      .cw-frame-v7__guide .cw-frame-v7__frame{border-width:.35cqw;flex:none}
+      .cw-frame-v7__guide .cw-frame-v7__frame{flex:none}
       .cw-frame-v7__guide-cell>span{font-size:2.8cqw;white-space:nowrap;color:#332a22}
       .cw-frame-v7__description{margin:0 0 24px;max-width:680px}
       .cw-frame-v7__description figcaption{position:absolute;bottom:4%;width:100%;text-align:center;font-size:3cqw;color:#51473c}
@@ -167,22 +173,23 @@
     const render = () => {
       const kind = orientation(); const url = artwork || design;
       const [width, height] = dimensions(variant?.options?.[sizeIndex]);
-      productImage.src = images[kind]; productImage.hidden = Boolean(url); productFrame.hidden = !url;
       for (const { frame, sample, photo } of frames) {
         frame.dataset.orientation = kind; sample.hidden = Boolean(url); photo.hidden = !url;
         sample.style.backgroundImage = `url("${images[kind]}")`; if (url) photo.src = url;
       }
-      roomFrame.style.width = `${width * 1.15}%`; roomFrame.style.height = `${height * 1.15}%`;
+      sizeFrame(roomFrame, width, height, 1.15);
       const caption = `${width} × ${height} in`; sizeLabel.textContent = caption;
       roomFrame.setAttribute('aria-label', `${panel.dataset.galleryLabel}, ${caption}`);
       for (const frame of [productFrame, sideFrame, descriptionFrame]) {
-        frame.style.width = kind === 'landscape' ? '78%' : '52%'; frame.style.height = kind === 'landscape' ? '52%' : '78%';
+        sizeFrame(frame, width, height, 82 / (Math.max(width, height) + 2 * beading(width, height)));
       }
-      const maxDimension = Math.max(...sizes.flatMap(size => dimensions(size)));
+      const maxDimension = Math.max(...sizes.map(size => {
+        const [w, h] = dimensions(size);
+        return Math.max(w, h) + 2 * beading(w, h);
+      }));
       for (const item of guideFrames) {
         const [w, h] = dimensions(item.size);
-        item.frame.style.width = `${w / maxDimension * 27}cqw`;
-        item.frame.style.height = `${h / maxDimension * 27}cqw`;
+        sizeFrame(item.frame, w, h, 27 / maxDimension);
         item.label.textContent = `${w} × ${h}`;
       }
       descriptionLabel.textContent = artwork ? panel.dataset.savedLabel : panel.dataset.sampleLabel;
