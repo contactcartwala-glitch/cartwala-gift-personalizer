@@ -76,8 +76,10 @@
   },
   "photo_frame": {
     "gallery": "Personalized photo frame gallery",
-    "portrait": "Portrait (2:3)",
-    "landscape": "Landscape (3:2)",
-    "sample": "Sample photo · Customise with your own photo"
+    "portrait": "Portrait",
+    "landscape": "Landscape",
+    "sample": "Sample photo · Customise with your own photo",
+    "product_photo": "Product photo",
+    "room_preview": "Room preview"
   }
 }
