@@ -6,7 +6,8 @@
     const style = document.createElement('style');
     style.textContent = `
       [data-cw-gallery-edit-host]{position:relative!important}
-      main.cw-gallery-edit-managed .cw-ux-edit-overlay{display:none!important}
+      html body main.cw-gallery-edit-managed [data-gallery-main]>.cw-ux-edit-overlay{display:none!important}
+      [data-cw-gallery-edit-host]>.cw-gallery-edit-button:not([hidden]){display:inline-flex!important}
       main.cw-gallery-edit-managed .cw-gallery-edit-source{display:none!important}
       .cw-gallery-edit-button{position:absolute!important;top:12px!important;right:12px!important;left:auto!important;bottom:auto!important;z-index:30;display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 17px;border:0;border-radius:22px;background:#ff6200!important;color:#fff!important;box-shadow:0 2px 9px #0003;font-family:inherit;font-size:14px;font-weight:700;line-height:1.2;cursor:pointer;touch-action:manipulation}
       .cw-gallery-edit-button[hidden]{display:none!important}
