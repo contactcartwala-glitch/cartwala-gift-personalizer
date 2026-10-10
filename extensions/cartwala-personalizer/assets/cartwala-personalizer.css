@@ -964,6 +964,15 @@ body.cw-personalization-complete
 .cw-mug-gallery-host > :not(.cw-mug-preview) {
   display: none !important;
 }
+.cw-mug-catalog-host {
+  position: relative;
+}
+.cw-mug-catalog-host > .cw-mug-catalog-open {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 3;
+}
 .cw-mug-gallery-host {
   display: block !important;
   position: relative !important;
@@ -1134,38 +1143,39 @@ body.cw-personalization-complete
   font-size: 17px;
   line-height: 16px;
 }
-.cw-mug-modal {
-  width: min(100% - 24px, 1000px);
+.cw-personalizer[data-product-kind="mug"] .cw-mug-modal {
+  width: min(100% - 24px, 680px);
+  max-height: calc(100dvh - 24px);
   max-width: none;
   padding: 0;
-  overflow: visible;
+  overflow: auto;
   border: 0;
   border-radius: 14px;
   background: transparent;
 }
-.cw-mug-modal::backdrop {
+.cw-personalizer[data-product-kind="mug"] .cw-mug-modal::backdrop {
   background: #111c;
 }
-.cw-mug-modal__panel {
+.cw-personalizer[data-product-kind="mug"] .cw-mug-modal__panel {
   overflow: hidden;
   border-radius: 14px;
   background: #fff;
   box-shadow: 0 24px 80px #0005;
 }
-.cw-mug-modal__panel > header {
+.cw-personalizer[data-product-kind="mug"] .cw-mug-modal__panel > header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 70px;
+  min-height: 58px;
   padding: 12px 20px;
   border-bottom: 1px solid #ddd;
 }
-.cw-mug-modal__panel > header h2 {
+.cw-personalizer[data-product-kind="mug"] .cw-mug-modal__panel > header h2 {
   margin: 0;
-  font-size: clamp(20px, 3vw, 30px);
-  text-transform: uppercase;
+  font-size: clamp(18px, 3vw, 23px);
+  color: #17191e;
 }
-.cw-mug-modal__panel > header button {
+.cw-personalizer[data-product-kind="mug"] .cw-mug-modal__panel > header button {
   width: 46px;
   height: 46px;
   padding: 0;
@@ -1176,32 +1186,82 @@ body.cw-personalization-complete
   line-height: 1;
   cursor: pointer;
 }
-.cw-mug-modal__stage {
+.cw-personalizer[data-product-kind="mug"] .cw-mug-modal__stage {
   position: relative;
   display: grid;
   place-items: center;
-  height: min(60vh, 540px);
-  min-height: 250px;
+  height: min(57dvh, 490px);
+  min-height: 180px;
   overflow: hidden;
   cursor: grab;
   touch-action: none;
-  background: #efe2d3;
+  background: radial-gradient(ellipse at 50% 38%, #30353e, #15181e 75%);
 }
-.cw-mug-modal__stage:focus-visible {
+.cw-personalizer[data-product-kind="mug"] .cw-mug-modal__stage:focus-visible {
   outline: 3px solid var(--cw-accent, #ff6200);
   outline-offset: -5px;
 }
-.cw-mug-modal__stage.is-dragging {
+.cw-personalizer[data-product-kind="mug"] .cw-mug-modal__stage.is-dragging {
   cursor: grabbing;
 }
-.cw-mug-modal__panel > p {
+.cw-personalizer[data-product-kind="mug"] .cw-mug-modal__panel > p {
   margin: 0;
   padding: 13px 20px 16px;
   color: #625953;
   text-align: center;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.cw-personalizer[data-product-kind="mug"] .cw-mug-modal__controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 16px 0;
+}
+.cw-personalizer[data-product-kind="mug"] .cw-mug-modal__controls button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid #d8dadd;
+  border-radius: 8px;
+  background: #fff;
+  color: #202226;
+  font: inherit;
+  cursor: pointer;
+}
+.cw-personalizer[data-product-kind="mug"] .cw-personalizer__toolbar-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.cw-personalizer[data-product-kind="mug"] .cw-mug-editor-preview {
+  min-height: 42px;
+  padding: 9px 14px;
+  border: 1px solid #ff6200;
+  border-radius: 8px;
+  background: #fff5ec;
+  color: #933700;
+  font: inherit;
+  font-size: 13px;
   font-weight: 700;
+  cursor: pointer;
+}
+.cw-personalizer[data-product-kind="mug"] .cw-mug-editor-preview:disabled {
+  opacity: .45;
+  cursor: not-allowed;
 }
 @media (max-width: 640px) {
+  .cw-personalizer[data-product-kind="mug"] .cw-personalizer__toolbar-actions {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    order: 1;
+  }
+  .cw-personalizer[data-product-kind="mug"] .cw-personalizer__toolbar-actions .cw-personalizer__preview--top {
+    min-width: 0;
+    font-size: 14px;
+  }
   .cw-mug-preview {
     margin: 18px auto;
     padding: 14px;
@@ -1229,12 +1289,12 @@ body.cw-personalization-complete
     width: 50px;
     height: 50px;
   }
-  .cw-mug-modal__panel > header {
+  .cw-personalizer[data-product-kind="mug"] .cw-mug-modal__panel > header {
     min-height: 58px;
     padding: 8px 12px;
   }
-  .cw-mug-modal__stage {
-    height: min(55vh, 450px);
+  .cw-personalizer[data-product-kind="mug"] .cw-mug-modal__stage {
+    height: min(51dvh, 450px);
   }
 }
 
