@@ -22,7 +22,8 @@
     "qa": "node scripts/verify-personalizer.mjs && node scripts/verify-mug-preview.mjs && node --check extensions/cartwala-personalizer/assets/cartwala-personalizer.js && node --check extensions/cartwala-personalizer/assets/cartwala-cart-preview.js && node --check extensions/cartwala-personalizer/assets/cartwala-selection-box.js && node scripts/verify-product-groups.mjs && node --check extensions/cartwala-personalizer/assets/cartwala-product-groups.js && node scripts/verify-png-mockups.mjs && node scripts/verify-shared-setup.mjs && node scripts/verify-acrylic-mockups.mjs && node scripts/verify-acrylic-designs.mjs && node scripts/verify-photo-frame-designs.mjs && node scripts/verify-master-navigation.mjs && node --check extensions/cartwala-personalizer/assets/cartwala-photo-frame-gallery.js",
     "verify": "npm run lint && npm run typecheck && npm run qa && npm run build && npm run qa:master-render",
     "qa:master-render": "node scripts/verify-master-render.mjs",
-    "qa:order-assets": "node scripts/verify-order-assets.mjs && node scripts/verify-print-recovery.mjs && node scripts/verify-album-print.mjs"
+    "qa:order-assets": "node scripts/verify-order-assets.mjs && node scripts/verify-print-recovery.mjs && node scripts/verify-album-print.mjs",
+    "qa:mug-studio": "node scripts/verify-mug-studio.mjs"
   },
   "type": "module",
   "engines": {
@@ -59,6 +60,7 @@
     "@types/react-dom": "^18.3.7",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "esbuild": "0.25.12",
     "eslint": "^8.57.1",
     "eslint-import-resolver-typescript": "^3.10.1",
     "eslint-plugin-import": "^2.32.0",
@@ -68,6 +70,7 @@
     "graphql-config": "^5.1.1",
     "preact": "^10.29.8",
     "prettier": "^3.6.2",
+    "three": "0.180.0",
     "typescript": "^5.9.3",
     "vite": "^6.3.6"
   },
