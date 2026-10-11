@@ -1,0 +1,204 @@
+{% if collection.handle == 'custom-sipper-bottles' %}{% render 'custom-sipper-filter' %}{% elsif collection.handle == 'customised-straw-water-bottles' %}{% render 'custom-straw-bottles' %}{% elsif collection.handle == 'sipper-birthday-designs' or collection.handle == 'sipper-love-designs' or collection.handle == 'sipper-anniversary-designs' or collection.handle == 'sipper-occasion-designs' or collection.handle == 'sipper-family-designs' %}{% render 'custom-sipper-bottles' %}{% elsif collection.handle == 'customised-bottles' %}{% render 'customised-bottles' %}{% else %}
+{% if collection.handle == 'photo-frames' %}
+{{ 'cartwala-frame-categories.css' | asset_url | stylesheet_tag }}
+<section class="cw-frame-catalog" data-cw-frame-catalog>
+  <div class="page-width">
+    <nav class="cw-frame-breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a><span aria-hidden="true">/</span><span>Photo Frames</span>
+    </nav>
+    <header class="cw-frame-hero">
+      <span class="cw-frame-eyebrow">CREATE YOUR FRAME</span>
+      <h1>Photo Frames</h1>
+      <p>Choose a frame design, upload your favourite photo and preview your personalised gift.</p>
+    </header>
+    <div class="cw-frame-steps" aria-label="How it works">
+      <div class="cw-frame-step"><span>1</span><strong>Select occasion</strong></div>
+      <div class="cw-frame-step"><span>2</span><strong>Choose design</strong></div>
+      <div class="cw-frame-step"><span>3</span><strong>Customise &amp; buy</strong></div>
+    </div>
+    <nav class="cw-frame-tabs" aria-label="Photo frame categories">
+      <button type="button" class="cw-frame-tab is-active" data-cw-frame-filter="all" aria-pressed="true">All</button>
+      <button type="button" class="cw-frame-tab" data-cw-frame-filter="birthday" aria-pressed="false">Birthday</button>
+      <button type="button" class="cw-frame-tab" data-cw-frame-filter="anniversary" aria-pressed="false">Anniversary</button>
+      <button type="button" class="cw-frame-tab" data-cw-frame-filter="love" aria-pressed="false">Love &amp; Couple</button>
+      <button type="button" class="cw-frame-tab" data-cw-frame-filter="wedding" aria-pressed="false">Wedding</button>
+      <button type="button" class="cw-frame-tab" data-cw-frame-filter="family" aria-pressed="false">Family</button>
+      <button type="button" class="cw-frame-tab" data-cw-frame-filter="baby" aria-pressed="false">Baby &amp; Kids</button>
+      <button type="button" class="cw-frame-tab" data-cw-frame-filter="parents" aria-pressed="false">Parents</button>
+      <button type="button" class="cw-frame-tab" data-cw-frame-filter="friends" aria-pressed="false">Friends</button>
+    </nav>
+    <div class="cw-frame-result-head">
+      <h2 data-cw-frame-heading>All Photo Frames</h2>
+      <span data-cw-frame-count aria-live="polite"></span>
+    </div>
+    <div class="cw-frame-product-grid" data-cw-frame-products>
+      {% comment %} Cartwala master photo frame appears first in every occasion tab. {% endcomment %}
+      {% assign cw_master_frame = all_products['customized-photo-frame-black-beading'] %}
+      {% if cw_master_frame != blank %}
+        <div class="cw-frame-product cw-frame-product--master" data-cw-frame-item data-cw-master-frame data-frame-groups="birthday anniversary love wedding family baby parents friends">
+          {% render 'product-card', product: cw_master_frame %}
+        </div>
+      {% endif %}
+      {% assign cw_mosaic_frame = all_products['personalised-mosaic-photo-frame'] %}
+      {% if cw_mosaic_frame != blank %}<div class="cw-frame-product" data-cw-frame-item data-cw-mosaic-frame data-frame-groups="birthday anniversary love wedding family baby parents friends">{% render 'product-card', product: cw_mosaic_frame %}</div>{% endif %}
+      {% assign frame_source_handles = 'photo-frames,personalised-photo-frames,birthday-photo-frames,wedding-anniversary-photo-frames,love-couple-photo-frames,family-photo-frames,baby-kids-photo-frames,mom-dad-parents-photo-frames,friends-photo-frames,all-personalised-photo-frames,baby-frames' | split: ',' %}
+      {% if cw_master_frame != blank %}
+        {% capture frame_seen_product_ids %}|{{ cw_master_frame.id }}|{% endcapture %}
+      {% else %}
+        {% assign frame_seen_product_ids = '|' %}
+      {% endif %}
+      {% capture frame_seen_product_ids %}{{ frame_seen_product_ids }}{{ cw_mosaic_frame.id }}|{% endcapture %}
+      {% for source_handle in frame_source_handles %}
+        {% assign source_collection = collections[source_handle] %}
+        {% if source_collection != blank %}
+          {% for frame_product in source_collection.products %}
+            {% capture frame_product_key %}|{{ frame_product.id }}|{% endcapture %}
+            {% unless frame_seen_product_ids contains frame_product_key %}
+              {% assign frame_seen_product_ids = frame_seen_product_ids | append: frame_product_key %}
+              {% assign frame_title = frame_product.title | downcase %}
+              {% assign frame_tags = frame_product.tags | join: ' ' | downcase %}
+              {% assign frame_groups = '' %}
+              {% if frame_title contains 'birthday' or frame_tags contains 'birthday' %}
+                {% assign frame_groups = frame_groups | append: ' birthday' %}
+              {% endif %}
+              {% if frame_title contains 'anniversary' or frame_tags contains 'anniversary' %}
+                {% assign frame_groups = frame_groups | append: ' anniversary' %}
+              {% endif %}
+              {% if frame_title contains 'wedding' or frame_tags contains 'wedding' or frame_title contains 'marriage' %}
+                {% assign frame_groups = frame_groups | append: ' wedding' %}
+              {% endif %}
+              {% if frame_title contains 'love' or frame_title contains 'couple' or frame_tags contains 'love' or frame_tags contains 'couple' %}
+                {% assign frame_groups = frame_groups | append: ' love' %}
+              {% endif %}
+              {% if frame_title contains 'family' or frame_tags contains 'family' %}
+                {% assign frame_groups = frame_groups | append: ' family' %}
+              {% endif %}
+              {% if frame_title contains 'baby' or frame_title contains 'birth' or frame_title contains 'kids' or frame_tags contains 'baby' or frame_tags contains 'newborn' or frame_tags contains 'milestone' %}
+                {% assign frame_groups = frame_groups | append: ' baby' %}
+              {% endif %}
+              {% if frame_title contains 'mom' or frame_title contains 'dad' or frame_title contains 'parent' or frame_tags contains 'parent' or frame_tags contains 'mother' or frame_tags contains 'father' %}
+                {% assign frame_groups = frame_groups | append: ' parents' %}
+              {% endif %}
+              {% if frame_title contains 'friend' or frame_tags contains 'friend' %}
+                {% assign frame_groups = frame_groups | append: ' friends' %}
+              {% endif %}
+              {% comment %}
+                Classify by actual Shopify collection membership as well as title/tags.
+                This supports newly added generic-named designs automatically.
+              {% endcomment %}
+              {% for member_collection in frame_product.collections %}
+                {% case member_collection.handle %}
+                  {% when 'birthday-photo-frames' %}
+                    {% assign frame_groups = frame_groups | append: ' birthday' %}
+                  {% when 'wedding-anniversary-photo-frames' %}
+                    {% assign frame_groups = frame_groups | append: ' wedding anniversary' %}
+                  {% when 'love-couple-photo-frames' %}
+                    {% assign frame_groups = frame_groups | append: ' love' %}
+                  {% when 'family-photo-frames' %}
+                    {% assign frame_groups = frame_groups | append: ' family' %}
+                  {% when 'baby-kids-photo-frames' or 'baby-frames' %}
+                    {% assign frame_groups = frame_groups | append: ' baby' %}
+                  {% when 'mom-dad-parents-photo-frames' %}
+                    {% assign frame_groups = frame_groups | append: ' parents' %}
+                  {% when 'friends-photo-frames' %}
+                    {% assign frame_groups = frame_groups | append: ' friends' %}
+                {% endcase %}
+              {% endfor %}
+              {% if source_handle == 'birthday-photo-frames' %}
+                {% assign frame_groups = frame_groups | append: ' birthday' %}
+              {% elsif source_handle == 'wedding-anniversary-photo-frames' %}
+                {% assign frame_groups = frame_groups | append: ' wedding anniversary' %}
+              {% elsif source_handle == 'love-couple-photo-frames' %}
+                {% assign frame_groups = frame_groups | append: ' love' %}
+              {% elsif source_handle == 'family-photo-frames' %}
+                {% assign frame_groups = frame_groups | append: ' family' %}
+              {% elsif source_handle == 'baby-kids-photo-frames' or source_handle == 'baby-frames' %}
+                {% assign frame_groups = frame_groups | append: ' baby' %}
+              {% elsif source_handle == 'mom-dad-parents-photo-frames' %}
+                {% assign frame_groups = frame_groups | append: ' parents' %}
+              {% elsif source_handle == 'friends-photo-frames' %}
+                {% assign frame_groups = frame_groups | append: ' friends' %}
+              {% endif %}
+              <div class="cw-frame-product" data-cw-frame-item data-frame-groups="{{ frame_groups | strip | escape }}">
+                {% render 'product-card', product: frame_product %}
+              </div>
+            {% endunless %}
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div class="cw-frame-empty" data-cw-frame-empty hidden>
+      <h3>More frame designs coming soon</h3>
+      <p>We don't have designs listed in this category yet. Explore the other frames available now.</p>
+      <button type="button" class="cw-frame-view-all" data-cw-frame-view-all>View All Photo Frames</button>
+    </div>
+  </div>
+</section>
+<script src="{{ 'cartwala-frame-categories.js' | asset_url }}" defer></script>
+{% else %}
+{% assign cw_frame_subcollection_handles = 'birthday-photo-frames,love-couple-photo-frames,wedding-anniversary-photo-frames,family-photo-frames,baby-kids-photo-frames,mom-dad-parents-photo-frames,friends-photo-frames,all-personalised-photo-frames,personalised-photo-frames,baby-frames' | split: ',' %}
+{% assign cw_frame_subcollection = false %}
+{% if cw_frame_subcollection_handles contains collection.handle %}
+  {% assign cw_frame_subcollection = true %}
+  {% assign cw_master_frame = all_products['customized-photo-frame-black-beading'] %}
+{% endif %}
+<div class="section"><div class="page-width"><nav class="breadcrumb"><a href="/">Home</a><span>/</span><span>{{ collection.title }}</span></nav><div class="collection-header"><div><h1>{{ collection.title }}</h1>{% if collection.description != blank %}<div class="text-muted">{{ collection.description }}</div>{% endif %}</div><span class="text-muted">{{ collection.products_count }} products</span></div><div class="grid products-grid" data-cw-infinite>{% assign collection_page_size = 24 %}{% if collection.handle == 'personalised-gift-collection' %}{% assign collection_page_size = 80 %}{% endif %}{% if collection.handle == 'crystal' %}{% assign collection_page_size = 50 %}{% endif %}{% paginate collection.products by collection_page_size %}{% if cw_frame_subcollection and cw_master_frame != blank and paginate.current_page == 1 %}<div class="cw-frame-master-first" data-cw-master-frame>{% render 'product-card', product: cw_master_frame %}</div>{% endif %}{% if cw_frame_subcollection and paginate.current_page == 1 %}{% assign cw_mosaic_frame = all_products['personalised-mosaic-photo-frame'] %}{% if cw_mosaic_frame != blank %}<div data-cw-mosaic-frame>{% render 'product-card', product: cw_mosaic_frame %}</div>{% endif %}{% endif %}{% for product in collection.products %}{% if cw_frame_subcollection and product.handle == 'personalised-mosaic-photo-frame' %}{% continue %}{% endif %}{% unless cw_frame_subcollection and cw_master_frame != blank and product.id == cw_master_frame.id %}{% render 'product-card', product: product %}{% endunless %}{% endfor %}{% if paginate.pages > 1 %}<nav data-cw-pagination style="grid-column:1/-1" aria-label="{{ 'crystal.collection_pages' | t }}">{{ paginate | default_pagination }}</nav>{% endif %}{% endpaginate %}</div></div></div>
+{% endif %}
+
+{% endif %}
+{% javascript %}
+(() => {
+const init = () => {
+document.querySelectorAll('[data-cw-infinite]').forEach((grid) => {
+if (grid.dataset.cwReady || !('IntersectionObserver' in window)) return;
+const pager = grid.querySelector('[data-cw-pagination]');
+let next = pager?.querySelector('.next a');
+if (!pager || !next) return;
+grid.dataset.cwReady = 'true';
+const marker = document.createElement('div');
+marker.style.cssText = 'grid-column:1/-1;height:1px';
+marker.setAttribute('aria-hidden', 'true');
+grid.append(marker);
+pager.hidden = true;
+let busy = false;
+const visited = new Set();
+const observer = new IntersectionObserver(async (entries) => {
+if (!entries.some((entry) => entry.isIntersecting) || busy || !next) return;
+const url = next.href;
+if (visited.has(url)) { observer.disconnect(); return; }
+busy = true;
+grid.setAttribute('aria-busy', 'true');
+try {
+const response = await fetch(url, { credentials: 'same-origin' });
+if (!response.ok) throw new Error('collection');
+const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+const incoming = doc.querySelector('[data-cw-infinite]');
+if (!incoming) throw new Error('grid');
+const incomingPager = incoming.querySelector('[data-cw-pagination]');
+const cards = [...incoming.children].filter((child) => !child.matches('[data-cw-pagination], [data-cw-draft-card]'));
+if (!cards.length) throw new Error('products');
+cards.forEach((card) => grid.insertBefore(document.importNode(card, true), pager));
+visited.add(url);
+pager.innerHTML = incomingPager?.innerHTML || '';
+next = pager.querySelector('.next a');
+if (!next) { observer.disconnect(); marker.remove(); pager.remove(); }
+else { observer.unobserve(marker); observer.observe(marker); }
+} catch {
+observer.disconnect();
+pager.hidden = false;
+marker.remove();
+} finally {
+busy = false;
+grid.removeAttribute('aria-busy');
+}
+}, { rootMargin: '600px 0px' });
+observer.observe(marker);
+});
+};
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+document.addEventListener('shopify:section:load', init);
+})();
+{% endjavascript %}
+{% schema %}{"name":"Collection","settings":[]}{% endschema %}
+
