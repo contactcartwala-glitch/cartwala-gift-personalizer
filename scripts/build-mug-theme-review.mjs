@@ -12,7 +12,7 @@ const bootstrap = `(() => {
   const loader = document.currentScript;
   document.querySelectorAll('[data-cw-personalizer][data-product-kind="mug"]').forEach(root => {
     root.dataset.cwMugReview = '20261011';
-    if (root.dataset.cwMugModel === 'white' && loader.dataset.cwMugStudioScript) {
+    if (loader.dataset.cwMugStudioScript) {
       root.dataset.cwMugStudioScript = loader.dataset.cwMugStudioScript;
       root.dataset.cwMugStudioModel = loader.dataset.cwMugStudioModel;
       root.dataset.cwMugStudioLabels = JSON.stringify(labels);
@@ -55,14 +55,20 @@ const bootstrap = `(() => {
       const heading = root.querySelector('.cw-mug-modal__panel > header h2');
       if (heading) heading.textContent = labels.studio_title;
       const help = root.querySelector('.cw-mug-modal__panel > p');
-      if (help) help.textContent = labels.studio_help;
+      if (help) {
+        help.textContent = labels.studio_help;
+        const brand = document.createElement('strong');
+        brand.className = 'cw-mug-modal__brand';
+        brand.textContent = labels.preview_brand;
+        help.append(document.createElement('br'), brand);
+      }
     }
   });
 })();\n`;
 const layout = fs.readFileSync(layoutPath, "utf8");
 if (!layout.includes("{{ content_for_header }}")) throw new Error("Expected content_for_header marker missing");
 const condition = "request.page_type == 'product' and product.tags contains 'cw-mug'";
-const loader = `<script src="{{ 'cartwala-mug-3d-review.js' | asset_url }}" defer{% if product.handle == 'personalized-normal-white-photo-mug-11oz' %} data-cw-mug-studio-script="{{ 'cartwala-mug-studio.js' | asset_url }}" data-cw-mug-studio-model="{{ 'cartwala-white-mug.glb' | asset_url }}"{% endif %}></script>`;
+const loader = `<script src="{{ 'cartwala-mug-3d-review.js' | asset_url }}" defer data-cw-mug-studio-script="{{ 'cartwala-mug-studio.js' | asset_url }}" data-cw-mug-studio-model="{{ 'cartwala-white-mug.glb' | asset_url }}"></script>`;
 const patch = `{% if ${condition} %}${loader}{% endif %}\n{{ content_for_header }}\n{% if ${condition} %}{{ 'cartwala-mug-3d-review.css' | asset_url | stylesheet_tag }}{% endif %}`;
 const updatedLayout = layout.includes('cartwala-mug-3d-review.js')
   ? layout.replace(/<script src="{{ 'cartwala-mug-3d-review.js' \| asset_url }}"[^>]*>[\s\S]*?<\/script>/, loader)

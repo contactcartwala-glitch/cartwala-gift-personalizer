@@ -33,7 +33,7 @@ for(let i=0;i<mesh.vertices.length;i+=9){
   assert.ok(!(y>1.1&&Math.hypot(x,z)<0.90),'Opening must remain hollow');
 }
 assert.ok(upwardFloor&&downwardBase&&inwardWall);
-assert.equal(createWhiteMug().children.length,3);
+assert.equal(createWhiteMug().children.length,4);
 const turn=fps=>{
   const camera=new THREE.PerspectiveCamera();camera.position.set(0,0,6);
   const controls=new OrbitControls(camera,null);controls.autoRotate=true;controls.autoRotateSpeed=2.2;
@@ -47,3 +47,11 @@ const turn=fps=>{
 };
 assert.ok(Math.abs(turn(30)-turn(120))<1e-10,'Rotation speed must be independent of display refresh rate');
 console.log('GLB round trip, hollow cup, handle proportions, print seam/orientation, normalized normals, automatic rotation and pause/resume passed.');
+
+for(const kind of ['white','red','magic','love-handle']) {
+  const mug=createWhiteMug(kind), geometry=softwareGeometry(mug);
+  assert.ok(geometry.vertices.every(Number.isFinite));
+  assert.ok(mug.getObjectByName('Ceramic_inner'));
+  assert.ok(mug.children.some(m=>m.material.name==='Handle'));
+  if(kind==='love-handle')assert.ok(mug.getObjectByName('Heart_handle'));
+}

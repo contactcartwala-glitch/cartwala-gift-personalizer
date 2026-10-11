@@ -39,9 +39,9 @@
     "right_view": "Right View",
     "live": "Live preview",
     "help": "Drag the mug or use the arrows to rotate",
-    "free_drag_help": "Drag to rotate · Pinch or scroll to zoom · View every side",
+    "free_drag_help": "Drag to rotate \u00b7 Pinch or scroll to zoom \u00b7 View every side",
     "editor_preview": "3D Preview",
-    "preparing": "Preparing 3D…",
+    "preparing": "Preparing 3D\u2026",
     "view_controls": "3D view controls",
     "zoom_in": "Zoom in",
     "zoom_out": "Zoom out",
@@ -56,9 +56,10 @@
     "rotate_right": "Rotate mug right",
     "pause_rotation": "Pause rotation",
     "resume_rotation": "Resume rotation",
-    "studio_help": "Drag to rotate · pinch or scroll to zoom",
+    "studio_help": "Drag to rotate \u00b7 pinch or scroll to zoom",
     "load_error": "The 3D preview could not load. Close it and try again.",
-    "studio_title": "3D View"
+    "studio_title": "3D View",
+    "preview_brand": "Cartwala Preview"
   },
   "personalizer": {
     "block_name": "Cartwala Personalizer",
@@ -89,7 +90,7 @@
     "gallery": "Personalized photo frame gallery",
     "portrait": "Portrait",
     "landscape": "Landscape",
-    "sample": "Sample photo · Customise with your own photo",
+    "sample": "Sample photo \u00b7 Customise with your own photo",
     "product_photo": "Product photo",
     "room_preview": "Room preview",
     "size_guide": "Compare frame sizes",

@@ -485,7 +485,7 @@
         const pixels = context.createImageData(width, height);
         const depth = new Float32Array(width * height).fill(-Infinity);
         const cold = mugModel === "magic" && !state.heated;
-        const palettes = [colour(cold ? "#171717" : "#ffffff"), colour(state.innerColour), colour(state.handleColour), [240,240,240]];
+        const palettes = [colour(cold ? "#171717" : "#ffffff"), colour(state.innerColour), colour(state.handleColour), [240,240,240], colour(cold ? "#171717" : "#ffffff")];
         for (let i = 0; i < geometry.indices.length; i += 3) {
           const ids = Array.from(geometry.indices.slice(i, i + 3));
           const p = ids.map(id => points.subarray(id * 6, id * 6 + 6));
@@ -903,7 +903,7 @@
 
   let mugStudioLoading;
   const createMugStudioRenderer = (scene, root) => {
-    let viewer, pendingTexture, loading, disposed=false, opened=false;
+    let viewer, pendingTexture, pendingState, loading, disposed=false, opened=false;
     const labels=JSON.parse(root.dataset.cwMugStudioLabels||'{}');
     const status=document.createElement('p');
     status.className='cw-mug-studio-status';status.setAttribute('role','status');
@@ -923,12 +923,14 @@
       });
       loading=mugStudioLoading.then(module=>module.createViewer(scene,{
         modelUrl:root.dataset.cwMugStudioModel,
-        software:geometry=>createMugSoftwareRenderer(scene,'white',geometry),
+        mugModel:root.dataset.cwMugModel,
+        software:geometry=>createMugSoftwareRenderer(scene,root.dataset.cwMugModel,geometry),
         onError:showError,
         onReady:()=>{status.hidden=true;},
       })).then(async instance=>{
         if(disposed){instance.dispose();return;}
         viewer=instance;
+        if(pendingState)viewer.setState(pendingState);
         status.hidden=true;
         if(spin){spin.disabled=false;spin.textContent=viewer.spinning?labels.pause_rotation:labels.resume_rotation;spin.setAttribute('aria-pressed',String(viewer.spinning));}
         if(pendingTexture)await viewer.setTexture(pendingTexture);
@@ -944,7 +946,7 @@
     });
     return {
       interactiveControls:true,
-      render(){},
+      render(state){pendingState=state;viewer?.setState(state);},
       setTexture(url){pendingTexture=url;if(viewer)viewer.setTexture(url).then(()=>{status.hidden=true;}).catch(showError);},
       open(){opened=true;if(viewer)viewer.open();else prepare();},
       close(){opened=false;viewer?.close();},
@@ -1012,7 +1014,7 @@
       scene.dataset.cwMugModel = mugModel;
       return {
         scene,
-        renderer: mugModel === 'white' && root.dataset.cwMugStudioScript && stage.contains(scene) ? createMugStudioRenderer(scene, root) : createMugRenderer(
+        renderer: root.dataset.cwMugStudioScript && stage.contains(scene) ? createMugStudioRenderer(scene, root) : createMugRenderer(
           scene,
           mugModel,
           geometry,

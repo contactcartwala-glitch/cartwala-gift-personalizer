@@ -1,11 +1,12 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { softwareGeometry } from './mug-studio-model.mjs';
+import { createWhiteMug, softwareGeometry } from './mug-studio-model.mjs';
 
 export async function createViewer(host, options) {
   const gltf = await new GLTFLoader().loadAsync(options.modelUrl);
-  const model = gltf.scene;
+  const model = options.mugModel && options.mugModel !== 'white' ? createWhiteMug(options.mugModel) : gltf.scene;
+  let mugState={handleColour:options.mugModel==='magic'?'#171717':options.mugModel==='red'?'#d92f3f':'#ffffff',innerColour:options.mugModel==='red'?'#d92f3f':'#ffffff',heated:false};
   let disposed=false, active=false, frame=0, lastTime=0, imageVersion=0, texture=null, image=null, spinning=true;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   spinning=!reduced.matches;
@@ -76,7 +77,7 @@ export async function createViewer(host, options) {
       const distance=camera.position.distanceTo(controls.target);
       const heightAtTarget=2*distance*Math.tan(THREE.MathUtils.degToRad(camera.fov/2));
       const center=controls.target.clone().applyMatrix3(new THREE.Matrix3().setFromMatrix4(camera.matrixWorldInverse));
-      software.render({studio:true,rotationMatrix:r,studioFrame:{center:[center.x,center.y],scale:2/heightAtTarget},zoom:1,handleColour:'#ffffff',innerColour:'#ffffff',heated:true},image);
+      software.render({studio:true,rotationMatrix:r,studioFrame:{center:[center.x,center.y],scale:2/heightAtTarget},zoom:1,...mugState},image);
     }
   };
   const animate=time=>{
@@ -140,6 +141,17 @@ export async function createViewer(host, options) {
   host.dataset.cwStudioStatus='ready';
   host.dataset.cwStudioRenderer=renderer?'webgl':'software';
   return {
+    setState(state){
+      mugState={...mugState,...state};
+      const cold=options.mugModel==='magic'&&!mugState.heated;
+      model.traverse(mesh=>{
+        if(!mesh.isMesh)return;
+        const material=mesh.material;
+        material.color.set(material.name==='Inner'?mugState.innerColour:material.name==='Handle'?mugState.handleColour:cold?'#171717':'#ffffff');
+        if(material.name==='Print'){material.map=cold?null:texture;material.needsUpdate=true;}
+      });
+      render();
+    },
     open(){active=true;resize();startLoop();host.dataset.cwMotion=spinning?'rotating':'paused';},
     close(){active=false;stopLoop();host.dataset.cwMotion='closed';},
     reset,
@@ -157,7 +169,7 @@ export async function createViewer(host, options) {
       const context=bitmap.getContext('2d');context.fillStyle='#fff';context.fillRect(0,0,bitmap.width,bitmap.height);context.drawImage(next,0,0,bitmap.width,bitmap.height);
       const nextTexture=new THREE.CanvasTexture(bitmap);nextTexture.flipY=false;nextTexture.colorSpace=THREE.SRGBColorSpace;nextTexture.anisotropy=renderer?Math.min(8,renderer.capabilities.getMaxAnisotropy()):1;
       texture?.dispose();texture=nextTexture;image=next;
-      for(const mesh of printMeshes){mesh.material.map=texture;mesh.material.needsUpdate=true;}
+      for(const mesh of printMeshes){mesh.material.map=options.mugModel==='magic'&&!mugState.heated?null:texture;mesh.material.needsUpdate=true;}
       render();
     },
     dispose(){disposed=true;active=false;imageVersion++;stopLoop();observer.disconnect();document.removeEventListener('visibilitychange',visibility);host.parentElement.removeEventListener('keydown',keydown);controls.dispose();texture?.dispose();model.traverse(o=>o.geometry?.dispose());originalMaterials.forEach(m=>m.dispose());environment?.dispose();renderer?.dispose();canvas.remove();},
