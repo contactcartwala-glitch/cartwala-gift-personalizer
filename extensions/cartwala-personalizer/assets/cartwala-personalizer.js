@@ -485,7 +485,7 @@
         const pixels = context.createImageData(width, height);
         const depth = new Float32Array(width * height).fill(-Infinity);
         const cold = mugModel === "magic" && !state.heated;
-        const palettes = [colour(cold ? "#171717" : "#ffffff"), colour(state.innerColour), colour(state.handleColour), [240,240,240], colour(cold ? "#171717" : "#ffffff")];
+        const palettes = [colour(cold ? "#171717" : "#ffffff"), colour(state.innerColour), colour(state.handleColour), [240,240,240], colour(cold ? "#171717" : "#ffffff"), colour(cold ? "#dddddd" : "#383838")];
         for (let i = 0; i < geometry.indices.length; i += 3) {
           const ids = Array.from(geometry.indices.slice(i, i + 3));
           const p = ids.map(id => points.subarray(id * 6, id * 6 + 6));

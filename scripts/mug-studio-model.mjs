@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import fontData from './mug-brand-font.mjs';
 
 export function createWhiteMug(kind = "white") {
   const model = new THREE.Group();
@@ -41,6 +43,18 @@ export function createWhiteMug(kind = "white") {
   const printUv = print.geometry.attributes.uv;
   for(let i=0;i<printUv.count;i++) printUv.setY(i,1-printUv.getY(i));
   model.add(print);
+  const font = new FontLoader().parse(fontData);
+  const markGeometry = new THREE.ShapeGeometry(font.generateShapes('Cartwala Preview',0.12),6);
+  markGeometry.computeBoundingBox();
+  const markCenter = markGeometry.boundingBox.getCenter(new THREE.Vector3());
+  markGeometry.translate(-markCenter.x,-markCenter.y,0);
+  markGeometry.rotateX(Math.PI/2);
+  const markMaterial = new THREE.MeshPhysicalMaterial({color:0x383838,roughness:0.4});
+  markMaterial.name = 'BottomMark';
+  const mark = new THREE.Mesh(markGeometry,markMaterial);
+  mark.name = 'Cartwala_Preview_bottom_center';
+  mark.position.y = -1.137;
+  model.add(mark);
   return model;
 }
 
@@ -59,7 +73,7 @@ export function softwareGeometry(model) {
       const printed = mesh.material.name === 'Print';
       const u = g.attributes.uv?.getX(i) || 0;
       const v = printed ? 1-g.attributes.uv.getY(i) : 0;
-      vertices.push(...p.toArray(),...n.toArray(),0.925-u*0.85,0.018+v*0.964,printed?0:mesh.name.includes('handle')?2:mesh.material.name==='Inner'?1:4);
+      vertices.push(...p.toArray(),...n.toArray(),0.925-u*0.85,0.018+v*0.964,mesh.material.name==='BottomMark'?5:printed?0:mesh.name.includes('handle')?2:mesh.material.name==='Inner'?1:4);
     }
     const count=g.index?.count||g.attributes.position.count;
     for(let i=0;i<count;i++) indices.push(offset+(g.index?g.index.getX(i):i));

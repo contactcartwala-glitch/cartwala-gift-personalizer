@@ -33,7 +33,7 @@ for(let i=0;i<mesh.vertices.length;i+=9){
   assert.ok(!(y>1.1&&Math.hypot(x,z)<0.90),'Opening must remain hollow');
 }
 assert.ok(upwardFloor&&downwardBase&&inwardWall);
-assert.equal(createWhiteMug().children.length,4);
+assert.equal(createWhiteMug().children.length,5);
 const turn=fps=>{
   const camera=new THREE.PerspectiveCamera();camera.position.set(0,0,6);
   const controls=new OrbitControls(camera,null);controls.autoRotate=true;controls.autoRotateSpeed=2.2;
@@ -54,4 +54,13 @@ for(const kind of ['white','red','magic','love-handle']) {
   assert.ok(mug.getObjectByName('Ceramic_inner'));
   assert.ok(mug.children.some(m=>m.material.name==='Handle'));
   if(kind==='love-handle')assert.ok(mug.getObjectByName('Heart_handle'));
+}
+
+for(const kind of ['white','red','magic','love-handle']) {
+  const mark=createWhiteMug(kind).getObjectByName('Cartwala_Preview_bottom_center');
+  const box=new THREE.Box3().setFromObject(mark),center=box.getCenter(new THREE.Vector3());
+  assert.ok(Math.abs(center.x)<1e-6 && Math.abs(center.z)<1e-6);
+  assert.ok(center.y < -1.135 && center.y > -1.14);
+  assert.ok(box.getSize(new THREE.Vector3()).x < 1.4);
+  assert.ok(mark.geometry.attributes.normal.getY(0)<-0.99);
 }

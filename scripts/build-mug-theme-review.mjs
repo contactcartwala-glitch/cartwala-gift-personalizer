@@ -17,13 +17,6 @@ const bootstrap = `(() => {
       root.dataset.cwMugStudioModel = loader.dataset.cwMugStudioModel;
       root.dataset.cwMugStudioLabels = JSON.stringify(labels);
     }
-    const productPreview = root.querySelector('[data-cw-mug-preview]');
-    if (productPreview && !productPreview.querySelector('.cw-mug-preview__brand')) {
-      const brand = document.createElement('p');
-      brand.className = 'cw-mug-preview__brand';
-      brand.textContent = labels.preview_brand;
-      productPreview.append(brand);
-    }
     const save = root.querySelector('[data-cw-save]');
     if (save && !root.querySelector('[data-cw-mug-editor-preview]')) {
       const actions = document.createElement('div');
@@ -64,10 +57,6 @@ const bootstrap = `(() => {
       const help = root.querySelector('.cw-mug-modal__panel > p');
       if (help) {
         help.textContent = labels.studio_help;
-        const brand = document.createElement('strong');
-        brand.className = 'cw-mug-modal__brand';
-        brand.textContent = labels.preview_brand;
-        help.append(document.createElement('br'), brand);
       }
     }
   });

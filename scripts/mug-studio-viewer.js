@@ -147,7 +147,7 @@ export async function createViewer(host, options) {
       model.traverse(mesh=>{
         if(!mesh.isMesh)return;
         const material=mesh.material;
-        material.color.set(material.name==='Inner'?mugState.innerColour:material.name==='Handle'?mugState.handleColour:cold?'#171717':'#ffffff');
+        material.color.set(material.name==='BottomMark'?(cold?'#dddddd':'#383838'):material.name==='Inner'?mugState.innerColour:material.name==='Handle'?mugState.handleColour:cold?'#171717':'#ffffff');
         if(material.name==='Print'){material.map=cold?null:texture;material.needsUpdate=true;}
       });
       render();
