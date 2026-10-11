@@ -451,7 +451,7 @@
       render(state, image) {
         const bounds = scene.getBoundingClientRect();
         if (!state || !bounds.width || !bounds.height) return false;
-        const ratio = Math.min(1.5, 720 / Math.max(bounds.width, bounds.height));
+        const ratio = Math.min(1.5, (state.studio ? 560 : 720) / Math.max(bounds.width, bounds.height));
         const width = Math.max(1, Math.round(bounds.width * ratio));
         const height = Math.max(1, Math.round(bounds.height * ratio));
         if (canvas.width !== width || canvas.height !== height) {
@@ -468,8 +468,8 @@
           artwork = ink.getImageData(0, 0, texture.width, texture.height);
           cachedImage = image;
         }
-        const rotation = mugRotationMatrix(state.rotationX, state.rotationY);
-        const frame = mugFrame(geometry.vertices, rotation, width / height,
+        const rotation = state.rotationMatrix || mugRotationMatrix(state.rotationX, state.rotationY);
+        const frame = state.studioFrame || mugFrame(geometry.vertices, rotation, width / height,
           Boolean(scene.closest?.(".cw-mug-preview__views")),
           Number(scene.dataset.cwRotationY) === 90 ? 2.05 : 3.05);
         const scale = frame.scale * (state.zoom || 1) * height / 2;
@@ -494,7 +494,7 @@
           if (nz <= 0) continue;
           const length = Math.hypot(nx, ny, nz) || 1;
           nx /= length; ny /= length; nz /= length;
-          const light = (0.64 + 0.36 * Math.max(0, (-0.6 * nx + 1.1 * ny + 1.8 * nz) / 2.193)) * (material === 1 ? 0.88 : 1);
+          const light = (0.64 + 0.36 * Math.max(0, (-0.6 * nx + 1.1 * ny + 1.8 * nz) / 2.193)) * (material === 1 && !state.studio ? 0.88 : 1);
           const shine = 35 * Math.pow(Math.max(0, (-0.143 * nx + 0.262 * ny + 0.954 * nz)), 65);
           const [a, b, c] = p;
           const denominator = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1]);
@@ -522,9 +522,17 @@
             }
             depth[index] = z;
             const at = index * 4;
-            pixels.data[at] = rgb[0] * light + shine;
-            pixels.data[at + 1] = rgb[1] * light + shine;
-            pixels.data[at + 2] = rgb[2] * light + shine;
+            let illumination=light, reflection=shine;
+            if(state.studio) {
+              let snx=w0*a[3]+w1*b[3]+w2*c[3], sny=w0*a[4]+w1*b[4]+w2*c[4], snz=w0*a[5]+w1*b[5]+w2*c[5];
+              const norm=Math.hypot(snx,sny,snz)||1;snx/=norm;sny/=norm;snz/=norm;
+              illumination=0.70+0.29*Math.max(0,(-0.38*snx+0.5*sny+0.78*snz));
+              const vertical=Math.max(0,1-Math.abs(sny)*0.7);
+              reflection=(72*Math.exp(-Math.pow((snx+0.42)/0.085,2))+38*Math.exp(-Math.pow((snx-0.56)/0.07,2)))*vertical*Math.max(0,snz);
+            }
+            pixels.data[at] = rgb[0] * illumination + reflection;
+            pixels.data[at + 1] = rgb[1] * illumination + reflection;
+            pixels.data[at + 2] = rgb[2] * illumination + reflection;
             pixels.data[at + 3] = 255;
           }
         }
@@ -893,6 +901,60 @@
     };
   };
 
+  let mugStudioLoading;
+  const createMugStudioRenderer = (scene, root) => {
+    let viewer, pendingTexture, loading, disposed=false, opened=false;
+    const labels=JSON.parse(root.dataset.cwMugStudioLabels||'{}');
+    const status=document.createElement('p');
+    status.className='cw-mug-studio-status';status.setAttribute('role','status');
+    status.textContent=labels.preparing||'Preparing your 3D preview…';
+    scene.append(status);
+    const spin=root.querySelector('[data-cw-mug-spin]');
+    const showError=error=>{status.hidden=false;status.textContent=error.message||String(error);scene.dataset.cwStudioStatus='error';};
+    const prepare=()=>{
+      if(loading)return loading;
+      scene.dataset.cwStudioStatus='loading';
+      mugStudioLoading ||= new Promise((resolve,reject)=>{
+        if(window.CartwalaMugStudio){resolve(window.CartwalaMugStudio);return;}
+        const script=document.createElement('script');script.src=root.dataset.cwMugStudioScript;script.async=true;
+        script.onload=()=>resolve(window.CartwalaMugStudio);
+        script.onerror=()=>{mugStudioLoading=null;script.remove();reject(new Error(labels.load_error));};
+        document.head.append(script);
+      });
+      loading=mugStudioLoading.then(module=>module.createViewer(scene,{
+        modelUrl:root.dataset.cwMugStudioModel,
+        software:geometry=>createMugSoftwareRenderer(scene,'white',geometry),
+        onError:showError,
+        onReady:()=>{status.hidden=true;},
+      })).then(async instance=>{
+        if(disposed){instance.dispose();return;}
+        viewer=instance;
+        status.hidden=true;
+        if(spin){spin.disabled=false;spin.textContent=viewer.spinning?labels.pause_rotation:labels.resume_rotation;spin.setAttribute('aria-pressed',String(viewer.spinning));}
+        if(pendingTexture)await viewer.setTexture(pendingTexture);
+        if(opened)viewer.open();
+      }).catch(error=>{loading=null;showError(error);});
+      return loading;
+    };
+    spin?.addEventListener('click',()=>{
+      if(!viewer)return;
+      const spinning=viewer.setSpinning(!viewer.spinning);
+      spin.textContent=spinning?labels.pause_rotation:labels.resume_rotation;
+      spin.setAttribute('aria-pressed',String(spinning));
+    });
+    return {
+      interactiveControls:true,
+      render(){},
+      setTexture(url){pendingTexture=url;if(viewer)viewer.setTexture(url).then(()=>{status.hidden=true;}).catch(showError);},
+      open(){opened=true;if(viewer)viewer.open();else prepare();},
+      close(){opened=false;viewer?.close();},
+      reset(){viewer?.reset();},
+      setZoom(value){viewer?.setZoom(value);},
+      getZoom(){return viewer?.getZoom()??1;},
+      dispose(){disposed=true;viewer?.dispose();},
+    };
+  };
+
   const initializeMugPreview = (root) => {
     const preview = root.querySelector("[data-cw-mug-preview]");
     if (!preview || preview.dataset.cwMugReady === "true") return;
@@ -950,7 +1012,7 @@
       scene.dataset.cwMugModel = mugModel;
       return {
         scene,
-        renderer: createMugRenderer(
+        renderer: mugModel === 'white' && root.dataset.cwMugStudioScript && stage.contains(scene) ? createMugStudioRenderer(scene, root) : createMugRenderer(
           scene,
           mugModel,
           geometry,
@@ -1129,8 +1191,10 @@
         mugDialog.setAttribute("open", "");
       }
       requestAnimationFrame(() => renderScene(interactive));
+      interactive.renderer.open?.();
     };
     const closeMugDialog = () => {
+      interactive.renderer.close?.();
       if (typeof mugDialog.close === "function" && mugDialog.open) {
         mugDialog.close();
       } else {
@@ -1145,19 +1209,22 @@
     );
     const setZoom = (value) => {
       interactive.zoom = Math.max(0.65, Math.min(1.8, value));
+      interactive.renderer.setZoom?.(interactive.zoom);
       renderScene(interactive);
     };
     mugDialog.querySelectorAll("[data-cw-mug-zoom]").forEach((button) => {
       button.addEventListener("click", () =>
-        setZoom(interactive.zoom + (button.dataset.cwMugZoom === "in" ? 0.15 : -0.15)),
+        setZoom((interactive.renderer.getZoom?.()??interactive.zoom) + (button.dataset.cwMugZoom === "in" ? 0.15 : -0.15)),
       );
     });
     mugDialog.querySelector("[data-cw-mug-reset]")?.addEventListener("click", () => {
       interactive.rotationX = -22;
       interactive.rotationY = 25;
       setZoom(1);
+      interactive.renderer.reset?.();
     });
     mugDialog.addEventListener("close", () => {
+      interactive.renderer.close?.();
       textureRevision += 1;
       pointers.clear();
       dragging = false;
@@ -1165,6 +1232,7 @@
       if (savedTexture) interactive.renderer.setTexture(savedTexture);
     });
     stage.addEventListener("wheel", (event) => {
+      if(interactive.renderer.interactiveControls)return;
       event.preventDefault();
       setZoom(interactive.zoom * Math.exp(-event.deltaY * 0.001));
     }, { passive: false });
@@ -1173,6 +1241,7 @@
       if (event.target === mugDialog) closeMugDialog();
     });
     stage.addEventListener("keydown", (event) => {
+      if(interactive.renderer.interactiveControls)return;
       if (
         !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "+", "=", "-", "Home"].includes(event.key)
       )
@@ -1207,6 +1276,7 @@
       }
     };
     stage.addEventListener("pointerdown", (event) => {
+      if(interactive.renderer.interactiveControls)return;
       if (event.button !== 0) return;
       pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
       startGesture();

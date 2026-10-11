@@ -53,7 +53,12 @@
     "stage_label": "Rotatable preview of your personalised mug",
     "render_fallback": "3D is unavailable on this device. Your saved print design is shown instead.",
     "rotate_left": "Rotate mug left",
-    "rotate_right": "Rotate mug right"
+    "rotate_right": "Rotate mug right",
+    "pause_rotation": "Pause rotation",
+    "resume_rotation": "Resume rotation",
+    "studio_help": "Drag to rotate · pinch or scroll to zoom",
+    "load_error": "The 3D preview could not load. Close it and try again.",
+    "studio_title": "3D View"
   },
   "personalizer": {
     "block_name": "Cartwala Personalizer",

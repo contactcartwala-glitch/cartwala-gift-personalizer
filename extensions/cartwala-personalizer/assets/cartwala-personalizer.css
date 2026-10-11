@@ -1229,6 +1229,46 @@ body.cw-personalization-complete
   font: inherit;
   cursor: pointer;
 }
+.cw-personalizer[data-cw-mug-studio-script] .cw-mug-modal {
+  width: min(100% - 24px, 560px);
+}
+.cw-personalizer[data-cw-mug-studio-script] .cw-mug-modal__stage {
+  height: min(62dvh, 530px);
+  background: #15181d;
+}
+.cw-personalizer[data-cw-mug-studio-script] .cw-mug-modal__panel > header {
+  min-height: 40px;
+  padding: 6px 14px;
+}
+.cw-personalizer[data-cw-mug-studio-script] .cw-mug-modal__panel > header h2 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.cw-personalizer[data-cw-mug-studio-script] .cw-mug-modal__panel > header button {
+  width: 32px;
+  height: 32px;
+  font-size: 26px;
+}
+.cw-personalizer[data-cw-mug-studio-script] .cw-mug-modal__panel > p {
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 400;
+  color: #777;
+}
+.cw-mug-studio-status {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #15181d;
+  color: #fff;
+  text-align: center;
+  font: 14px/1.5 Arial, sans-serif;
+}
+.cw-mug-studio-status[hidden] { display: none; }
 .cw-personalizer[data-product-kind="mug"] .cw-personalizer__toolbar-actions {
   display: flex;
   gap: 8px;

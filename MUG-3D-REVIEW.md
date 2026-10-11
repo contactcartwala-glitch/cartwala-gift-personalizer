@@ -1,5 +1,40 @@
 # Mug 3D preview review
 
+## October 11: reference-style white cup sample
+
+The merchant rejected the earlier appearance and approved one white-cup sample
+before rolling the new model out to the catalog. The same unpublished theme
+186712064185 now enables the new viewer **only** on
+`personalized-normal-white-photo-mug-11oz`.
+
+- Original hollow 11 oz GLB with rounded rim, recessed foot, smooth D handle,
+  separate printable wrap and blank space at the handle. No competitor assets.
+- Three.js 0.180.0, GLTFLoader and OrbitControls, bundled with MIT notice.
+- Auto rotation speed 2.2, matching the inspected Zapvi viewer setting. Drag
+  takes control immediately; release resumes rotation. Pinch/wheel zoom.
+- Per merchant correction: simple `3D View` header and one instruction line;
+  no visible reset, zoom or pause buttons. Reduced-motion preference disables
+  automatic rotation. Keyboard arrows, +/- and Home remain available.
+- Viewer/model load only on opening 3D. Animation stops on close, hidden tab
+  or section removal. The editor's current artwork is applied without saving.
+- Ceramic clearcoat and studio environment reflection on WebGL devices;
+  the same GLB geometry has an interactive software fallback.
+
+Validation: GLB export/load round trip, hollow interior/base, normalized normals,
+print seam and upright UVs, refresh-rate-independent rotation and controls;
+existing mug regression suite, ESLint, Liquid layout and asset validation.
+Browser checks on the draft covered auto rotation, direct dragging, inside/base
+views, close/reopen and personalized synthetic image/name. This cloud browser
+does not provide WebGL: visual checks exercised the software fallback. Full
+WebGL reflections and physical mobile touch still need device review.
+
+Build with `node scripts/build-mug-studio.mjs` then the theme builder below using
+the current draft layout. Do not publish the theme or release the app extension
+until the merchant approves the sample. Earlier draft behavior remains on the
+other mugs.
+
+## October 10 implementation
+
 The product photo now has a 3D button before customization. The editor also has
 a 3D Preview action that renders the current photo and text without saving or
 unlocking purchase. Preview & Save continues to commit the print properties and
