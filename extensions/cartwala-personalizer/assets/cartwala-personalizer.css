@@ -3178,3 +3178,5 @@ body.cw-photo-frame-master-page .variant-picker input[type="radio"]:checked+labe
 }
 
 .cw-mug-modal__brand { display: inline-block; margin-top: 4px; color: #333; font-size: 12px; font-weight: 600; }
+
+.cw-mug-preview > .cw-mug-preview__brand, .cw-mug-catalog-brand { display: block; width: 100%; margin: 12px 0 4px; padding: 8px 12px; text-align: center; color: #333; background: #fff; font-size: 14px; line-height: 1.4; font-weight: 600; }

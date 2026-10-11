@@ -994,12 +994,13 @@
         ) || image.parentElement
       );
     };
-    let catalogButton;
+    let catalogButton, catalogBrand;
     const mountPreviewInGallery = () => {
       if (preview.dataset.cwGalleryMounted === "true") return;
       const host = galleryHost();
       if (!host) return;
       catalogButton?.remove();
+      catalogBrand?.remove();
       host.classList.add("cw-mug-gallery-host");
       host.querySelectorAll("[data-cw-mug-preview]").forEach((existing) => {
         if (existing !== preview) existing.hidden = true;
@@ -1322,6 +1323,7 @@
         document.removeEventListener("product:variant-change", applyColour);
         if (!root.contains(preview)) preview.remove();
         catalogButton?.remove();
+      catalogBrand?.remove();
       },
       { once: true },
     );
@@ -1352,6 +1354,12 @@
         else openMugDialog();
       });
       host.appendChild(catalogButton);
+      const brandSource = preview.querySelector('.cw-mug-preview__brand');
+      if (brandSource) {
+        catalogBrand = brandSource.cloneNode(true);
+        catalogBrand.classList.add('cw-mug-catalog-brand');
+        host.after(catalogBrand);
+      }
     }
   };
 
