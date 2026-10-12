@@ -53,3 +53,9 @@ model ProductGroupSettings {
   revision  Int      @default(1)
   updatedAt DateTime @updatedAt
 }
+
+model GoogleReviewSnapshot {
+  shop      String   @id
+  payload   Json
+  fetchedAt DateTime @default(now())
+}
