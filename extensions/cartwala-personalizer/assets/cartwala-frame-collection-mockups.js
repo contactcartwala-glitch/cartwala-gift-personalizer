@@ -8,6 +8,16 @@
     const choices = templates.filter(item => item.orientation === orientation);
     return choices.length ? choices[Math.floor(index / 5) % choices.length] : null;
   };
+  const geometry = (mockup) => {
+    const width = mockup.orientation === 'Landscape' ? 63 : 42;
+    const height = mockup.orientation === 'Landscape' ? 42 : 63;
+    const scaleX = width / mockup.width;
+    const scaleY = height / mockup.height;
+    return {
+      art: { left: `${50 - width / 2}%`, top: `${48 - height / 2}%`, width: `${width}%`, height: `${height}%` },
+      overlay: { left: `${50 - (mockup.x + mockup.width / 2) * scaleX}%`, top: `${48 - (mockup.y + mockup.height / 2) * scaleY}%`, width: `${100 * scaleX}%`, height: `${100 * scaleY}%` }
+    };
+  };
   const start = async () => {
     let saved;
     try { saved = JSON.parse(data.dataset.mockups || 'null'); } catch { return; }
@@ -21,21 +31,25 @@
     }
     if (!templates.length) return;
     const style = document.createElement('style');
-    style.textContent = '.cw-frame-card-scene{position:absolute;inset:0;display:block;overflow:hidden;pointer-events:none}.cw-frame-card-scene img{position:absolute!important;display:block!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important;transition:none!important}.cw-frame-card-scene .cw-frame-card-art{object-fit:cover!important}.cw-frame-card-scene .cw-frame-card-overlay{inset:0!important;width:100%!important;height:100%!important;object-fit:contain!important}';
+    style.textContent = '.cw-frame-card-scene{position:absolute;inset:0;display:block;overflow:hidden;pointer-events:none}.cw-frame-card-scene img{position:absolute!important;display:block!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important;transition:none!important}.cw-frame-card-scene .cw-frame-card-art{object-fit:cover!important}.cw-frame-card-scene .cw-frame-card-overlay{object-fit:fill!important}';
     document.head.appendChild(style);
     const mount = () => {
-      for (const link of document.querySelectorAll('#MainContent .product-card__media > a[href*="/products/"]')) {
+      const links = [...document.querySelectorAll('#MainContent .product-card__media > a[href*="/products/"]')];
+      const orderedHandles = [...new Set(links.map(link => new URL(link.href, location.href).pathname.match(/\/products\/([^/]+)/)?.[1]).filter(handle => byHandle.has(handle)))];
+      for (const link of links) {
         if (link.dataset.cwCollectionMockup) continue;
         const handle = new URL(link.href, location.href).pathname.match(/\/products\/([^/]+)/)?.[1];
         const record = byHandle.get(handle);
-        const mockup = record && choose(record.index, templates, record.orientation);
+        const mockup = record && choose(orderedHandles.indexOf(handle), templates, record.orientation);
         const original = link.querySelector('img');
         if (!mockup || !record.artwork || !original) continue;
         link.dataset.cwCollectionMockup = mockup.id;
         const scene = document.createElement('span'); scene.className = 'cw-frame-card-scene'; scene.setAttribute('aria-hidden', 'true'); scene.style.visibility = 'hidden';
         const art = document.createElement('img'); art.className = 'cw-frame-card-art'; art.alt = ''; art.loading = 'lazy'; art.draggable = false;
-        Object.assign(art.style, { left: `${mockup.x}%`, top: `${mockup.y}%`, width: `${mockup.width}%`, height: `${mockup.height}%` });
+        const layout = geometry(mockup);
+        Object.assign(art.style, layout.art);
         const overlay = document.createElement('img'); overlay.className = 'cw-frame-card-overlay'; overlay.alt = ''; overlay.loading = 'lazy'; overlay.draggable = false;
+        Object.assign(overlay.style, layout.overlay);
         let loaded = 0;
         const ready = () => { if (++loaded === 2) { original.style.visibility = 'hidden'; scene.style.visibility = 'visible'; } };
         const failed = () => { scene.remove(); original.style.visibility = ''; };

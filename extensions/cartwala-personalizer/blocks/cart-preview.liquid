@@ -29,6 +29,16 @@
         {% endunless %}
       {% endfor %}
     {% endpaginate %}
+    {% assign legacy_handles = 'customised-baby-frame,cw-pf-001-personalized-baby-birth-frame,cw-pf-004-baby-birth-frame-design-3,cw-pf-005-google-it-photo-frame,cw-pf-006-our-love-story-frame,cw-pf-007-baby-birth-frame-design-5,cw-pf-008-baby-birth-frame-design-4,cw-pf-009-baby-birth-frame-design-2' | split: ',' %}
+    {% for legacy_handle in legacy_handles %}
+      {% assign legacy_item = all_products[legacy_handle] %}
+      {% if legacy_item != blank %}
+        {% assign legacy_artwork = legacy_item.metafields.cartwala_personalizer.frame_artwork.value %}
+        {% if legacy_artwork != blank %}
+          <span data-handle="{{ legacy_item.handle | escape }}" data-artwork="{{ legacy_artwork | escape }}" data-orientation="Portrait"></span>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
   </div>
   <script src="{{ 'cartwala-frame-collection-mockups.js' | asset_url }}" defer></script>
 {% endif %}

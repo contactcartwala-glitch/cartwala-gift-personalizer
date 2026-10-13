@@ -9,6 +9,16 @@ assert.equal((await server.loadFrameMockups(admin)).templates.length,10);await s
 const collectionScript = fs.readFileSync('extensions/cartwala-personalizer/assets/cartwala-frame-collection-mockups.js', 'utf8');
 const chooseBody = collectionScript.match(/const choose = ([\s\S]*?\n  });/)[1];
 const choose = vm.runInNewContext(`(${chooseBody})`);
+const geometryBody = collectionScript.match(/const geometry = ([\s\S]*?\n  });/)[1];
+const geometry = vm.runInNewContext(`(${geometryBody})`);
+for (const mockup of defaults) {
+  const { art, overlay } = geometry(mockup);
+  const n = value => parseFloat(value);
+  assert.equal(n(art.width), 42);
+  assert.equal(n(art.height), 63);
+  assert.ok(Math.abs(n(overlay.left) + mockup.x * n(overlay.width) / 100 - n(art.left)) < 0.001);
+  assert.ok(Math.abs(n(overlay.top) + mockup.y * n(overlay.height) / 100 - n(art.top)) < 0.001);
+}
 for (let index = 0; index < 50; index++) assert.equal(choose(index, defaults, 'Portrait').id, defaults[Math.floor(index / 5)].id);
 assert.equal(choose(0, [], 'Portrait'), null);
 assert.equal(choose(0, defaults, 'Landscape'), null);
