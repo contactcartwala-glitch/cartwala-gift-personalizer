@@ -1,11 +1,13 @@
 (() => {
-  const mount = () => {
+  const mount = async () => {
     const host = document.querySelector('[data-cw-personalizer][data-cw-photo-frame-master="true"]');
     const panel = host?.querySelector('[data-cw-photo-frame-data]');
     if (!panel || panel.dataset.bound === 'true') return;
     const original = document.querySelector('.product-gallery, media-gallery, [id^="MediaGallery-"], .product__media-wrapper, .product-media, [data-product-gallery]');
     if (!original) return;
     panel.dataset.bound = 'true';
+    let templates;
+    try { const saved=JSON.parse(panel.dataset.mockups||'null'); templates=saved?.templates||await fetch('https://cartwala-gift-personalizer.fly.dev/api/frame-mockup/manifest').then(response=>{if(!response.ok)throw new Error('Mockups unavailable');return response.json();}); } catch { templates=[]; }
     const variants = JSON.parse(panel.dataset.variants || '[]');
     const options = JSON.parse(panel.dataset.options || '[]');
     const scope = host.closest('.shopify-section') || document;
@@ -150,7 +152,7 @@
     document.head.appendChild(style); original.before(gallery); original.dataset.cwFrameOriginalHidden = 'true';
     document.body.classList.add('cw-photo-frame-master-page');
     let current = 0;
-    const count = track.children.length;
+    let count = track.children.length;
     const updateCounter = () => { current = Math.max(0, Math.min(count - 1, Math.round(track.scrollLeft / (track.clientWidth || 1)))); counter.textContent = `${current + 1} / ${count}`; };
     const show = index => { current = (index + count) % count; track.scrollTo({ left: current * track.clientWidth, behavior: 'instant' }); updateCounter(); };
     track.addEventListener('scroll', updateCounter, { passive: true });
@@ -170,8 +172,24 @@
       if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) show(current + (dx < 0 ? 1 : -1));
     });
     track.addEventListener('pointercancel', () => { drag = null; });
+    const scenes=[];
+    const buildScenes=(kind,url)=>{
+      scenes.forEach(scene=>scene.remove());scenes.length=0;
+      let choices=templates.filter(item=>item.orientation.toLowerCase()===kind);
+      const seed=[...String(panel.dataset.productId||'')].reduce((sum,digit)=>sum*31+digit.charCodeAt(0),0)>>>0;
+      if(choices.length){const offset=seed%choices.length;choices=choices.slice(offset).concat(choices.slice(0,offset));}
+      for(const item of choices){
+        const scene=document.createElement('div');scene.className='cw-frame-v7__slide';scene.setAttribute('role','group');scene.setAttribute('aria-label',item.name);
+        const photo=document.createElement('img');photo.alt='Your design';photo.draggable=false;Object.assign(photo.style,{position:'absolute',left:`${item.x}%`,top:`${item.y}%`,width:`${item.width}%`,height:`${item.height}%`,objectFit:'cover'});if(url)photo.src=url;else photo.hidden=true;
+        const overlay=document.createElement('img');overlay.src=item.url;overlay.alt=item.name;overlay.draggable=false;overlay.loading=scenes.length?'lazy':'eager';Object.assign(overlay.style,{position:'absolute',inset:'0',width:'100%',height:'100%',objectFit:'contain',pointerEvents:'none'});scene.append(photo,overlay);track.insertBefore(scene,roomSlide);scenes.push(scene);
+      }
+      roomSlide.hidden=choices.length>0;count=[...track.children].filter(slide=>!slide.hidden).length;
+      if(choices.length){descriptionFrame.hidden=true;let image=descriptionPreview.querySelector('[data-cw-scene-description]');if(!image){image=document.createElement('div');image.dataset.cwSceneDescription='true';descriptionPreview.prepend(image);}image.replaceChildren(scenes[0].cloneNode(true));Object.assign(image.style,{position:'absolute',inset:'0'});image.firstChild.style.width='100%';}
+      else{descriptionFrame.hidden=false;descriptionPreview.querySelector('[data-cw-scene-description]')?.remove();}
+    };
     const render = () => {
       const kind = orientation(); const url = artwork || design;
+      buildScenes(kind,url);
       const [width, height] = dimensions(variant?.options?.[sizeIndex]);
       for (const { frame, sample, photo } of frames) {
         frame.dataset.orientation = kind; sample.hidden = Boolean(url); photo.hidden = !url;

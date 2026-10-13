@@ -1,0 +1,13 @@
+import type { authenticate } from "../shopify.server";
+import {defaultFrameMockups,type FrameMockup} from "./frame-mockups";
+type Admin=Awaited<ReturnType<typeof authenticate.admin>>["admin"];
+export type FrameProduct={id:string;title:string;config:{jsonValue:{photoFrameDesign?:{orientation:string}}}|null};
+type Result={errors?:Array<{message:string}>;data?:{shop?:{id:string;mockups?:{jsonValue:{templates:FrameMockup[]};compareDigest:string}};products?:{nodes:FrameProduct[]};metafieldsSet?:{userErrors:Array<{message:string}>};productUpdate?:{product:{id:string;media:{nodes:Array<{id:string;alt:string}>}};userErrors:Array<{message:string}>};productReorderMedia?:{mediaUserErrors:Array<{message:string}>}}};
+export const FRAME_QUERY=`query FrameMockups{shop{id mockups:metafield(namespace:"$app",key:"frame_mockups"){jsonValue compareDigest}}}`;
+export const FRAME_SAVE=`mutation SaveFrameMockups($metafields:[MetafieldsSetInput!]!){metafieldsSet(metafields:$metafields){userErrors{message}}}`;
+export const FRAME_PRODUCTS=`query FrameDesigns{products(first:100,query:"tag:cw-photo-frame-linked"){nodes{id title config:metafield(namespace:"cartwala_personalizer",key:"personalizer_config"){jsonValue}}}}`;
+export const FRAME_PUBLISH=`mutation PublishFrameDesign($product:ProductUpdateInput!,$media:[CreateMediaInput!]){productUpdate(product:$product,media:$media){product{id media(first:100){nodes{id alt}}}userErrors{message}}}`;
+export const FRAME_REORDER=`mutation FeatureFrameMockup($id:ID!,$moves:[MoveInput!]!){productReorderMedia(id:$id,moves:$moves){mediaUserErrors{message}}}`;
+export async function run(admin:Admin,query:string,variables:Record<string,unknown>={}){const result=await (await admin.graphql(query,{variables})).json() as Result;if(result.errors?.length||!result.data)throw new Error(result.errors?.[0]?.message||"Shopify did not return data");return result.data;}
+export async function loadFrameMockups(admin:Admin){const {shop}=await run(admin,FRAME_QUERY);if(!shop)throw new Error("Could not load mockups");return {ownerId:shop.id,digest:shop.mockups?.compareDigest||null,templates:shop.mockups?.jsonValue.templates||defaultFrameMockups};}
+export async function saveFrameMockups(admin:Admin,templates:FrameMockup[],digest:string|null){const current=await loadFrameMockups(admin);if(current.digest!==digest)throw new Error("Mockups changed in another tab. Refresh and try again.");const {metafieldsSet}=await run(admin,FRAME_SAVE,{metafields:[{ownerId:current.ownerId,namespace:"$app",key:"frame_mockups",type:"json",value:JSON.stringify({version:1,templates}),compareDigest:digest}]});if(!metafieldsSet||metafieldsSet.userErrors.length)throw new Error(metafieldsSet?.userErrors[0]?.message||"Could not save mockups");}

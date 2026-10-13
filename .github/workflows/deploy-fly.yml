@@ -1,6 +1,9 @@
 name: Deploy Fly backend
 
 on:
+  push:
+    branches: [master]
+    paths: ["app/**", "package.json", "package-lock.json", "Dockerfile", "prisma/**"]
   workflow_dispatch:
 
 concurrency:

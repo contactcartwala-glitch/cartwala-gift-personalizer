@@ -10,6 +10,7 @@ export function MasterProductNavigation({ designs = false, frame = false, canNav
   };
   return <s-section heading={frame ? "Black Beading Photo Frame Master" : "Acrylic Photo Frame Master"}>
     <s-paragraph>Manage master sizes, prices, mockups and linked PSD designs in Master Products.</s-paragraph>
+    <s-button href="/app/frame-mockups">Black Frame mockups · upload / delete</s-button>
     <nav aria-label="Acrylic master settings" style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
       <s-button variant={!designs ? "primary" : "secondary"} onClick={() => open("master")}>Sizes, prices &amp; master photos</s-button>
       <s-button variant={designs && !frame ? "primary" : "secondary"} onClick={() => open("designs")}>Designs, PSD upload &amp; preview</s-button>
