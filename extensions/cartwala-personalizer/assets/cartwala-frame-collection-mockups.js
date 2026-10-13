@@ -49,13 +49,23 @@
         const art = document.createElement('img'); art.className = 'cw-frame-card-art'; art.alt = ''; art.loading = 'lazy'; art.draggable = false;
         const layout = geometry(mockup);
         Object.assign(art.style, layout.art);
+        let artworkLayer = art;
+        if (handle === masterHandle) {
+          const viewport = document.createElement('span');
+          Object.assign(viewport.style, layout.art, { position: 'absolute', overflow: 'hidden' });
+          // The master image includes a frame and wall. Show only its inner
+          // photograph so the collection overlay supplies one consistent frame.
+          Object.assign(art.style, { left: '-47.65625%', top: '-15.234375%', width: '195.3125%', height: '130.208333%' });
+          viewport.appendChild(art);
+          artworkLayer = viewport;
+        }
         const overlay = document.createElement('img'); overlay.className = 'cw-frame-card-overlay'; overlay.alt = ''; overlay.loading = 'lazy'; overlay.draggable = false;
         Object.assign(overlay.style, layout.overlay);
         let loaded = 0;
         const ready = () => { if (++loaded === 2) { original.style.visibility = 'hidden'; scene.style.visibility = 'visible'; } };
         const failed = () => { scene.remove(); original.style.visibility = ''; };
         art.onload = overlay.onload = ready; art.onerror = overlay.onerror = failed;
-        scene.append(art, overlay); link.style.position = 'relative'; link.appendChild(scene);
+        scene.append(artworkLayer, overlay); link.style.position = 'relative'; link.appendChild(scene);
         art.src = record.artwork; overlay.src = mockup.url;
       }
     };
