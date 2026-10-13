@@ -1,3 +1,38 @@
+{% if request.page_type == 'collection' and collection.handle == 'photo-frames' %}
+  <div data-cw-frame-collection hidden data-mockups="{{ shop.metafields['app--421161926657'].frame_mockups.value | json | escape }}">
+    {% paginate collection.products by 250 %}
+      {% for item in collection.products %}
+        {% unless item.handle == 'customized-photo-frame-black-beading' %}
+          {% liquid
+            assign artwork = item.metafields.cartwala_personalizer.frame_artwork.value
+            assign direction = 'Portrait'
+            assign config = item.metafields.cartwala_personalizer.personalizer_config.value
+            if config.photoFrameDesign.orientation == 'Landscape'
+              assign direction = 'Landscape'
+            endif
+            if artwork == blank
+              for image in item.images
+                if direction == 'Portrait' and image.aspect_ratio > 0.64 and image.aspect_ratio < 0.69
+                  assign artwork = image | image_url: width: 1000
+                  break
+                elsif direction == 'Landscape' and image.aspect_ratio > 1.45 and image.aspect_ratio < 1.55
+                  assign artwork = image | image_url: width: 1000
+                  break
+                endif
+              endfor
+            endif
+            if artwork == blank and item.featured_image != blank
+              assign artwork = item.featured_image | image_url: width: 1000
+            endif
+          %}
+          <span data-handle="{{ item.handle | escape }}" data-artwork="{{ artwork | escape }}" data-orientation="{{ direction }}"></span>
+        {% endunless %}
+      {% endfor %}
+    {% endpaginate %}
+  </div>
+  <script src="{{ 'cartwala-frame-collection-mockups.js' | asset_url }}" defer></script>
+{% endif %}
+
 {% schema %}
 {
   "name": "Cartwala cart previews",
