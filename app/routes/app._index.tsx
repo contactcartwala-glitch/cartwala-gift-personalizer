@@ -1,3 +1,4 @@
+import { SHOPIFY_FILE_MAX_BYTES } from "../lib/shopify-file-limits";
 import { validatePhotoFrameDesign } from "../lib/photo-frame-design.server";
 import { MasterProductNavigation } from "../components/MasterProducts";
 import { ACRYLIC_MASTER_ID } from "../lib/acrylic-design";
@@ -30,6 +31,7 @@ import {
 } from "../lib/personalizer-config";
 import {
   deleteShopifyFiles,
+
   uploadFont,
   uploadImage,
   uploadImageAssets,
@@ -397,7 +399,16 @@ async function handlePsdImport(
     }
 
     const sourceFile = data.get("sourcePsd");
-    const source = sourceFile instanceof File ? await uploadPsdAsset(admin, sourceFile) : undefined;
+    let source: ShopifyFileAsset | undefined;
+    if (sourceFile instanceof File) {
+      if (sourceFile.size > SHOPIFY_FILE_MAX_BYTES) {
+        warning = [warning, "Template imported; the original PSD exceeds Shopify's 20 MB backup limit. Keep your original PSD locally."].filter(Boolean).join(" ");
+      } else {
+        source = await uploadPsdAsset(admin, sourceFile);
+      }
+    }
+    const sourceWarning = String(data.get("sourceWarning") || "").slice(0, 500);
+    if (sourceWarning) warning = [warning, sourceWarning].filter(Boolean).join(" ");
     if (source) uploadedIds.push(source.id);
     const imageFiles = [overlayFile, ...maskFiles];
     if (imageFiles.some((file) => !(file instanceof File) || !file.size))
@@ -406,7 +417,7 @@ async function handlePsdImport(
     // Poll each group once instead of waiting separately for every mask.
     // Keep groups bounded so large designs do not exhaust server memory.
     for (let offset = 0; offset < imageFiles.length; offset += 4) {
-      const batch = await uploadImageAssets(admin, imageFiles.slice(offset, offset + 4) as File[], { maxFileBytes: 25 * 1024 * 1024 });
+      const batch = await uploadImageAssets(admin, imageFiles.slice(offset, offset + 4) as File[], { maxFileBytes: SHOPIFY_FILE_MAX_BYTES });
       uploadedIds.push(...batch.map((asset) => asset.id));
       images.push(...batch);
     }
@@ -415,7 +426,7 @@ async function handlePsdImport(
     const config = normalizeConfig({
       ...imported,
       overlayUrl: overlay.url,
-      sourcePsdUrl: source?.url || imported.sourcePsdUrl,
+      sourcePsdUrl: source?.url,
       photoFields: imported.photoFields.map((field, index) => ({
         ...field,
         maskUrl: masks[index].url,
@@ -1533,7 +1544,8 @@ export function PersonalizerHome({ masterMode = false, masterKind = "acrylic" }:
       };
       const form = new FormData();
       form.append("intent", "psdImport");
-      form.append("sourcePsd", file);
+      if (file.size <= SHOPIFY_FILE_MAX_BYTES) form.append("sourcePsd", file);
+      else form.append("sourceWarning", "Template imported; the original PSD exceeds Shopify's 20 MB backup limit. Keep your original PSD locally.");
       form.append("productId", selected.id);
       form.append("config", JSON.stringify(imported));
       const knownFontKeys = new Set(
@@ -1899,7 +1911,8 @@ export function PersonalizerHome({ masterMode = false, masterKind = "acrylic" }:
             Upload one layered PSD. Every PHOTO or UPLOAD layer becomes a
             customer photo slot, and every editable Photoshop text layer becomes
             a text field. Positions, sizes, masks, fonts and colours are
-            imported automatically.
+            imported automatically. PSDs up to 250 MB can be read. Original PSD
+            download backups are available only for files up to 20 MB; keep larger originals locally.
           </s-paragraph>
           <input
             key={psdKey}
