@@ -35,12 +35,13 @@
     document.head.appendChild(style);
     const mount = () => {
       const links = [...document.querySelectorAll('#MainContent .product-card__media > a[href*="/products/"]')];
-      const orderedHandles = [...new Set(links.map(link => new URL(link.href, location.href).pathname.match(/\/products\/([^/]+)/)?.[1]).filter(handle => byHandle.has(handle)))];
+      const masterHandle = 'customized-photo-frame-black-beading';
+      const orderedHandles = [...new Set(links.map(link => new URL(link.href, location.href).pathname.match(/\/products\/([^/]+)/)?.[1]).filter(handle => handle !== masterHandle && byHandle.has(handle)))];
       for (const link of links) {
         if (link.dataset.cwCollectionMockup) continue;
         const handle = new URL(link.href, location.href).pathname.match(/\/products\/([^/]+)/)?.[1];
         const record = byHandle.get(handle);
-        const mockup = record && choose(orderedHandles.indexOf(handle), templates, record.orientation);
+        const mockup = record && choose(handle === masterHandle ? 0 : orderedHandles.indexOf(handle), templates, record.orientation);
         const original = link.querySelector('img');
         if (!mockup || !record.artwork || !original) continue;
         link.dataset.cwCollectionMockup = mockup.id;
