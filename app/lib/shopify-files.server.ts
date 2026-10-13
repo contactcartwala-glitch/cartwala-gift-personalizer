@@ -262,12 +262,13 @@ export async function uploadPdfAsset(
 export async function uploadImageAssets(
   admin: AdminApiContext,
   files: File[],
+  options: { maxFileBytes?: number } = {},
 ): Promise<ShopifyFileAsset[]> {
   if (!files.length || files.length > 4 || files.some(
     (file) => !/\.(png|jpe?g|webp)$/i.test(file.name) ||
       !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
-      file.size < 100 || file.size > 15 * 1024 * 1024,
-  )) throw new ShopifyFileUploadError("Choose up to four JPG, PNG or WebP images under 15 MB each.");
+      file.size < 100 || file.size > (options.maxFileBytes ?? 15 * 1024 * 1024),
+  )) throw new ShopifyFileUploadError(`Choose up to four JPG, PNG or WebP images under ${(options.maxFileBytes ?? 15 * 1024 * 1024) / (1024 * 1024)} MB each.`);
 
   const stagedResponse = await admin.graphql(
     `#graphql

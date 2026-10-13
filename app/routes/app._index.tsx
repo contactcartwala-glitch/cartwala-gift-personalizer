@@ -32,7 +32,7 @@ import {
   deleteShopifyFiles,
   uploadFont,
   uploadImage,
-  uploadImageAsset,
+  uploadImageAssets,
   uploadPsdAsset,
   firstMetafieldsSetError,
   type ShopifyFileAsset,
@@ -54,6 +54,7 @@ import {
   psdDrawableLayers,
   psdLayerBounds,
   psdLayerLabel,
+  isPsdPhotoLayer,
   psdTextAlignment,
   psdTextBoxBounds,
   psdTextPixelFontSize,
@@ -398,16 +399,18 @@ async function handlePsdImport(
     const sourceFile = data.get("sourcePsd");
     const source = sourceFile instanceof File ? await uploadPsdAsset(admin, sourceFile) : undefined;
     if (source) uploadedIds.push(source.id);
-    const overlay = await uploadImageAsset(admin, overlayFile);
-    uploadedIds.push(overlay.id);
-    const masks: ShopifyFileAsset[] = [];
-    for (const maskFile of maskFiles) {
-      if (!(maskFile instanceof File) || !maskFile.size)
-        throw new Error("One of the PSD photo masks is empty.");
-      const mask = await uploadImageAsset(admin, maskFile);
-      uploadedIds.push(mask.id);
-      masks.push(mask);
+    const imageFiles = [overlayFile, ...maskFiles];
+    if (imageFiles.some((file) => !(file instanceof File) || !file.size))
+      throw new Error("One of the PSD photo masks is empty.");
+    const images: ShopifyFileAsset[] = [];
+    // Poll each group once instead of waiting separately for every mask.
+    // Keep groups bounded so large designs do not exhaust server memory.
+    for (let offset = 0; offset < imageFiles.length; offset += 4) {
+      const batch = await uploadImageAssets(admin, imageFiles.slice(offset, offset + 4) as File[], { maxFileBytes: 25 * 1024 * 1024 });
+      uploadedIds.push(...batch.map((asset) => asset.id));
+      images.push(...batch);
     }
+    const [overlay, ...masks] = images;
 
     const config = normalizeConfig({
       ...imported,
@@ -1352,7 +1355,7 @@ export function PersonalizerHome({ masterMode = false, masterKind = "acrylic" }:
       const layers = psdDrawableLayers(psd.children);
       const photos = layers.filter(
         (layer) =>
-          /^(PHOTO|UPLOAD)(?:[\s_-]|\d|$)/i.test(String(layer.name || "")) &&
+          isPsdPhotoLayer(layer) &&
           psdLayerBounds(layer).right > psdLayerBounds(layer).left,
       );
       const texts = layers.filter((layer) => {
