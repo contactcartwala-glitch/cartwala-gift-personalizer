@@ -1,0 +1,289 @@
+{
+  "reason": "The legacy 2:3 alpha opening cleared original top/bottom beading pixels. Restore alpha only outside the original white placeholder; use measured opening geometry.",
+  "oldDefaults": [
+    {
+      "id": "room-01",
+      "name": "Brick shelf",
+      "url": "https://cartwala-gift-personalizer.fly.dev/api/frame-mockup/room-01",
+      "orientation": "Portrait",
+      "x": 27.11323763955343,
+      "y": 8.293460925039872,
+      "width": 46.25199362041467,
+      "height": 69.377990430622
+    },
+    {
+      "id": "room-02",
+      "name": "Industrial concrete",
+      "url": "https://cartwala-gift-personalizer.fly.dev/api/frame-mockup/room-02",
+      "orientation": "Portrait",
+      "x": 28.86762360446571,
+      "y": 9.330143540669857,
+      "width": 42.58373205741627,
+      "height": 63.8755980861244
+    },
+    {
+      "id": "room-03",
+      "name": "Marble luxury",
+      "url": "https://cartwala-gift-personalizer.fly.dev/api/frame-mockup/room-03",
+      "orientation": "Portrait",
+      "x": 28.4688995215311,
+      "y": 10.76555023923445,
+      "width": 43.0622009569378,
+      "height": 64.5933014354067
+    },
+    {
+      "id": "room-04",
+      "name": "Walnut living room",
+      "url": "https://cartwala-gift-personalizer.fly.dev/api/frame-mockup/room-04",
+      "orientation": "Portrait",
+      "x": 28.86762360446571,
+      "y": 9.409888357256778,
+      "width": 42.10526315789473,
+      "height": 63.1578947368421
+    },
+    {
+      "id": "room-05",
+      "name": "Library",
+      "url": "https://cartwala-gift-personalizer.fly.dev/api/frame-mockup/room-05",
+      "orientation": "Portrait",
+      "x": 29.82456140350877,
+      "y": 8.771929824561402,
+      "width": 40.35087719298245,
+      "height": 60.526315789473685
+    },
+    {
+      "id": "room-06",
+      "name": "Bohemian rattan",
+      "url": "https://cartwala-gift-personalizer.fly.dev/api/frame-mockup/room-06",
+      "orientation": "Portrait",
+      "x": 31.57894736842105,
+      "y": 12.838915470494419,
+      "width": 37.00159489633174,
+      "height": 55.50239234449761
+    },
+    {
+      "id": "room-07",
+      "name": "Navy lounge",
+      "url": "https://cartwala-gift-personalizer.fly.dev/api/frame-mockup/room-07",
+      "orientation": "Portrait",
+      "x": 27.432216905901118,
+      "y": 9.649122807017543,
+      "width": 45.13556618819777,
+      "height": 67.70334928229666
+    },
+    {
+      "id": "room-08",
+      "name": "Terracotta",
+      "url": "https://cartwala-gift-personalizer.fly.dev/api/frame-mockup/room-08",
+      "orientation": "Portrait",
+      "x": 29.346092503987244,
+      "y": 11.562998405103668,
+      "width": 41.30781499202552,
+      "height": 61.961722488038276
+    },
+    {
+      "id": "room-09",
+      "name": "Window desk",
+      "url": "https://cartwala-gift-personalizer.fly.dev/api/frame-mockup/room-09",
+      "orientation": "Portrait",
+      "x": 29.106858054226475,
+      "y": 12.679425837320574,
+      "width": 46.25199362041467,
+      "height": 69.377990430622
+    },
+    {
+      "id": "room-10",
+      "name": "Minimal gallery",
+      "url": "https://cartwala-gift-personalizer.fly.dev/api/frame-mockup/room-10",
+      "orientation": "Portrait",
+      "x": 29.98405103668261,
+      "y": 7.73524720893142,
+      "width": 40.03189792663477,
+      "height": 60.04784688995215
+    }
+  ],
+  "newDefaults": [
+    {
+      "id": "room-01",
+      "name": "Brick shelf",
+      "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cartwala-complete-beading-room-01.png?v=1791959548",
+      "orientation": "Portrait",
+      "x": 27.27272727272727,
+      "y": 11.084529505582138,
+      "width": 45.85326953748006,
+      "height": 63.79585326953748
+    },
+    {
+      "id": "room-02",
+      "name": "Industrial concrete",
+      "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cartwala-complete-beading-room-02.png?v=1791959534",
+      "orientation": "Portrait",
+      "x": 29.106858054226475,
+      "y": 11.323763955342903,
+      "width": 42.10526315789473,
+      "height": 59.88835725677831
+    },
+    {
+      "id": "room-03",
+      "name": "Marble luxury",
+      "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cartwala-complete-beading-room-03.png?v=1791959560",
+      "orientation": "Portrait",
+      "x": 28.4688995215311,
+      "y": 10.76555023923445,
+      "width": 43.0622009569378,
+      "height": 64.5933014354067
+    },
+    {
+      "id": "room-04",
+      "name": "Walnut living room",
+      "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cartwala-complete-beading-room-04.png?v=1791959673",
+      "orientation": "Portrait",
+      "x": 29.106858054226475,
+      "y": 9.808612440191387,
+      "width": 41.706539074960126,
+      "height": 62.44019138755981
+    },
+    {
+      "id": "room-05",
+      "name": "Library",
+      "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cartwala-complete-beading-room-05.png?v=1791959579",
+      "orientation": "Portrait",
+      "x": 30.063795853269536,
+      "y": 10.127591706539075,
+      "width": 40.03189792663477,
+      "height": 57.73524720893142
+    },
+    {
+      "id": "room-06",
+      "name": "Bohemian rattan",
+      "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cartwala-complete-beading-room-06.png?v=1791959609",
+      "orientation": "Portrait",
+      "x": 31.658692185007975,
+      "y": 13.31738437001595,
+      "width": 36.76236044657097,
+      "height": 54.54545454545454
+    },
+    {
+      "id": "room-07",
+      "name": "Navy lounge",
+      "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cartwala-complete-beading-room-07.png?v=1791959625",
+      "orientation": "Portrait",
+      "x": 27.67145135566188,
+      "y": 10.287081339712918,
+      "width": 44.73684210526316,
+      "height": 66.4274322169059
+    },
+    {
+      "id": "room-08",
+      "name": "Terracotta",
+      "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cartwala-complete-beading-room-08.png?v=1791959592",
+      "orientation": "Portrait",
+      "x": 29.505582137161085,
+      "y": 13.157894736842104,
+      "width": 40.98883572567783,
+      "height": 58.69218500797449
+    },
+    {
+      "id": "room-09",
+      "name": "Window desk",
+      "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cartwala-complete-beading-room-09.png?v=1791959640",
+      "orientation": "Portrait",
+      "x": 29.1866028708134,
+      "y": 14.992025518341306,
+      "width": 46.01275917065391,
+      "height": 64.83253588516746
+    },
+    {
+      "id": "room-10",
+      "name": "Minimal gallery",
+      "url": "https://cdn.shopify.com/s/files/1/0803/7931/4361/files/cartwala-complete-beading-room-10.png?v=1791959656",
+      "orientation": "Portrait",
+      "x": 30.22328548644338,
+      "y": 9.569377990430622,
+      "width": 39.633173843700156,
+      "height": 56.29984051036683
+    }
+  ],
+  "repairs": [
+    {
+      "id": "room-01",
+      "x": 27.27272727272727,
+      "y": 11.084529505582138,
+      "width": 45.85326953748006,
+      "height": 63.79585326953748,
+      "restored": 44600
+    },
+    {
+      "id": "room-02",
+      "x": 29.106858054226475,
+      "y": 11.323763955342903,
+      "width": 42.10526315789473,
+      "height": 59.88835725677831,
+      "restored": 31206
+    },
+    {
+      "id": "room-03",
+      "x": 28.4688995215311,
+      "y": 10.76555023923445,
+      "width": 43.0622009569378,
+      "height": 64.5933014354067,
+      "restored": 0
+    },
+    {
+      "id": "room-04",
+      "x": 29.106858054226475,
+      "y": 9.808612440191387,
+      "width": 41.706539074960126,
+      "height": 62.44019138755981,
+      "restored": 8667
+    },
+    {
+      "id": "room-05",
+      "x": 30.063795853269536,
+      "y": 10.127591706539075,
+      "width": 40.03189792663477,
+      "height": 57.73524720893142,
+      "restored": 20606
+    },
+    {
+      "id": "room-06",
+      "x": 31.658692185007975,
+      "y": 13.31738437001595,
+      "width": 36.76236044657097,
+      "height": 54.54545454545454,
+      "restored": 7620
+    },
+    {
+      "id": "room-07",
+      "x": 27.67145135566188,
+      "y": 10.287081339712918,
+      "width": 44.73684210526316,
+      "height": 66.4274322169059,
+      "restored": 13221
+    },
+    {
+      "id": "room-08",
+      "x": 29.505582137161085,
+      "y": 13.157894736842104,
+      "width": 40.98883572567783,
+      "height": 58.69218500797449,
+      "restored": 24182
+    },
+    {
+      "id": "room-09",
+      "x": 29.1866028708134,
+      "y": 14.992025518341306,
+      "width": 46.01275917065391,
+      "height": 64.83253588516746,
+      "restored": 35499
+    },
+    {
+      "id": "room-10",
+      "x": 30.22328548644338,
+      "y": 9.569377990430622,
+      "width": 39.633173843700156,
+      "height": 56.29984051036683,
+      "restored": 27124
+    }
+  ]
+}
