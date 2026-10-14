@@ -387,3 +387,10 @@ export async function uploadPsdAsset(admin: AdminApiContext, file: File): Promis
  if (String.fromCharCode(...header) !== "8BPS") throw new ShopifyFileUploadError("Invalid PSD file.");
  return uploadToShopifyFiles(admin, new File([file], file.name, {type:"image/vnd.adobe.photoshop"}), "FILE", 30);
 }
+
+/** Preserve uploaded originals byte-for-byte inside a managed ZIP file. */
+export async function uploadOriginalZipAsset(admin: AdminApiContext, file: File): Promise<ShopifyFileAsset> {
+  if (file.type !== "application/zip" || !/\.zip$/i.test(file.name) || file.size < 100 || file.size > SHOPIFY_FILE_MAX_BYTES)
+    throw new ShopifyFileUploadError("Original ZIP must be smaller than 20 MB.");
+  return uploadToShopifyFiles(admin, file, "FILE", 30);
+}

@@ -59,3 +59,30 @@ model GoogleReviewSnapshot {
   payload   Json
   fetchedAt DateTime @default(now())
 }
+
+model PhotoOriginalArchive {
+  id        String   @id @default(uuid())
+  shop      String
+  hash      String
+  fileId    String?
+  url       String?
+  byteSize  Int
+  photoCount Int
+  createdAt DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+  deletedAt DateTime?
+  orders PhotoOriginalArchiveOrder[]
+
+  @@unique([shop, hash])
+  @@index([shop, deletedAt, createdAt])
+}
+
+model PhotoOriginalArchiveOrder {
+  archiveId String
+  orderId String
+  completedAt DateTime?
+  archive PhotoOriginalArchive @relation(fields: [archiveId], references: [id], onDelete: Cascade)
+
+  @@id([archiveId, orderId])
+  @@index([orderId])
+}

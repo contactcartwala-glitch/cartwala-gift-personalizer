@@ -5,6 +5,7 @@ import { useLoaderData } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import { originalArchiveIds } from "../lib/photo-originals";
 import { polaroidZipUrls } from "../lib/polaroid-print-layout";
 import { orderedPrintSize } from "../lib/print-dimensions";
 import { printPngWithDpi } from "../lib/png-print-density.client";
@@ -151,7 +152,16 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     sourceUrls: design.sourceUrls as string[],
     shirtSizes: design.shirtSizes as string[],
   }]));
-  return { items, signatureOrders: uniqueSignatureOrders, designs, loadError };
+  const originalIds = [...new Set(items.flatMap(item => originalArchiveIds(item.attributes)))];
+  let originals: Record<string, { available: boolean; photoCount: number }> = {};
+  if (originalIds.length) try {
+    const archives = await prisma.photoOriginalArchive.findMany({ where: { shop: session.shop, id: { in: originalIds } } });
+    originals = Object.fromEntries(archives.map(archive => [archive.id, { available: Boolean(archive.url && !archive.deletedAt), photoCount: archive.photoCount }]));
+  } catch (error) {
+    console.error("Original photo lookup failed", error);
+    loadError = "Original photos could not be loaded. Print downloads are still available.";
+  }
+  return { items, signatureOrders: uniqueSignatureOrders, designs, originals, loadError };
 };
 // Shopify file properties can be serialized [thumbnail, original] pairs.
 // Preserve other JSON properties (especially the saved layer layout).
@@ -708,7 +718,7 @@ async function downloadPsd(item: PrintItem) {
   );
 }
 export default function PrintFilesPage() {
-  const { items, signatureOrders, designs, loadError } = useLoaderData<typeof loader>();
+  const { items, signatureOrders, designs, originals, loadError } = useLoaderData<typeof loader>();
   const [working, setWorking] = useState("");
   const [albumProgress, setAlbumProgress] = useState("");
   const grouped = useMemo(() => {
@@ -730,6 +740,15 @@ export default function PrintFilesPage() {
       setWorking("");
       setAlbumProgress("");
     }
+  };
+  const downloadOriginals = async (item: PrintItem) => {
+    const params = new URLSearchParams({ orderId: item.orderId, lineItemId: item.lineItemId });
+    const response = await fetch(`/app/original-files?${params}`);
+    if (!response.ok) {
+      const result = await response.json();
+      throw new Error(result.error || "Could not download original photos.");
+    }
+    downloadBlob(await response.blob(), `${safeFile(item.orderName)}-Original-Photos.zip`);
   };
   const downloadPolaroid = async (item: PrintItem) => {
     const { buildPolaroidPrintExport } = await import("../lib/polaroid-print-export.client");
@@ -813,6 +832,9 @@ export default function PrintFilesPage() {
               if (isPolaroid) try {
                 if (!polaroidZipUrls(attributes).length) polaroidProblem = "Saved print ZIP is missing.";
               } catch (error) { polaroidProblem = error instanceof Error ? error.message : "Saved print ZIP is invalid."; }
+              const archiveIds = originalArchiveIds(item.attributes);
+              const originalsAvailable = archiveIds.length > 0 && archiveIds.every(id => originals[id]?.available);
+              const photoPrintBatch = isPolaroid || item.attributes.some(attribute => /^Print files \d+$/.test(attribute.key));
               const albumPages = albumPrintPages(attributes);
               const isAlbum = albumPages.length > 0 || Boolean(attributes["Album print pages"]);
               const albumProblem = isAlbum ? albumPrintProblem(albumPages, attributes) : "";
@@ -850,6 +872,17 @@ export default function PrintFilesPage() {
                       : hasSource ? "Recovery PSD only — check layout before printing" : "Original photos missing — print export unavailable"}
                     {!isPolaroid && !isAlbum && missing.length > 0 ? ` (${missing.length}/${design.p.length})` : ""}
                   </div>
+                  {photoPrintBatch && <div style={{ marginBottom: 12 }}>
+                    <button type="button" disabled={Boolean(working) || !originalsAvailable}
+                      onClick={() => run(`${item.lineItemId}:originals`, () => downloadOriginals(item))}
+                      style={{ background: "#111", color: "white", border: 0, borderRadius: 8, padding: "11px 18px", fontWeight: 700, opacity: originalsAvailable ? 1 : 0.45 }}>
+                      {working === `${item.lineItemId}:originals` ? "Preparing originals…" : "Download Originals ZIP"}
+                    </button>
+                    <p style={{ fontSize: 13, color: "#666", marginBottom: 0 }}>
+                      {originalsAvailable ? "Unedited uploaded files, saved once per photo. Download your backup before the 30-day retention period after fulfillment ends."
+                        : archiveIds.length ? "Originals are unavailable or the retention period has ended." : "Original photos were not saved for this older order."}
+                    </p>
+                  </div>}
                   {isPolaroid ? <>
                     <button type="button" disabled={Boolean(working) || Boolean(polaroidProblem)}
                       onClick={() => run(`${item.lineItemId}:polaroid`, () => downloadPolaroid(item))}

@@ -98,63 +98,47 @@ export async function buildPolaroidPrintExport(
     type: string;
     copies: number;
   }> = [];
+  const unpacked: Record<string, Uint8Array> = {};
+  let manifest: Manifest | null = null;
   for (const archive of archives) {
     progress(`Loading saved ZIP ${archive.index}/${archives.length}…`);
-    const response = await fetch(
-      `/app/print-asset?url=${encodeURIComponent(archive.url)}`,
-    );
-    if (!response.ok)
-      throw new Error(
-        "A saved Polaroid ZIP could not be downloaded. Please retry.",
-      );
-    const unpacked = unzipSync(new Uint8Array(await response.arrayBuffer()));
-    const manifestBytes = unpacked["print-manifest.json"];
-    if (!manifestBytes) throw new Error("The saved ZIP has no print manifest.");
-    const manifest = JSON.parse(strFromU8(manifestBytes)) as Manifest;
-    if (!Array.isArray(manifest.photos) || !manifest.photos.length)
-      throw new Error("The saved ZIP contains no print photos.");
-    if (manifest.size !== attributes["Print size"]) {
-      const saved = polaroidPrintSize(manifest.size || "");
-      if (saved.width !== size.width || saved.height !== size.height)
-        throw new Error("Saved photos do not match the ordered print size.");
+    const response = await fetch(`/app/print-asset?url=${encodeURIComponent(archive.url)}`);
+    if (!response.ok) throw new Error("A saved Polaroid ZIP could not be downloaded. Please retry.");
+    const part = unzipSync(new Uint8Array(await response.arrayBuffer()));
+    for (const [name, bytes] of Object.entries(part)) {
+      if (name === "print-manifest.json") {
+        const next = JSON.parse(strFromU8(bytes)) as Manifest;
+        if (manifest && JSON.stringify(manifest) !== JSON.stringify(next))
+          throw new Error("Conflicting saved print manifests.");
+        manifest = next;
+      } else {
+        if (unpacked[name]) throw new Error("Duplicated photo files in saved ZIP parts.");
+        unpacked[name] = bytes;
+      }
     }
-    let archiveCount = 0;
-    for (const photo of manifest.photos) {
-      if (
-        !Number.isInteger(photo.copies) ||
-        photo.copies < 1 ||
-        photo.copies > 1000
-      )
-        throw new Error("The saved photo copy count is invalid.");
-      const bytes = unpacked[photo.file];
-      if (!bytes)
-        throw new Error(`A saved print photo is missing: ${photo.file}`);
-      const jpeg = bytes[0] === 255 && bytes[1] === 216;
-      const png =
-        bytes[0] === 137 &&
-        bytes[1] === 80 &&
-        bytes[2] === 78 &&
-        bytes[3] === 71;
-      if (!jpeg && !png)
-        throw new Error("A saved print photo has an unsupported format.");
-      const output = jpeg
-        ? jpegWithPrintDpi(bytes)
-        : new Uint8Array(
-            await (
-              await printPngWithDpi(new Blob([new Uint8Array(bytes)]))
-            ).arrayBuffer(),
-          );
-      sources.push({
-        name: `photo-${String(sources.length + 1).padStart(3, "0")}`,
-        bytes: output,
-        type: jpeg ? "image/jpeg" : "image/png",
-        copies: photo.copies,
-      });
-      archiveCount += photo.copies;
-    }
-    if (archiveCount !== manifest.totalPrints)
-      throw new Error("The saved ZIP photo count is incomplete.");
   }
+  if (!manifest || !Array.isArray(manifest.photos) || !manifest.photos.length)
+    throw new Error("The saved ZIP has no complete print manifest.");
+  const saved = polaroidPrintSize(manifest.size || "");
+  if (saved.width !== size.width || saved.height !== size.height)
+    throw new Error("Saved photos do not match the ordered print size.");
+  const used = new Set<string>();
+  for (const photo of manifest.photos) {
+    if (!Number.isInteger(photo.copies) || photo.copies < 1 || photo.copies > 1000 || used.has(photo.file))
+      throw new Error("The saved photo copy count or filename is invalid.");
+    used.add(photo.file);
+    const bytes = unpacked[photo.file];
+    if (!bytes) throw new Error(`A saved print photo is missing: ${photo.file}`);
+    const jpeg = bytes[0] === 255 && bytes[1] === 216;
+    const png = bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71;
+    if (!jpeg && !png) throw new Error("A saved print photo has an unsupported format.");
+    const output = jpeg ? jpegWithPrintDpi(bytes)
+      : new Uint8Array(await (await printPngWithDpi(new Blob([new Uint8Array(bytes)]))).arrayBuffer());
+    sources.push({ name: `photo-${String(sources.length + 1).padStart(3, "0")}`,
+      bytes: output, type: jpeg ? "image/jpeg" : "image/png", copies: photo.copies });
+  }
+  if (sources.reduce((n, source) => n + source.copies, 0) !== manifest.totalPrints)
+    throw new Error("The saved ZIP photo count is incomplete.");
   const packCount = sources.reduce((total, photo) => total + photo.copies, 0);
   const expected = Number(attributes["Number of prints"]);
   if (!Number.isInteger(expected) || expected < 1 || packCount !== expected)
