@@ -4,9 +4,22 @@
   if (!data) return;
   const records = [...data.querySelectorAll('[data-handle]')];
   const byHandle = new Map(records.map((record, index) => [record.dataset.handle, { ...record.dataset, index }]));
-  const choose = (index, templates, orientation) => {
+  const choose = (handle, templates, orientation) => {
     const choices = templates.filter(item => item.orientation === orientation);
-    return choices.length ? choices[Math.floor(index / 5) % choices.length] : null;
+    let selected = null, highest = -1;
+    for (const item of choices) {
+      let score = 2166136261;
+      for (const character of `cartwala-mixed-frames|${handle}|${item.id}`) {
+        score = Math.imul(score ^ character.charCodeAt(0), 16777619);
+      }
+      score ^= score >>> 16;
+      score = Math.imul(score, 0x85ebca6b);
+      score ^= score >>> 13;
+      score = Math.imul(score, 0xc2b2ae35);
+      score = (score ^ (score >>> 16)) >>> 0;
+      if (score > highest) { highest = score; selected = item; }
+    }
+    return selected;
   };
   const geometry = (mockup) => {
     const width = mockup.orientation === 'Landscape' ? 75 : 50;
@@ -38,12 +51,11 @@
     const mount = () => {
       const links = [...document.querySelectorAll('#MainContent .product-card__media > a[href*="/products/"]')];
       const masterHandle = 'customized-photo-frame-black-beading';
-      const orderedHandles = [...new Set(links.map(link => new URL(link.href, location.href).pathname.match(/\/products\/([^/]+)/)?.[1]).filter(handle => handle !== masterHandle && byHandle.has(handle)))];
       for (const link of links) {
         if (link.dataset.cwCollectionMockup) continue;
         const handle = new URL(link.href, location.href).pathname.match(/\/products\/([^/]+)/)?.[1];
         const record = byHandle.get(handle);
-        const mockup = record && choose(handle === masterHandle ? 0 : orderedHandles.indexOf(handle), templates, record.orientation);
+        const mockup = record && choose(handle, templates, record.orientation);
         const original = link.querySelector('img');
         if (!mockup || !record.artwork || !original) continue;
         link.dataset.cwCollectionMockup = mockup.id;

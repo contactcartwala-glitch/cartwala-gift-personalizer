@@ -29,7 +29,18 @@ for (const mockup of defaults) {
   assert.ok(Math.abs(n(overlay.left) + mockup.x * n(overlay.width) / 100 - n(art.left)) < 0.001);
   assert.ok(Math.abs(n(overlay.top) + mockup.y * n(overlay.height) / 100 - n(art.top)) < 0.001);
 }
-for (let index = 0; index < 50; index++) assert.equal(choose(index, defaults, 'Portrait').id, defaults[Math.floor(index / 5)].id);
+const mixed = Array.from({length:500}, (_, index) => choose(`design-${index}`, defaults, 'Portrait').id);
+const totals = defaults.map(item => mixed.filter(id => id === item.id).length);
+assert.ok(totals.every(total => total >= 25 && total <= 80), 'All ten themes should be mixed across 500 designs');
+for (let index = 0; index < 500; index++) {
+  const key = `design-${index}`;
+  assert.equal(choose(key, defaults, 'Portrait').id, mixed[index], 'Refresh must preserve assignment');
+  assert.equal(choose(key, [...defaults].reverse(), 'Portrait').id, mixed[index], 'Template order must preserve assignment');
+  const withoutFirst = defaults.slice(1);
+  if (mixed[index] !== defaults[0].id) assert.equal(choose(key, withoutFirst, 'Portrait').id, mixed[index], 'Deleting one mockup must retain other assignments');
+}
+assert.ok(mixed.slice(0,10).some((id,index) => index && id !== mixed[index-1]), 'Do not assign groups of five');
+console.log('500-design distribution:', totals.join(', '));
 assert.equal(choose(0, [], 'Portrait'), null);
 assert.equal(choose(0, defaults, 'Landscape'), null);
 vm.runInNewContext(collectionScript, { location: { pathname: '/collections/photo-frames/products/example' }, document: new Proxy({}, { get() { throw new Error('Collection script touched a product page'); } }) });
@@ -39,4 +50,4 @@ assert.doesNotMatch(gallery, /buildScenes|frame-mockup\/manifest|dataset\.mockup
 assert.match(gallery, /sizeFrame\(roomFrame, width, height, 1\.15\)/);
 const manager = fs.readFileSync('app/routes/app.frame-mockups.tsx', 'utf8');
 assert.doesNotMatch(manager, /FRAME_PUBLISH|FRAME_REORDER|productUpdate|productReorderMedia/);
-console.log('Collection mockups passed: 50 designs in ten groups of five, delete-all, orientation filtering, product-page isolation, original four slides and artwork saves without product media mutations.');
+console.log('Collection mockups passed: 500 stable mixed designs, mockup reordering/deletion stability, delete-all, orientation filtering, product-page isolation, original four slides and artwork saves without product media mutations.');
