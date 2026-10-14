@@ -5,6 +5,7 @@ import { useLoaderData } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import { polaroidZipUrls } from "../lib/polaroid-print-layout";
 import { orderedPrintSize } from "../lib/print-dimensions";
 import { printPngWithDpi } from "../lib/png-print-density.client";
 import { DESIGN_ATTRIBUTE } from "../lib/signature-day.server";
@@ -113,7 +114,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
             "_Cartwala Design ID",
             "_Personalised Preview",
             "_Cartwala Design JSON",
-          ].includes(a.key) || /^_Album print \d+-/.test(a.key),
+          ].includes(a.key) || /^Print files \d+$/i.test(a.key) || /^_Album print \d+-/.test(a.key),
         )
       )
         continue;
@@ -730,6 +731,12 @@ export default function PrintFilesPage() {
       setAlbumProgress("");
     }
   };
+  const downloadPolaroid = async (item: PrintItem) => {
+    const { buildPolaroidPrintExport } = await import("../lib/polaroid-print-export.client");
+    const bytes = await buildPolaroidPrintExport(attrMap(item.attributes), item.quantity, setAlbumProgress);
+    downloadBlob(new Blob([new Uint8Array(bytes)], { type: "application/zip" }),
+      `${safeFile(`${item.orderName}-${item.productTitle}`)}-photos-and-13x19-sheets-300dpi.zip`);
+  };
   const downloadAlbum = async (item: PrintItem, format: "zip" | "pdf") => {
     const attributes = attrMap(item.attributes), pages = albumPrintPages(attributes);
     const problem = albumPrintProblem(pages, attributes);
@@ -801,6 +808,11 @@ export default function PrintFilesPage() {
           >
             {orderItems.map((item) => {
               const { design, exact, attributes } = getDesign(item);
+              const isPolaroid = /polaroid/i.test(item.productTitle + " " + (attributes["Print style"] || ""));
+              let polaroidProblem = "";
+              if (isPolaroid) try {
+                if (!polaroidZipUrls(attributes).length) polaroidProblem = "Saved print ZIP is missing.";
+              } catch (error) { polaroidProblem = error instanceof Error ? error.message : "Saved print ZIP is invalid."; }
               const albumPages = albumPrintPages(attributes);
               const isAlbum = albumPages.length > 0 || Boolean(attributes["Album print pages"]);
               const albumProblem = isAlbum ? albumPrintProblem(albumPages, attributes) : "";
@@ -829,14 +841,26 @@ export default function PrintFilesPage() {
                     style={{ color: "#666", fontSize: 13, marginBottom: 12 }}
                   >
                     Qty {item.quantity} ·{" "}
-                    {isAlbum
+                    {isPolaroid
+                      ? polaroidProblem || `${attributes["Number of prints"] || ""} prints per pack · ${attributes["Print size"] || ""} · 300 DPI · 13 × 19 inch sheets`
+                      : isAlbum
                       ? albumProblem || `${albumPages.length} album print pages ready · Covers included`
                       : exact && complete
                       ? "Layer data ready"
                       : hasSource ? "Recovery PSD only — check layout before printing" : "Original photos missing — print export unavailable"}
-                    {!isAlbum && missing.length > 0 ? ` (${missing.length}/${design.p.length})` : ""}
+                    {!isPolaroid && !isAlbum && missing.length > 0 ? ` (${missing.length}/${design.p.length})` : ""}
                   </div>
-                  {isAlbum ? <>
+                  {isPolaroid ? <>
+                    <button type="button" disabled={Boolean(working) || Boolean(polaroidProblem)}
+                      onClick={() => run(`${item.lineItemId}:polaroid`, () => downloadPolaroid(item))}
+                      style={{ background: "#ff6200", color: "white", border: 0, borderRadius: 8,
+                        padding: "11px 18px", fontWeight: 700, cursor: "pointer", opacity: polaroidProblem ? 0.45 : 1 }}>
+                      {working === `${item.lineItemId}:polaroid` ? albumProgress || "Preparing print ZIP…" : "Download Photos + 13 × 19 Sheets (ZIP)"}
+                    </button>
+                    <p style={{ fontSize: 13, color: "#666" }}>
+                      Ordered-size photos and all copies arranged on 13 × 19 inch sheets at 300 DPI, with 3 mm cutting gaps. Print at 100% / Actual size.
+                    </p>
+                  </> : isAlbum ? <>
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                       {(["zip", "pdf"] as const).map((format) => <button
                         key={format} type="button"
