@@ -70,6 +70,8 @@ export async function crystalPrintFile(attributes: Record<string, string>, forma
   tc.translate(spec.textTransform.x, spec.textTransform.y); tc.rotate(spec.textTransform.rotation); tc.scale(spec.textTransform.scale, spec.textTransform.scale); tc.fillStyle = 'rgba(245,247,247,.88)'; tc.textAlign = 'center'; tc.textBaseline = 'middle'; lines.forEach((line, i) => tc.fillText(line, 0, (i - (lines.length - 1) / 2) * (fs + 3)));
   // Photoshop masks read luminance, not alpha: flatten the shape over black.
   const mask = canvas(width, height), maskCtx = mask.getContext('2d')!; maskCtx.fillStyle = '#000'; maskCtx.fillRect(0, 0, width, height); maskCtx.drawImage(photoMask, 0, 0);
+  const original = attributes['Original photo'] ? await loadCrystalImage(attributes['Original photo']) : null;
+  if (original && original.width * original.height > 40000000) throw new Error('Original photo is too large for a PSD layer. Download the original separately.');
   const { writePsd } = await import('ag-psd');
   const bytes = writePsd({ width, height, canvas: composite,
     imageResources: { resolutionInfo: { horizontalResolution: 300, horizontalResolutionUnit: 'PPI', widthUnit: 'Inches', verticalResolution: 300, verticalResolutionUnit: 'PPI', heightUnit: 'Inches' } },
@@ -78,6 +80,7 @@ export async function crystalPrintFile(attributes: Record<string, string>, forma
       { name: 'Crystal / glass', canvas: crystal },
       { name: 'Customer photo - engraving', canvas: photo, blendMode: 'screen', mask: { top: 0, left: 0, bottom: height, right: width, defaultColor: 0, canvas: mask } },
       ...(spec.message.trim() ? [{ name: 'Customer message (raster text)', canvas: text }] : []),
+      ...(original ? [{ name: 'Original customer photo - full upload', canvas: (() => { const c = canvas(original.width, original.height); c.getContext('2d')!.drawImage(original, 0, 0); return c; })(), hidden: true }] : []),
       { name: 'Original colour cutout (reference)', canvas: (() => { const c = canvas(cutout.width, cutout.height); c.getContext('2d')!.drawImage(cutout, 0, 0); return c; })(), hidden: true },
       { name: 'Customer-approved preview (reference)', canvas: composite, hidden: true },
     ],

@@ -911,6 +911,17 @@ export default function PrintFilesPage() {
                         style={{ background: format === "jpg" ? "#ff6200" : "#111", color: "white", border: 0, borderRadius: 8, padding: "11px 18px", fontWeight: 700, opacity: crystalReady ? 1 : .45 }}>
                         {working === `${item.lineItemId}:${format}` ? "Preparing artwork…" : `Download ${format.toUpperCase()}`}
                       </button>)}
+                      <button type="button" disabled={Boolean(working) || !printSourceUrl(attributes["Original photo"])}
+                        onClick={() => run(`${item.lineItemId}:original`, async () => {
+                          const response = await fetch(assetUrl(attributes["Original photo"]));
+                          if (!response.ok) throw new Error("Original photo could not be downloaded.");
+                          const original = await response.blob();
+                          const extension = original.type.includes("png") ? "png" : original.type.includes("webp") ? "webp" : "jpg";
+                          downloadBlob(original, `${safeFile(`${item.orderName}-${item.productTitle}`)}-original.${extension}`);
+                        })}
+                        style={{ background: "#111", color: "white", border: 0, borderRadius: 8, padding: "11px 18px", fontWeight: 700, opacity: printSourceUrl(attributes["Original photo"]) ? 1 : .45 }}>
+                        {working === `${item.lineItemId}:original` ? "Downloading original…" : "Download Original Photo"}
+                      </button>
                     </div>
                     <p style={{ fontSize: 13, color: "#666" }}>Full saved customer preview, including the crystal, background and photo placement. Original preview pixels and aspect ratio are preserved at 300 DPI. PSD has separate background, crystal, masked photo and message layers, plus hidden source and approved-preview references.</p>
                   </> : isAlbum ? <>
