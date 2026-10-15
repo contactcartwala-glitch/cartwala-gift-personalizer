@@ -912,7 +912,7 @@ export default function PrintFilesPage() {
                         {working === `${item.lineItemId}:${format}` ? "Preparing artwork…" : `Download ${format.toUpperCase()}`}
                       </button>)}
                     </div>
-                    <p style={{ fontSize: 13, color: "#666" }}>Full saved customer preview, including the crystal, background and photo placement. Original preview pixels and aspect ratio are preserved at 300 DPI. PSD contains the saved preview as one composite layer.</p>
+                    <p style={{ fontSize: 13, color: "#666" }}>Full saved customer preview, including the crystal, background and photo placement. Original preview pixels and aspect ratio are preserved at 300 DPI. PSD has separate background, crystal, masked photo and message layers, plus hidden source and approved-preview references.</p>
                   </> : isAlbum ? <>
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                       {(["zip", "pdf"] as const).map((format) => <button
