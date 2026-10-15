@@ -32,6 +32,16 @@
 
   window.fetch=async(input,init)=>{
     if(!isCartAdd(input)||String(init?.method||'GET').toUpperCase()!=='POST'||!(init?.body instanceof FormData))return nativeFetch(input,init);
+    // Modern GiftPico orders carry durable photo/print references. Never
+    // recompress their originals, or silently retry a cart POST with photo
+    // fields stripped: a network-uncertain retry can duplicate the line.
+    const isGiftPicoOrder=[...init.body.keys()].some(key=>
+      key==='properties[_Cartwala Design ID]' ||
+      key==='properties[_Personalised Preview]' ||
+      key.startsWith('properties[_Cartwala Original ') ||
+      key.startsWith('properties[_Cartwala Source ')
+    );
+    if(isGiftPicoOrder)return nativeFetch(input,init);
     document.dispatchEvent(new CustomEvent('cartwala:cart-start',{bubbles:true}));
     const optimizedBody=await optimizeForm(init.body);const optimizedInit={...init,body:optimizedBody,headers:retryHeaders(init.headers)};let firstResponse=null;
     try{firstResponse=await nativeFetch(input,optimizedInit);if(firstResponse.ok){document.dispatchEvent(new CustomEvent('cartwala:cart-complete',{bubbles:true}));return firstResponse}}catch(error){console.warn('Cartwala optimized cart request failed; trying compatibility mode',error)}

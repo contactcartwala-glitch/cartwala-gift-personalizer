@@ -279,9 +279,8 @@
     compare.hidden=!p.compare;
     const state=personalizationState();
     const option=optionText();
-    variant.textContent=state.required
-      ? `${state.complete?'✓ Photo saved':'Customise before adding'}${option?' · '+option:''}`
-      : option;
+    // Keep the chosen option visible without extra personalization status lines.
+    variant.textContent=option;
 
     const save=savingsText();
     saving.textContent=save;
