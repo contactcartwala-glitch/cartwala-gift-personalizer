@@ -5,6 +5,7 @@ import { useLoaderData } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import { crystalPrintFile, crystalPrintSpec } from "../lib/crystal-print.client";
 import { originalArchiveIds } from "../lib/photo-originals";
 import { polaroidZipUrls } from "../lib/polaroid-print-layout";
 import { orderedPrintSize } from "../lib/print-dimensions";
@@ -88,7 +89,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       loadError = "The app has not been granted read_orders. Deploy the Shopify app configuration, then reopen the app and approve the updated permissions.";
     } else {
       const response = await admin.graphql(`#graphql
- query CartwalaPrintOrders($after: String) { orders(first: 50, after: $after, reverse: true, sortKey: CREATED_AT) { nodes { id name createdAt displayFinancialStatus lineItems(first: 100) { nodes { id name title quantity customAttributes { key value } product { id title metafield(namespace: "$app", key: "personalizer_config") { jsonValue } } } } } pageInfo { hasNextPage endCursor } } }`);
+ query CartwalaPrintOrders($after: String) { orders(first: 50, after: $after, reverse: true, sortKey: CREATED_AT) { nodes { id name createdAt displayFinancialStatus lineItems(first: 100) { nodes { id name title quantity customAttributes { key value } product { id title templateSuffix metafield(namespace: "$app", key: "personalizer_config") { jsonValue } } } } } pageInfo { hasNextPage endCursor } } }`);
       payload = (await response.json()) as any;
       if (payload.errors?.length) throw new Error(payload.errors[0].message);
     }
@@ -108,10 +109,15 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       if (signatureId) signatureOrders.push({ orderName: order.name, createdAt: order.createdAt,
         financialStatus: order.displayFinancialStatus || "UNKNOWN", productTitle: line.title || line.name,
         designId: signatureId });
+      const crystal = /^crystal(?:-heart)?$/.test(line.product?.templateSuffix || "");
+      if (crystal && !attributes.some(a => a.key === "_Cartwala Crystal")) attributes.push({ key: "_Cartwala Crystal", value: "true" });
       if (
         !attributes.some((a) =>
           [
             "_Cartwala Personalization",
+            "_Cartwala Crystal",
+            "_Crystal crop",
+            "_Crystal Print JSON",
             "_Cartwala Design ID",
             "_Personalised Preview",
             "_Cartwala Design JSON",
@@ -843,6 +849,8 @@ export default function PrintFilesPage() {
               const complete = hasPrintContent(design) && missing.length === 0;
               const hasPreview = printSourceUrl(attributes["_Personalised Preview"]);
               const previewOnly = (!exact || !complete) && hasPreview;
+              const isCrystal = attributes["_Cartwala Crystal"] === "true" || Boolean(attributes["_Crystal crop"]);
+              const crystalReady = Boolean(crystalPrintSpec(attributes) && printSourceUrl(attributes["_Background removed photo"]));
               const pk = `${item.lineItemId}:png`,
                 sk = `${item.lineItemId}:psd`;
               return (
@@ -867,6 +875,8 @@ export default function PrintFilesPage() {
                       ? polaroidProblem || `${attributes["Number of prints"] || ""} prints per pack · ${attributes["Print size"] || ""} · 300 DPI · 13 × 19 inch sheets`
                       : isAlbum
                       ? albumProblem || `${albumPages.length} album print pages ready · Covers included`
+                      : isCrystal
+                      ? crystalReady ? "Crystal artwork ready · 300 DPI · PSD + JPG" : "Crystal photo/layout missing — attach customer artwork before export"
                       : exact && complete
                       ? "Layer data ready"
                       : hasSource ? "Recovery PSD only — check layout before printing" : "Original photos missing — print export unavailable"}
@@ -893,6 +903,16 @@ export default function PrintFilesPage() {
                     <p style={{ fontSize: 13, color: "#666" }}>
                       Ordered-size photos and all copies arranged on 13 × 19 inch sheets at 300 DPI, with 3 mm cutting gaps. Print at 100% / Actual size.
                     </p>
+                  </> : isCrystal ? <>
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      {(["jpg", "psd"] as const).map(format => <button key={format} type="button"
+                        disabled={Boolean(working) || !crystalReady}
+                        onClick={() => run(`${item.lineItemId}:${format}`, async () => downloadBlob(await crystalPrintFile(attributes, format), `${safeFile(`${item.orderName}-${item.productTitle}`)}-300dpi.${format}`))}
+                        style={{ background: format === "jpg" ? "#ff6200" : "#111", color: "white", border: 0, borderRadius: 8, padding: "11px 18px", fontWeight: 700, opacity: crystalReady ? 1 : .45 }}>
+                        {working === `${item.lineItemId}:${format}` ? "Preparing artwork…" : `Download ${format.toUpperCase()}`}
+                      </button>)}
+                    </div>
+                    <p style={{ fontSize: 13, color: "#666" }}>Artwork at ordered crystal face size, without the product mockup. PSD has separate photo and raster text layers. 3D engraving requires additional production software.</p>
                   </> : isAlbum ? <>
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                       {(["zip", "pdf"] as const).map((format) => <button
