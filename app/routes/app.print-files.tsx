@@ -5,7 +5,7 @@ import { useLoaderData } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
-import { crystalPrintFile, crystalPrintSpec } from "../lib/crystal-print.client";
+import { crystalPrintFile } from "../lib/crystal-print.client";
 import { originalArchiveIds } from "../lib/photo-originals";
 import { polaroidZipUrls } from "../lib/polaroid-print-layout";
 import { orderedPrintSize } from "../lib/print-dimensions";
@@ -850,7 +850,7 @@ export default function PrintFilesPage() {
               const hasPreview = printSourceUrl(attributes["_Personalised Preview"]);
               const previewOnly = (!exact || !complete) && hasPreview;
               const isCrystal = attributes["_Cartwala Crystal"] === "true" || Boolean(attributes["_Crystal crop"]);
-              const crystalReady = Boolean(crystalPrintSpec(attributes) && printSourceUrl(attributes["_Background removed photo"]));
+              const crystalReady = Boolean(printSourceUrl(attributes["_Personalised Preview"]));
               const pk = `${item.lineItemId}:png`,
                 sk = `${item.lineItemId}:psd`;
               return (
@@ -876,7 +876,7 @@ export default function PrintFilesPage() {
                       : isAlbum
                       ? albumProblem || `${albumPages.length} album print pages ready · Covers included`
                       : isCrystal
-                      ? crystalReady ? "Crystal artwork ready · 300 DPI · PSD + JPG" : "Crystal photo/layout missing — attach customer artwork before export"
+                      ? crystalReady ? "Saved customer crystal preview ready · 300 DPI · PSD + JPG" : "Saved crystal preview missing — export unavailable"
                       : exact && complete
                       ? "Layer data ready"
                       : hasSource ? "Recovery PSD only — check layout before printing" : "Original photos missing — print export unavailable"}
@@ -912,7 +912,7 @@ export default function PrintFilesPage() {
                         {working === `${item.lineItemId}:${format}` ? "Preparing artwork…" : `Download ${format.toUpperCase()}`}
                       </button>)}
                     </div>
-                    <p style={{ fontSize: 13, color: "#666" }}>Artwork at ordered crystal face size, without the product mockup. PSD has separate photo and raster text layers. 3D engraving requires additional production software.</p>
+                    <p style={{ fontSize: 13, color: "#666" }}>Full saved customer preview, including the crystal, background and photo placement. Original preview pixels and aspect ratio are preserved at 300 DPI. PSD contains the saved preview as one composite layer.</p>
                   </> : isAlbum ? <>
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                       {(["zip", "pdf"] as const).map((format) => <button
