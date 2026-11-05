@@ -1090,6 +1090,8 @@
         const saveLabel = save.textContent;
         const result = root.querySelector("[data-cw-result]");
         const resultImage = root.querySelector("[data-cw-result-image]");
+        const customizeButton = root.querySelector("[data-cw-open]");
+        const customizeLabel = customizeButton.textContent;
         const productClockPreview = root.querySelector("[data-cw-clock-product-preview]");
         let saved = false;
         let busy = false;
@@ -1105,6 +1107,16 @@
           console.error("Cartwala configuration is invalid", error);
         }
         const config = normalize(raw);
+        const framePanel = root.querySelector("[data-cw-photo-frame-data]");
+        let frameVariantId = framePanel?.dataset.selectedVariant || "";
+        if (framePanel) {
+          const frameVariants = JSON.parse(framePanel.dataset.variants || "[]");
+          const frameOptions = JSON.parse(framePanel.dataset.options || "[]");
+          const frameVariant = frameVariants.find((item) => String(item.id) === frameVariantId);
+          const orientationIndex = frameOptions.findIndex((name) => name.toLowerCase() === "orientation");
+          config.ratio = /landscape/i.test(framePanel.dataset.fixedOrientation || frameVariant?.options?.[orientationIndex] || "") ? "3:2" : "2:3";
+        }
+
         try {
           const groupPanel = document.querySelector(`[data-cw-product-group][data-product-id="${root.dataset.productId}"]`);
           const group = JSON.parse(groupPanel?.dataset.config || "{}");
@@ -1205,7 +1217,12 @@
                 !button.closest(".shopify-payment-button") &&
                 !button.closest("[data-cw-personalizer]"),
             );
-        const setPurchaseReady = (ready) =>
+        const setPurchaseReady = (ready) => {
+          if (framePanel) {
+            root.dataset.cwPurchaseReady = String(ready);
+            const label = ready ? root.dataset.labelEdit || "Edit Again" : customizeLabel;
+            if (customizeButton.textContent !== label) customizeButton.textContent = label;
+          }
           purchaseButtons().forEach((button) => {
             if (button.dataset.cwDisplay === undefined)
               button.dataset.cwDisplay = button.style.display || "";
@@ -1214,6 +1231,7 @@
             button.disabled = !ready;
             button.setAttribute("aria-hidden", ready ? "false" : "true");
           });
+        };
         const lockButtons = () => {
           if (!saved) setPurchaseReady(false);
         };
@@ -1338,6 +1356,48 @@
             }
           });
         }
+        let framePreviewRequested = false;
+        let framePreviewActive = false;
+        const refreshFramePreview = () => {
+          if (!framePreviewRequested || busy || dialog.open) return;
+          framePreviewRequested = false;
+          void attach(true);
+        };
+        if (framePanel) {
+          root.addEventListener("cw:photo-frame-selection", (event) => {
+            const { ratio, variantId } = event.detail || {};
+            if (!["2:3", "3:2"].includes(ratio) || !variantId) return;
+            if (ratio === config.ratio && String(variantId) === frameVariantId) return;
+            const ratioChanged = ratio !== config.ratio;
+            if (ratioChanged || !saved) invalidate();
+            else revision++;
+            frameVariantId = String(variantId);
+            const variantInput = productForm?.querySelector('[name="id"]');
+            if (variantInput) variantInput.value = frameVariantId;
+            if (saved && !cartSubmitting) setPurchaseReady(true);
+            if (!ratioChanged) {
+              if (framePreviewActive) framePreviewRequested = true;
+              return;
+            }
+            config.ratio = ratio;
+            root.style.setProperty("--cw-ratio", ratio.replace(":", "/"));
+            const [width, height] = ratio.split(":").map(Number);
+            root.style.setProperty("--cw-stage-ratio", String(width / height));
+            if (ratioChanged) photoStates.forEach((state) => {
+              state.x = 0;
+              state.y = 0;
+              state.relativeX = 0;
+              state.relativeY = 0;
+              state.scale = 1;
+            });
+            requestAnimationFrame(() => {
+              photoStates.forEach(apply);
+              positionSlots();
+              framePreviewRequested = photoStates.some((state) => state.file) && isReady();
+              refreshFramePreview();
+            });
+          });
+        }
         let cartSubmitting = false;
         productForm?.addEventListener(
           "submit",
@@ -1347,6 +1407,10 @@
             if (root.dataset.cwAcrylicProduct === "true") {
               const variantInput = productForm.querySelector('input[name="id"]');
               if (variantInput && selectedVariantId) variantInput.value = selectedVariantId;
+            }
+            if (framePanel && frameVariantId) {
+              const variantInput = productForm.querySelector('[name="id"]');
+              if (variantInput) variantInput.value = frameVariantId;
             }
             if (!saved || busy) {
               dialog.showModal();
@@ -1389,9 +1453,10 @@
               }, 50);
               setTimeout(() => showCartPreview(previewUrl, designId), 300);
               cartSubmitting = false;
+              setPurchaseReady(saved && !busy);
             } catch (error) {
               cartSubmitting = false;
-              setPurchaseReady(true);
+              setPurchaseReady(saved && !busy);
               window.alert(
                 error instanceof Error
                   ? error.message
@@ -1794,6 +1859,47 @@
           modalStage?.addEventListener("pointerup", stopModalDrag);
           modalStage?.addEventListener("pointercancel", stopModalDrag);
           modalStage?.addEventListener("lostpointercapture", stopModalDrag);
+
+          // Clock body colour cycle: JS-driven so it cannot be blocked by older !important CSS.
+          const clockPalette = [
+            [255, 244, 168], // yellow
+            [255, 205, 176], // orange
+            [207, 255, 220], // green
+            [210, 239, 255], // blue
+            [238, 218, 255], // purple
+            [255, 218, 236], // pink
+          ];
+          const clockFaces = () => [
+            ...root.querySelectorAll(".cw-clock-product-face,.cw-clock-modal-face"),
+          ];
+          let clockColorTimer = null;
+          const startClockColorCycle = () => {
+            if (clockColorTimer) return;
+            const cycleMs = 9000;
+            const tick = () => {
+              const now = performance.now();
+              const t = (now % cycleMs) / cycleMs * clockPalette.length;
+              const i = Math.floor(t) % clockPalette.length;
+              const j = (i + 1) % clockPalette.length;
+              const f = t - Math.floor(t);
+              const rgb = clockPalette[i].map((v, k) =>
+                Math.round(v + (clockPalette[j][k] - v) * f),
+              );
+              const bg = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+              const glow = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, .42)`;
+              clockFaces().forEach((face) => {
+                face.style.setProperty("background", bg, "important");
+                face.style.setProperty(
+                  "box-shadow",
+                  `inset 0 0 34px 12px ${glow}, 0 0 18px ${glow}`,
+                  "important",
+                );
+              });
+            };
+            tick();
+            clockColorTimer = window.setInterval(tick, 90);
+          };
+          startClockColorCycle();
 
           productClockPreview?.querySelectorAll("[data-cw-clock-edit-side]").forEach((button) => {
             button.addEventListener("click", () => {
@@ -2362,6 +2468,10 @@
         );
 
         root.querySelector("[data-cw-open]").addEventListener("click", () => {
+          if (framePanel) {
+            framePreviewRequested = false;
+            if (framePreviewActive) invalidate();
+          }
           if (isPhotoCubeClock) {
             if (productClockPreview) productClockPreview.hidden = true;
             hideClockPreview();
@@ -2520,8 +2630,10 @@
           x: Number.isFinite(state.relativeX) ? state.relativeX : (Number(state.x) || 0) / (stage.clientWidth || lastStageWidth || 1),
           y: Number.isFinite(state.relativeY) ? state.relativeY : (Number(state.y) || 0) / (stage.clientHeight || lastStageHeight || 1),
         });
-        const attach = async () => {
+        const attach = async (automatic = false) => {
           if (!productForm || !isReady() || busy) return;
+          automatic = automatic === true;
+          framePreviewActive = Boolean(framePanel && automatic);
           if (stage.clientWidth) lastStageWidth = stage.clientWidth;
           if (stage.clientHeight) lastStageHeight = stage.clientHeight;
           busy = true;
@@ -2707,13 +2819,19 @@
                   state.input.value.trim(),
                 );
             });
-            if (startRevision !== revision)
+            if (startRevision !== revision) {
+              if (automatic) return;
               throw new Error(
                 "Design changed while rendering. Please preview again.",
               );
+            }
             const blob = await new Promise((resolve) =>
               canvas.toBlob(resolve, "image/png"),
             );
+            if (startRevision !== revision) {
+              if (automatic) return;
+              throw new Error("Design changed while rendering. Please preview again.");
+            }
             if (!blob) throw new Error("Preview could not be generated");
             if (previewUrl) URL.revokeObjectURL(previewUrl);
             previewUrl = URL.createObjectURL(blob);
@@ -2796,8 +2914,10 @@
             );
           } finally {
             busy = false;
+            framePreviewActive = false;
             save.textContent = saveLabel;
             updateReady();
+            if (framePreviewRequested) requestAnimationFrame(refreshFramePreview);
           }
         };
 
@@ -2943,6 +3063,7 @@
           )
           .then((record) => {
             if (!record || Date.now() - record.updated > 7 * 86400000) return;
+            if (framePanel && record.printDesign?.r !== config.ratio) return;
             designId = record.designId;
             photoStates.forEach((s, i) => {
               const stored = record.photos[i];
@@ -3059,6 +3180,7 @@
           .catch((error) =>
             console.warn("Cartwala draft restore unavailable", error),
           );
+        if (framePanel) root.dispatchEvent(new CustomEvent("cw:photo-frame-ready"));
         root.querySelector("[data-cw-open]").addEventListener("click", () => {
           photoStates.forEach((s) => {
             if (s.relativeX !== undefined) {

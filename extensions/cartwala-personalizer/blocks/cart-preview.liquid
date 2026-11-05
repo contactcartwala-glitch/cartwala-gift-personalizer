@@ -1,3 +1,46 @@
+{% if request.page_type == 'collection' and collection.handle == 'photo-frames' %}
+  <div data-cw-frame-collection hidden data-mockups="{{ shop.metafields['app--421161926657'].frame_mockups.value | json | escape }}">
+    {% paginate collection.products by 250 %}
+      {% for item in collection.products %}
+          {% liquid
+            assign artwork = item.metafields.cartwala_personalizer.frame_artwork.value
+            assign direction = 'Portrait'
+            assign config = item.metafields.cartwala_personalizer.personalizer_config.value
+            if config.photoFrameDesign.orientation == 'Landscape'
+              assign direction = 'Landscape'
+            endif
+            if artwork == blank
+              for image in item.images
+                if direction == 'Portrait' and image.aspect_ratio > 0.64 and image.aspect_ratio < 0.69
+                  assign artwork = image | image_url: width: 1000
+                  break
+                elsif direction == 'Landscape' and image.aspect_ratio > 1.45 and image.aspect_ratio < 1.55
+                  assign artwork = image | image_url: width: 1000
+                  break
+                endif
+              endfor
+            endif
+            if artwork == blank and item.featured_image != blank
+              assign artwork = item.featured_image | image_url: width: 1000
+            endif
+          %}
+          <span data-handle="{{ item.handle | escape }}" data-artwork="{{ artwork | escape }}" data-orientation="{{ direction }}"></span>
+      {% endfor %}
+    {% endpaginate %}
+    {% assign legacy_handles = 'customised-baby-frame,cw-pf-001-personalized-baby-birth-frame,cw-pf-004-baby-birth-frame-design-3,cw-pf-005-google-it-photo-frame,cw-pf-006-our-love-story-frame,cw-pf-007-baby-birth-frame-design-5,cw-pf-008-baby-birth-frame-design-4,cw-pf-009-baby-birth-frame-design-2' | split: ',' %}
+    {% for legacy_handle in legacy_handles %}
+      {% assign legacy_item = all_products[legacy_handle] %}
+      {% if legacy_item != blank %}
+        {% assign legacy_artwork = legacy_item.metafields.cartwala_personalizer.frame_artwork.value %}
+        {% if legacy_artwork != blank %}
+          <span data-handle="{{ legacy_item.handle | escape }}" data-artwork="{{ legacy_artwork | escape }}" data-orientation="Portrait"></span>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  </div>
+  <script src="{{ 'cartwala-frame-collection-mockups.js' | asset_url }}" defer></script>
+{% endif %}
+
 {% schema %}
 {
   "name": "Cartwala cart previews",

@@ -5,6 +5,9 @@ import { useLoaderData } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import { crystalPrintFile } from "../lib/crystal-print.client";
+import { originalArchiveIds } from "../lib/photo-originals";
+import { polaroidZipUrls } from "../lib/polaroid-print-layout";
 import { orderedPrintSize } from "../lib/print-dimensions";
 import { printPngWithDpi } from "../lib/png-print-density.client";
 import { DESIGN_ATTRIBUTE } from "../lib/signature-day.server";
@@ -86,7 +89,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       loadError = "The app has not been granted read_orders. Deploy the Shopify app configuration, then reopen the app and approve the updated permissions.";
     } else {
       const response = await admin.graphql(`#graphql
- query CartwalaPrintOrders($after: String) { orders(first: 50, after: $after, reverse: true, sortKey: CREATED_AT) { nodes { id name createdAt displayFinancialStatus lineItems(first: 100) { nodes { id name title quantity customAttributes { key value } product { id title metafield(namespace: "$app", key: "personalizer_config") { jsonValue } } } } } pageInfo { hasNextPage endCursor } } }`);
+ query CartwalaPrintOrders($after: String) { orders(first: 50, after: $after, reverse: true, sortKey: CREATED_AT) { nodes { id name createdAt displayFinancialStatus lineItems(first: 100) { nodes { id name title quantity customAttributes { key value } product { id title templateSuffix metafield(namespace: "$app", key: "personalizer_config") { jsonValue } } } } } pageInfo { hasNextPage endCursor } } }`);
       payload = (await response.json()) as any;
       if (payload.errors?.length) throw new Error(payload.errors[0].message);
     }
@@ -106,14 +109,19 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       if (signatureId) signatureOrders.push({ orderName: order.name, createdAt: order.createdAt,
         financialStatus: order.displayFinancialStatus || "UNKNOWN", productTitle: line.title || line.name,
         designId: signatureId });
+      const crystal = /^crystal(?:-heart)?$/.test(line.product?.templateSuffix || "");
+      if (crystal && !attributes.some(a => a.key === "_Cartwala Crystal")) attributes.push({ key: "_Cartwala Crystal", value: "true" });
       if (
         !attributes.some((a) =>
           [
             "_Cartwala Personalization",
+            "_Cartwala Crystal",
+            "_Crystal crop",
+            "_Crystal Print JSON",
             "_Cartwala Design ID",
             "_Personalised Preview",
             "_Cartwala Design JSON",
-          ].includes(a.key),
+          ].includes(a.key) || /^Print files \d+$/i.test(a.key) || /^_Album print \d+-/.test(a.key),
         )
       )
         continue;
@@ -150,10 +158,45 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     sourceUrls: design.sourceUrls as string[],
     shirtSizes: design.shirtSizes as string[],
   }]));
-  return { items, signatureOrders: uniqueSignatureOrders, designs, loadError };
+  const originalIds = [...new Set(items.flatMap(item => originalArchiveIds(item.attributes)))];
+  let originals: Record<string, { available: boolean; photoCount: number }> = {};
+  if (originalIds.length) try {
+    const archives = await prisma.photoOriginalArchive.findMany({ where: { shop: session.shop, id: { in: originalIds } } });
+    originals = Object.fromEntries(archives.map(archive => [archive.id, { available: Boolean(archive.url && !archive.deletedAt), photoCount: archive.photoCount }]));
+  } catch (error) {
+    console.error("Original photo lookup failed", error);
+    loadError = "Original photos could not be loaded. Print downloads are still available.";
+  }
+  return { items, signatureOrders: uniqueSignatureOrders, designs, originals, loadError };
+};
+// Shopify file properties can be serialized [thumbnail, original] pairs.
+// Preserve other JSON properties (especially the saved layer layout).
+const originalAssetUrl = (value: string) => {
+  const valid = (url: unknown): url is string =>
+    typeof url === "string" && /^https?:\/\//i.test(url);
+  if (valid(value)) return value;
+  try {
+    const urls: unknown = JSON.parse(value || "null");
+    if (Array.isArray(urls)) return [...urls].reverse().find(valid) || "";
+  } catch { /* Not a serialized file property. */ }
+  return "";
 };
 const attrMap = (a: Attribute[]) =>
-  Object.fromEntries(a.map((x) => [x.key, x.value]));
+  Object.fromEntries(a.map((x) => [x.key, originalAssetUrl(x.value) || x.value]));
+type AlbumPage = { name: string; url: string; index: number };
+const albumPrintPages = (attributes: Record<string, string>): AlbumPage[] =>
+  Object.entries(attributes).flatMap(([key, value]) => {
+    const match = /^_Album print (\d+-(?:front-cover|page|back-cover)\.(?:jpe?g|png))$/i.exec(key);
+    if (!match) return [];
+    return [{ name: match[1], index: Number(match[1].split("-")[0]), url: originalAssetUrl(value) }];
+  }).sort((a, b) => a.index - b.index);
+const albumPrintProblem = (pages: AlbumPage[], attributes: Record<string, string>) => {
+  const expected = Number(attributes["Album print pages"] || 0);
+  if (!pages.length || (expected > 0 && pages.length !== expected) ||
+    pages.some((page, index) => !page.url || page.index !== index))
+    return "Some album print pages are missing. Download is unavailable until all pages are saved.";
+  return "";
+};
 const numeric = (v: unknown, f: number) => {
   if (v === null || v === undefined || v === "") return f;
   const n = Number(v);
@@ -571,7 +614,7 @@ const downloadBlob = (blob: Blob, filename: string) => {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(u), 2000);
+  setTimeout(() => URL.revokeObjectURL(u), 60_000);
 };
 async function downloadPng(item: PrintItem) {
   const saved = getDesign(item);
@@ -681,8 +724,9 @@ async function downloadPsd(item: PrintItem) {
   );
 }
 export default function PrintFilesPage() {
-  const { items, signatureOrders, designs, loadError } = useLoaderData<typeof loader>();
+  const { items, signatureOrders, designs, originals, loadError } = useLoaderData<typeof loader>();
   const [working, setWorking] = useState("");
+  const [albumProgress, setAlbumProgress] = useState("");
   const grouped = useMemo(() => {
     const m = new Map<string, PrintItem[]>();
     for (const i of items)
@@ -700,7 +744,34 @@ export default function PrintFilesPage() {
       );
     } finally {
       setWorking("");
+      setAlbumProgress("");
     }
+  };
+  const downloadOriginals = async (item: PrintItem) => {
+    const params = new URLSearchParams({ orderId: item.orderId, lineItemId: item.lineItemId });
+    const response = await fetch(`/app/original-files?${params}`);
+    if (!response.ok) {
+      const result = await response.json();
+      throw new Error(result.error || "Could not download original photos.");
+    }
+    downloadBlob(await response.blob(), `${safeFile(item.orderName)}-Original-Photos.zip`);
+  };
+  const downloadPolaroid = async (item: PrintItem) => {
+    const { buildPolaroidPrintExport } = await import("../lib/polaroid-print-export.client");
+    const bytes = await buildPolaroidPrintExport(attrMap(item.attributes), item.quantity, setAlbumProgress);
+    downloadBlob(new Blob([new Uint8Array(bytes)], { type: "application/zip" }),
+      `${safeFile(`${item.orderName}-${item.productTitle}`)}-photos-and-13x19-sheets-300dpi.zip`);
+  };
+  const downloadAlbum = async (item: PrintItem, format: "zip" | "pdf") => {
+    const attributes = attrMap(item.attributes), pages = albumPrintPages(attributes);
+    const problem = albumPrintProblem(pages, attributes);
+    if (problem) throw new Error(problem);
+    const { buildAlbumPrintExport } = await import("../lib/album-print-export.client");
+    const bytes = await buildAlbumPrintExport(pages, format, `${item.orderName} ${item.productTitle}`,
+      (done, total) => setAlbumProgress(`Preparing ${done}/${total} pages…`));
+    downloadBlob(new Blob([new Uint8Array(bytes)], {
+      type: format === "zip" ? "application/zip" : "application/pdf",
+    }), `${safeFile(`${item.orderName}-${item.productTitle}`)}-print-pages.${format}`);
   };
   const downloadSignaturePdf = async (orderName: string, design: typeof designs[string]) => {
     const pdf = await buildSignatureDayPrintPdf(design);
@@ -762,11 +833,24 @@ export default function PrintFilesPage() {
           >
             {orderItems.map((item) => {
               const { design, exact, attributes } = getDesign(item);
+              const isPolaroid = /polaroid/i.test(item.productTitle + " " + (attributes["Print style"] || ""));
+              let polaroidProblem = "";
+              if (isPolaroid) try {
+                if (!polaroidZipUrls(attributes).length) polaroidProblem = "Saved print ZIP is missing.";
+              } catch (error) { polaroidProblem = error instanceof Error ? error.message : "Saved print ZIP is invalid."; }
+              const archiveIds = originalArchiveIds(item.attributes);
+              const originalsAvailable = archiveIds.length > 0 && archiveIds.every(id => originals[id]?.available);
+              const photoPrintBatch = isPolaroid || item.attributes.some(attribute => /^Print files \d+$/.test(attribute.key));
+              const albumPages = albumPrintPages(attributes);
+              const isAlbum = albumPages.length > 0 || Boolean(attributes["Album print pages"]);
+              const albumProblem = isAlbum ? albumPrintProblem(albumPages, attributes) : "";
               const missing = missingPhotos(design, attributes);
               const hasSource = design.p.length > 0 && missing.length === 0;
               const complete = hasPrintContent(design) && missing.length === 0;
               const hasPreview = printSourceUrl(attributes["_Personalised Preview"]);
               const previewOnly = (!exact || !complete) && hasPreview;
+              const isCrystal = attributes["_Cartwala Crystal"] === "true" || Boolean(attributes["_Crystal crop"]);
+              const crystalReady = Boolean(printSourceUrl(attributes["_Personalised Preview"]));
               const pk = `${item.lineItemId}:png`,
                 sk = `${item.lineItemId}:psd`;
               return (
@@ -787,11 +871,84 @@ export default function PrintFilesPage() {
                     style={{ color: "#666", fontSize: 13, marginBottom: 12 }}
                   >
                     Qty {item.quantity} ·{" "}
-                    {exact && complete
+                    {isPolaroid
+                      ? polaroidProblem || `${attributes["Number of prints"] || ""} prints per pack · ${attributes["Print size"] || ""} · 300 DPI · 13 × 19 inch sheets`
+                      : isAlbum
+                      ? albumProblem || `${albumPages.length} album print pages ready · Covers included`
+                      : isCrystal
+                      ? crystalReady ? "Saved customer crystal preview ready · 300 DPI · PSD + JPG" : "Saved crystal preview missing — export unavailable"
+                      : exact && complete
                       ? "Layer data ready"
                       : hasSource ? "Recovery PSD only — check layout before printing" : "Original photos missing — print export unavailable"}
-                    {missing.length > 0 ? ` (${missing.length}/${design.p.length})` : ""}
+                    {!isPolaroid && !isAlbum && missing.length > 0 ? ` (${missing.length}/${design.p.length})` : ""}
                   </div>
+                  {photoPrintBatch && <div style={{ marginBottom: 12 }}>
+                    <button type="button" disabled={Boolean(working) || !originalsAvailable}
+                      onClick={() => run(`${item.lineItemId}:originals`, () => downloadOriginals(item))}
+                      style={{ background: "#111", color: "white", border: 0, borderRadius: 8, padding: "11px 18px", fontWeight: 700, opacity: originalsAvailable ? 1 : 0.45 }}>
+                      {working === `${item.lineItemId}:originals` ? "Preparing originals…" : "Download Originals ZIP"}
+                    </button>
+                    <p style={{ fontSize: 13, color: "#666", marginBottom: 0 }}>
+                      {originalsAvailable ? "Unedited uploaded files, saved once per photo. Download your backup before the 30-day retention period after fulfillment ends."
+                        : archiveIds.length ? "Originals are unavailable or the retention period has ended." : "Original photos were not saved for this older order."}
+                    </p>
+                  </div>}
+                  {isPolaroid ? <>
+                    <button type="button" disabled={Boolean(working) || Boolean(polaroidProblem)}
+                      onClick={() => run(`${item.lineItemId}:polaroid`, () => downloadPolaroid(item))}
+                      style={{ background: "#ff6200", color: "white", border: 0, borderRadius: 8,
+                        padding: "11px 18px", fontWeight: 700, cursor: "pointer", opacity: polaroidProblem ? 0.45 : 1 }}>
+                      {working === `${item.lineItemId}:polaroid` ? albumProgress || "Preparing print ZIP…" : "Download Photos + 13 × 19 Sheets (ZIP)"}
+                    </button>
+                    <p style={{ fontSize: 13, color: "#666" }}>
+                      Ordered-size photos and all copies arranged on 13 × 19 inch sheets at 300 DPI, with 3 mm cutting gaps. Print at 100% / Actual size.
+                    </p>
+                  </> : isCrystal ? <>
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      {(["jpg", "psd"] as const).map(format => <button key={format} type="button"
+                        disabled={Boolean(working) || !crystalReady}
+                        onClick={() => run(`${item.lineItemId}:${format}`, async () => downloadBlob(await crystalPrintFile(attributes, format), `${safeFile(`${item.orderName}-${item.productTitle}`)}-300dpi.${format}`))}
+                        style={{ background: format === "jpg" ? "#ff6200" : "#111", color: "white", border: 0, borderRadius: 8, padding: "11px 18px", fontWeight: 700, opacity: crystalReady ? 1 : .45 }}>
+                        {working === `${item.lineItemId}:${format}` ? "Preparing artwork…" : `Download ${format.toUpperCase()}`}
+                      </button>)}
+                      <button type="button" disabled={Boolean(working) || !printSourceUrl(attributes["Original photo"])}
+                        onClick={() => run(`${item.lineItemId}:original`, async () => {
+                          const response = await fetch(assetUrl(attributes["Original photo"]));
+                          if (!response.ok) throw new Error("Original photo could not be downloaded.");
+                          const original = await response.blob();
+                          const extension = original.type.includes("png") ? "png" : original.type.includes("webp") ? "webp" : "jpg";
+                          downloadBlob(original, `${safeFile(`${item.orderName}-${item.productTitle}`)}-original.${extension}`);
+                        })}
+                        style={{ background: "#111", color: "white", border: 0, borderRadius: 8, padding: "11px 18px", fontWeight: 700, opacity: printSourceUrl(attributes["Original photo"]) ? 1 : .45 }}>
+                        {working === `${item.lineItemId}:original` ? "Downloading original…" : "Download Original Photo"}
+                      </button>
+                    </div>
+                    <p style={{ fontSize: 13, color: "#666" }}>Full saved customer preview, including the crystal, background and photo placement. Original preview pixels and aspect ratio are preserved at 300 DPI. PSD has separate background, crystal, masked photo and message layers, plus hidden source and approved-preview references.</p>
+                  </> : isAlbum ? <>
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      {(["zip", "pdf"] as const).map((format) => <button
+                        key={format} type="button"
+                        disabled={Boolean(working) || Boolean(albumProblem)}
+                        onClick={() => run(`${item.lineItemId}:${format}`, () => downloadAlbum(item, format))}
+                        style={{ background: format === "zip" ? "#ff6200" : "#111", color: "white",
+                          border: 0, borderRadius: 8, padding: "11px 18px", fontWeight: 700,
+                          cursor: "pointer", opacity: albumProblem ? 0.45 : 1 }}
+                      >{working === `${item.lineItemId}:${format}`
+                          ? albumProgress || "Preparing album…"
+                          : format === "zip" ? "Download All Print Pages (ZIP)" : "Download Print PDF"}</button>)}
+                    </div>
+                    <p style={{ fontSize: 13, color: "#666" }}>
+                      Full-resolution saved artwork, in page order. PDF uses 300 DPI. These pages are flattened images; editable PSD layers were not saved.
+                    </p>
+                    <details>
+                      <summary style={{ cursor: "pointer" }}>View {albumPages.length} saved pages</summary>
+                      <ol style={{ maxHeight: 260, overflow: "auto", lineHeight: 1.8 }}>
+                        {albumPages.map((page) => <li key={page.name}>
+                          {page.url ? <a href={page.url} target="_blank" rel="noreferrer">{page.name}</a> : `${page.name} — missing`}
+                        </li>)}
+                      </ol>
+                    </details>
+                  </> : <>
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                     <button
                       type="button"
@@ -827,6 +984,7 @@ export default function PrintFilesPage() {
                       {working === sk ? "Generating PSD…" : "Download PSD"}
                     </button>
                   </div>
+                  </>}
                 </div>
               );
             })}

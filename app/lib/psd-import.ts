@@ -354,3 +354,10 @@ export const canvasHasPixels = (canvas: HTMLCanvasElement): boolean => {
   for (let index = 3; index < data.length; index += 4) if (data[index] > 0) return true;
   return false;
 };
+
+// Editable Photoshop text must never also become a photo mask merely because
+// its name starts with UPLOAD (e.g. UPLOAD YOUR NAMES).
+export const isPsdPhotoLayer = (layer: PsdCanvasLayer): boolean =>
+  !layer.text && !layer.hidden &&
+  (/^(PHOTO|UPLOAD)(?:[\s_-]|\d|$)/i.test(String(layer.name || "")) ||
+   /^main[\s_-]*(?:pic|photo|picture)$/i.test(String(layer.name || "").trim()));

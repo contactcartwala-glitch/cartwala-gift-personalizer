@@ -68,7 +68,11 @@ export type LinkField = {
 
 export type CustomFont = { id: string; name: string; url: string };
 
+export const PHOTO_FRAME_MASTER_ID = "gid://shopify/Product/15416643420345";
+export type PhotoFrameDesign = { masterProductId: typeof PHOTO_FRAME_MASTER_ID; orientation: "Portrait" | "Landscape" };
+
 export type Config = {
+  photoFrameDesign?: PhotoFrameDesign;
   acrylicDesign?: AcrylicDesign;
   sourcePsdUrl?: string;
   enabled: boolean;
@@ -363,9 +367,14 @@ export const normalizeConfig = (value: unknown): Config => {
   const canvasRatio = /^\d{1,5}:\d{1,5}$/.test(String(input.canvasRatio))
     ? String(input.canvasRatio)
     : "1:1";
+  const frameLink = input.photoFrameDesign as Partial<PhotoFrameDesign> | undefined;
+  const photoFrameDesign: PhotoFrameDesign | undefined = frameLink?.masterProductId === PHOTO_FRAME_MASTER_ID &&
+    (frameLink.orientation === "Portrait" || frameLink.orientation === "Landscape")
+    ? { masterProductId: PHOTO_FRAME_MASTER_ID, orientation: frameLink.orientation } : undefined;
 
   return {
     ...(normalizeAcrylicDesign(input.acrylicDesign) ? { acrylicDesign: normalizeAcrylicDesign(input.acrylicDesign) } : {}),
+    ...(photoFrameDesign ? { photoFrameDesign } : {}),
     enabled: input.enabled !== false,
     overlayUrl: cleanAssetUrl(input.overlayUrl),
     ...(cleanAssetUrl(input.sourcePsdUrl) ? {sourcePsdUrl:cleanAssetUrl(input.sourcePsdUrl)} : {}),

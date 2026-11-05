@@ -223,23 +223,18 @@ body.cw-personalization-complete
   border-radius: 0;
   box-shadow: none;
 }
-/* Master black-beading photo frame: show the frame shape inside the
-   editor without baking it into the customer's printable artwork. */
+/* Keep the beading outside the artwork. Stage dimensions remain the print
+   dimensions used by photo/text positioning, so no artwork is obscured. */
 .cw-personalizer[data-cw-photo-frame-master="true"] .cw-personalizer__stage {
+  --cw-frame-beading: clamp(10px, 2.2vw, 24px);
+  --cw-frame-stage-height: 70dvh;
+  width: min(calc(100% - 2 * var(--cw-frame-beading)), 760px, calc((var(--cw-frame-stage-height) - 2 * var(--cw-frame-beading)) * var(--cw-stage-ratio, 1)));
+  max-height: calc(var(--cw-frame-stage-height) - 2 * var(--cw-frame-beading));
+  margin-block: var(--cw-frame-beading);
   background: #fff;
-  box-shadow: 0 8px 24px rgba(0,0,0,.16);
-}
-.cw-personalizer[data-cw-photo-frame-master="true"] .cw-personalizer__stage::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 7;
-  pointer-events: none;
-  box-sizing: border-box;
-  border: clamp(10px, 2.2vw, 24px) solid #111;
   box-shadow:
-    inset 0 0 0 2px rgba(255,255,255,.08),
-    inset 0 0 12px rgba(0,0,0,.35);
+    0 0 0 var(--cw-frame-beading) #111,
+    0 8px 24px var(--cw-frame-beading) rgba(0,0,0,.16);
 }
 .cw-personalizer[data-cw-photo-frame-master="true"] .cw-personalizer__photo-selection {
   z-index: 8;
@@ -843,6 +838,9 @@ body.cw-personalization-complete
     width: min(100%, 760px, calc((95vh - 210px) * var(--cw-stage-ratio, 1)));
     max-height: calc(95vh - 210px);
   }
+  .cw-personalizer[data-cw-photo-frame-master="true"] .cw-personalizer__stage {
+    --cw-frame-stage-height: calc(95vh - 210px);
+  }
 }
 @media (max-width: 900px) {
   .cw-personalizer__dialog {
@@ -902,6 +900,10 @@ body.cw-personalization-complete
   .cw-personalizer__stage {
     width: 100%;
     max-width: 560px;
+    max-height: none;
+  }
+  .cw-personalizer[data-cw-photo-frame-master="true"] .cw-personalizer__stage {
+    width: min(calc(100% - 2 * var(--cw-frame-beading)), 560px);
     max-height: none;
   }
   .cw-personalizer__photo-selection-handle {
@@ -2472,4 +2474,605 @@ body.cw-photo-frame-master-page .variant-picker input[type="radio"]:checked+labe
 .cw-clock-product-face img,
 .cw-clock-modal-face img{
   z-index:1;
+}
+
+
+/* FINAL clock-only lighting correction: one clean LED rim, no double colour */
+@keyframes cwClockSingleLedCycle{
+  0%,100%{
+    box-shadow:
+      inset 0 0 0 5px rgba(255,236,120,.92),
+      0 0 20px rgba(255,222,92,.50);
+  }
+  20%{
+    box-shadow:
+      inset 0 0 0 5px rgba(255,164,110,.92),
+      0 0 20px rgba(255,121,80,.50);
+  }
+  40%{
+    box-shadow:
+      inset 0 0 0 5px rgba(141,246,166,.94),
+      0 0 20px rgba(72,220,108,.50);
+  }
+  60%{
+    box-shadow:
+      inset 0 0 0 5px rgba(139,211,255,.94),
+      0 0 20px rgba(72,169,240,.50);
+  }
+  80%{
+    box-shadow:
+      inset 0 0 0 5px rgba(219,166,255,.94),
+      0 0 20px rgba(177,102,238,.48);
+  }
+}
+.cw-clock-product-face,
+.cw-clock-modal-face,
+.cw-clock-product-face--front,
+.cw-clock-product-face--bottom,
+.cw-clock-modal-face--front,
+.cw-clock-modal-face--bottom{
+  animation:none !important;
+  background:#f8f8f8 !important;
+  box-shadow:none !important;
+}
+.cw-clock-product-face::after,
+.cw-clock-modal-face::after{
+  display:none !important;
+}
+.cw-clock-product-face::before,
+.cw-clock-modal-face::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:4;
+  pointer-events:none;
+  border-radius:inherit;
+  animation:cwClockSingleLedCycle 7s linear infinite !important;
+}
+.cw-clock-product-face img,
+.cw-clock-modal-face img{
+  position:relative;
+  z-index:1;
+}
+
+
+/* FINAL clock-only INTERNAL light effect: colour glows inside the clock body, not outside */
+@keyframes cwClockInternalLight{
+  0%,100%{
+    box-shadow:
+      inset 0 0 22px 8px rgba(255,238,140,.88),
+      inset 0 0 42px 16px rgba(255,232,92,.34);
+  }
+  20%{
+    box-shadow:
+      inset 0 0 22px 8px rgba(255,174,112,.88),
+      inset 0 0 42px 16px rgba(255,119,77,.32);
+  }
+  40%{
+    box-shadow:
+      inset 0 0 22px 8px rgba(154,248,181,.9),
+      inset 0 0 42px 16px rgba(73,222,111,.32);
+  }
+  60%{
+    box-shadow:
+      inset 0 0 22px 8px rgba(147,217,255,.9),
+      inset 0 0 42px 16px rgba(69,171,241,.32);
+  }
+  80%{
+    box-shadow:
+      inset 0 0 22px 8px rgba(224,178,255,.9),
+      inset 0 0 42px 16px rgba(183,108,239,.30);
+  }
+}
+.cw-clock-product-face::before,
+.cw-clock-modal-face::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:4;
+  pointer-events:none;
+  border-radius:inherit;
+  animation:cwClockInternalLight 7s linear infinite !important;
+}
+.cw-clock-product-face,
+.cw-clock-modal-face,
+.cw-clock-product-face--front,
+.cw-clock-product-face--bottom,
+.cw-clock-modal-face--front,
+.cw-clock-modal-face--bottom{
+  box-shadow:none !important;
+}
+
+
+/* CLOCK ONLY — final body-light correction.
+   The whole plastic body/rim changes colour; not a thin outline. */
+@keyframes cwClockBodyLightFill{
+  0%,100%{
+    border-color:#fff4a8;
+    background:#fff9cf;
+    box-shadow:
+      inset 0 0 34px 12px rgba(255,235,105,.48),
+      0 0 24px rgba(255,223,83,.34);
+  }
+  20%{
+    border-color:#ffc49f;
+    background:#ffe0ca;
+    box-shadow:
+      inset 0 0 34px 12px rgba(255,143,92,.46),
+      0 0 24px rgba(255,126,77,.34);
+  }
+  40%{
+    border-color:#a9f6ba;
+    background:#d8ffe1;
+    box-shadow:
+      inset 0 0 34px 12px rgba(84,226,116,.45),
+      0 0 24px rgba(75,218,107,.34);
+  }
+  60%{
+    border-color:#a9ddff;
+    background:#dff3ff;
+    box-shadow:
+      inset 0 0 34px 12px rgba(81,176,241,.44),
+      0 0 24px rgba(70,170,238,.34);
+  }
+  80%{
+    border-color:#ddb5ff;
+    background:#f0ddff;
+    box-shadow:
+      inset 0 0 34px 12px rgba(181,105,239,.42),
+      0 0 24px rgba(177,100,236,.32);
+  }
+}
+
+/* wipe older thin-line/pseudo glow effects */
+.cw-clock-product-face::before,
+.cw-clock-product-face::after,
+.cw-clock-modal-face::before,
+.cw-clock-modal-face::after{
+  display:none !important;
+  content:none !important;
+}
+
+/* full clock shell around every side */
+.cw-clock-product-face,
+.cw-clock-modal-face{
+  box-sizing:border-box !important;
+  border:28px solid #fff4a8 !important;
+  border-radius:38px !important;
+  background:#fff9cf !important;
+  overflow:hidden !important;
+  animation:cwClockBodyLightFill 7s linear infinite !important;
+}
+
+/* photos sit inside the glowing shell, not edge-to-edge */
+.cw-clock-product-face img,
+.cw-clock-modal-face img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  border-radius:18px !important;
+  transform:none !important;
+}
+
+/* front/bottom keep their fixed face images, with the same illuminated shell */
+.cw-clock-product-face--front,
+.cw-clock-product-face--bottom,
+.cw-clock-modal-face--front,
+.cw-clock-modal-face--bottom{
+  border:28px solid #fff4a8 !important;
+  background:#fff9cf !important;
+  animation:cwClockBodyLightFill 7s linear infinite !important;
+  overflow:hidden !important;
+}
+.cw-clock-product-face--front img,
+.cw-clock-product-face--bottom img,
+.cw-clock-modal-face--front img,
+.cw-clock-modal-face--bottom img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  object-position:center !important;
+  border-radius:18px !important;
+  transform:none !important;
+}
+
+@media(max-width:749px){
+  .cw-clock-product-face,
+  .cw-clock-modal-face,
+  .cw-clock-product-face--front,
+  .cw-clock-product-face--bottom,
+  .cw-clock-modal-face--front,
+  .cw-clock-modal-face--bottom{
+    border-width:20px !important;
+    border-radius:30px !important;
+  }
+}
+
+
+/* CLOCK ONLY — authoritative final 3D shell/light rules.
+   Full rounded body on all six sides; uploaded photos remain inside the body.
+   The body itself cycles colour. */
+@keyframes cwClockShellCycleFinal{
+  0%,100%{
+    border-color:#fff3a6;
+    background:#fff7c9;
+    box-shadow:
+      inset 0 0 26px rgba(255,232,101,.46),
+      0 0 16px rgba(255,218,72,.24);
+  }
+  20%{
+    border-color:#ffc59f;
+    background:#ffe2cc;
+    box-shadow:
+      inset 0 0 26px rgba(255,139,88,.42),
+      0 0 16px rgba(255,120,74,.22);
+  }
+  40%{
+    border-color:#a9f3b9;
+    background:#dfffe5;
+    box-shadow:
+      inset 0 0 26px rgba(79,221,111,.42),
+      0 0 16px rgba(69,210,101,.22);
+  }
+  60%{
+    border-color:#a9dcff;
+    background:#e0f3ff;
+    box-shadow:
+      inset 0 0 26px rgba(74,170,238,.40),
+      0 0 16px rgba(67,160,226,.22);
+  }
+  80%{
+    border-color:#dfb6ff;
+    background:#f2e1ff;
+    box-shadow:
+      inset 0 0 26px rgba(179,104,237,.38),
+      0 0 16px rgba(171,97,229,.20);
+  }
+}
+
+/* kill all previous overlay/pseudo glow layers so there is no double border */
+.cw-clock-product-face::before,
+.cw-clock-product-face::after,
+.cw-clock-modal-face::before,
+.cw-clock-modal-face::after{
+  content:none !important;
+  display:none !important;
+}
+
+/* one complete clock body on every face */
+.cw-clock-product-face,
+.cw-clock-modal-face,
+.cw-clock-product-face--front,
+.cw-clock-product-face--top,
+.cw-clock-product-face--left,
+.cw-clock-product-face--right,
+.cw-clock-product-face--back,
+.cw-clock-product-face--bottom,
+.cw-clock-modal-face--front,
+.cw-clock-modal-face--top,
+.cw-clock-modal-face--left,
+.cw-clock-modal-face--right,
+.cw-clock-modal-face--back,
+.cw-clock-modal-face--bottom{
+  box-sizing:border-box !important;
+  border:26px solid #fff3a6 !important;
+  border-radius:40px !important;
+  background:#fff7c9 !important;
+  overflow:hidden !important;
+  animation:cwClockShellCycleFinal 8s linear infinite !important;
+}
+
+/* uploaded/fixed artwork sits INSIDE the illuminated body */
+.cw-clock-product-face img,
+.cw-clock-modal-face img,
+.cw-clock-product-face--front img,
+.cw-clock-product-face--bottom img,
+.cw-clock-modal-face--front img,
+.cw-clock-modal-face--bottom img{
+  width:100% !important;
+  height:100% !important;
+  display:block !important;
+  object-fit:cover !important;
+  object-position:center !important;
+  border-radius:18px !important;
+  transform:none !important;
+  box-shadow:none !important;
+}
+
+/* keep the 3D cube itself clean and fully visible */
+.cw-clock-product-cube,
+.cw-clock-modal-cube{
+  transform-style:preserve-3d !important;
+  overflow:visible !important;
+}
+
+@media(max-width:749px){
+  .cw-clock-product-face,
+  .cw-clock-modal-face,
+  .cw-clock-product-face--front,
+  .cw-clock-product-face--top,
+  .cw-clock-product-face--left,
+  .cw-clock-product-face--right,
+  .cw-clock-product-face--back,
+  .cw-clock-product-face--bottom,
+  .cw-clock-modal-face--front,
+  .cw-clock-modal-face--top,
+  .cw-clock-modal-face--left,
+  .cw-clock-modal-face--right,
+  .cw-clock-modal-face--back,
+  .cw-clock-modal-face--bottom{
+    border-width:18px !important;
+    border-radius:30px !important;
+  }
+}
+
+
+/* CLOCK ONLY — continuous 3D body correction (authoritative final override)
+   Removes the triangular/double border look. Each face is one rounded clock-body panel
+   with the photo/display inset inside it. The full body itself changes colour. */
+@keyframes cwClockBodyCycleV2{
+  0%,100%{
+    background:#fff7c9;
+    box-shadow:inset 0 0 30px rgba(255,232,101,.42);
+  }
+  20%{
+    background:#ffe2cc;
+    box-shadow:inset 0 0 30px rgba(255,139,88,.40);
+  }
+  40%{
+    background:#dfffe5;
+    box-shadow:inset 0 0 30px rgba(79,221,111,.40);
+  }
+  60%{
+    background:#e0f3ff;
+    box-shadow:inset 0 0 30px rgba(74,170,238,.38);
+  }
+  80%{
+    background:#f2e1ff;
+    box-shadow:inset 0 0 30px rgba(179,104,237,.36);
+  }
+}
+
+/* remove every old outline/glow layer */
+.cw-clock-product-face::before,
+.cw-clock-product-face::after,
+.cw-clock-modal-face::before,
+.cw-clock-modal-face::after{
+  content:none !important;
+  display:none !important;
+}
+
+/* full six-sided body */
+.cw-clock-product-face,
+.cw-clock-modal-face,
+.cw-clock-product-face--front,
+.cw-clock-product-face--top,
+.cw-clock-product-face--left,
+.cw-clock-product-face--right,
+.cw-clock-product-face--back,
+.cw-clock-product-face--bottom,
+.cw-clock-modal-face--front,
+.cw-clock-modal-face--top,
+.cw-clock-modal-face--left,
+.cw-clock-modal-face--right,
+.cw-clock-modal-face--back,
+.cw-clock-modal-face--bottom{
+  box-sizing:border-box !important;
+  border:0 !important;
+  padding:16px !important;
+  border-radius:38px !important;
+  background:#fff7c9 !important;
+  overflow:hidden !important;
+  animation:cwClockBodyCycleV2 8s linear infinite !important;
+}
+
+/* uploaded/fixed face content sits INSIDE the body; no double border */
+.cw-clock-product-face > img,
+.cw-clock-modal-face > img,
+.cw-clock-product-face--front > img,
+.cw-clock-product-face--bottom > img,
+.cw-clock-modal-face--front > img,
+.cw-clock-modal-face--bottom > img{
+  width:100% !important;
+  height:100% !important;
+  display:block !important;
+  object-fit:cover !important;
+  object-position:center !important;
+  border-radius:24px !important;
+  transform:none !important;
+  box-shadow:none !important;
+}
+
+/* Front and Bottom fixed artwork already include the real clock face/panel.
+   Keep them visually full, while the surrounding face remains the animated body. */
+.cw-clock-product-face--front,
+.cw-clock-product-face--bottom,
+.cw-clock-modal-face--front,
+.cw-clock-modal-face--bottom{
+  padding:12px !important;
+}
+.cw-clock-product-face--front > img,
+.cw-clock-product-face--bottom > img,
+.cw-clock-modal-face--front > img,
+.cw-clock-modal-face--bottom > img{
+  border-radius:26px !important;
+}
+
+/* keep cube geometry clean */
+.cw-clock-product-cube,
+.cw-clock-modal-cube{
+  transform-style:preserve-3d !important;
+  overflow:visible !important;
+}
+
+@media(max-width:749px){
+  .cw-clock-product-face,
+  .cw-clock-modal-face,
+  .cw-clock-product-face--front,
+  .cw-clock-product-face--top,
+  .cw-clock-product-face--left,
+  .cw-clock-product-face--right,
+  .cw-clock-product-face--back,
+  .cw-clock-product-face--bottom,
+  .cw-clock-modal-face--front,
+  .cw-clock-modal-face--top,
+  .cw-clock-modal-face--left,
+  .cw-clock-modal-face--right,
+  .cw-clock-modal-face--back,
+  .cw-clock-modal-face--bottom{
+    padding:11px !important;
+    border-radius:30px !important;
+  }
+}
+
+
+/* CLOCK ONLY — clean final 3D body + display-only front.
+   One continuous color-changing clock shell; no white front photo border. */
+@keyframes cwClockShellCycleClean{
+  0%,100%{
+    background:#fff2a8;
+    box-shadow:inset 0 0 30px rgba(255,226,92,.42);
+  }
+  20%{
+    background:#ffd7bd;
+    box-shadow:inset 0 0 30px rgba(255,133,86,.40);
+  }
+  40%{
+    background:#d7ffe1;
+    box-shadow:inset 0 0 30px rgba(72,220,108,.38);
+  }
+  60%{
+    background:#d9f1ff;
+    box-shadow:inset 0 0 30px rgba(63,165,235,.38);
+  }
+  80%{
+    background:#eedcff;
+    box-shadow:inset 0 0 30px rgba(173,97,234,.36);
+  }
+}
+
+/* override every earlier clock glow/border experiment */
+.cw-clock-product-face::before,
+.cw-clock-product-face::after,
+.cw-clock-modal-face::before,
+.cw-clock-modal-face::after{
+  content:none !important;
+  display:none !important;
+}
+
+.cw-clock-product-face,
+.cw-clock-modal-face,
+.cw-clock-product-face--front,
+.cw-clock-product-face--top,
+.cw-clock-product-face--left,
+.cw-clock-product-face--right,
+.cw-clock-product-face--back,
+.cw-clock-product-face--bottom,
+.cw-clock-modal-face--front,
+.cw-clock-modal-face--top,
+.cw-clock-modal-face--left,
+.cw-clock-modal-face--right,
+.cw-clock-modal-face--back,
+.cw-clock-modal-face--bottom{
+  box-sizing:border-box !important;
+  border:0 !important;
+  padding:18px !important;
+  border-radius:40px !important;
+  background:#fff2a8 !important;
+  overflow:hidden !important;
+  animation:cwClockShellCycleClean 7s linear infinite !important;
+}
+
+/* customer photos are inset within the color-changing body */
+.cw-clock-product-face > img,
+.cw-clock-modal-face > img{
+  width:100% !important;
+  height:100% !important;
+  display:block !important;
+  object-fit:cover !important;
+  object-position:center !important;
+  border-radius:20px !important;
+  transform:none !important;
+  box-shadow:none !important;
+}
+
+/* fixed bottom panel is inset just like the photo sides */
+.cw-clock-product-face--bottom > img,
+.cw-clock-modal-face--bottom > img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  object-position:center !important;
+  border-radius:20px !important;
+  transform:none !important;
+}
+
+/* FRONT = only the LCD display, with the color-changing body around it */
+.cw-clock-display-only{
+  width:100%;
+  height:100%;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:stretch;
+  padding:10%;
+  border-radius:20px;
+  background:#9da184;
+  color:#111;
+  box-shadow:inset 0 0 0 2px rgba(0,0,0,.12);
+}
+.cw-clock-display-only > strong{
+  display:block;
+  margin:0;
+  font:700 clamp(54px,8vw,86px)/.95 monospace;
+  letter-spacing:-.08em;
+  text-align:center;
+}
+.cw-clock-display-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:6px;
+  margin-top:12px;
+  padding-top:10px;
+  border-top:3px solid rgba(0,0,0,.75);
+  font:700 clamp(12px,1.6vw,18px)/1.2 monospace;
+  text-align:center;
+}
+.cw-clock-display-temp{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:2px solid rgba(0,0,0,.65);
+  font:700 clamp(12px,1.5vw,18px)/1.2 monospace;
+  text-align:center;
+}
+
+/* ensure the entire cube rotates as one object */
+.cw-clock-product-cube,
+.cw-clock-modal-cube{
+  transform-style:preserve-3d !important;
+  overflow:visible !important;
+}
+
+@media(max-width:749px){
+  .cw-clock-product-face,
+  .cw-clock-modal-face,
+  .cw-clock-product-face--front,
+  .cw-clock-product-face--top,
+  .cw-clock-product-face--left,
+  .cw-clock-product-face--right,
+  .cw-clock-product-face--back,
+  .cw-clock-product-face--bottom,
+  .cw-clock-modal-face--front,
+  .cw-clock-modal-face--top,
+  .cw-clock-modal-face--left,
+  .cw-clock-modal-face--right,
+  .cw-clock-modal-face--back,
+  .cw-clock-modal-face--bottom{
+    padding:12px !important;
+    border-radius:30px !important;
+  }
+  .cw-clock-display-only{
+    border-radius:16px;
+  }
 }

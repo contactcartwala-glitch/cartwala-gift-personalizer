@@ -74,3 +74,10 @@ name = "Acrylic master mockups"
 description = "Merchant-selected master PNGs for each size, thickness and orientation"
 access.admin = "merchant_read_write"
 access.storefront = "public_read"
+
+[shop.metafields.app.frame_mockups]
+type = "json"
+name = "Black Frame mockup gallery"
+description = "Reusable transparent room mockups for frame designs"
+access.admin = "merchant_read_write"
+access.storefront = "public_read"

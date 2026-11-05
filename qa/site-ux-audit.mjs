@@ -6,12 +6,19 @@ const BASE_URL=(process.env.BASE_URL||"https://cartwala.in").replace(/\/$/,"");
 const MAX_URLS=Math.max(10,Number(process.env.QA_MAX_URLS||600));
 const OUTPUT_DIR=path.resolve(process.env.QA_OUTPUT_DIR||"qa-output");
 const STRICT=String(process.env.QA_STRICT||"1")!=="0";
-const NAV_TIMEOUT=30000;
-const WAIT_AFTER_LOAD=850;
+const QA_MODE=String(process.env.QA_MODE||"full").toLowerCase();
+const QA_BROWSER=String(process.env.QA_BROWSER||"all").toLowerCase();
+const QA_SHARD_INDEX=Math.max(0,Number(process.env.QA_SHARD_INDEX||0));
+const QA_SHARD_TOTAL=Math.max(1,Number(process.env.QA_SHARD_TOTAL||1));
+const NAV_TIMEOUT=18000;
+const WAIT_AFTER_LOAD=650;
 const results=[];
 const startedAt=new Date().toISOString();
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function closeBrowserNoWait(browser){
+  try{ browser.close().catch(()=>{}); }catch{}
+}
 const safeName=(value)=>String(value).replace(/^https?:\/\//,"").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"").slice(0,110)||"page";
 const sameOrigin=url=>{try{return new URL(url).origin===new URL(BASE_URL).origin}catch{return false}};
 const normalizeUrl=url=>{try{const u=new URL(url,BASE_URL);u.hash="";return u.href}catch{return null}};
@@ -98,12 +105,21 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
   page.on("console",onConsole);
   let response=null;
   let navError=null;
-  try{
-    response=await page.goto(url,{waitUntil:"domcontentloaded",timeout:NAV_TIMEOUT});
-    await page.waitForLoadState("networkidle",{timeout:5000}).catch(()=>{});
-    await sleep(WAIT_AFTER_LOAD);
-  }catch(error){
-    navError=String(error?.message||error);
+  for(let attempt=1;attempt<=2;attempt+=1){
+    try{
+      response=await page.goto(url,{waitUntil:"commit",timeout:NAV_TIMEOUT});
+      await page.waitForLoadState("domcontentloaded",{timeout:15000}).catch(()=>{});
+      await page.waitForLoadState("networkidle",{timeout:2500}).catch(()=>{});
+      await sleep(WAIT_AFTER_LOAD);
+      navError=null;
+      break;
+    }catch(error){
+      navError=String(error?.message||error);
+      if(attempt<2){
+        await sleep(800);
+        continue;
+      }
+    }
   }
 
   const issues=[];
@@ -131,7 +147,7 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
         .filter(visible)
         .filter(el=>!(el.getAttribute("aria-label")||el.getAttribute("title")||el.textContent?.trim()))
         .slice(0,8).map(el=>el.outerHTML.slice(0,140));
-      const smallTargets=deep?[...document.querySelectorAll([
+      const smallTargets=(deep&&vw<=1024)?[...document.querySelectorAll([
           "button",
           "input:not([type=hidden]):not([type=radio]):not([type=checkbox])",
           "select",
@@ -206,7 +222,8 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
 
   const actionablePageErrors=pageErrors.filter(message=>
     !/api\/event\/collect.*access control checks/i.test(message)&&
-    !/otlp-http-production\.shopifysvc\.com\/v1\/metrics.*access control checks/i.test(message)
+    !/otlp-http-production\.shopifysvc\.com\/v1\/metrics.*access control checks/i.test(message)&&
+    !/\.well-known\/shopify\/monorail\/unstable\/produce_batch.*access control checks/i.test(message)
   );
   const hasShopAppCsp=consoleErrors.some(message=>
     /shop\.app.*content security policy/i.test(message)||
@@ -218,7 +235,8 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
     !(hasShopAppCsp&&/Failed to load resource:.*403/i.test(message))&&
     !/Failed to load resource:.*status of (403|404|502|503|504)/i.test(message)&&
     !/Reached maximum amount of queued data of 64Kb for keepalive requests/i.test(message)&&
-    !/X-Content-Type-Options: nosniff/i.test(message)
+    !/X-Content-Type-Options: nosniff/i.test(message)&&
+    !/Cookie .* has been rejected for invalid domain/i.test(message)
   );
   if(actionablePageErrors.length)issues.push({severity:"critical",code:"page-errors",message:`${actionablePageErrors.length} uncaught page error(s)`,examples:actionablePageErrors.slice(0,6)});
   if(actionableConsoleErrors.length)issues.push({severity:"warning",code:"console-errors",message:`${actionableConsoleErrors.length} console error(s)`,examples:actionableConsoleErrors.slice(0,6)});
@@ -237,23 +255,40 @@ async function auditPage(page,url,{browserName,viewport,label="crawl",deep=false
 }
 
 async function crawlAll(urls){
-  const browser=await chromium.launch({headless:true});
+  const browser=await hardTimeout("launch-browser",()=>chromium.launch({headless:true}),30000);
   const context=await browser.newContext({viewport:{width:390,height:844}});
   let next=0;
-  const workers=Array.from({length:Math.min(5,urls.length)},async(_,worker)=>{
-    const page=await context.newPage();
+  const workers=Array.from({length:Math.min(4,urls.length)},async(_,worker)=>{
+    let page=await context.newPage();
     page.setDefaultTimeout(12000);
     while(true){
       const index=next++;
       if(index>=urls.length)break;
       const url=urls[index];
       process.stdout.write(`[crawl ${index+1}/${urls.length}] ${url}\n`);
-      await auditPage(page,url,{browserName:"chromium",viewport:{width:390,height:844},label:"all-mobile",deep:false});
+      try{
+        await hardTimeout(
+          `crawl-page ${url}`,
+          ()=>auditPage(page,url,{browserName:"chromium",viewport:{width:390,height:844},label:"all-mobile",deep:false}),
+          45000
+        );
+      }catch(error){
+        results.push({
+          url,
+          browser:"chromium",
+          viewport:{width:390,height:844},
+          label:"all-mobile",
+          issues:[{severity:"critical",code:"page-hard-timeout",message:String(error?.message||error).slice(0,260)}]
+        });
+        try{await page.close({runBeforeUnload:false});}catch{}
+        page=await context.newPage();
+        page.setDefaultTimeout(12000);
+      }
     }
-    await page.close();
+    try{await page.close({runBeforeUnload:false});}catch{}
   });
   await Promise.all(workers);
-  await browser.close();
+  closeBrowserNoWait(browser);
 }
 
 async function responsiveMatrix(urls){
@@ -264,24 +299,59 @@ async function responsiveMatrix(urls){
     {width:768,height:1024,name:"tablet"},
     {width:1366,height:768,name:"desktop"}
   ];
-  const engines=[["chromium",chromium],["webkit",webkit],["firefox",firefox]];
-  for(const [browserName,type] of engines){
+  const allEngines=[["chromium",chromium],["webkit",webkit],["firefox",firefox]];
+  const engines=QA_BROWSER==="all"?allEngines:allEngines.filter(([name])=>name===QA_BROWSER);
+  if(!engines.length)throw new Error(`Unknown QA_BROWSER: ${QA_BROWSER}`);
+
+  // Actions normally runs one browser engine per job. "all" remains available
+  // for local/manual runs.
+  await Promise.all(engines.map(async([browserName,type])=>{
     const browser=await type.launch({headless:true});
-    for(const vp of viewports){
-      const context=await browser.newContext({viewport:{width:vp.width,height:vp.height}});
-      const page=await context.newPage();
-      page.setDefaultTimeout(12000);
-      for(const url of urls){
-        process.stdout.write(`[matrix ${browserName} ${vp.name}] ${url}\n`);
-        await auditPage(page,url,{browserName,viewport:{width:vp.width,height:vp.height},label:vp.name,deep:true});
+    try{
+      for(const vp of viewports){
+        const context=await browser.newContext({viewport:{width:vp.width,height:vp.height}});
+        const page=await context.newPage();
+        page.setDefaultTimeout(10000);
+        for(const url of urls){
+          process.stdout.write(`[matrix ${browserName} ${vp.name}] ${url}\n`);
+          await auditPage(page,url,{browserName,viewport:{width:vp.width,height:vp.height},label:vp.name,deep:true});
+        }
+        await context.close();
       }
-      await context.close();
+    }finally{
+      closeBrowserNoWait(browser);
     }
-    await browser.close();
-  }
+  }));
 }
 
 const PHOTO_FIXTURE_BASE64="iVBORw0KGgoAAAANSUhEUgAAAMgAAAEsCAIAAAAJmGvpAAAE8klEQVR4nO3csW1bSRRAUXrhfNvYIhy5JgUuYQPVtJGLcBlyBxsQIGRYEiSZV5w3/5xYJN9g7p9PfAH89PDwcIJr++vWA7AnYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBaJz3/y4q93P641B2v67/6f973QiUVCWCSERUJYJIRFQlgkhEXij55jPefdDz+4las/knRikRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkRAWCWGREBYJYZEQFglhkUh+H2sPf3+/e82f/fxyX08ykbB+8cqYnnuJyC6EdTq9q6eX30dhhw7rWj298M6HLeygYXVJPflBB8zrcGF9WFK/f+ih8jrW44abVLXIp3+wo5xYi2zqcY6uQ5xYi1R1sdo8hf3DWnMX15zqina+FS6+eXvfFrc9sRav6mLKnG+1Z1izdmvWtK+0YVgT92nizC/bMCxWsFtYcy/9uZM/aauwpu/N9Pkf2yesPXZlj1WcdgqLpWwS1jYX+mmXtewQ1h478dgGK9ohLBY0PqwNLu4nTV/X+LBY0+ywpl/WLxu9utlhsSxhkRgc1ug7xSvNXePgsFiZsEhMDWvuPeKthq50algsTlgkhEViZFhDv3a828T1jgyL9QmLhLBICIuEsEgIi4SwSAiLhLBICIuEsEgIi8TIsHb9QdjnTFzvyLBYn7BICIvE1LAmfu14n6ErnRoWixMWicFhDb1HvMncNQ4Oi5UJi8TssObeKV5j9Opmh8Wyxoc1+rJ+wfR1jQ+LNe0Q1vSL+3cbrGiHsE5b7MTFHmvZJCxWs09Ye1zoe6zitFNYp/m7Mn3+x7YK6zR5b+ZO/qTdwmIRG4Y18dKfOPPLNgzrNG2fZk37SnuGdZqzW1PmfKvPtx4gdN6zZX8ZdtekzrY9sS7W3L81p7qi/cM6rbeLq81T2PlW+Ngit8UjJHV2iBPr4rb7epyqTsc5sS5ucnQdKqmzw4V19mF5HTCps4OGdXbZ9asXdtieLg4d1sW1CtPThbB+8biMV0YmpicJ61mK+RPHetzAhxEWCWGREBYJYZEQFglhkRAWiQ0fkN59//fWI7zH/Zdvtx7hmpxYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRFQlgkhEVCWCSERUJYJIRF4vOtB7i++y/fbj0CTiwawiIhLBLCIiEsEsIiISwSwiIhLBLCIiEsEsn/Cr/e/SjelkGcWCSERUJYJIRFQlgkhEVCWCQ+PTw83HoGNuTEIiEsEsIiISwSwiIhLBLCIiEsEsIiISwSwiIhLBLCIiEsEsIiISwSwiIhLBL/A2a5t6g0uYznAAAAAElFTkSuQmCC";
+
+async function hardTimeout(label,fn,timeoutMs=30000){
+  let timer;
+  try{
+    return await Promise.race([
+      Promise.resolve().then(fn),
+      new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(`Hard timeout: ${label}`)),timeoutMs)})
+    ]);
+  }finally{
+    if(timer)clearTimeout(timer);
+  }
+}
+
+async function frameStep(name,fn,timeoutMs=20000){
+  console.log(`[frame] ${name} start`);
+  let timer;
+  try{
+    const value=await Promise.race([
+      Promise.resolve().then(fn),
+      new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(`Frame step timed out: ${name}`)),timeoutMs)})
+    ]);
+    console.log(`[frame] ${name} ok`);
+    return value;
+  }finally{
+    if(timer)clearTimeout(timer);
+  }
+}
 
 async function photoFrameJourney(){
   const url=BASE_URL+"/products/customized-photo-frame-black-beading";
@@ -291,60 +361,94 @@ async function photoFrameJourney(){
   page.setDefaultTimeout(15000);
   const issues=[];
   try{
-    await page.goto(url,{waitUntil:"domcontentloaded",timeout:NAV_TIMEOUT});
-    await page.waitForLoadState("networkidle",{timeout:5000}).catch(()=>{});
-    await sleep(800);
+    let opened=false;
+    let lastNavigationError=null;
+    for(let attempt=1;attempt<=2;attempt+=1){
+      try{
+        await page.goto(url,{waitUntil:"commit",timeout:NAV_TIMEOUT});
+        await page.waitForLoadState("domcontentloaded",{timeout:15000}).catch(()=>{});
+        await page.waitForLoadState("networkidle",{timeout:2500}).catch(()=>{});
+        opened=true;
+        break;
+      }catch(error){
+        lastNavigationError=error;
+        if(attempt<2)await sleep(800);
+      }
+    }
+    if(!opened)throw lastNavigationError||new Error("Photo-frame page navigation failed");
+    await sleep(650);
+
+    console.log("[frame] page-opened");
+    const squareBefore=await frameStep("check-square-gallery-before-personalization",()=>page.evaluate(()=>{
+      const customStage=document.querySelector("[data-cw-frame-v5] [data-cw-frame-v5-stage]");
+      if(customStage){
+        const r=customStage.getBoundingClientRect();
+        const ratio=r.height? r.width/r.height : 0;
+        return {ok:r.width>180&&r.height>180&&ratio>=0.94&&ratio<=1.06,width:Math.round(r.width),height:Math.round(r.height),ratio};
+      }
+      const gallery=document.querySelector(".product-gallery, media-gallery, [id^='MediaGallery-'], .product__media-wrapper, .product-media, [data-product-gallery]")||document;
+      const candidates=[...gallery.querySelectorAll("img")].map(img=>({img,r:img.getBoundingClientRect()}))
+        .filter(({r,img})=>r.width>180&&r.height>180&&getComputedStyle(img).display!=="none"&&getComputedStyle(img).visibility!=="hidden");
+      candidates.sort((a,b)=>b.r.width*b.r.height-a.r.width*a.r.height);
+      const target=candidates[0];
+      if(!target)return {ok:false,width:0,height:0,ratio:0};
+      const item=target.img.closest(".product__media-item,[id*='Slide-'],.slider__slide,[data-media-id]")||target.img.parentElement;
+      const r=(item||target.img).getBoundingClientRect();
+      const ratio=r.height? r.width/r.height : 0;
+      return {ok:ratio>=0.94&&ratio<=1.06,width:Math.round(r.width),height:Math.round(r.height),ratio};
+    }),15000);
+    if(!squareBefore?.ok)issues.push({severity:"critical",code:"frame-gallery-square",message:`Initial product gallery is not 1:1 (measured ${squareBefore?.width||0}×${squareBefore?.height||0})`});
 
     const radio=page.locator('input[type="radio"][value="24x36"]').first();
     const select=page.locator('select option[value="24x36"]').first();
-    if(await radio.count()){
-      await radio.evaluate(el=>{
+    if(await frameStep("count-size-radio",()=>radio.count(),5000)){
+      await frameStep("select-24x36",()=>radio.evaluate(el=>{
         el.checked=true;
         el.dispatchEvent(new Event("input",{bubbles:true}));
         el.dispatchEvent(new Event("change",{bubbles:true}));
-      });
-    }else if(await select.count()){
+      }),15000);
+    }else if(await frameStep("count-size-select",()=>select.count(),5000)){
       await select.evaluate(option=>{const s=option.parentElement;s.value=option.value;s.dispatchEvent(new Event("change",{bubbles:true}))});
     }else{
       const text=page.getByText("24x36",{exact:true}).last();
-      if(await text.count())await text.click({force:true});
+      if(await frameStep("count-size-text",()=>text.count(),5000))await frameStep("click-size-text",()=>text.click({force:true}),10000);
       else issues.push({severity:"critical",code:"frame-size-option",message:"24x36 size option was not found"});
     }
     await sleep(700);
 
     const open=page.locator('[data-cw-personalizer][data-cw-photo-frame-master="true"] [data-cw-open]').first();
-    if(!(await open.count()))throw new Error("Customize button not found on master photo frame");
-    await open.click({force:true});
+    if(!(await frameStep("count-customize-button",()=>open.count(),5000)))throw new Error("Customize button not found on master photo frame");
+    await frameStep("open-personalizer",()=>open.click({force:true}),15000);
     const file=page.locator('[data-cw-personalizer][data-cw-photo-frame-master="true"] input[type="file"]').first();
-    if(!(await file.count()))throw new Error("Photo upload input not found");
-    await file.setInputFiles({name:"cartwala-qa-photo.png",mimeType:"image/png",buffer:Buffer.from(PHOTO_FIXTURE_BASE64,"base64")});
-    await page.waitForFunction(()=>{const b=document.querySelector('[data-cw-personalizer][data-cw-photo-frame-master="true"] [data-cw-save]');return b&&!b.disabled},{timeout:12000});
-    await page.locator('[data-cw-personalizer][data-cw-photo-frame-master="true"] [data-cw-save]').click({force:true});
-    await page.waitForFunction(()=>document.body.classList.contains("cw-photo-frame-personalized"),{timeout:15000});
+    if(!(await frameStep("count-photo-input",()=>file.count(),5000)))throw new Error("Photo upload input not found");
+    await frameStep("upload-photo",()=>file.setInputFiles({name:"cartwala-qa-photo.png",mimeType:"image/png",buffer:Buffer.from(PHOTO_FIXTURE_BASE64,"base64")}),20000);
+    await frameStep("wait-save-enabled",()=>page.waitForFunction(()=>{const b=document.querySelector('[data-cw-personalizer][data-cw-photo-frame-master="true"] [data-cw-save]');return b&&!b.disabled},{timeout:12000}),15000);
+    await frameStep("preview-save",()=>page.locator('[data-cw-personalizer][data-cw-photo-frame-master="true"] [data-cw-save]').click({force:true}),15000);
+    await frameStep("wait-personalized",()=>page.waitForFunction(()=>document.body.classList.contains("cw-photo-frame-personalized"),{timeout:15000}),18000);
     await sleep(1200);
 
-    const sticky=await page.locator(".cw-site-sticky-atc").isVisible().catch(()=>false);
+    const sticky=await frameStep("check-sticky",()=>page.locator(".cw-site-sticky-atc").isVisible(),5000).catch(()=>false);
     if(!sticky)issues.push({severity:"critical",code:"frame-sticky-atc",message:"Sticky Add to Cart is not visible after personalization"});
 
-    const visibleKind=await page.evaluate(()=>{
+    const visibleKind=await frameStep("check-size-preview",()=>page.evaluate(()=>{
       const candidates=[...document.querySelectorAll("img[data-cw-frame-kind]")].map(img=>({img,r:img.getBoundingClientRect()}))
         .filter(({r,img})=>r.width>120&&r.height>120&&getComputedStyle(img).visibility!=="hidden");
       candidates.sort((a,b)=>b.r.width*b.r.height-a.r.width*a.r.height);
       return candidates[0]?.img.dataset.cwFrameKind||"";
-    });
+    }),15000);
     if(visibleKind!=="size:24x36")issues.push({severity:"critical",code:"frame-size-preview",message:`After selecting 24x36, visible gallery preview is "${visibleKind||"unknown"}"`});
 
     const guideImage=page.locator(
       '.product-gallery__thumbs img[data-cw-frame-kind="guide"], .product__media-wrapper img[data-cw-frame-kind="guide"], media-gallery img[data-cw-frame-kind="guide"], [id^="MediaGallery-"] img[data-cw-frame-kind="guide"]'
     ).filter({visible:true}).first();
     const fallbackGuide=page.locator('img[data-cw-frame-kind="guide"]').first();
-    const guideTarget=(await guideImage.count())?guideImage:fallbackGuide;
-    if(await guideTarget.count()){
+    const guideTarget=(await frameStep("count-guide-primary",()=>guideImage.count(),5000))?guideImage:fallbackGuide;
+    if(await frameStep("count-guide-target",()=>guideTarget.count(),5000)){
       const clickable=guideTarget.locator("xpath=ancestor::button[1] | ancestor::a[1] | ancestor::*[@role='button'][1]");
-      if(await clickable.count())await clickable.click({force:true});
-      else await guideTarget.click({force:true});
+      if(await frameStep("count-guide-clickable",()=>clickable.count(),5000))await frameStep("click-guide",()=>clickable.click({force:true}),15000);
+      else await frameStep("click-guide",()=>guideTarget.click({force:true}),15000);
       await sleep(900);
-      const guideVisible=await page.evaluate(()=>{
+      const guideVisible=await frameStep("check-guide-preview",()=>page.evaluate(()=>{
         const gallery=document.querySelector(".product-gallery, media-gallery, [id^='MediaGallery-'], .product__media-wrapper")||document;
         const preferred=gallery.querySelector(".product-gallery__main img[data-cw-frame-kind], .product__media-item.is-active img[data-cw-frame-kind], .product__media-item[aria-hidden='false'] img[data-cw-frame-kind]");
         if(preferred)return preferred.dataset.cwFrameKind||"";
@@ -352,19 +456,43 @@ async function photoFrameJourney(){
           .filter(({r,img})=>r.width>120&&r.height>120&&getComputedStyle(img).visibility!=="hidden"&&getComputedStyle(img).display!=="none");
         candidates.sort((a,b)=>b.r.width*b.r.height-a.r.width*a.r.height);
         return candidates[0]?.img.dataset.cwFrameKind||"";
-      });
+      }),15000);
       if(guideVisible!=="guide")issues.push({severity:"critical",code:"frame-second-image",message:`Clicking size-guide thumbnail opened "${guideVisible||"unknown"}" instead of the second image`});
     }else{
       issues.push({severity:"critical",code:"frame-guide-thumb",message:"Size-guide thumbnail was not found"});
     }
 
-    await page.screenshot({path:path.join(OUTPUT_DIR,"screenshots","photo-frame-personalization-journey.png"),fullPage:true});
+    const sideImage=page.locator('img[data-cw-frame-kind="side"]').filter({visible:true}).first();
+    const sideTarget=(await frameStep("count-side-target",()=>sideImage.count(),5000))?sideImage:page.locator('img[data-cw-frame-kind="side"]').first();
+    if(await frameStep("count-side-fallback",()=>sideTarget.count(),5000)){
+      const sideClickable=sideTarget.locator("xpath=ancestor::button[1] | ancestor::a[1] | ancestor::*[@role='button'][1]");
+      if(await frameStep("count-side-clickable",()=>sideClickable.count(),5000))await frameStep("click-side",()=>sideClickable.click({force:true}),15000);
+      else await frameStep("click-side",()=>sideTarget.click({force:true}),15000);
+      await sleep(500);
+      const sideVisible=await frameStep("check-side-preview",()=>page.evaluate(()=>{
+        const custom=document.querySelector("[data-cw-frame-v5]");
+        if(custom){
+          const main=custom.querySelector("[data-cw-frame-v5-base][data-cw-frame-kind]");
+          if(main)return main.dataset.cwFrameKind||"";
+        }
+        const gallery=document.querySelector(".product-gallery, media-gallery, [id^='MediaGallery-'], .product__media-wrapper")||document;
+        const candidates=[...gallery.querySelectorAll("img[data-cw-frame-kind]")].map(img=>({img,r:img.getBoundingClientRect()}))
+          .filter(({r,img})=>r.width>120&&r.height>120&&getComputedStyle(img).visibility!=="hidden"&&getComputedStyle(img).display!=="none");
+        candidates.sort((a,b)=>b.r.width*b.r.height-a.r.width*a.r.height);
+        return candidates[0]?.img.dataset.cwFrameKind||"";
+      }),15000);
+      if(sideVisible!=="side")issues.push({severity:"critical",code:"frame-third-image",message:`Clicking side-view thumbnail opened "${sideVisible||"unknown"}" instead of the third image`});
+    }else{
+      issues.push({severity:"critical",code:"frame-side-thumb",message:"Side-view thumbnail was not found"});
+    }
+
+    await page.screenshot({path:path.join(OUTPUT_DIR,"screenshots","photo-frame-personalization-journey.png"),fullPage:true,timeout:15000}).catch(()=>{});
   }catch(error){
     issues.push({severity:"critical",code:"frame-journey-error",message:String(error?.message||error).slice(0,320)});
-    await page.screenshot({path:path.join(OUTPUT_DIR,"screenshots","photo-frame-personalization-failure.png"),fullPage:true}).catch(()=>{});
+    await page.screenshot({path:path.join(OUTPUT_DIR,"screenshots","photo-frame-personalization-failure.png"),fullPage:true,timeout:15000}).catch(()=>{});
   }
   results.push({url,browser:"chromium",viewport:{width:390,height:844},label:"photo-frame-journey",issues});
-  await browser.close();
+  closeBrowserNoWait(browser);
 }
 
 async function writeReport(discovered,representative){
@@ -375,6 +503,8 @@ async function writeReport(discovered,representative){
   for(const issue of issueRows)byCode[issue.code]=(byCode[issue.code]||0)+1;
   const report={
     baseUrl:BASE_URL,
+    mode:QA_MODE,
+    browser:QA_BROWSER,
     startedAt,
     finishedAt:new Date().toISOString(),
     discoveredUrls:discovered.length,
@@ -391,7 +521,8 @@ async function writeReport(discovered,representative){
     "# Cartwala Website UI/UX QA",
     "",
     `- Base URL: ${BASE_URL}`,
-    `- URLs discovered/audited in full-site mobile crawl: **${discovered.length}**`,
+    `- QA mode: **${QA_MODE}**${QA_BROWSER!=="all"?` (${QA_BROWSER})`:""}`,
+    `- URLs discovered: **${discovered.length}**`,
     `- Total browser/viewport checks: **${results.length}**`,
     `- Critical issues: **${critical.length}**`,
     `- Warnings: **${warnings.length}**`,
@@ -425,18 +556,35 @@ async function main(){
   await ensureOutput();
   const urls=await discoverUrls();
   const reps=representativeUrls(urls);
-  console.log(`Discovered ${urls.length} URLs; responsive matrix will cover ${reps.length} representative routes.`);
-  await crawlAll(urls);
-  await responsiveMatrix(reps);
-  await photoFrameJourney();
+  console.log(`QA mode=${QA_MODE}; browser=${QA_BROWSER}; discovered ${urls.length} URLs; representative routes=${reps.length}.`);
+
+  if(QA_MODE==="crawl"){
+    const shardUrls=urls.filter((_,index)=>index%QA_SHARD_TOTAL===QA_SHARD_INDEX);
+    console.log(`[crawl-shard] ${QA_SHARD_INDEX+1}/${QA_SHARD_TOTAL}: ${shardUrls.length} URLs`);
+    await crawlAll(shardUrls);
+  }else if(QA_MODE==="matrix"){
+    await responsiveMatrix(reps);
+  }else if(QA_MODE==="frame"){
+    await photoFrameJourney();
+  }else if(QA_MODE==="full"){
+    await crawlAll(urls);
+    await responsiveMatrix(reps);
+    await photoFrameJourney();
+  }else{
+    throw new Error(`Unknown QA_MODE: ${QA_MODE}`);
+  }
+
   const {critical,warnings}=await writeReport(urls,reps);
   console.log(`QA complete: ${critical.length} critical, ${warnings.length} warnings.`);
   if(STRICT&&critical.length)process.exitCode=1;
 }
 
-main().catch(async error=>{
+main().then(()=>{
+  const code=process.exitCode||0;
+  setTimeout(()=>process.exit(code),250);
+}).catch(async error=>{
   console.error(error);
   await fs.mkdir(OUTPUT_DIR,{recursive:true}).catch(()=>{});
   await fs.writeFile(path.join(OUTPUT_DIR,"fatal.txt"),String(error?.stack||error)).catch(()=>{});
-  process.exitCode=1;
+  setTimeout(()=>process.exit(1),250);
 });

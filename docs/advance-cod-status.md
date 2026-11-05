@@ -49,14 +49,15 @@ The callback route is exercised through HTTP Request/Response objects with real 
 
 A diagnostic orderCreate attempt through the generic Shopify connector was rejected before any order was created: that operation requires an offline-authenticated app client. The installed Cartwala app's write_orders/write_draft_orders grants were separately verified. Accounting validation must therefore run through the app's own authenticated offline Admin client in an isolated test environment; repeating scope approval does not resolve the connector token-type restriction.
 
+The draft has been brought forward onto master commit `643f3da107644230e0176e1e3f9dce4d81404ee0` through a merge into the feature branch only. The five overlapping files were reconciled: navigation retains Google Reviews and adds Advance COD, Prisma retains Google Reviews/photo-original models and adds COD models, both dependency sets are retained in package/lock files, and the current app configuration retains frame-mockup definitions plus the granted COD scopes. Other master files are carried forward unchanged by tree identity. After reconciliation, npm ci, Prisma generation, full application typecheck/build, all eight COD suites, and Google Reviews/photo-original regression tests passed. The locally reconstructed checkout still omits binary/static assets, so this is build validation, not storefront visual QA or a deployment.
+
 ## Next integration work
 
-1. Bring this older draft forward onto the current master without losing the live Google Reviews work; resolve PR conflicts before any deployment.
-2. Validate a single Shopify order's partial-payment accounting using the app's offline Admin client; reconcile merchandise, tax, discounts and the INR 80 non-shipping fee exactly.
-3. Confirm warehouse/parcel configuration and Shopify auto-sync exclusions before linking the NimbusPost adapter.
-4. Implement checkout initiation, recovery UI/job, refund/cancellation handling and explicit NimbusPost remaining-amount acknowledgment.
-5. Configure staging account/shop/environment bindings in an isolated backend, apply migrations and run actual Paytm staging and deployed concurrency/recovery tests.
-6. Test in the duplicate theme, show the merchant the complete order result, and obtain publication approval.
+1. Validate a single Shopify order's partial-payment accounting using the app's offline Admin client; reconcile merchandise, tax, discounts and the INR 80 non-shipping fee exactly.
+2. Confirm warehouse/parcel configuration and Shopify auto-sync exclusions before linking the NimbusPost adapter.
+3. Implement checkout initiation, recovery UI/job, refund/cancellation handling and explicit NimbusPost remaining-amount acknowledgment.
+4. Configure staging account/shop/environment bindings in an isolated backend, apply migrations and run actual Paytm staging and deployed concurrency/recovery tests.
+5. Test in the duplicate theme, show the merchant the complete order result, and obtain publication approval.
 
 References:
 - https://shopify.dev/changelog/posts/draft-order-deposit-fields-now-available-in-the-admin-and-customer-account-graphql-apis

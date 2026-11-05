@@ -55,10 +55,12 @@ export class PaytmApiError extends Error {
 export function verifyPaytmCallback(raw: string, config: Pick<PaytmConfig, "mid" | "merchantKey">) {
   if (Buffer.byteLength(raw, "utf8") > 32_768) throw new Error("Invalid Paytm callback");
   const fields = new URLSearchParams(raw), params: Record<string, string> = {};
+  const seen = new Set<string>();
   let signature = "";
   for (const [name, value] of fields) {
-    if (!/^[A-Z0-9_]{1,64}$/.test(name) || value.length > 4096 || Object.hasOwn(params, name) ||
-        (name === "CHECKSUMHASH" && signature)) throw new Error("Invalid Paytm callback");
+    if (!/^[A-Z0-9_]{1,64}$/.test(name) || value.length > 4096 || seen.has(name))
+      throw new Error("Invalid Paytm callback");
+    seen.add(name);
     if (name === "CHECKSUMHASH") signature = value;
     else params[name] = value;
   }

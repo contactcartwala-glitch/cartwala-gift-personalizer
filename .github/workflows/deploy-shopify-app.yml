@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - "qa/**"
+      - ".github/workflows/site-ux-audit.yml"
+      - ".github/workflows/summarize-last-ux-audit.yml"
+      - ".github/workflows/deploy-shopify-app.yml"
+      - ".github/workflows/deploy-fly.yml"
   workflow_dispatch:
 
 concurrency:

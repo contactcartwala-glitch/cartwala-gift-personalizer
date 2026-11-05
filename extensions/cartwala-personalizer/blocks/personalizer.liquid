@@ -7,13 +7,19 @@
   if personalizer_config == blank
     assign personalizer_config = product.metafields['app--340764327937'].personalizer_config.value
   endif
+  assign photo_frame_design = personalizer_config.photoFrameDesign
+  assign photo_frame_artwork = product.metafields.cartwala_personalizer.frame_artwork.value
+  if photo_frame_artwork == blank and product.featured_image != blank
+    assign photo_frame_artwork = product.featured_image | image_url: width: 2000
+  endif
   assign acrylic_design = personalizer_config.acrylicDesign
   if acrylic_design.masterProductId != blank
     assign group_config = nil
   endif
   assign personalizer_enabled = personalizer_config.enabled
   assign photo_frame_master = false
-  if product.tags contains 'master-photo-frame'
+  if product.tags contains 'master-photo-frame' or photo_frame_design.masterProductId != blank
+    assign group_config = nil
     assign photo_frame_master = true
     assign personalizer_enabled = true
   endif
@@ -81,6 +87,9 @@
     {% else %}
       <div data-cw-config="{{ personalizer_config | json | escape }}" hidden></div>
     {% endif %}
+    {% if photo_frame_master %}
+      <div data-cw-photo-frame-data data-fixed-orientation="{{ photo_frame_design.orientation | escape }}" data-design-image="{% if photo_frame_design.masterProductId != blank %}{{ photo_frame_artwork | escape }}{% endif %}" data-guide-label="{{ 'photo_frame.size_guide' | t | escape }}" data-side-label="{{ 'photo_frame.side_view' | t | escape }}" data-previous-label="{{ 'photo_frame.previous' | t | escape }}" data-next-label="{{ 'photo_frame.next' | t | escape }}" data-variants="{{ product.variants | json | escape }}" data-options="{{ product.options | json | escape }}" data-selected-variant="{{ product.selected_or_first_available_variant.id }}" data-gallery-label="{{ 'photo_frame.gallery' | t | escape }}" data-product-label="{{ 'photo_frame.product_photo' | t | escape }}" data-room-label="{{ 'photo_frame.room_preview' | t | escape }}" data-portrait-label="{{ 'photo_frame.portrait' | t | escape }}" data-landscape-label="{{ 'photo_frame.landscape' | t | escape }}" data-sample-label="{{ 'photo_frame.sample' | t | escape }}" data-saved-label="{{ 'personalizer.saved_preview' | t | escape }}" hidden></div>
+    {% endif %}
     {% if acrylic_product %}
       <div data-cw-acrylic data-master-mockups="{{ acrylic_master.metafields['app--421161926657'].acrylic_mockups.value | json | escape }}" data-master-previews="{{ acrylic_master.metafields['app--421161926657'].group_config.value.previews | json | escape }}" data-option-names="{{ product.options | json | escape }}" data-design-ratio="{{ personalizer_config.canvasRatio | escape }}" data-fixed-orientation="{{ acrylic_fixed_orientation }}" data-design-image="{% if acrylic_fixed_orientation != blank and product.featured_image != blank %}{{ product.featured_image | image_url: width: 2400 }}{% endif %}" data-variants="{{ product.variants | json | escape }}" data-selected-variant="{{ product.selected_or_first_available_variant.id }}" data-room-image="{% if acrylic_room != blank %}{{ acrylic_room | image_url: width: 2000 }}{% else %}{{ 'cartwala-acrylic-room.jpg' | asset_url }}{% endif %}" data-stud-image="{{ 'cartwala-acrylic-stud.png' | asset_url }}" hidden></div>
       <script src="{{ 'cartwala-acrylic-frame.js' | asset_url }}" defer></script>
@@ -95,7 +104,15 @@
         </header>
         <div class="cw-clock-product-preview__stage" data-cw-clock-product-stage tabindex="0" aria-label="Rotatable 3D photo clock preview">
           <div class="cw-clock-product-cube" data-cw-clock-product-cube>
-            <div class="cw-clock-product-face cw-clock-product-face--front"><img src="https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-cube-clock-front-fixed-final.png?v=1791299029" alt="Clock front display"></div>
+            <div class="cw-clock-product-face cw-clock-product-face--front">
+              <div class="cw-clock-display-only" aria-label="Clock front display">
+                <strong>12:12</strong>
+                <div class="cw-clock-display-grid">
+                  <span>THU</span><span>1/1</span><span>27°C</span>
+                </div>
+                <div class="cw-clock-display-temp">TEMP&nbsp;&nbsp;27.8°C</div>
+              </div>
+            </div>
             <div class="cw-clock-product-face cw-clock-product-face--back"><img data-cw-clock-product-face-image="back" alt=""></div>
             <div class="cw-clock-product-face cw-clock-product-face--left"><img data-cw-clock-product-face-image="left" alt=""></div>
             <div class="cw-clock-product-face cw-clock-product-face--right"><img data-cw-clock-product-face-image="right" alt=""></div>
@@ -129,7 +146,15 @@
           </header>
           <div class="cw-clock-modal__stage" data-cw-clock-modal-stage tabindex="0">
             <div class="cw-clock-modal-cube" data-cw-clock-modal-cube>
-              <div class="cw-clock-modal-face cw-clock-modal-face--front"><img src="https://cdn.shopify.com/s/files/1/0803/7931/4361/files/photo-cube-clock-front-fixed-final.png?v=1791299029" alt="Clock front display"></div>
+              <div class="cw-clock-modal-face cw-clock-modal-face--front">
+                <div class="cw-clock-display-only" aria-label="Clock front display">
+                  <strong>12:12</strong>
+                  <div class="cw-clock-display-grid">
+                    <span>THU</span><span>1/1</span><span>27°C</span>
+                  </div>
+                  <div class="cw-clock-display-temp">TEMP&nbsp;&nbsp;27.8°C</div>
+                </div>
+              </div>
               <div class="cw-clock-modal-face cw-clock-modal-face--back"><img data-cw-clock-modal-face-image="back" alt=""></div>
               <div class="cw-clock-modal-face cw-clock-modal-face--left"><img data-cw-clock-modal-face-image="left" alt=""></div>
               <div class="cw-clock-modal-face cw-clock-modal-face--right"><img data-cw-clock-modal-face-image="right" alt=""></div>
@@ -177,13 +202,14 @@
   <script src="{{ 'cartwala-cart-retry.js' | asset_url }}" defer></script>
   <script src="{{ 'cartwala-selection-box.js' | asset_url }}" defer></script>
   <script src="{{ 'cartwala-editor-ui.js' | asset_url }}" defer></script>
+  <script src="{{ 'cartwala-gallery-edit.js' | asset_url }}" defer></script>
   <script src="{{ 'cartwala-print-metadata.js' | asset_url }}" defer></script>
   <script src="{{ 'cartwala-cart-fix.js' | asset_url }}" defer></script>
   <script src="{{ 'cartwala-loading.js' | asset_url }}" defer></script>
   <script src="{{ 'cartwala-preview-fit-fix.js' | asset_url }}" defer></script>
-  <script src="{{ 'cartwala-stability-fix.js' | asset_url }}" defer></script>
+  <script src="{{ 'cartwala-stability-fix-v2.js' | asset_url }}" defer></script>
   {% if photo_frame_master %}
-    <script src="{{ 'cartwala-photo-frame-gallery.js' | asset_url }}" defer></script>
+    <script src="{{ 'cartwala-photo-frame-gallery-v7.js' | asset_url }}" defer></script>
   {% endif %}
 {% endif %}
 

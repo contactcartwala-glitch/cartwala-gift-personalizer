@@ -1,0 +1,29 @@
+<section class="cw-google-reviews" data-cw-google-reviews hidden {{ block.shopify_attributes }}>
+  <h2>{{ block.settings.heading | escape }}</h2>
+  <p data-cw-review-summary></p>
+  <div class="cw-google-reviews-grid" data-cw-review-list></div>
+  <button type="button" data-cw-review-more hidden>{{ 'google_reviews.more' | t }}</button>
+  <p><a href="{{ block.settings.maps_url | escape }}" target="_blank" rel="noopener noreferrer">{{ 'google_reviews.view_google' | t }}</a></p>
+  <template data-cw-review-template>
+    <article class="cw-google-review">
+      <strong data-cw-review-name></strong>
+      <p data-cw-review-rating></p>
+      <p data-cw-review-comment></p>
+      <time data-cw-review-date></time>
+    </article>
+  </template>
+  <span data-cw-review-anonymous hidden>{{ 'google_reviews.anonymous' | t }}</span>
+  <span data-cw-review-label hidden>{{ 'google_reviews.label' | t }}</span>
+</section>
+{% schema %}
+{
+  "name": "Google Reviews",
+  "target": "section",
+  "javascript": "cartwala-google-reviews.js",
+  "stylesheet": "cartwala-google-reviews.css",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Customer Reviews on Google" },
+    { "type": "url", "id": "maps_url", "label": "Shop Google Maps link" }
+  ]
+}
+{% endschema %}

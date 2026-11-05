@@ -5,7 +5,7 @@ import ts from "typescript";
 import { readPsd, writePsd } from "ag-psd";
 
 const route = fs.readFileSync("app/routes/app.print-files.tsx", "utf8");
-const helpers = route.slice(route.indexOf("const attrMap ="), route.indexOf("const documentSize ="));
+const helpers = route.slice(route.indexOf("const originalAssetUrl ="), route.indexOf("const documentSize ="));
 const js = ts.transpileModule(helpers, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
 const context = vm.createContext({});
 vm.runInContext(`${js}\nthis.getDesign = getDesign; this.numeric = numeric; this.sourceFor = sourceFor; this.missingPhotos = missingPhotos;`, context);

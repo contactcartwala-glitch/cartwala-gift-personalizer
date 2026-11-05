@@ -22,7 +22,7 @@ try {
   const form = new URLSearchParams({ ...callback, CHECKSUMHASH: checksum }).toString();
   assert.deepEqual(verifyPaytmCallback(form, config), { orderId: reference.orderId });
   // A signed provider notification supplies only an order reference, never payment proof.
-  for (const bad of [form + "&MID=duplicate", form + "&CHECKSUMHASH=duplicate",
+  for (const bad of [form + "&MID=duplicate", form + "&CHECKSUMHASH=duplicate", "CHECKSUMHASH=&" + form,
     form.replace("TXN_SUCCESS", "TXN_FAILURE"), form.replace("280.00", "1.00"),
     new URLSearchParams(callback).toString(), "x".repeat(32769), form + "&lowercase=value"])
     assert.throws(() => verifyPaytmCallback(bad, config));

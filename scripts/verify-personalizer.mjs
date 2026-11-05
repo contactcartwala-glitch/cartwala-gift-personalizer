@@ -267,7 +267,7 @@ assert.match(admin, /from "\.\.\/lib\/shopify-files\.server"/);
 assert.match(admin, /from "\.\.\/lib\/psd-import"/);
 assert.match(admin, /import\("ag-psd"\)/);
 assert.match(admin, /intent === "psdImport"/);
-assert.match(admin, /\^\(PHOTO\|UPLOAD\)/);
+assert.match(admin, /isPsdPhotoLayer\(layer\)/);
 assert.match(admin, /maskFiles\.push/);
 assert.match(admin, /configRef\.current = imported\.config/);
 assert.match(
@@ -380,3 +380,14 @@ assert.match(psdImport, /\["c", "m", "y", "k"\]\.every/);
 console.log(
   "Personalizer QA passed: dynamic PSD fields, 13/50-slot configs, field-count cap, purchase gating, preview/save persistence, original files, cart drawer/page preview contracts, and the admin-module + bug-fix refactor.",
 );
+
+// Regression: Photoshop text named UPLOAD must not create duplicate photo slots.
+const { build } = await import("esbuild");
+const psdBundle = await build({ entryPoints: ["app/lib/psd-import.ts"], bundle: true, write: false, platform: "node", format: "esm" });
+const { isPsdPhotoLayer } = await import("data:text/javascript;base64," + Buffer.from(psdBundle.outputFiles[0].text).toString("base64"));
+assert.equal(isPsdPhotoLayer({ name: "UPLOAD YOUR NAMES", text: { text: "Siri & Dileep" } }), false);
+assert.equal(isPsdPhotoLayer({ name: "UPLOAD YOUR DATE", text: { text: "14.03.2026" } }), false);
+assert.equal(isPsdPhotoLayer({ name: "upload your photo3" }), true);
+assert.equal(isPsdPhotoLayer({ name: "main pic" }), true);
+assert.equal(isPsdPhotoLayer({ name: "PHOTO 1", hidden: true }), false);
+console.log("PSD photo/text layer classification regression passed");

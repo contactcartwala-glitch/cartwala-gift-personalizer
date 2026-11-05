@@ -11,6 +11,7 @@
 // resolves to `[]` through the optional chains) and was being reported as a
 // silent success.
 
+import { SHOPIFY_FILE_MAX_BYTES } from "./shopify-file-limits";
 import { authenticate } from "../shopify.server";
 
 type AdminApiContext = Awaited<ReturnType<typeof authenticate.admin>>["admin"];
@@ -27,6 +28,8 @@ type GraphQLJson = {
 };
 
 export class ShopifyFileUploadError extends Error {}
+
+
 
 const userErrorsAt = (
   json: GraphQLJson,
@@ -98,7 +101,7 @@ async function sendToStagedTarget(
   const sent = await fetch(target.url, { method: "POST", body });
   if (!sent.ok)
     throw new ShopifyFileUploadError(
-      "The file could not be uploaded to Shopify.",
+      `Shopify could not upload ${file.name} (HTTP ${sent.status}).`,
     );
 }
 
@@ -262,12 +265,13 @@ export async function uploadPdfAsset(
 export async function uploadImageAssets(
   admin: AdminApiContext,
   files: File[],
+  options: { maxFileBytes?: number } = {},
 ): Promise<ShopifyFileAsset[]> {
   if (!files.length || files.length > 4 || files.some(
     (file) => !/\.(png|jpe?g|webp)$/i.test(file.name) ||
       !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
-      file.size < 100 || file.size > 15 * 1024 * 1024,
-  )) throw new ShopifyFileUploadError("Choose up to four JPG, PNG or WebP images under 15 MB each.");
+      file.size < 100 || file.size > (options.maxFileBytes ?? 15 * 1024 * 1024),
+  )) throw new ShopifyFileUploadError(`Choose up to four JPG, PNG or WebP images under ${(options.maxFileBytes ?? 15 * 1024 * 1024) / (1024 * 1024)} MB each.`);
 
   const stagedResponse = await admin.graphql(
     `#graphql
@@ -378,8 +382,15 @@ export function firstMetafieldsSetError(json: GraphQLJson): string | undefined {
 }
 
 export async function uploadPsdAsset(admin: AdminApiContext, file: File): Promise<ShopifyFileAsset> {
- if (!/\.psd$/i.test(file.name) || !file.size || file.size > 250 * 1024 * 1024) throw new ShopifyFileUploadError("Choose a PSD under 250 MB.");
+ if (!/\.psd$/i.test(file.name) || !file.size || file.size > SHOPIFY_FILE_MAX_BYTES) throw new ShopifyFileUploadError("Original PSD backups in Shopify Files must be under 20 MB.");
  const header = new Uint8Array(await file.slice(0, 4).arrayBuffer());
  if (String.fromCharCode(...header) !== "8BPS") throw new ShopifyFileUploadError("Invalid PSD file.");
  return uploadToShopifyFiles(admin, new File([file], file.name, {type:"image/vnd.adobe.photoshop"}), "FILE", 30);
+}
+
+/** Preserve uploaded originals byte-for-byte inside a managed ZIP file. */
+export async function uploadOriginalZipAsset(admin: AdminApiContext, file: File): Promise<ShopifyFileAsset> {
+  if (file.type !== "application/zip" || !/\.zip$/i.test(file.name) || file.size < 100 || file.size > SHOPIFY_FILE_MAX_BYTES)
+    throw new ShopifyFileUploadError("Original ZIP must be smaller than 20 MB.");
+  return uploadToShopifyFiles(admin, file, "FILE", 30);
 }
