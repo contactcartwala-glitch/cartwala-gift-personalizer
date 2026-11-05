@@ -73,6 +73,7 @@ model PartialCodIntent {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   outbox             PartialCodOutbox?
+  paytmAttempt       PartialCodPaytmAttempt?
 
   @@unique([shop, requestKey])
   @@index([shop, state, createdAt])
@@ -96,3 +97,19 @@ model PartialCodSettings {
   revision       Int      @default(1)
   updatedAt      DateTime @updatedAt
 }
+
+model PartialCodPaytmAttempt {
+  intentId           String   @id
+  intent             PartialCodIntent @relation(fields: [intentId], references: [id], onDelete: Restrict)
+  orderId            String   @unique
+  environment        String
+  merchantId         String
+  payableNowPaise     Int
+  state              String   @default("created")
+  claimToken         String?
+  transactionId      String?
+  paymentFingerprint String?  @unique
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
