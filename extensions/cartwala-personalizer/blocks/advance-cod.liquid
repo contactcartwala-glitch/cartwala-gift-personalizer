@@ -1,0 +1,42 @@
+{% if request.page_type == 'cart' %}
+  <section data-cw-advance-cod hidden aria-label="{{ 'advance_cod.title' | t | escape }}" {{ block.shopify_attributes }}>
+    <script type="application/json" data-cw-cod-i18n>{
+"error": {{ 'advance_cod.messages.error' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
+"checking": {{ 'advance_cod.messages.checking' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
+"not_started": {{ 'advance_cod.messages.not_started' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
+"payment_pending": {{ 'advance_cod.messages.payment_pending' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
+"payment_failed": {{ 'advance_cod.messages.payment_failed' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
+"paid_order_pending": {{ 'advance_cod.messages.paid_order_pending' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
+"order_confirmed": {{ 'advance_cod.messages.order_confirmed' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
+"needs_review": {{ 'advance_cod.messages.needs_review' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
+"calculating": {{ 'advance_cod.messages.calculating' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
+"review": {{ 'advance_cod.messages.review' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
+"opening": {{ 'advance_cod.messages.opening' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
+"check_before_retry": {{ 'advance_cod.messages.check_before_retry' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
+"complete": {{ 'advance_cod.messages.complete' | t: now: '__NOW__', balance: '__BALANCE__' | json }}
+}</script>
+    <h2>{{ 'advance_cod.title' | t }}</h2>
+    <p>{{ 'advance_cod.intro' | t }}</p>
+    <form data-cw-cod-address>
+      <p><label>{{ 'advance_cod.first_name' | t }} <input name="firstName" autocomplete="given-name" maxlength="100" required></label></p>
+      <p><label>{{ 'advance_cod.last_name' | t }} <input name="lastName" autocomplete="family-name" maxlength="100"></label></p>
+      <p><label>{{ 'advance_cod.address' | t }} <input name="address1" autocomplete="address-line1" maxlength="255" required></label></p>
+      <p><label>{{ 'advance_cod.landmark' | t }} <input name="address2" autocomplete="address-line2" maxlength="255"></label></p>
+      <p><label>{{ 'advance_cod.city' | t }} <input name="city" autocomplete="address-level2" maxlength="100" required></label></p>
+      <p><label>{{ 'advance_cod.state' | t }} <select name="provinceCode" autocomplete="address-level1" required>
+        <option value="">{{ 'advance_cod.choose_state' | t }}</option>
+        <option value="AP">{{ 'advance_cod.states.ap' | t }}</option><option value="AR">{{ 'advance_cod.states.ar' | t }}</option><option value="AS">{{ 'advance_cod.states.as' | t }}</option><option value="BR">{{ 'advance_cod.states.br' | t }}</option><option value="CT">{{ 'advance_cod.states.ct' | t }}</option><option value="GA">{{ 'advance_cod.states.ga' | t }}</option><option value="GJ">{{ 'advance_cod.states.gj' | t }}</option><option value="HR">{{ 'advance_cod.states.hr' | t }}</option><option value="HP">{{ 'advance_cod.states.hp' | t }}</option><option value="JH">{{ 'advance_cod.states.jh' | t }}</option><option value="KA">{{ 'advance_cod.states.ka' | t }}</option><option value="KL">{{ 'advance_cod.states.kl' | t }}</option><option value="MP">{{ 'advance_cod.states.mp' | t }}</option><option value="MH">{{ 'advance_cod.states.mh' | t }}</option><option value="MN">{{ 'advance_cod.states.mn' | t }}</option><option value="ML">{{ 'advance_cod.states.ml' | t }}</option><option value="MZ">{{ 'advance_cod.states.mz' | t }}</option><option value="NL">{{ 'advance_cod.states.nl' | t }}</option><option value="OR">{{ 'advance_cod.states.or' | t }}</option><option value="PB">{{ 'advance_cod.states.pb' | t }}</option><option value="RJ">{{ 'advance_cod.states.rj' | t }}</option><option value="SK">{{ 'advance_cod.states.sk' | t }}</option><option value="TN">{{ 'advance_cod.states.tn' | t }}</option><option value="TS">{{ 'advance_cod.states.ts' | t }}</option><option value="TR">{{ 'advance_cod.states.tr' | t }}</option><option value="UP">{{ 'advance_cod.states.up' | t }}</option><option value="UT">{{ 'advance_cod.states.ut' | t }}</option><option value="WB">{{ 'advance_cod.states.wb' | t }}</option><option value="AN">{{ 'advance_cod.states.an' | t }}</option><option value="CH">{{ 'advance_cod.states.ch' | t }}</option><option value="DH">{{ 'advance_cod.states.dh' | t }}</option><option value="DL">{{ 'advance_cod.states.dl' | t }}</option><option value="JK">{{ 'advance_cod.states.jk' | t }}</option><option value="LA">{{ 'advance_cod.states.la' | t }}</option><option value="LD">{{ 'advance_cod.states.ld' | t }}</option><option value="PY">{{ 'advance_cod.states.py' | t }}</option>
+      </select></label></p>
+      <p><label>{{ 'advance_cod.pin' | t }} <input name="zip" autocomplete="postal-code" inputmode="numeric" pattern="[1-9][0-9]{5}" required></label></p>
+      <p><label>{{ 'advance_cod.phone' | t }} <input name="phone" autocomplete="tel-national" inputmode="tel" pattern="[6-9][0-9]{9}" maxlength="10" required></label></p>
+      <button type="submit">{{ 'advance_cod.review' | t }}</button>
+    </form>
+    <p data-cw-cod-status role="status" aria-live="polite"></p>
+    <button type="button" data-cw-cod-pay hidden>{{ 'advance_cod.pay' | t }}</button>
+    <button type="button" data-cw-cod-recheck hidden>{{ 'advance_cod.recheck' | t }}</button>
+  </section>
+  <script src="{{ 'cartwala-advance-cod.js' | asset_url }}" defer></script>
+{% endif %}
+{% schema %}
+{"name":"Cartwala advance COD","target":"section","settings":[]}
+{% endschema %}

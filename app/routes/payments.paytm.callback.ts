@@ -1,7 +1,7 @@
 import type { ActionFunctionArgs } from "react-router";
-import { configuredPaytm, paytmDatabase } from "../lib/partial-cod-paytm-runtime.server";
+import { configuredPaytm, paytmDatabase, progressConfiguredCodCheckout } from "../lib/partial-cod-paytm-runtime.server";
 import { verifyPaytmCallback } from "../lib/partial-cod-paytm.server";
-import { claimPaytmStatusCheck, findPaytmCallbackIntent, recordPaytmProof } from "../lib/partial-cod-paytm-store.server";
+import { findPaytmCallbackIntent } from "../lib/partial-cod-paytm-store.server";
 
 const headers = { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" };
 async function boundedBody(request: Request) {
@@ -32,15 +32,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   catch { return new Response("Invalid payment callback", { status: 400, headers }); }
   try {
     const intent = await findPaytmCallbackIntent(paytmDatabase, orderId, connection.shop, connection.config);
-    if (!await claimPaytmStatusCheck(paytmDatabase, intent.id))
-      return new Response("Payment confirmation is processing. Do not pay again.", { status: 202, headers });
-    const proof = await connection.gateway.verify(intent);
-    if (proof.status === "paid") {
-      await recordPaytmProof(paytmDatabase, intent, connection.config, proof);
-      // Order creation/accounting must consume the verified ledger, never this callback body.
-      return new Response("Payment recorded. Your order confirmation is being checked. Do not pay again.", { headers });
-    }
-    return new Response(proof.status === "pending"
+    const progress = await progressConfiguredCodCheckout(connection.shop, intent.id);
+    if (progress.state === "order_confirmed") return new Response("Your order is confirmed. Thank you for shopping with Cartwala Gift Shop.", { headers });
+    if (progress.state === "paid_order_pending")
+      return new Response("Payment recorded. Your order confirmation is being checked. Do not pay again.", { status: 202, headers });
+    return new Response(progress.state === "payment_pending"
       ? "Payment confirmation is pending. Do not pay again."
       : "Payment was not confirmed. Contact Cartwala before attempting another payment.", { headers });
   } catch {

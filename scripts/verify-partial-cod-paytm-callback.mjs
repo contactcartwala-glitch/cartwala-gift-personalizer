@@ -16,6 +16,9 @@ try {
   )`);
   await pg.exec(await readFile("prisma/migrations/20261105095000_partial_cod_paytm_attempt/migration.sql", "utf8"));
   const db = { query: async (sql, parameters) => (await pg.query(sql, parameters)).rows };
+  await build({ entryPoints: ["app/lib/partial-cod-checkout.server.ts"], bundle: true,
+    packages: "external", platform: "node", format: "esm", outfile: new URL("checkout.mjs", output).pathname });
+  const { progressCodCheckout } = await import(new URL("checkout.mjs", output));
   await build({ entryPoints: ["app/routes/payments.paytm.callback.ts"], bundle: true,
     packages: "external", platform: "node", format: "esm", outfile: new URL("callback.mjs", output).pathname,
     plugins: [{ name: "test-runtime", setup(builder) {
@@ -23,6 +26,7 @@ try {
       builder.onLoad({ filter: /.*/, namespace: "test" }, () => ({ contents: `
         export const paytmDatabase = globalThis.__paytmCallbackFixture.db;
         export function configuredPaytm() { return globalThis.__paytmCallbackFixture.connection(); }
+        export function progressConfiguredCodCheckout(shop, id) { return globalThis.__paytmCallbackFixture.progress(shop, id); }
       ` }));
     } }] });
   const config = { mid: "TESTMERCHANT1234567890", merchantKey: "TESTONLYKEY12345", environment: "staging" };
@@ -35,6 +39,8 @@ try {
         paidPaise: intent.payableNowPaise, fingerprint: `paytm:staging:${config.mid}:CALLBACK-TXN` };
     }
   } }) };
+  globalThis.__paytmCallbackFixture.progress = (shop, id) => progressCodCheckout(db,
+    globalThis.__paytmCallbackFixture.connection().gateway, shop, id, config, async () => { throw new Error("order dispatch unavailable"); });
   const { action, loader } = await import(new URL("callback.mjs", output));
   const call = (body, contentType = "application/x-www-form-urlencoded", method = "POST") =>
     action({ request: new Request("https://example.test/payments/paytm/callback", {
@@ -58,12 +64,13 @@ try {
   const reference = "CW" + createHash("sha256").update(`${shop}:${id}`).digest("hex").slice(0,48);
   await pg.query(`INSERT INTO "PartialCodIntent" VALUES ($1,$2,'request-key','awaiting_payment','INR',100000,20,28000,80000,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`, [id, shop]);
   await pg.query(`INSERT INTO "PartialCodPaytmAttempt" ("intentId","orderId","environment","merchantId","payableNowPaise","state") VALUES ($1,$2,'staging',$3,28000,'ready')`, [id, reference, config.mid]);
+  await pg.exec('ALTER TABLE "PartialCodIntent" ADD COLUMN "codOrderId" TEXT');
   const form = await signed(reference);
   const pending = await call(form);
   assert.equal(pending.status, 200);
   assert.match(await pending.text(), /pending/);
   assert.equal((await pg.query(`SELECT "state" FROM "PartialCodPaytmAttempt"`)).rows[0].state, "ready");
-  assert.equal((await call(form)).status, 202);
+  assert.equal((await call(form)).status, 200);
   assert.equal(calls, 1);
   const unlock = () => pg.exec(`UPDATE "PartialCodPaytmAttempt" SET "lastCheckedAt"=NULL`);
   await unlock(); mode = "throw";
@@ -72,12 +79,12 @@ try {
   assert.equal((await unavailable.text()).includes("private provider error"), false);
   await unlock(); mode = "paid";
   const paid = await call(form);
-  assert.equal(paid.status, 200);
+  assert.equal(paid.status, 202);
   assert.equal(paid.headers.get("cache-control"), "no-store");
   assert.match(await paid.text(), /Payment recorded/);
   assert.equal((await pg.query(`SELECT "state" FROM "PartialCodPaytmAttempt"`)).rows[0].state, "paid");
   await unlock();
-  assert.equal((await call(form)).status, 200);
+  assert.equal((await call(form)).status, 202);
   assert.equal((await pg.query(`SELECT COUNT(*)::int AS count FROM "PartialCodPaytmAttempt"`)).rows[0].count, 1);
   globalThis.__paytmCallbackFixture.connection = () => { throw new Error("missing configuration"); };
   assert.equal((await call(form)).status, 503);

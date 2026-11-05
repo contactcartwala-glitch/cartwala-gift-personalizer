@@ -1,4 +1,4 @@
-import { Form, useActionData, useLoaderData, useNavigation, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router";
+import { Form, Link, useActionData, useLoaderData, useNavigation, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router";
 import { useState } from "react";
 import { authenticate } from "../shopify.server";
 import { loadCodSettings, saveCodSettings } from "../lib/partial-cod-settings.server";
@@ -60,7 +60,9 @@ export default function AdvanceCod() {
       </tbody></table>
     </s-section>
     <s-section heading="Setup progress">
+      <p><Link to="/app/advance-cod-recovery">Review pending payments and recover existing orders</Link></p>
       <ul>{COD_INTEGRATION_STATUS.map(item => <li key={item.id}>{item.label}: {item.ready ? "Complete" : "Pending"}</li>)}</ul>
     </s-section>
   </s-page>;
 }
+
