@@ -8,7 +8,7 @@ export type CodCheckoutState = "not_started" | "payment_pending" | "payment_fail
 
 export async function readCodCheckout(db: PaytmDatabase, shop: string, id: string, account: Account) {
   const rows = await db.query<CheckoutRow>(`SELECT i."id",i."shop",i."state",i."currency",i."orderPaise",i."advancePercent",
-      i."payableNowPaise",i."collectPaise",i."codOrderId",a."state" AS "attemptState"
+      i."codFeePaise",i."payableNowPaise",i."collectPaise",i."codOrderId",a."state" AS "attemptState"
     FROM "PartialCodIntent" i LEFT JOIN "PartialCodPaytmAttempt" a ON a."intentId"=i."id"
     WHERE i."id"=$1 AND i."shop"=$2 AND (a."intentId" IS NULL OR (a."merchantId"=$3 AND a."environment"=$4))`,
   [id, shop, account.mid, account.environment]);

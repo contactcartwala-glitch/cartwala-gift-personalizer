@@ -29,7 +29,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   if (!admin || !session) return Response.json({ error: "App is not installed" }, { status: 503, headers });
   const settings = await loadCodSettings(session.shop);
   return Response.json({ enabled: settings.enabled && canEnableAdvanceCod(),
-    advancePercent: settings.advancePercent, codFeePaise: 8000, checkoutAvailable: codCheckoutAvailable(session.shop, settings) }, { headers });
+    advancePercent: settings.advancePercent, codFeePaise: settings.codFeePaise, checkoutAvailable: codCheckoutAvailable(session.shop, settings) }, { headers });
 };
 
 // Every provider operation requires a signed quote capability as well as app-proxy authentication.
@@ -81,9 +81,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const available = codCheckoutAvailable(session.shop, settings);
     if (input.intent === "create_quote" && !available)
       return Response.json({ error: "Advance checkout is unavailable. Use prepaid checkout." }, { status: 503, headers });
-    const quote = await calculateCodQuote(admin, input, settings.advancePercent);
+    const quote = await calculateCodQuote(admin, input, settings.advancePercent, settings.codFeePaise);
     const row = await prisma.partialCodIntent.create({ data: {
-      shop: session.shop, requestKey, state: "quoted", advancePercent: settings.advancePercent,
+      shop: session.shop, requestKey, state: "quoted", advancePercent: settings.advancePercent, codFeePaise: settings.codFeePaise,
       orderPaise: quote.amounts.orderPaise, payableNowPaise: quote.amounts.payableNowPaise,
       collectPaise: quote.amounts.collectOnDeliveryPaise,
       lines: quote.lines, shippingAddress: quote.shippingAddress, accountingSnapshot: quote.accountingSnapshot,

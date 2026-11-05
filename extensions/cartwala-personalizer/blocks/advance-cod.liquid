@@ -1,19 +1,19 @@
 {% if request.page_type == 'cart' %}
   <section data-cw-advance-cod hidden aria-label="{{ 'advance_cod.title' | t | escape }}" {{ block.shopify_attributes }}>
     <script type="application/json" data-cw-cod-i18n>{
-"error": {{ 'advance_cod.messages.error' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
-"checking": {{ 'advance_cod.messages.checking' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
-"not_started": {{ 'advance_cod.messages.not_started' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
-"payment_pending": {{ 'advance_cod.messages.payment_pending' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
-"payment_failed": {{ 'advance_cod.messages.payment_failed' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
-"paid_order_pending": {{ 'advance_cod.messages.paid_order_pending' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
-"order_confirmed": {{ 'advance_cod.messages.order_confirmed' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
-"needs_review": {{ 'advance_cod.messages.needs_review' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
-"calculating": {{ 'advance_cod.messages.calculating' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
-"review": {{ 'advance_cod.messages.review' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
-"opening": {{ 'advance_cod.messages.opening' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
-"check_before_retry": {{ 'advance_cod.messages.check_before_retry' | t: now: '__NOW__', balance: '__BALANCE__' | json }},
-"complete": {{ 'advance_cod.messages.complete' | t: now: '__NOW__', balance: '__BALANCE__' | json }}
+"error": {{ 'advance_cod.messages.error' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }},
+"checking": {{ 'advance_cod.messages.checking' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }},
+"not_started": {{ 'advance_cod.messages.not_started' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }},
+"payment_pending": {{ 'advance_cod.messages.payment_pending' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }},
+"payment_failed": {{ 'advance_cod.messages.payment_failed' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }},
+"paid_order_pending": {{ 'advance_cod.messages.paid_order_pending' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }},
+"order_confirmed": {{ 'advance_cod.messages.order_confirmed' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }},
+"needs_review": {{ 'advance_cod.messages.needs_review' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }},
+"calculating": {{ 'advance_cod.messages.calculating' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }},
+"review": {{ 'advance_cod.messages.review' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }},
+"opening": {{ 'advance_cod.messages.opening' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }},
+"check_before_retry": {{ 'advance_cod.messages.check_before_retry' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }},
+"complete": {{ 'advance_cod.messages.complete' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }}
 }</script>
     <h2>{{ 'advance_cod.title' | t }}</h2>
     <p>{{ 'advance_cod.intro' | t }}</p>

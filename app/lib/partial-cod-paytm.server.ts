@@ -1,11 +1,12 @@
 import { createHash } from "node:crypto";
 import PaytmChecksum from "paytmchecksum";
+import { frozenCodFee } from "./partial-cod";
 
 type JsonObject = Record<string, unknown>;
 type ApiFetch = typeof fetch;
 export type PaytmIntent = {
   id: string; shop: string; state: string; currency: string;
-  orderPaise: number; advancePercent: number; payableNowPaise: number; collectPaise: number;
+  orderPaise: number; advancePercent: number; codFeePaise?: number; payableNowPaise: number; collectPaise: number;
 };
 export type PaytmConfig = {
   mid: string; merchantKey: string; environment: "staging" | "production";
@@ -38,7 +39,7 @@ export function paytmPaymentReference(intent: PaytmIntent) {
       !Number.isInteger(intent.advancePercent) || intent.advancePercent < 10 || intent.advancePercent > 50)
     throw new Error("Invalid Paytm payment intent");
   const advance = Math.floor((intent.orderPaise * intent.advancePercent + 50) / 100);
-  if (intent.payableNowPaise !== advance + 8000 || intent.collectPaise !== intent.orderPaise - advance)
+  if (intent.payableNowPaise !== advance + frozenCodFee(intent.codFeePaise) || intent.collectPaise !== intent.orderPaise - advance)
     throw new Error("Stored Paytm amounts do not match the frozen quote");
   const digest = createHash("sha256").update(`${intent.shop}:${intent.id}`).digest("hex");
   return { orderId: `CW${digest.slice(0, 48)}`, customerId: `CW${digest.slice(0, 32)}`,

@@ -1,3 +1,4 @@
+import { frozenCodFee } from "./partial-cod";
 import { createHash } from "node:crypto";
 import { readCodAccounting, type FrozenCodAccounting } from "./partial-cod-accounting";
 import { buildCodQuoteInput } from "./partial-cod-quote";
@@ -49,7 +50,7 @@ export function buildPaidCodOrder(context: PaidCodOrderContext) {
       ...snapshot.lines.map(line => ({ variantId: line.variantId, quantity: line.quantity,
         priceSet: money(line.unitPaise), taxable: line.taxable, requiresShipping: line.requiresShipping,
         properties: [...line.properties, { name: "_cartwala_cod_line", value: line.quoteLineId }] })),
-      { title: COD_FEE_TITLE, quantity: 1, priceSet: money(8000), taxable: false, requiresShipping: false,
+      { title: COD_FEE_TITLE, quantity: 1, priceSet: money(frozenCodFee(intent.codFeePaise)), taxable: false, requiresShipping: false,
         properties: [{ name: "_cartwala_order_kind", value: "partial_cod_fee" },
           { name: "_cartwala_cod_intent", value: intent.id }] },
     ],
@@ -96,8 +97,8 @@ export function verifyCodCreatedOrder(context: PaidCodOrderContext, actual: CodC
       !actual.tags.includes(expected.tag) ||
       actual.taxesIncluded !== expected.snapshot.taxesIncluded ||
       expected.attributes.some(p => actual.customAttributes.filter(v => v.key === p.key && v.value === p.value).length !== 1) ||
-      inrPaise(actual.totalPriceSet) !== intent.orderPaise + 8000 ||
-      inrPaise(actual.currentTotalPriceSet) !== intent.orderPaise + 8000 ||
+      inrPaise(actual.totalPriceSet) !== intent.orderPaise + frozenCodFee(intent.codFeePaise) ||
+      inrPaise(actual.currentTotalPriceSet) !== intent.orderPaise + frozenCodFee(intent.codFeePaise) ||
       inrPaise(actual.totalReceivedSet) !== intent.payableNowPaise ||
       inrPaise(actual.totalOutstandingSet) !== intent.collectPaise || inrPaise(actual.totalRefundedSet) !== 0 ||
       inrPaise(actual.totalShippingPriceSet) !== 0 || inrPaise(actual.currentTotalDiscountsSet) !== 0 ||
@@ -119,11 +120,11 @@ export function verifyCodCreatedOrder(context: PaidCodOrderContext, actual: CodC
       (["firstName", "lastName", "address1", "address2", "city", "provinceCode", "zip"] as const)
         .some(key => normalized(address[key]) !== normalized(destination[key])))
     throw new Error("Shopify delivery details changed; review the order before shipping");
-  verifyCodOrderLines(expected.snapshot, intent.id, lines);
+  verifyCodOrderLines(expected.snapshot, intent.id, lines, frozenCodFee(intent.codFeePaise));
   return { orderId: actual.id, receivedPaise: intent.payableNowPaise, collectPaise: intent.collectPaise };
 }
 
-function verifyCodOrderLines(snapshot: FrozenCodAccounting, intentId: string, actual: CodCreatedLine[]) {
+function verifyCodOrderLines(snapshot: FrozenCodAccounting, intentId: string, actual: CodCreatedLine[], feePaise: number) {
   if (actual.length !== snapshot.lines.length + 1) throw new Error("Shopify order lines changed");
   const remaining = [...actual];
   for (const line of snapshot.lines) {
@@ -140,7 +141,7 @@ function verifyCodOrderLines(snapshot: FrozenCodAccounting, intentId: string, ac
   }
   const fee = remaining[0];
   if (fee.variant || fee.quantity !== 1 || fee.currentQuantity !== 1 || fee.requiresShipping || fee.taxable ||
-      fee.title !== COD_FEE_TITLE || inrPaise(fee.originalUnitPriceSet) !== 8000 || inrPaise(fee.discountedTotalSet) !== 8000 ||
+      fee.title !== COD_FEE_TITLE || inrPaise(fee.originalUnitPriceSet) !== feePaise || inrPaise(fee.discountedTotalSet) !== feePaise ||
       props(fee.customAttributes) !== props([{ key: "_cartwala_order_kind", value: "partial_cod_fee" },
         { key: "_cartwala_cod_intent", value: intentId }])) throw new Error("Shopify COD fee changed");
 }

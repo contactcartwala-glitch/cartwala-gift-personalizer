@@ -81,7 +81,7 @@
       if (!quote.checkoutAvailable || !quote.access) throw new Error();
       saveAccess(quote.access);
       form.hidden = true; pay.hidden = false;
-      say(messages.review.replace('__NOW__', money(quote.amounts.payableNowPaise)).replace('__BALANCE__', money(quote.amounts.collectOnDeliveryPaise)));
+      say(messages.review.replace('__NOW__', money(quote.amounts.payableNowPaise)).replace('__BALANCE__', money(quote.amounts.collectOnDeliveryPaise)).replace('__CHARGE__', money(quote.amounts.feePaise)));
     });
   });
   pay.addEventListener("click", () => locked(async () => {
@@ -101,11 +101,12 @@
   }));
   recheck.addEventListener("click", () => locked(check));
   locked(async () => {
-    access = sessionStorage.getItem(storageKey) || "";
-    if (access) { root.hidden = false; form.hidden = true; recheck.hidden = false; return check(); }
     const response = await fetch(endpoint, { cache: "no-store", credentials: "same-origin" });
     if (!response.ok) return;
     const config = await response.json();
-    if (config.checkoutAvailable) root.hidden = false;
+    if (!config.checkoutAvailable) return;
+    root.hidden = false;
+    access = sessionStorage.getItem(storageKey) || "";
+    if (access) { form.hidden = true; recheck.hidden = false; return check(); }
   });
 })();

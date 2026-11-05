@@ -22,10 +22,11 @@ try {
     findPaytmCallbackIntent, claimPaytmStatusCheck } = await import(new URL("store.mjs", output));
   const account = { mid: "TESTMERCHANT1234567890", environment: "staging" };
   const base = { id: "12345678-1234-1234-1234-123456789abc", shop: "test.myshopify.com",
-    state: "quoted", currency: "INR", orderPaise: 100000, advancePercent: 20,
+    codFeePaise: 8000, state: "quoted", currency: "INR", orderPaise: 100000, advancePercent: 20,
     payableNowPaise: 28000, collectPaise: 80000 };
+  await pg.exec('ALTER TABLE "PartialCodIntent" ADD COLUMN "codFeePaise" INTEGER NOT NULL DEFAULT 8000');
   const insert = async (intent, age = "0 minutes") => {
-    await pg.query(`INSERT INTO "PartialCodIntent" VALUES ($1,$2,'request-secret',$3,$4,$5,$6,$7,$8,
+    await pg.query(`INSERT INTO "PartialCodIntent" ("id","shop","requestKey","state","currency","orderPaise","advancePercent","payableNowPaise","collectPaise","createdAt","updatedAt","accountingSnapshot") VALUES ($1,$2,'request-secret',$3,$4,$5,$6,$7,$8,
       CURRENT_TIMESTAMP - $9::interval, CURRENT_TIMESTAMP, $10)`, [intent.id, intent.shop, intent.state,
       intent.currency, intent.orderPaise, intent.advancePercent, intent.payableNowPaise, intent.collectPaise, age,
       JSON.stringify({ version: 1, orderPaise: intent.orderPaise, taxesIncluded: true, taxPaise: 0, taxLines: [],

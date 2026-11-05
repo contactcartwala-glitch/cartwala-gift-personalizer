@@ -12,7 +12,7 @@ type OrderAttempt = { intentId: string; orderReference: string; paymentFingerpri
 export async function loadPaidCodOrderContext(db: PaytmDatabase, intentId: string, shop: string, account: Account) {
   const rows = await db.query<PaidCodOrderContext["intent"] & {
     accountingSnapshot: unknown; shippingAddress: unknown; payment: PaidCodOrderContext["payment"];
-  }>(`SELECT i."id", i."shop", i."state", i."currency", i."orderPaise", i."advancePercent", i."payableNowPaise",
+  }>(`SELECT i."id", i."shop", i."state", i."currency", i."orderPaise", i."advancePercent", i."codFeePaise", i."payableNowPaise",
       i."collectPaise", i."depositOrderId", i."codOrderId", i."accountingSnapshot", i."shippingAddress",
       jsonb_build_object('state', p."state", 'environment', p."environment", 'merchantId', p."merchantId",
         'orderId', p."orderId", 'transactionId', p."transactionId", 'paymentFingerprint', p."paymentFingerprint",

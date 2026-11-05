@@ -15,13 +15,20 @@ function money(value: number, name: string): number {
   return value;
 }
 
-export function calculatePartialCod(orderPaise: number, advancePercent = 20): CodAmounts {
+// Existing intents without an explicit fee retain the historical ₹80 amount.
+export function frozenCodFee(value: unknown = 8000): number {
+  if (!Number.isSafeInteger(value) || Number(value) < 0 || Number(value) > 1_000_000)
+    throw new Error("Invalid frozen COD charge");
+  return Number(value);
+}
+
+export function calculatePartialCod(orderPaise: number, advancePercent = 20, codFeePaise = 8000): CodAmounts {
   money(orderPaise, "order amount");
   if (orderPaise === 0) throw new Error("An empty order cannot use partial COD");
   if (!Number.isInteger(advancePercent) || advancePercent < 10 || advancePercent > 50)
     throw new Error("Advance percentage must be an integer between 10 and 50");
   const advancePaise = Math.floor((orderPaise * advancePercent + 50) / 100);
-  const feePaise = 8000;
+  const feePaise = frozenCodFee(codFeePaise);
   const collectOnDeliveryPaise = orderPaise - advancePaise;
   return {
     orderPaise, advancePaise, feePaise,
@@ -90,7 +97,7 @@ export function buildCodShipment(intent: CodIntent, capabilities: ShippingCapabi
   if (intent.state !== "cod_order_created" || !intent.codOrderId || !intent.paidTransactionId) {
     throw new Error("A verified deposit and a linked COD order are required");
   }
-  const amounts = calculatePartialCod(intent.amounts.orderPaise, intent.advancePercent ?? 20);
+  const amounts = calculatePartialCod(intent.amounts.orderPaise, intent.advancePercent ?? 20, intent.amounts.feePaise);
   if ((Object.keys(amounts) as Array<keyof CodAmounts>).some(key => amounts[key] !== intent.amounts[key])) {
     throw new Error("Stored order amounts do not match policy");
   }
@@ -125,3 +132,4 @@ export function buildDepositLine(intent: CodIntent) {
     ],
   };
 }
+

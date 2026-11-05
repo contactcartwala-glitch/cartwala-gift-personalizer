@@ -95,6 +95,7 @@ model PartialCodIntent {
   currency           String   @default("INR")
   orderPaise         Int
   advancePercent     Int      @default(20)
+  codFeePaise        Int      @default(5000)
   payableNowPaise    Int
   collectPaise       Int
   lines              Json
@@ -129,6 +130,7 @@ model PartialCodSettings {
   shop           String   @id
   enabled        Boolean  @default(false)
   advancePercent Int      @default(20)
+  codFeePaise    Int      @default(5000)
   revision       Int      @default(1)
   updatedAt      DateTime @updatedAt
 }

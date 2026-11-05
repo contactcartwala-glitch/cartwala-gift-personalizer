@@ -94,7 +94,7 @@
   },
   "advance_cod": {
     "title": "Pay an advance, balance on delivery",
-    "intro": "Free shipping. A ₹80 COD charge is included in your payment today.",
+    "intro": "Choose prepaid or review the advance payment and extra COD charge.",
     "first_name": "First name",
     "last_name": "Last name",
     "address": "Address",
@@ -117,7 +117,7 @@
       "order_confirmed": "Your order is confirmed. Balance on delivery: {{ balance }}. Thank you for shopping with Cartwala Gift Shop ❤️",
       "needs_review": "This checkout needs assistance. Contact Cartwala before paying again.",
       "calculating": "Calculating your advance…",
-      "review": "Pay {{ now }} now, including ₹80 COD charge. Pay {{ balance }} on delivery. Your cart and delivery details are now fixed for this checkout.",
+      "review": "Pay {{ now }} now, including {{ charge }} COD charge. Pay {{ balance }} on delivery. Your cart and delivery details are now fixed for this checkout.",
       "opening": "Opening secure payment…",
       "check_before_retry": "Check payment status below before attempting another payment.",
       "complete": "Complete payment in Paytm, then check its status below."

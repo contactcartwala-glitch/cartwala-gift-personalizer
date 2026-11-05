@@ -48,6 +48,7 @@ export async function createConfiguredPaidCodOrder(intentId: string) {
 }
 
 export function codCheckoutAvailable(shop: string, settings: AdvanceCodSettings) {
+  if (!settings.enabled) return false;
   try {
     const connection = configuredPaytm();
     if (shop !== connection.shop || process.env.ADVANCE_COD_SHOPIFY_SYNC_EXCLUDED !== "true" ||

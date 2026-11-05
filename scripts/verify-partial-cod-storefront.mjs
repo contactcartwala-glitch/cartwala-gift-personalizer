@@ -10,7 +10,7 @@ async function fixture({ saved = "", available = true, brokenStorage = false } =
     addEventListener(name, fn) { this.listeners[name] = fn; } });
   const form = element(), status = element(), pay = element(), recheck = element(), submit = element();
   const root = { ...element(), hidden: true, dataset: {}, setAttribute() {}, removeAttribute() {},
-    querySelector: selector => ({ "[data-cw-cod-i18n]": { textContent: JSON.stringify(translations).replaceAll("{{ balance }}", "__BALANCE__").replaceAll("{{ now }}", "__NOW__") }, form, "[data-cw-cod-status]": status, "[data-cw-cod-pay]": pay,
+    querySelector: selector => ({ "[data-cw-cod-i18n]": { textContent: JSON.stringify(translations).replaceAll("{{ balance }}", "__BALANCE__").replaceAll("{{ now }}", "__NOW__").replaceAll("{{ charge }}", "__CHARGE__") }, form, "[data-cw-cod-status]": status, "[data-cw-cod-pay]": pay,
       "[data-cw-cod-recheck]": recheck })[selector], querySelectorAll: () => [submit, pay, recheck] };
   pay.hidden = true; recheck.hidden = true;
   const storage = new Map(saved ? [["cartwala-advance-cod-v1", saved]] : []);
@@ -33,7 +33,7 @@ async function fixture({ saved = "", available = true, brokenStorage = false } =
       if (url === "/cart.js") value = { total_discount: 0, items: [{ variant_id: 123, quantity: 1,
         properties: { _preview: "https://example.test/preview.png" } }] };
       if (body?.intent === "create_quote") value = { checkoutAvailable: true, access: "TEST_CAPABILITY",
-        amounts: { payableNowPaise: 28000, collectOnDeliveryPaise: 80000 } };
+        amounts: { feePaise: 8000, payableNowPaise: 28000, collectOnDeliveryPaise: 80000 } };
       if (body?.intent === "begin_payment") {
         await checkoutWait;
         value = { checkout: { mid: "TESTMERCHANT1234567890", environment: "staging", orderId: "TESTORDER",
@@ -68,11 +68,14 @@ f.config().handler.transactionStatus({ STATUS: "TXN_SUCCESS", TXNAMOUNT: "0.01" 
 assert.match(f.status.textContent, /order is confirmed/);
 assert.equal(f.calls.filter(x => x.body?.intent === "begin_payment").length, 1);
 assert.equal([...f.storage.values()].some(x => x.includes("TRANSIENT_TOKEN")), false);
-const resumed = await fixture({ saved: "TEST_CAPABILITY", available: false });
+const resumed = await fixture({ saved: "TEST_CAPABILITY", available: true });
 assert.equal(resumed.root.hidden, false); assert.equal(resumed.form.hidden, true);
 assert.equal(resumed.calls.filter(x => x.body?.intent === "payment_status").length, 1);
 assert.equal(resumed.calls.some(x => x.body?.intent === "begin_payment"), false);
 assert.equal((await fixture({ available: false })).root.hidden, true);
+const switchedOff = await fixture({ saved: "TEST_CAPABILITY", available: false });
+assert.equal(switchedOff.root.hidden, true);
+assert.equal(switchedOff.calls.some(x => x.body), false);
 const noStorage = await fixture({ brokenStorage: true });
 noStorage.form.listeners.submit({ preventDefault() {} }); await flush();
 assert.equal(noStorage.pay.hidden, true);

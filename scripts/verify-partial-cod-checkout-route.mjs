@@ -11,7 +11,7 @@ globalThis.__codRouteFixture = {
   auth: async () => ({ admin: {}, session: { shop } }),
   db: { partialCodIntent: { findUnique: async () => exists ? { id } : null, count: async () => 0,
     create: async ({ data }) => { created++; return { ...data, id }; } } },
-  settings: async () => ({ enabled: false, advancePercent: 20, revision: 1 }),
+  settings: async () => ({ enabled: false, advancePercent: 20, codFeePaise: 5000, revision: 1 }),
   quote: async () => ({ lines: [], shippingAddress: {}, accountingSnapshot: {},
     amounts: { orderPaise: 100000, payableNowPaise: 28000, collectOnDeliveryPaise: 80000 } }),
   available: () => available,
@@ -51,7 +51,8 @@ try {
   assert.equal(review.checkoutAvailable, false); assert.equal("access" in review, false);
   available = true;
   const quote = await (await call(input)).json();
-  assert.equal(quote.checkoutAvailable, true); assert.equal(typeof quote.access, "string");
+  assert.equal(quote.checkoutAvailable, true);
+  assert.equal((await (await loader({ request: new Request("https://example.test") })).json()).codFeePaise, 5000); assert.equal(typeof quote.access, "string");
   exists = true; assert.equal((await call(input)).status, 409); exists = false;
   for (const access of [id, "wrong", quote.access + "tamper"])
     assert.equal((await call({ intent: "begin_payment", access })).status, 400);

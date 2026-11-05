@@ -66,9 +66,9 @@ export function buildCodQuoteInput(value: unknown) {
 export function verifyCodQuote(value: {
   totalPriceSet: Parameters<typeof inrPaise>[0]; totalShippingPriceSet: Parameters<typeof inrPaise>[0];
   currencyCode: string; presentmentCurrencyCode: string;
-}, advancePercent = 20) {
+}, advancePercent = 20, codFeePaise = 8000) {
   if (value.currencyCode !== "INR" || value.presentmentCurrencyCode !== "INR" ||
       inrPaise(value.totalShippingPriceSet) !== 0) throw new Error("Unsupported COD quote");
-  return calculatePartialCod(inrPaise(value.totalPriceSet), advancePercent);
+  return calculatePartialCod(inrPaise(value.totalPriceSet), advancePercent, codFeePaise);
 }
 

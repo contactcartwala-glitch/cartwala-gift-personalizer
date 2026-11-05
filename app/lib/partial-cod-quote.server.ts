@@ -27,7 +27,7 @@ export const CALCULATE_COD_QUOTE = `mutation CalculateCodQuote($input: DraftOrde
 }`;
 
 /** No order or payment is created here. Requires an authenticated app-proxy caller. */
-export async function calculateCodQuote(admin: Admin, value: unknown, advancePercent = 20) {
+export async function calculateCodQuote(admin: Admin, value: unknown, advancePercent = 20, codFeePaise = 8000) {
   const prepared = buildCodQuoteInput(value);
   const response = await admin.graphql(CALCULATE_COD_QUOTE, { variables: { input: prepared.input } });
   const json = await response.json() as {
@@ -43,6 +43,6 @@ export async function calculateCodQuote(admin: Admin, value: unknown, advancePer
   const accountingSnapshot = freezeCodAccounting(result.calculatedDraftOrder, prepared.lines,
     prepared.input.lineItems.map(line => line.uuid));
   return { lines: prepared.lines, shippingAddress: prepared.shippingAddress, accountingSnapshot,
-    amounts: verifyCodQuote(result.calculatedDraftOrder, advancePercent), calculated: result.calculatedDraftOrder };
+    amounts: verifyCodQuote(result.calculatedDraftOrder, advancePercent, codFeePaise), calculated: result.calculatedDraftOrder };
 }
 

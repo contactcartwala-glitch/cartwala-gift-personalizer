@@ -12,7 +12,7 @@ export async function saveCodSettings(shop: string, value: unknown) {
   if (settings.revision === 0) {
     try {
       return await prisma.partialCodSettings.create({ data: {
-        shop, enabled: settings.enabled, advancePercent: settings.advancePercent,
+        shop, enabled: settings.enabled, advancePercent: settings.advancePercent, codFeePaise: settings.codFeePaise,
       } });
     } catch (error) {
       if (error && typeof error === "object" && "code" in error && error.code === "P2002")
@@ -22,8 +22,9 @@ export async function saveCodSettings(shop: string, value: unknown) {
   }
   const result = await prisma.partialCodSettings.updateMany({
     where: { shop, revision: settings.revision },
-    data: { enabled: settings.enabled, advancePercent: settings.advancePercent, revision: { increment: 1 } },
+    data: { enabled: settings.enabled, advancePercent: settings.advancePercent, codFeePaise: settings.codFeePaise, revision: { increment: 1 } },
   });
   if (result.count !== 1) throw new Error("Settings changed in another tab. Reload before saving.");
   return loadCodSettings(shop);
 }
+

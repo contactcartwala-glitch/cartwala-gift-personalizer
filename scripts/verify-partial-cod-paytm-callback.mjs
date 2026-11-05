@@ -64,7 +64,7 @@ try {
   const reference = "CW" + createHash("sha256").update(`${shop}:${id}`).digest("hex").slice(0,48);
   await pg.query(`INSERT INTO "PartialCodIntent" VALUES ($1,$2,'request-key','awaiting_payment','INR',100000,20,28000,80000,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`, [id, shop]);
   await pg.query(`INSERT INTO "PartialCodPaytmAttempt" ("intentId","orderId","environment","merchantId","payableNowPaise","state") VALUES ($1,$2,'staging',$3,28000,'ready')`, [id, reference, config.mid]);
-  await pg.exec('ALTER TABLE "PartialCodIntent" ADD COLUMN "codOrderId" TEXT');
+  await pg.exec('ALTER TABLE "PartialCodIntent" ADD COLUMN "codOrderId" TEXT, ADD COLUMN "codFeePaise" INTEGER NOT NULL DEFAULT 8000');
   const form = await signed(reference);
   const pending = await call(form);
   assert.equal(pending.status, 200);

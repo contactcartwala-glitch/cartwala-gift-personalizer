@@ -16,12 +16,12 @@ try {
   const { createCodOrderFromPaidIntent, reconcilePaidCodOrder } = await import(new URL("partial-cod-order-store.server.mjs", output));
   for (const name of ["20261005070000_partial_cod", "20261007080000_partial_cod_settings",
     "20261105095000_partial_cod_paytm_attempt", "20261105110000_partial_cod_accounting_snapshot",
-    "20261105111500_partial_cod_order_attempt"])
+    "20261105111500_partial_cod_order_attempt", "20261105170000_partial_cod_configurable_fee"])
     await pg.exec(await readFile(`prisma/migrations/${name}/migration.sql`, "utf8"));
   const db = { query: async (sql, parameters) => (await pg.query(sql, parameters)).rows };
   const account = { mid: "TESTMERCHANT1234567890", environment: "staging" };
   const contexts = new Map();
-  function fixture({ count = 1, unit = 100000, tax = 0, included = false, percent = 20 } = {}) {
+  function fixture({ count = 1, unit = 100000, tax = 0, included = false, percent = 20, fee = 8000 } = {}) {
     const id = randomUUID(), shop = "test.myshopify.com", base = count * unit;
     const source = Array.from({ length: count }, (_, i) => ({ variantId: "gid://shopify/ProductVariant/123", quantity: 1,
       properties: [{ name: "_print_url", value: `https://example.test/artwork-${i}.png` }] }));
@@ -37,12 +37,12 @@ try {
     const advance = Math.floor((orderPaise * percent + 50) / 100);
     const reference = "CW" + createHash("sha256").update(`${shop}:${id}`).digest("hex").slice(0, 48);
     const context = { intent: { id, shop, state: "awaiting_payment", currency: "INR", orderPaise,
-      advancePercent: percent, payableNowPaise: advance + 8000, collectPaise: orderPaise - advance,
+      advancePercent: percent, codFeePaise: fee, payableNowPaise: advance + fee, collectPaise: orderPaise - advance,
       depositOrderId: null, codOrderId: null }, accountingSnapshot,
       shippingAddress: { firstName: "QA", lastName: "Test", address1: "Test only", address2: "", city: "Warangal",
         provinceCode: "TS", zip: "506001", phone: "+919999999999", countryCode: "IN" },
       payment: { state: "paid", environment: "staging", merchantId: account.mid, orderId: reference,
-        transactionId: `TXN-${id}`, paymentFingerprint: `paytm:staging:${account.mid}:TXN-${id}`, payableNowPaise: advance + 8000 } };
+        transactionId: `TXN-${id}`, paymentFingerprint: `paytm:staging:${account.mid}:TXN-${id}`, payableNowPaise: advance + fee } };
     contexts.set(id, context);
     return { context, calculated, source, ids };
   }
@@ -54,7 +54,7 @@ try {
       tags: expected.order.tags, shippingAddress: { ...expected.order.shippingAddress, countryCodeV2: "IN" },
       taxLines: expected.snapshot.taxLines.map(t => ({ title: t.title, rate: t.rate,
         channelLiable: t.channelLiable, priceSet: money(t.paise) })),
-      totalPriceSet: money(i.orderPaise + 8000), currentTotalPriceSet: money(i.orderPaise + 8000),
+      totalPriceSet: money(i.orderPaise + (i.codFeePaise ?? 8000)), currentTotalPriceSet: money(i.orderPaise + (i.codFeePaise ?? 8000)),
       totalReceivedSet: money(i.payableNowPaise), totalOutstandingSet: money(i.collectPaise), totalRefundedSet: money(0),
       totalShippingPriceSet: money(0), currentTotalDiscountsSet: money(0), totalTaxSet: money(expected.snapshot.taxPaise),
       transactions: [{ kind: "SALE", status: "SUCCESS", test: expected.order.test, gateway: "Cartwala Paytm", amountSet: money(i.payableNowPaise) }] },
@@ -80,6 +80,15 @@ try {
   for (const percent of [10, 30, 40, 50]) {
     const x = fixture({ percent }).context, ack = acknowledgment(x, "gid://shopify/Order/102");
     assert.equal(verifyCodCreatedOrder(x, ack.header, ack.lines).receivedPaise, 8000 + percent * 1000);
+  }
+  for (const fee of [0, 4000, 5000, 8000, 123]) {
+    const x = fixture({ fee }).context, ack = acknowledgment(x, "gid://shopify/Order/102");
+    const proof = verifyCodCreatedOrder(x, ack.header, ack.lines);
+    assert.equal(proof.receivedPaise, 20000 + fee);
+    assert.equal(proof.collectPaise, 80000);
+    const wrong = structuredClone(ack);
+    wrong.lines.at(-1).originalUnitPriceSet = money(fee + 1);
+    assert.throws(() => verifyCodCreatedOrder(x, wrong.header, wrong.lines));
   }
   for (const args of [{ unit: 100000, tax: 18000 }, { unit: 118000, tax: 18000, included: true }]) {
     const x = fixture(args).context, ack = acknowledgment(x, "gid://shopify/Order/103");
@@ -115,10 +124,10 @@ try {
   async function persist(x) {
     const i = x.intent, p = x.payment;
     await pg.query(`INSERT INTO "PartialCodIntent" ("id","shop","requestKey","state","currency","orderPaise","advancePercent",
-      "payableNowPaise","collectPaise","lines","shippingAddress","accountingSnapshot","updatedAt")
-      VALUES ($1,$2,$1,'awaiting_payment','INR',$3,$4,$5,$6,$7,$8,$9,CURRENT_TIMESTAMP)`,
+      "payableNowPaise","collectPaise","lines","shippingAddress","accountingSnapshot","codFeePaise","updatedAt")
+      VALUES ($1,$2,$1,'awaiting_payment','INR',$3,$4,$5,$6,$7,$8,$9,$10,CURRENT_TIMESTAMP)`,
     [i.id, i.shop, i.orderPaise, i.advancePercent, i.payableNowPaise, i.collectPaise,
-      JSON.stringify(x.accountingSnapshot.lines), JSON.stringify(x.shippingAddress), JSON.stringify(x.accountingSnapshot)]);
+      JSON.stringify(x.accountingSnapshot.lines), JSON.stringify(x.shippingAddress), JSON.stringify(x.accountingSnapshot), i.codFeePaise ?? 8000]);
     await pg.query(`INSERT INTO "PartialCodPaytmAttempt" ("intentId","orderId","environment","merchantId","payableNowPaise","state","transactionId","paymentFingerprint")
       VALUES ($1,$2,'staging',$3,$4,'paid',$5,$6)`, [i.id, p.orderId, account.mid, i.payableNowPaise, p.transactionId, p.paymentFingerprint]);
   }
@@ -204,5 +213,5 @@ try {
   assert.equal(mutations, beforeLive);
   const large = fixture({ count: 100, unit: 1000 }).context; await persist(large); const pageStart = linePages;
   await run(large); assert.equal(linePages - pageStart, 3);
-  console.log("Single-order accounting passed: frozen tax/price/artwork snapshots, 10–50% advances, ₹80 non-shipping fee, exact Shopify re-read, one-writer SQL claims, no duplicate sale/retry, uncertain-order recovery and live gate. Transport is mocked; no Shopify order was created.");
+  console.log("Single-order accounting passed: frozen tax/price/artwork snapshots, 10–50% advances, frozen configurable non-shipping fee, exact Shopify re-read, one-writer SQL claims, no duplicate sale/retry, uncertain-order recovery and live gate. Transport is mocked; no Shopify order was created.");
 } finally { await pg.close(); await rm(output, { recursive: true, force: true }); }

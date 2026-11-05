@@ -11,7 +11,7 @@ type Attempt = { intentId: string; orderId: string; state: string; transactionId
 
 export async function findPaytmCallbackIntent(db: PaytmDatabase, orderId: string, shop: string, account: Account) {
   const rows = await db.query<PaytmIntent>(
-    `SELECT i."id", i."shop", i."state", i."currency", i."orderPaise", i."advancePercent", i."payableNowPaise", i."collectPaise"
+    `SELECT i."id", i."shop", i."state", i."currency", i."orderPaise", i."advancePercent", i."codFeePaise", i."payableNowPaise", i."collectPaise"
      FROM "PartialCodIntent" i JOIN "PartialCodPaytmAttempt" a ON a."intentId" = i."id"
      WHERE a."orderId" = $1 AND i."shop" = $2 AND a."merchantId" = $3 AND a."environment" = $4
        AND a."state" <> 'created'`, [orderId, shop, account.mid, account.environment]);
@@ -31,7 +31,7 @@ export async function claimPaytmStatusCheck(db: PaytmDatabase, intentId: string)
 
 export async function loadPaytmIntent(db: PaytmDatabase, shop: string, id: string, requestKey: string) {
   const rows = await db.query<PaytmIntent>(
-    `SELECT "id", "shop", "state", "currency", "orderPaise", "advancePercent", "payableNowPaise", "collectPaise"
+    `SELECT "id", "shop", "state", "currency", "orderPaise", "advancePercent", "codFeePaise", "payableNowPaise", "collectPaise"
      FROM "PartialCodIntent" WHERE "id" = $1 AND "shop" = $2 AND "requestKey" = $3`, [id, shop, requestKey]);
   if (rows.length !== 1) throw new Error("Unknown Paytm quote");
   paytmPaymentReference(rows[0]);

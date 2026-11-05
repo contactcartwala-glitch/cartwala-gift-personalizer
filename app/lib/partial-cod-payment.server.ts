@@ -25,7 +25,7 @@ export async function recordPaidDeposit(admin: Admin, shop: string, intentId: st
   };
   if (!response.ok || json.errors?.length || !json.data?.order) throw new Error("Could not verify payment with Shopify");
   const proof = verifyDepositSnapshot({
-    intentId, orderPaise: intent.orderPaise, advancePercent: intent.advancePercent,
+    intentId, orderPaise: intent.orderPaise, advancePercent: intent.advancePercent, codFeePaise: intent.codFeePaise,
     linkedDraftOrderId: json.data.draftOrder?.order?.id ?? null,
   }, json.data.order);
   const fingerprint = `${shop}:${proof.fingerprint}`;
@@ -71,4 +71,5 @@ export async function finishCodOrderJob(intentId: string, claimToken: string, or
     await tx.partialCodIntent.update({ where: { id: intentId }, data: { state: "cod_order_created", codOrderId: orderId } });
   });
 }
+
 

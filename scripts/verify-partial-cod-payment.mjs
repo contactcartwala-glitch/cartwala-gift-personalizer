@@ -12,7 +12,7 @@ const snapshot = {
   transactions: [{ id: 'transaction-1', kind: 'SALE', status: 'SUCCESS', test: false, amountSet: money('280.00') }],
 };
 assert.equal(inrPaise(money('280.1')), 28010);
-for (const invalid of ['-1', 'NaN', '1e3', '1.001', ' 1', '1000081']) assert.throws(() => inrPaise(money(invalid)));
+for (const invalid of ['-1', 'NaN', '1e3', '1.001', ' 1', '1010001']) assert.throws(() => inrPaise(money(invalid)));
 assert.throws(() => inrPaise(money('280', 'USD')));
 const proof = verifyDepositSnapshot(expected, snapshot);
 assert.equal(proof.orderId, snapshot.id);
@@ -48,4 +48,5 @@ assert.equal(verifyDepositSnapshot(expected, split).fingerprint, 'capture-a|capt
 split.transactions.reverse();
 assert.equal(verifyDepositSnapshot(expected, split).fingerprint, 'capture-a|capture-b');
 console.log('Deposit identity, real captures, exact amounts, split payments, refunds and cancellation checks passed.');
+
 

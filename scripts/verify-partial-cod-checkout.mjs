@@ -24,7 +24,7 @@ try {
   await pg.exec(`CREATE TABLE "PartialCodIntent" (
     "id" TEXT PRIMARY KEY,"shop" TEXT NOT NULL,"state" TEXT NOT NULL,"currency" TEXT NOT NULL,
     "orderPaise" INTEGER NOT NULL,"advancePercent" INTEGER NOT NULL,"payableNowPaise" INTEGER NOT NULL,
-    "collectPaise" INTEGER NOT NULL,"codOrderId" TEXT,"accountingSnapshot" JSONB,
+    "collectPaise" INTEGER NOT NULL,"codFeePaise" INTEGER NOT NULL DEFAULT 8000,"codOrderId" TEXT,"accountingSnapshot" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,"updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)`);
   await pg.exec(await readFile("prisma/migrations/20261105095000_partial_cod_paytm_attempt/migration.sql", "utf8"));
   // Match Prisma's typed TEXT bindings, rather than relying on PostgreSQL inferred types.
