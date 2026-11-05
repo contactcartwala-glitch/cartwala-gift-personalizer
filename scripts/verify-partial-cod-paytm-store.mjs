@@ -17,7 +17,8 @@ try {
   const db = { query: async (sql, parameters) => (await pg.query(sql, parameters)).rows };
   await build({ entryPoints: ["app/lib/partial-cod-paytm-store.server.ts"], bundle: true,
     packages: "external", platform: "node", format: "esm", outfile: new URL("store.mjs", output).pathname });
-  const { loadPaytmIntent, beginPaytmPayment, claimPaytmAttempt, recordPaytmProof } = await import(new URL("store.mjs", output));
+  const { loadPaytmIntent, beginPaytmPayment, claimPaytmAttempt, recordPaytmProof,
+    findPaytmCallbackIntent, claimPaytmStatusCheck } = await import(new URL("store.mjs", output));
   const account = { mid: "TESTMERCHANT1234567890", environment: "staging" };
   const base = { id: "12345678-1234-1234-1234-123456789abc", shop: "test.myshopify.com",
     state: "quoted", currency: "INR", orderPaise: 100000, advancePercent: 20,
@@ -45,6 +46,14 @@ try {
   let attempt = (await pg.query(`SELECT * FROM "PartialCodPaytmAttempt"`)).rows[0];
   assert.equal(attempt.state, "ready");
   assert.equal("txnToken" in attempt, false);
+  assert.equal((await findPaytmCallbackIntent(db, attempt.orderId, base.shop, account)).state, "awaiting_payment");
+  await assert.rejects(findPaytmCallbackIntent(db, attempt.orderId, "other.myshopify.com", account));
+  await assert.rejects(findPaytmCallbackIntent(db, attempt.orderId, base.shop, { ...account, mid: "OTHER" }));
+  await assert.rejects(findPaytmCallbackIntent(db, attempt.orderId, base.shop, { ...account, environment: "production" }));
+  const checks = await Promise.all(Array.from({ length: 12 }, () => claimPaytmStatusCheck(db, base.id)));
+  assert.equal(checks.filter(Boolean).length, 1);
+  await pg.query(`UPDATE "PartialCodPaytmAttempt" SET "lastCheckedAt"=CURRENT_TIMESTAMP - INTERVAL '11 seconds' WHERE "intentId"=$1`, [base.id]);
+  assert.equal(await claimPaytmStatusCheck(db, base.id), true);
   const proof = { status: "paid", orderId: attempt.orderId, transactionId: "TXN-1", paidPaise: 28000,
     currency: "INR", fingerprint: `paytm:staging:${account.mid}:TXN-1` };
   await Promise.all(Array.from({ length: 8 }, () => recordPaytmProof(db, base, account, proof)));
@@ -79,3 +88,4 @@ try {
   await assert.rejects(pg.query(`UPDATE "PartialCodPaytmAttempt" SET "transactionId"=NULL WHERE "intentId"=$1`, [base.id]));
   console.log("PostgreSQL-backed Paytm single-writer claims, duplicate/replay guards, cross-order uniqueness, expiry, uncertain recovery and closed-order protection passed.");
 } finally { await pg.close(); await rm(output, { recursive: true, force: true }); }
+

@@ -111,5 +111,6 @@ model PartialCodPaytmAttempt {
   paymentFingerprint String?  @unique
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+  lastCheckedAt      DateTime?
 }
 

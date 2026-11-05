@@ -8,6 +8,26 @@ type Account = { mid: string; environment: "staging" | "production" };
 type PaidProof = Extract<Awaited<ReturnType<Gateway["verify"]>>, { status: "paid" }>;
 type Attempt = { intentId: string; orderId: string; state: string; transactionId: string | null };
 
+export async function findPaytmCallbackIntent(db: PaytmDatabase, orderId: string, shop: string, account: Account) {
+  const rows = await db.query<PaytmIntent>(
+    `SELECT i."id", i."shop", i."state", i."currency", i."orderPaise", i."advancePercent", i."payableNowPaise", i."collectPaise"
+     FROM "PartialCodIntent" i JOIN "PartialCodPaytmAttempt" a ON a."intentId" = i."id"
+     WHERE a."orderId" = $1 AND i."shop" = $2 AND a."merchantId" = $3 AND a."environment" = $4
+       AND a."state" <> 'created'`, [orderId, shop, account.mid, account.environment]);
+  if (rows.length !== 1) throw new Error("Unknown Paytm callback order");
+  if (paytmPaymentReference(rows[0]).orderId !== orderId) throw new Error("Invalid Paytm callback reference");
+  return rows[0];
+}
+
+/** Limits signed callback replay across workers, without storing the callback body or PII. */
+export async function claimPaytmStatusCheck(db: PaytmDatabase, intentId: string) {
+  const rows = await db.query<Attempt>(
+    `UPDATE "PartialCodPaytmAttempt" SET "lastCheckedAt" = CURRENT_TIMESTAMP
+     WHERE "intentId" = $1 AND "state" <> 'created'
+       AND ("lastCheckedAt" IS NULL OR "lastCheckedAt" < CURRENT_TIMESTAMP - INTERVAL '10 seconds') RETURNING *`, [intentId]);
+  return rows.length === 1;
+}
+
 export async function loadPaytmIntent(db: PaytmDatabase, shop: string, id: string, requestKey: string) {
   const rows = await db.query<PaytmIntent>(
     `SELECT "id", "shop", "state", "currency", "orderPaise", "advancePercent", "payableNowPaise", "collectPaise"
@@ -88,3 +108,4 @@ export async function recordPaytmProof(db: PaytmDatabase, intent: PaytmIntent, a
   if (rows.length !== 1) throw new Error("Paytm payment is closed or conflicts with recorded proof");
   return rows[0];
 }
+

@@ -7,7 +7,7 @@ await mkdir(output, { recursive: true });
 try {
   await build({ entryPoints: ["app/lib/partial-cod-paytm.server.ts"], bundle: true,
     packages: "external", platform: "node", format: "esm", outfile: new URL("adapter.mjs", output).pathname });
-  const { createPaytmClient, paytmPaymentReference } = await import(new URL("adapter.mjs", output));
+  const { createPaytmClient, paytmPaymentReference, verifyPaytmCallback } = await import(new URL("adapter.mjs", output));
   const key = "TESTONLYKEY12345";
   const config = { mid: "TESTMERCHANT1234567890", merchantKey: key,
     environment: "staging", appOrigin: "https://example.test" };
@@ -17,6 +17,16 @@ try {
   const reference = paytmPaymentReference(intent);
   assert.equal(reference.orderId.length, 50);
   assert.equal(reference.amount, "280.00");
+  const callback = { MID: config.mid, ORDERID: reference.orderId, STATUS: "TXN_SUCCESS", TXNAMOUNT: "280.00" };
+  const checksum = await PaytmChecksum.generateSignature(callback, key);
+  const form = new URLSearchParams({ ...callback, CHECKSUMHASH: checksum }).toString();
+  assert.deepEqual(verifyPaytmCallback(form, config), { orderId: reference.orderId });
+  // A signed provider notification supplies only an order reference, never payment proof.
+  for (const bad of [form + "&MID=duplicate", form + "&CHECKSUMHASH=duplicate",
+    form.replace("TXN_SUCCESS", "TXN_FAILURE"), form.replace("280.00", "1.00"),
+    new URLSearchParams(callback).toString(), "x".repeat(32769), form + "&lowercase=value"])
+    assert.throws(() => verifyPaytmCallback(bad, config));
+  assert.throws(() => verifyPaytmCallback(form, { ...config, mid: "OTHERACCOUNT" }));
   assert.deepEqual(paytmPaymentReference({ ...intent }), reference);
   assert.notEqual(paytmPaymentReference({ ...intent, shop: "other.myshopify.com" }).orderId, reference.orderId);
   assert.equal(paytmPaymentReference({ ...intent, advancePercent: 30, payableNowPaise: 38000, collectPaise: 70000 }).amount, "380.00");
@@ -88,3 +98,4 @@ try {
   assert.throws(() => createPaytmClient({ ...config, merchantKey: "invalid" }));
   console.log("Paytm SDK signatures, frozen amounts, status verification, tamper/refund guards, stable references, live gate and no blind retries passed.");
 } finally { await rm(output, { recursive: true, force: true }); }
+

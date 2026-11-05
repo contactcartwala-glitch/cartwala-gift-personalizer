@@ -10,8 +10,10 @@ CREATE TABLE "PartialCodPaytmAttempt" (
   "paymentFingerprint" TEXT UNIQUE,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "lastCheckedAt" TIMESTAMP(3),
   CONSTRAINT "paytm_paid_proof" CHECK (
     ("state" = 'paid' AND "transactionId" IS NOT NULL AND "paymentFingerprint" IS NOT NULL)
     OR ("state" <> 'paid' AND "transactionId" IS NULL AND "paymentFingerprint" IS NULL)
   )
 );
+

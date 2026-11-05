@@ -7,7 +7,7 @@ export type PaytmIntent = {
   id: string; shop: string; state: string; currency: string;
   orderPaise: number; advancePercent: number; payableNowPaise: number; collectPaise: number;
 };
-type Config = {
+export type PaytmConfig = {
   mid: string; merchantKey: string; environment: "staging" | "production";
   appOrigin: string; allowLiveInitiation?: boolean;
 };
@@ -52,7 +52,26 @@ export class PaytmApiError extends Error {
 }
 
 /** Server-only adapter. No credentials, transaction tokens, response bodies or PII are logged. */
-export function createPaytmClient(config: Config, apiFetch: ApiFetch = fetch) {
+export function verifyPaytmCallback(raw: string, config: Pick<PaytmConfig, "mid" | "merchantKey">) {
+  if (Buffer.byteLength(raw, "utf8") > 32_768) throw new Error("Invalid Paytm callback");
+  const fields = new URLSearchParams(raw), params: Record<string, string> = {};
+  let signature = "";
+  for (const [name, value] of fields) {
+    if (!/^[A-Z0-9_]{1,64}$/.test(name) || value.length > 4096 || Object.hasOwn(params, name) ||
+        (name === "CHECKSUMHASH" && signature)) throw new Error("Invalid Paytm callback");
+    if (name === "CHECKSUMHASH") signature = value;
+    else params[name] = value;
+  }
+  if (Object.keys(params).length > 64 || params.MID !== config.mid || !/^CW[a-f0-9]{48}$/.test(params.ORDERID || "") ||
+      !/^[A-Za-z0-9+/]{100,200}={0,2}$/.test(signature)) throw new Error("Invalid Paytm callback");
+  let valid = false;
+  try { valid = PaytmChecksum.verifySignature(params, config.merchantKey, signature); } catch { /* Fail closed. */ }
+  if (!valid) throw new Error("Invalid Paytm callback signature");
+  // A valid callback is only a hint to re-read status; never return a paid proof from these fields.
+  return { orderId: params.ORDERID };
+}
+
+export function createPaytmClient(config: PaytmConfig, apiFetch: ApiFetch = fetch) {
   if (!/^[A-Za-z0-9]{10,40}$/.test(config.mid) || Buffer.byteLength(config.merchantKey, "utf8") !== 16 ||
       /[\r\n]/.test(config.merchantKey) || !Object.hasOwn(hosts, config.environment))
     throw new Error("Paytm configuration is missing or invalid");
@@ -134,3 +153,4 @@ export function createPaytmClient(config: Config, apiFetch: ApiFetch = fetch) {
     },
   };
 }
+
