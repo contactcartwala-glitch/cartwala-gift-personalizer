@@ -2,6 +2,20 @@
 
 ## Current release status
 
+### Merchant checkout-placement requirement is unresolved
+
+The merchant clarified that the option must appear on the final Shopify payment page; existing personalization/cart functionality is outside this task. A current Admin API read confirmed 0k9icg-ns.myshopify.com is on Basic with shopifyPlus=false. The current draft's advance-cod.liquid is a CART-page section leading into separate Paytm checkout. It does not implement the requested final-payment-page integration and must not be presented or deployed as that solution.
+
+Official Shopify documentation confirms payment-step Checkout UI extensions require Plus; custom payments integrations require eligible/approved Payments Platform access. A manual Advance COD payment-method label alone would not collect the advance, add the fee correctly or reconcile it, and the 2026-07 orderCreateManualPayment amount field requires Plus. Do not use a manual label or mark a full order paid as a substitute. The successful orderCreate test proves imported partial accounting only, not native checkout integration.
+
+A separate false placement-readiness gate now records this prerequisite. Before further production integration, choose and verify either (a) an approved provider/app supporting the requested payment-page experience, compatible with account/payment/courier requirements, or (b) explicit merchant acceptance of the existing cart-to-Paytm flow. Do not silently change placement or subscribe to a paid service. No checkout/theme/payment setting was changed for this investigation.
+
+Sources verified on 5 November 2026:
+- https://shopify.dev/docs/api/checkout-ui-extensions/latest
+- https://shopify.dev/docs/api/admin-graphql/2026-07/mutations/orderCreateManualPayment
+- https://shopify.dev/docs/apps/build/payments
+
+
 The diagnostic-only correction fed09158227671d6e0c459ade6fb9fb1179db628 is live. Shopify test order #1034 persists confirmed: INR 1,080 total / INR 280 test advance / INR 800 outstanding. The full Advance COD feature below remains a draft; none of the customer checkout/recovery additions have been deployed. All activation gates remain false.
 
 The draft now includes a cart-page app block, guarded app-proxy checkout initiation, signed customer recovery access, callback-to-order dispatch, an authenticated merchant recovery page and a protected scheduled-recovery endpoint. These changes pass local transport/database/HTTP/UI-contract tests, not actual Paytm checkout or mobile browser tests.

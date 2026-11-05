@@ -13,6 +13,7 @@ export function validateCodSettings(value: unknown): AdvanceCodSettings {
 
 // These gates are implementation status, not merchant-editable settings or environment overrides.
 export const COD_INTEGRATION_STATUS = [
+  { id: "placement", label: "Supported checkout placement agreed", ready: false },
   { id: "checkout", label: "Advance payment checkout", ready: false },
   { id: "orders", label: "Full order and payment accounting", ready: false },
   { id: "courier", label: "NimbusPost remaining balance collection", ready: false },
@@ -28,3 +29,4 @@ export function requireCodActivation(settings: AdvanceCodSettings): void {
   if (settings.enabled && !canEnableAdvanceCod())
     throw new Error("Advance COD cannot be enabled until checkout, orders and NimbusPost tests are complete.");
 }
+
