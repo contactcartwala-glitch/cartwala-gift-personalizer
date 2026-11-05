@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { paytmPaymentReference, type PaytmIntent, type createPaytmClient } from "./partial-cod-paytm.server";
+import { readCodAccounting } from "./partial-cod-accounting";
 
 /** Parameterized SQL only. Implement with Prisma $queryRawUnsafe(sql, ...parameters). */
 export type PaytmDatabase = { query<T>(sql: string, parameters: unknown[]): Promise<T[]> };
@@ -40,6 +41,13 @@ export async function loadPaytmIntent(db: PaytmDatabase, shop: string, id: strin
 /** A durable single-writer claim is committed before any request can reach Paytm. */
 export async function claimPaytmAttempt(db: PaytmDatabase, intent: PaytmIntent, account: Account) {
   const reference = paytmPaymentReference(intent);
+  const priced = await db.query<{ accountingSnapshot: unknown }>(
+    `SELECT "accountingSnapshot" FROM "PartialCodIntent" WHERE "id"=$1 AND "shop"=$2 AND "currency"=$3
+       AND "orderPaise"=$4 AND "advancePercent"=$5 AND "payableNowPaise"=$6 AND "collectPaise"=$7
+       AND "state"='quoted' AND "createdAt" > CURRENT_TIMESTAMP - INTERVAL '30 minutes'`,
+    [intent.id, intent.shop, intent.currency, intent.orderPaise, intent.advancePercent, intent.payableNowPaise, intent.collectPaise]);
+  if (priced.length !== 1) throw new Error("Payment quote changed, expired or already started");
+  readCodAccounting(priced[0].accountingSnapshot, intent.orderPaise);
   await db.query<Attempt>(
     `INSERT INTO "PartialCodPaytmAttempt" ("intentId", "orderId", "environment", "merchantId", "payableNowPaise")
      SELECT "id", $2, $3, $4, $5 FROM "PartialCodIntent"

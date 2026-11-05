@@ -2,6 +2,8 @@ import prisma from "../db.server";
 import { canEnableAdvanceCod } from "./partial-cod-settings";
 import { createPaytmClient, type PaytmConfig } from "./partial-cod-paytm.server";
 import type { PaytmDatabase } from "./partial-cod-paytm-store.server";
+import { unauthenticated } from "../shopify.server";
+import { createCodOrderFromPaidIntent } from "./partial-cod-order-store.server";
 
 export const paytmDatabase: PaytmDatabase = {
   query: <T>(sql: string, parameters: unknown[]) => prisma.$queryRawUnsafe<T[]>(sql, ...parameters),
@@ -19,4 +21,15 @@ export function configuredPaytm() {
     environment, appOrigin: process.env.SHOPIFY_APP_URL || "", allowLiveInitiation: canEnableAdvanceCod(),
   };
   return { shop, config, gateway: createPaytmClient(config) };
+}
+
+/** Internal worker entry point only; shop/account are never taken from a public request. */
+export async function createConfiguredPaidCodOrder(intentId: string) {
+  const connection = configuredPaytm();
+  if (connection.config.environment === "production" && !canEnableAdvanceCod())
+    throw new Error("Live Advance COD integration is not ready");
+  const { admin } = await unauthenticated.admin(connection.shop);
+  return createCodOrderFromPaidIntent(paytmDatabase, admin, connection.gateway, intentId, connection.shop,
+    connection.config, { allowLiveOrders: canEnableAdvanceCod(),
+      shippingSyncExcluded: process.env.ADVANCE_COD_SHOPIFY_SYNC_EXCLUDED === "true" });
 }

@@ -53,7 +53,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       shop: session.shop, requestKey, state: "quoted", advancePercent: settings.advancePercent,
       orderPaise: quote.amounts.orderPaise, payableNowPaise: quote.amounts.payableNowPaise,
       collectPaise: quote.amounts.collectOnDeliveryPaise,
-      lines: quote.lines, shippingAddress: quote.shippingAddress,
+      lines: quote.lines, shippingAddress: quote.shippingAddress, accountingSnapshot: quote.accountingSnapshot,
     } });
     return Response.json({ quoteId: row.id, advancePercent: row.advancePercent,
       amounts: quote.amounts, checkoutAvailable: false,
@@ -66,3 +66,4 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       { status: 400, headers });
   }
 };
+

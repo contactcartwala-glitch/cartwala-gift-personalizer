@@ -1,5 +1,6 @@
 import { calculatePartialCod, type PersonalisedLine } from "./partial-cod";
 import { inrPaise } from "./partial-cod-payment";
+import { randomUUID } from "node:crypto";
 
 export type CodAddress = {
   firstName: string; lastName: string; address1: string; address2: string;
@@ -53,7 +54,7 @@ export function buildCodQuoteInput(value: unknown) {
   return {
     lines, shippingAddress,
     input: {
-      lineItems: lines.map(line => ({ variantId: line.variantId, quantity: line.quantity,
+      lineItems: lines.map(line => ({ uuid: randomUUID(), variantId: line.variantId, quantity: line.quantity,
         customAttributes: line.properties.map(property => ({ key: property.name, value: property.value })) })),
       shippingAddress, presentmentCurrencyCode: "INR", acceptAutomaticDiscounts: true,
       discountCodes: discountCodes.map(code => text(code, 255)), allowDiscountCodesInCheckout: false,
@@ -70,3 +71,4 @@ export function verifyCodQuote(value: {
       inrPaise(value.totalShippingPriceSet) !== 0) throw new Error("Unsupported COD quote");
   return calculatePartialCod(inrPaise(value.totalPriceSet), advancePercent);
 }
+

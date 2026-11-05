@@ -99,6 +99,7 @@ model PartialCodIntent {
   collectPaise       Int
   lines              Json
   shippingAddress    Json
+  accountingSnapshot Json?
   depositDraftId     String?  @unique
   depositOrderId     String?  @unique
   paymentFingerprint String?  @unique
@@ -107,6 +108,7 @@ model PartialCodIntent {
   updatedAt          DateTime @updatedAt
   outbox             PartialCodOutbox?
   paytmAttempt       PartialCodPaytmAttempt?
+  orderAttempt       PartialCodOrderAttempt?
 
   @@unique([shop, requestKey])
   @@index([shop, state, createdAt])
@@ -145,5 +147,18 @@ model PartialCodPaytmAttempt {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   lastCheckedAt      DateTime?
+}
+
+model PartialCodOrderAttempt {
+  intentId           String   @id
+  intent             PartialCodIntent @relation(fields: [intentId], references: [id], onDelete: Restrict)
+  orderReference     String   @unique
+  paymentFingerprint String   @unique
+  payloadHash        String
+  state              String   @default("processing")
+  claimToken         String
+  candidateOrderId   String?  @unique
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 

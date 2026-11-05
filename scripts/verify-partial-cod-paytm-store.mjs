@@ -11,7 +11,8 @@ try {
     "state" TEXT NOT NULL, "currency" TEXT NOT NULL, "orderPaise" INTEGER NOT NULL,
     "advancePercent" INTEGER NOT NULL, "payableNowPaise" INTEGER NOT NULL,
     "collectPaise" INTEGER NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "accountingSnapshot" JSONB
   )`);
   await pg.exec(await readFile("prisma/migrations/20261105095000_partial_cod_paytm_attempt/migration.sql", "utf8"));
   const db = { query: async (sql, parameters) => (await pg.query(sql, parameters)).rows };
@@ -25,8 +26,11 @@ try {
     payableNowPaise: 28000, collectPaise: 80000 };
   const insert = async (intent, age = "0 minutes") => {
     await pg.query(`INSERT INTO "PartialCodIntent" VALUES ($1,$2,'request-secret',$3,$4,$5,$6,$7,$8,
-      CURRENT_TIMESTAMP - $9::interval, CURRENT_TIMESTAMP)`, [intent.id, intent.shop, intent.state,
-      intent.currency, intent.orderPaise, intent.advancePercent, intent.payableNowPaise, intent.collectPaise, age]);
+      CURRENT_TIMESTAMP - $9::interval, CURRENT_TIMESTAMP, $10)`, [intent.id, intent.shop, intent.state,
+      intent.currency, intent.orderPaise, intent.advancePercent, intent.payableNowPaise, intent.collectPaise, age,
+      JSON.stringify({ version: 1, orderPaise: intent.orderPaise, taxesIncluded: true, taxPaise: 0, taxLines: [],
+        lines: [{ quoteLineId: intent.id, variantId: "gid://shopify/ProductVariant/123", quantity: 1,
+          unitPaise: intent.orderPaise, taxable: false, requiresShipping: true, properties: [] }] })]);
   };
   await insert(base);
   assert.deepEqual(await loadPaytmIntent(db, base.shop, base.id, "request-secret"), base);
@@ -83,6 +87,12 @@ try {
   const expired = { ...base, id: "42345678-1234-1234-1234-123456789abc" };
   await insert(expired, "31 minutes");
   await assert.rejects(claimPaytmAttempt(db, expired, account));
+  const legacy = { ...base, id: "52345678-1234-1234-1234-123456789abc" };
+  await insert(legacy);
+  await pg.query(`UPDATE "PartialCodIntent" SET "accountingSnapshot"=NULL WHERE "id"=$1`, [legacy.id]);
+  const beforeLegacy = requests;
+  await assert.rejects(beginPaytmPayment(db, gateway, legacy, account));
+  assert.equal(requests, beforeLegacy);
   await pg.query(`UPDATE "PartialCodIntent" SET "state"='cancelled' WHERE "id"=$1`, [base.id]);
   await assert.rejects(recordPaytmProof(db, base, account, proof));
   await assert.rejects(pg.query(`UPDATE "PartialCodPaytmAttempt" SET "transactionId"=NULL WHERE "intentId"=$1`, [base.id]));
