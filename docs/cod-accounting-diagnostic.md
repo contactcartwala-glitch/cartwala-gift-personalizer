@@ -19,3 +19,8 @@ Local validation: node scripts/verify-cod-accounting-diagnostic.mjs, npm run typ
 The approved initial release 4db26b058352da8eb50f20c7064f5e36a3cea921 became live on Render deploy dep-dbm6vbl9el5s738tgrag on 5 November 2026. Its independent diagnostic migration was applied. It created exactly one Shopify test order, #1034 (gid://shopify/Order/18979804872889), with test=true, PARTIALLY_PAID, INR 1,080 total, INR 280 received, INR 800 outstanding, zero shipping/tax/refund and two non-shipping custom lines. The connected Admin API independently confirmed those fields. No real payment was initiated. Render auto-deploy is now disabled as approved.
 
 The admin confirmation initially remained uncertain because the JSON result was supplied as a typed text parameter to a JSONB column. A PostgreSQL test reproducing Prisma text parameter binding failed on the old SQL. Adding an explicit ::jsonb cast fixes persistence; the regression suite now preserves text binding for every string parameter. Rechecking this original order never creates another order. Final live confirmation after this correction must be recorded separately; local success is not a substitute.
+
+
+## Correction deployed and confirmed
+
+After explicit follow-up merchant approval, Render deployment dep-dbm77i5bedkc73bebmd0 made fed09158227671d6e0c459ade6fb9fb1179db628 live at 2026-11-05T12:19:13.400024Z. The existing #1034 was rechecked without another orderCreate. The admin page now persists confirmed and shows INR 1,080 total, INR 280 test payment and INR 800 outstanding. No real payment or shipment was made. Automatic deployments remain paused; the full Advance COD feature remains off and undeployed.
