@@ -1,4 +1,4 @@
-# Advance COD review: 7 October 2026
+# Advance COD review: updated 5 November 2026
 
 ## Implemented in this review
 
@@ -23,13 +23,17 @@ NimbusPost account inspection confirmed that the Shopify channel is active. A de
 
 The new NimbusPost v2 adapter maps the frozen remaining amount to `order_collectable_amount`, converts paise to rupees, sends parcel weight in kilograms and phone/pincode as numbers. It refuses unverified payment states, unreconciled merchandise values and orders whose automatic Shopify shipping sync has not been excluded. It creates an unbooked order only, never books or requests pickup, requires a separate provider order re-read to acknowledge the exact balance, and never automatically repeats an uncertain POST. This adapter is not connected to the checkout or outbox yet. Mocked tests verify mapping and error recovery, not a live COD order acknowledgment. No courier order or shipment was created.
 
-Paytm merchant credentials and integration do not exist in this source or the current execution environment. The merchant dashboard requires login; secure QR authentication was unavailable and the browser was handed to the merchant. Shopify's installed Paytm gateway does not by itself provide this custom backend with Paytm merchant API credentials. Direct advance payment, server-side status verification and refunds remain blocked pending merchant access and confirmation of the supported accounting flow.
+On 5 November the merchant signed into the correct Paytm Payments account, where production API credentials were available. With explicit approval, `PAYTM_MID` and `PAYTM_MERCHANT_KEY` were saved to Render service `cartwala-gift-personalizer-1` in Dileep's workspace using Save only. The page was reloaded to verify both variable names persisted. No secret value is committed here, and the running build has not been redeployed to consume these variables.
 
-The Fly production app is configured in `shopify.app.live.toml`; this review is not deployed. No database migration, webhook registration or customer activation has been performed.
+The server-only Paytm adapter uses the pinned `paytmchecksum` 1.5.1 SDK for request signing and response verification, separate fixed staging/production hosts, server-frozen amounts and an opaque stable reference per shop/intent. A successful signed transaction-status re-read must acknowledge the merchant, order, exact amount, transaction ID, successful capture and zero refunded amount. Pending/failed responses do not produce paid proof. Production initiation requires an explicit opt-in and does not retry requests automatically. The adapter is not imported by a route and cannot currently collect a payment. Its callback URL is a reserved integration path, not an implemented endpoint. Durable payment-attempt storage, replay/concurrency protection, callback routing, refund/cancellation recovery and final Shopify order accounting are still incomplete. Stable references alone do not provide database idempotency.
+
+The Cartwala backend currently observed in Render is service `cartwala-gift-personalizer-1`, with deployed commit `43e69e390b876ebdcfbbbe5a88d61c658b182cf7`. The older Fly configuration in the draft is not evidence of the current runtime. This draft is not deployed or merged; no database migration, webhook registration or customer activation has been performed.
 
 ## Validation
 
 Policy, payment, quote and configurable-settings tests passed. The NimbusPost adapter tests cover 20%/30% balances, paid-state guards, duplicate-sync guards, declared merchandise value, numeric address fields, kilogram units, exact COD acknowledgment, and a rate-limited POST without retry. Typecheck, changed-module ESLint and production build passed. The Shopify quote mutation and a read-only order totals review query were validated against API version 2026-07. Database concurrency, live checkout and live COD-order acknowledgment tests have not run.
+
+5 November Paytm validation: mocked transport tests using real SDK signatures cover request/response signing, tampered/missing signatures, 20%/30% and fractional-paise rounding, stable references scoped by shop, mismatched merchant/order/amount, refunded/pre-authorized payments, pending/failed states, closed intents, invalid configuration, transport/HTTP/JSON errors, no automatic retries and the default live-initiation gate. The new adapter and SDK declaration pass scoped strict TypeScript checking and ESLint. These checks do not constitute a Paytm staging transaction, a full application build, database-concurrency test or live checkout test.
 
 ## Next integration work
 
@@ -38,7 +42,12 @@ Policy, payment, quote and configurable-settings tests passed. The NimbusPost ad
 3. Implement checkout creation, linked merchandise order creation, refund/cancellation recovery and explicit NimbusPost remaining-amount acknowledgment.
 4. Apply migrations to a test database and run concurrency/recovery tests.
 5. Test in the duplicate theme, show the merchant the complete order result, and obtain publication approval.
+6. Connect the Paytm adapter through durable attempts and the callback/status routes, verify staging credentials and an actual staging payment before any live test, then integrate the single Shopify order and NimbusPost balance.
 
 References:
 - https://shopify.dev/changelog/posts/draft-order-deposit-fields-now-available-in-the-admin-and-customer-account-graphql-apis
 - https://shopify.dev/docs/api/admin-graphql/2026-07/mutations/draftOrderCalculate
+- https://www.paytmpayments.com/docs/api/initiate-transaction-api
+- https://www.paytmpayments.com/docs/api/v3/transaction-status-api
+- https://www.paytmpayments.com/docs/jscheckout-test-go-live
+
