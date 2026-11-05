@@ -25,7 +25,7 @@ api_version = "2026-07"
   uri = "/webhooks/products/acrylic"
 
 [access_scopes]
-scopes = "read_files,read_orders,read_products,write_files,write_products,write_app_proxy"
+scopes = "read_files,read_orders,read_products,write_files,write_products,write_app_proxy,write_orders,write_draft_orders"
 
 [app_proxy]
 url = "/signature-day"
@@ -74,3 +74,4 @@ name = "Acrylic master mockups"
 description = "Merchant-selected master PNGs for each size, thickness and orientation"
 access.admin = "merchant_read_write"
 access.storefront = "public_read"
+
