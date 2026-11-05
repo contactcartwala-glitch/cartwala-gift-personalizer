@@ -113,7 +113,7 @@ export async function runCodDiagnostic(db: Database, admin: Admin, shop: string)
       WHERE "id"=$1 AND ("orderId" IS NULL OR "orderId"=$2) RETURNING *`, [id, orderId]);
     if (linked.length !== 1) throw new Error("Accounting test order conflicts with the saved reference");
     const verified = await verify(admin, shop, orderId);
-    const recorded = await db.query<Row>(`UPDATE "CodAccountingDiagnostic" SET "state"=$2,"observed"=$3,"updatedAt"=CURRENT_TIMESTAMP
+    const recorded = await db.query<Row>(`UPDATE "CodAccountingDiagnostic" SET "state"=$2,"observed"=$3::jsonb,"updatedAt"=CURRENT_TIMESTAMP
       WHERE "id"=$1 AND "orderId"=$4 RETURNING *`, [id, verified.state, JSON.stringify(verified.observed), orderId]);
     if (recorded.length !== 1) throw new Error("Accounting test result could not be recorded");
     return { orderId, ...verified };
