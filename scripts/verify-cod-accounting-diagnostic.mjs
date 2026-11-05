@@ -9,7 +9,9 @@ async function scenario(mode) {
   const pg = new PGlite();
   try {
     await pg.exec(await readFile("prisma/migrations/20261105113000_cod_accounting_diagnostic/migration.sql", "utf8"));
-    const db = { query: async (sql, params) => (await pg.query(sql, params)).rows };
+    // Prisma binds JavaScript strings as PostgreSQL text, unlike untyped protocol parameters.
+    const db = { query: async (sql, params) => (await pg.query(sql.replace(/\$(\d+)/g, (_, n) =>
+      typeof params[Number(n) - 1] === "string" ? `($${n}::text)` : `$${n}`), params)).rows };
     const { runCodDiagnostic, codDiagnosticPayload, COD_DIAGNOSTIC_SHOP } = await import(new URL("diagnostic.mjs", output));
     const shop = COD_DIAGNOSTIC_SHOP, payload = codDiagnosticPayload(shop);
     for (const field of ["shippingAddress", "billingAddress", "customer", "email", "phone", "financialStatus", "fulfillment"])
