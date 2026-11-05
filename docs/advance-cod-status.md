@@ -121,3 +121,14 @@ Provider references checked for this implementation:
 - https://www.paytmpayments.com/docs/jscheckout-verify-payment
 - https://www.paytmpayments.com/docs/js-checkout/configuration//options/
 - https://shopify.dev/docs/apps/build/security/app-server/authenticate-every-request
+
+
+## Refund proof verification added
+
+The draft now includes server-only full-advance refund reference construction and signed Paytm refund-status verification. The stable 50-character reference binds shop, intent, original Paytm transaction, merchant and environment. A success requires TXN_SUCCESS / code 10 and exact original transaction amount, refund amount and cumulative amount equal to the advance actually collected, including the COD fee. Partial, excessive, mismatched, missing and tampered evidence cannot produce refunded proof. Pending, failed and missing-record states do not prove a refund and never authorize resubmission. Provider destination/card/bank/phone details are not returned. SDK-signature tests and scoped typecheck/ESLint pass. No HTTP refund submission or real financial operation occurred.
+
+This is a verification component, not complete cancellation/refund handling. Durable refund claims, serialized cancellation/order-creation holds, Shopify cancellation/accounting reconciliation, NimbusPost shipment cancellation acknowledgment and merchant-confirmed refund execution/recovery remain required before the refunds readiness gate can change. The current documentation exposes different refund endpoint families across examples, so the actual account-compatible endpoint must be confirmed in staging rather than guessed or silently substituted.
+
+References checked:
+- https://www.paytmpayments.com/docs/api/refund-api
+- https://www.paytmpayments.com/docs/api/refund-status-api/
