@@ -1,14 +1,28 @@
-(() => {
+(async () => {
   'use strict';
   const dialog = document.querySelector('[data-cw-cod-review]');
   if (!dialog || !window.HTMLDialogElement || typeof dialog.showModal !== 'function') return;
   const labels = JSON.parse(dialog.querySelector('script[type="application/json"]').textContent);
-  const percent = Number(dialog.dataset.percent), fee = Number(dialog.dataset.fee);
-  if (!Number.isInteger(percent) || percent < 10 || percent > 50 || !Number.isSafeInteger(fee) || fee < 0 || fee > 1000000) return;
+  const base = window.Shopify?.routes?.root || '/';
+  async function configuration() {
+    const response = await fetch(`${base}apps/cartwala-signature-day-1/cod-review`, {
+      cache: 'no-store', credentials: 'same-origin', signal: AbortSignal.timeout(8000),
+    });
+    if (!response.ok) throw new Error();
+    const value = await response.json();
+    if (value.available !== true || value.paymentsEnabled !== false || value.themeId !== dialog.dataset.themeId ||
+      typeof value.enabled !== 'boolean' || !Number.isInteger(value.advancePercent) || value.advancePercent < 10 ||
+      value.advancePercent > 50 || !Number.isSafeInteger(value.codFeePaise) || value.codFeePaise < 0 || value.codFeePaise > 1000000)
+      throw new Error();
+    return value;
+  }
+  let config;
+  try { config = await configuration(); } catch { return; }
+  if (!config.enabled) return;
+  let percent = config.advancePercent, fee = config.codFeePaise;
   const form = dialog.querySelector('form'), status = dialog.querySelector('[role="status"]');
   const next = dialog.querySelector('[data-cod-next]');
   const radios = [...dialog.querySelectorAll('input[name="cw_cod_choice"]')];
-  const base = window.Shopify?.routes?.root || '/';
   let origin, loading = false, bypass = false, leaving = false, operation = 0;
   const money = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value / 100);
   function setChoice() {
@@ -43,6 +57,13 @@
     origin = source;
     const token = ++operation;
     loading = true;
+    try {
+      config = await configuration();
+      if (!config.enabled) { loading = false; resume(); return; }
+      percent = config.advancePercent;
+      fee = config.codFeePaise;
+    } catch { loading = false; resume(); return; }
+    if (token !== operation) return;
     radios.forEach(r => { r.checked = r.value === 'prepaid'; r.disabled = true; });
     dialog.querySelector('[data-cod-amounts]').hidden = true;
     status.textContent = labels.loading;

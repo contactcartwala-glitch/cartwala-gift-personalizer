@@ -39,9 +39,7 @@
         "settings": {}
       }
     },
-    "cw_cod_review_enabled": true,
-    "cw_cod_review_percent": 20,
-    "cw_cod_review_fee": 50
+    "cw_cod_review_enabled": true
   },
   "presets": {},
   "platform_customizations": {

@@ -5,7 +5,7 @@
 {% enddoc %}
 {% if settings.cw_cod_review_enabled %}
   {{ 'cw-cod-review.css' | asset_url | stylesheet_tag }}
-  <dialog data-cw-cod-review data-percent="{{ settings.cw_cod_review_percent | default: 20 }}" data-fee="{{ settings.cw_cod_review_fee | default: 50 | times: 100 | round }}" aria-labelledby="cw-cod-review-title" aria-describedby="cw-cod-review-notice">
+  <dialog data-cw-cod-review data-theme-id="{{ theme.id }}" aria-labelledby="cw-cod-review-title" aria-describedby="cw-cod-review-notice">
     <button type="button" class="cw-cod-close" data-cod-close aria-label="{{ 'cod_review.close' | t }}">×</button>
     <h2 id="cw-cod-review-title">{{ 'cod_review.heading' | t }}</h2>
     <p class="cw-cod-note" id="cw-cod-review-notice">{{ 'cod_review.preview' | t }}</p>

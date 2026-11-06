@@ -181,7 +181,7 @@
       {
         "type": "number",
         "id": "free_shipping_threshold",
-        "label": "Free shipping threshold (₹)",
+        "label": "Free shipping threshold (\u20b9)",
         "default": 999
       }
     ]
@@ -247,29 +247,13 @@
     "settings": [
       {
         "type": "paragraph",
-        "content": "Layout review only. Advance payments and courier creation are disabled. Amount settings here are for this draft theme only; the server admin controls are not connected yet."
+        "content": "This unpublished theme reads preview settings from Apps > Gift Personalizer > Advance COD. Advance payments and courier creation remain disabled."
       },
       {
         "type": "checkbox",
         "id": "cw_cod_review_enabled",
-        "label": "Show payment choice review",
+        "label": "Load Advance COD review controls",
         "default": false
-      },
-      {
-        "type": "range",
-        "id": "cw_cod_review_percent",
-        "label": "Preview advance percentage",
-        "min": 10,
-        "max": 50,
-        "step": 1,
-        "default": 20,
-        "unit": "%"
-      },
-      {
-        "type": "number",
-        "id": "cw_cod_review_fee",
-        "label": "Preview COD charge (₹)",
-        "default": 50
       }
     ]
   }
