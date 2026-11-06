@@ -35,3 +35,12 @@ The operator page selects the existing ₹400 Heart Shape LED Magic Mirror and r
 - Full and isolated typecheck, scoped ESLint, isolated production build, migration exercised with PGlite, and all thirteen generated GraphQL operations validated against Shopify 2026-07.
 
 This is a merchant payment pilot, not a completed or activated customer feature. A real payment/refund and final merchant approval remain required before customer activation or publication.
+
+## Deployment and handoff
+
+The isolated pilot code commit **2db23c3bb3b0105f59afec0e0424875f98847859** is live in Render deploy **dep-dbmpog6gekts73e5u040**, finished **6 November 2026 14:54:09 IST**. The authenticated admin pilot page loaded successfully with the new table present, no existing native pilot checkouts, settings ON / 20% / ₹50, and the actual ₹400 Heart Magic Mirror selected. The merchant name and TS state code were prefilled in the handoff form; delivery address, city, PIN and +91 phone remain for the merchant to supply. No native pilot draft, genuine payment, refund, shipment or new event subscription has yet been created through this pilot. Event setup runs only when a valid checkout is prepared, then is confirmed before exposing the invoice.
+
+Post-deploy public app-proxy reads are used to verify both preview settings and customer checkout gating. The merchant pilot is available at:
+https://admin.shopify.com/store/0k9icg-ns/apps/gift-personalizer/app/cod-native-checkout
+
+The next dependent step is merchant-provided delivery details, followed by Prepare checkout. Review the resulting invoice and amount before the merchant performs the real payment. The earlier #1036 remains synthetic proof and must not be described as this genuine native payment test. Customer checkout placement/activation and final acceptance remain pending along with real payment/refund/cancellation/stock/courier checks. No theme or extension was published.
