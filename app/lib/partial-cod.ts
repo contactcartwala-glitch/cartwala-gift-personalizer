@@ -89,7 +89,7 @@ export type ShippingCapabilities = {
   supportsExplicitCodAmount: boolean;
 };
 
-/** Neutral adapter contract. Provider-specific mapping and acknowledgment are mandatory. */
+/** Courier contract: ordinary COD with the outstanding amount; advance accounting stays in the intent. */
 export function buildCodShipment(intent: CodIntent, capabilities: ShippingCapabilities) {
   if (!capabilities.excludesDepositOrders || !capabilities.supportsExplicitCodAmount) {
     throw new Error("Shipping integration has not been verified for partial COD");
@@ -108,7 +108,6 @@ export function buildCodShipment(intent: CodIntent, capabilities: ShippingCapabi
     currency: intent.currency,
     collectPaise: amounts.collectOnDeliveryPaise,
     declaredOrderPaise: amounts.orderPaise,
-    prepaidPaise: amounts.payableNowPaise,
     lines: intent.lines.map(line => ({
       variantId: line.variantId,
       quantity: line.quantity,

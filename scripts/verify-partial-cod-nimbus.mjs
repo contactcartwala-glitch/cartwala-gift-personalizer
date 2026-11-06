@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { Buffer } from "node:buffer";
 import { build } from "esbuild";
 const compile = async path => {
   const result = await build({ entryPoints: [path], bundle: true, write: false, platform: "node", format: "esm" });
@@ -7,6 +8,7 @@ const compile = async path => {
 const { calculatePartialCod } = await compile("app/lib/partial-cod.ts");
 const { buildNimbusCodOrder, verifyNimbusCodOrder } = await compile("app/lib/partial-cod-nimbus.ts");
 const { createNimbusClient } = await compile("app/lib/partial-cod-nimbus.server.ts");
+const { buildCodShipment } = await compile("app/lib/partial-cod.ts");
 const intent = { id: "intent-1", shop: "test.myshopify.com", currency: "INR", advancePercent: 20,
   amounts: calculatePartialCod(100000), lines: [], depositOrderId: "deposit-1", state: "cod_order_created",
   paidTransactionId: "payment-1", codOrderId: "order-1" };
@@ -20,6 +22,34 @@ assert.equal(body.order_collectable_amount, 800);
 assert.equal(body.package.weight, .5);
 assert.equal(body.shipping_address.phone, 9876543210);
 assert.equal(body.items[0].price, 1000);
+// The courier sees ordinary COD and the balance. Original goods value remains the invoice value.
+for (const percent of [10, 20, 30, 50]) {
+  for (const fee of [0, 4000, 5000, 8000, 123]) {
+    const amounts = calculatePartialCod(40000, percent, fee);
+    const example = { ...intent, advancePercent: percent, amounts };
+    const shipment = buildCodShipment(example, { excludesDepositOrders: true, supportsExplicitCodAmount: true });
+    assert.equal(shipment.paymentType, "COD");
+    assert.equal(Object.hasOwn(shipment, "prepaidPaise"), false);
+    const payload = buildNimbusCodOrder(example, { ...fulfillment,
+      items: [{ ...fulfillment.items[0], unitPricePaise: 40000 }] });
+    assert.equal(payload.payment_mode, "cod");
+    assert.equal(payload.order_collectable_amount, (40000 - amounts.advancePaise) / 100);
+    assert.equal(payload.items[0].price, 400);
+    assert.equal(payload.items.length, 1);
+    for (const field of ["advancePercent", "advancePaise", "prepaidPaise", "codFeePaise", "payableNowPaise"])
+      assert.equal(Object.hasOwn(payload, field), false);
+    assert.equal(verifyNimbusCodOrder(payload, { ...payload }).collectPaise, amounts.collectOnDeliveryPaise);
+    for (const wrong of [400, amounts.advancePaise / 100, amounts.totalPaise / 100]
+      .filter(value => value !== payload.order_collectable_amount))
+      assert.throws(() => verifyNimbusCodOrder(payload, { ...payload, order_collectable_amount: wrong }));
+    if (percent === 20) {
+      assert.equal(amounts.payableNowPaise, 8000 + fee);
+      assert.equal(payload.order_collectable_amount, 320);
+      assert.throws(() => verifyNimbusCodOrder(payload, { ...payload, order_collectable_amount: "320.001" }));
+      assert.throws(() => verifyNimbusCodOrder(payload, { ...payload, order_collectable_amount: "320.01" }));
+    }
+  }
+}
 assert.equal(buildNimbusCodOrder({ ...intent, advancePercent: 30, amounts: calculatePartialCod(100000, 30) }, fulfillment).order_collectable_amount, 700);
 assert.throws(() => buildNimbusCodOrder(intent, { ...fulfillment, shopifySyncExcluded: false }));
 assert.throws(() => buildNimbusCodOrder({ ...intent, state: "awaiting_payment" }, fulfillment));
@@ -46,3 +76,4 @@ const rateLimited = createNimbusClient({ apiKey: "npk_test", apiSecret: "test-se
 await assert.rejects(rateLimited.createUnbookedOrder(body), e => e.status === 429 && e.retryAfter === 30 && !e.message.includes("private"));
 assert.equal(failedCalls, 1);
 console.log("NimbusPost balance mapping, unit conversion, dispatch gates, acknowledgement and no blind POST retries passed.");
+

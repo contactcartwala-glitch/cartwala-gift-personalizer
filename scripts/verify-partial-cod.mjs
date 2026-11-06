@@ -46,7 +46,7 @@ for (const flags of [{ ...capabilities, excludesDepositOrders: false }, { ...cap
 const shipment = buildCodShipment(linked, capabilities);
 assert.equal(shipment.paymentType, "COD");
 assert.equal(shipment.collectPaise, 80000);
-assert.equal(shipment.prepaidPaise, 28000);
+assert.equal(Object.hasOwn(shipment, "prepaidPaise"), false);
 assert.equal(shipment.orderId, "cod-order-1");
 assert.deepEqual(shipment.lines, intent.lines);
 assert.notEqual(shipment.lines[0].properties, intent.lines[0].properties);
@@ -54,4 +54,5 @@ assert.equal(buildCodShipment(linked, capabilities).idempotencyKey, shipment.ide
 assert.equal(buildCodShipment({ ...linked, amounts: Object.fromEntries(Object.entries(amounts).reverse()) }, capabilities).collectPaise, 80000);
 assert.throws(() => buildCodShipment({ ...linked, amounts: { ...amounts, collectOnDeliveryPaise: 100000 } }, capabilities));
 console.log("Partial COD policy, payment matching, shipping gating and artwork preservation checks passed.");
+
 
