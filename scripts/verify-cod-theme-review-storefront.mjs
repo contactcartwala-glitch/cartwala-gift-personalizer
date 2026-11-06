@@ -20,7 +20,7 @@ async function scenario(initial, refreshed = initial, opts={}) {
       '[data-cod-close]': { addEventListener: (name, handler) => { events.close = handler; } } })[selector],
   };
   const location = { hostname:"cartwala.in", origin: "https://cartwala.in", href: "https://cartwala.in/cart", assign: value => locations.push(value) };
-  let configurations = 0;
+
   const window = { HTMLDialogElement: function () {}, Shopify: { routes: { root: "/" } }, location,
     addEventListener: (name, handler) => { events[name] = handler; } };
   const document = { createElement:()=>({append(){}}), querySelector: () => dialog, addEventListener: (name, handler) => { events[name] = handler; } };
@@ -29,7 +29,7 @@ async function scenario(initial, refreshed = initial, opts={}) {
       calls.push({ url, options });
       if (url.endsWith("cod-review")) {
         assert.equal(url, "/apps/cartwala-signature-day-1/cod-review");
-        const config = configurations++ ? refreshed : initial;
+        const config = refreshed;
         if (config instanceof Error) throw config;
         return { ok: true, json: async () => config };
       }
@@ -50,7 +50,7 @@ async function scenario(initial, refreshed = initial, opts={}) {
 const valid = { available: true, enabled: true, themeId: "188248228025", paymentsEnabled: false, advancePercent: 20, codFeePaise: 5000 };
 for (const initial of [{ ...valid, enabled: false }, { ...valid, themeId: "other" }, { ...valid, codFeePaise: -1 }, new Error("offline")]) {
   const state = await scenario(initial);
-  if(initial.enabled === false){await state.click();assert.equal(state.dialog.open,false);assert.deepEqual(state.locations,["https://cartwala.in/checkout"]);} else assert.equal(state.events.click, undefined);
+  await state.click();assert.equal(state.dialog.open,false);assert.deepEqual(state.locations,["https://cartwala.in/checkout"]);
 }
 for (const refreshed of [{ ...valid, enabled: false }, new Error("offline")]) {
   const state = await scenario(valid, refreshed);

@@ -30,11 +30,13 @@
     return { ...value, canPay: native?.checkoutAvailable === true && native.enabled === true &&
       native.revision === value.revision && native.advancePercent === value.advancePercent && native.codFeePaise === value.codFeePaise };
   }
-  try { config = await configuration(); } catch { return; }
+  config = { enabled: false, canPay: false };
   // Install the listener even when OFF so an already-open preview can observe a later ON.
   const isCod = () => radios.some(r => r.value === 'cod' && r.checked);
   function setChoice() {
     const cod = isCod();
+    const notice = dialog.querySelector('#cw-cod-review-notice');
+    if (notice) notice.hidden = config.canPay;
     address.hidden = !cod;
     address.querySelectorAll('input,select').forEach(el => { el.disabled = !cod || loading || confirmed || blocked; });
     dialog.querySelector('[data-cod-breakdown]').hidden = !cod;
@@ -49,9 +51,16 @@
     dialog.close();
     if (origin?.element?.isConnected) origin.element.focus();
   }
+  function restoreOrigin() {
+    if (!origin?.element) return;
+    if (origin.label !== undefined) origin.element.textContent = origin.label;
+    origin.element.disabled = false;
+    origin.element.removeAttribute?.('aria-busy');
+  }
   function resume() {
     if (!origin || leaving || loading) return;
     leaving = true;
+    restoreOrigin();
     dialog.close();
     bypass = true;
     if (origin.form) {
@@ -143,12 +152,17 @@
   async function open(source) {
     if (loading || dialog.open || leaving) return;
     origin = source; loading = true;
+    origin.label = origin.element.textContent;
+    origin.element.disabled = true;
+    origin.element.setAttribute?.('aria-busy','true');
+    origin.element.textContent = labels.loading;
     if (!requestKey && !access) blocked = false;
     const token = ++operation;
     try { config = await configuration(); }
     catch { loading = false; resume(); return; }
     if (!config.enabled) { loading = false; resume(); return; }
     radios.forEach(r => { r.checked = r.value === 'prepaid'; r.disabled = true; });
+    restoreOrigin();
     dialog.querySelector('[data-cod-amounts]').hidden = true;
     status.textContent = labels.loading; cart = undefined;
     setChoice(); dialog.showModal();
