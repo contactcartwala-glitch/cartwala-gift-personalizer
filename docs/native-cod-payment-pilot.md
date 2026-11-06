@@ -1,0 +1,37 @@
+# Native Advance COD payment pilot — 6 November 2026
+
+## Candidate behavior
+
+The new merchant-only `/app/cod-native-checkout` pilot uses the currently active Shopify checkout gateway. It prepares a real-variant draft containing the advance portion of the original goods, exact quantities and copied artwork properties, plus the upfront COD/shipping charge. It uses no gateway SDK, Paytm credential, custom gateway transaction or manually marked-paid order. A payable invoice is exposed only after native calculations, draft readback and event-subscription checks pass.
+
+Example: ₹400 goods at 20% plus ₹50 charge → native checkout ₹130. Only after authenticated Shopify reads prove successful **nonmanual** online capture/sale, the same order is edited to ₹450 full value, received ₹130 and outstanding ₹320. A nonshipping deferred-goods line carries the balance; original physical variants retain their quantities and artwork. A whole-paise allocation splits a quantity into at most two variant lines when necessary, preserving the summed quantity. Full original unit price is retained as an item property. No deferred amount is described as a discount. The six human-readable Shopify order fields, including Online amount received, are written only after payment verification.
+
+TEST #1036 previously established that this same-order transition automatically updates the existing NimbusPost record from Prepaid to COD ₹320. This candidate never creates a second Shopify order, courier record, allocation or shipment.
+
+## Tax and native calculation evidence
+
+Server-side Shopify calculations freeze original product prices, tax flags, quantity and properties. Three calculations verify the full original goods plus charge, advance plus charge, and final advance plus deferred balance. INR, zero discounts, exact total/shipping, merchandise identity and native tax signatures must match. Mixed tax flags/rates, bundles, discounts, foreign addresses, excessive lines/properties and tax-exclusive goods with tax use full prepaid checkout. Native per-line rounding is accepted only within a bound of one paise per additional line; rates must match. Final order-edit totals and tax are checked again before commit and re-read afterward.
+
+Independent Shopify draftOrderCalculate calls on real Magic Mirror variant `gid://shopify/ProductVariant/49065013412025`, with a clearly fictitious Telangana test address, confirmed: original goods ₹400 + shipping ₹50 = ₹450, IGST 18% ₹61.02; advance goods ₹80 + shipping ₹50 = ₹130, tax ₹12.20; advance goods ₹80 + deferred balance ₹320 + shipping ₹50 = ₹450, tax ₹61.02. All had zero discounts and taxesIncluded=true. These calculations created no draft, order, contact, reservation or payment. A real invoice/order with merchant-supplied address still requires acceptance.
+
+## State, recovery and events
+
+An additive `NativeCodCheckout` table stores an immutable server quote, unique draft/order bindings, unique payment fingerprint and a durable edit claim. Claim before each first external create/edit; do not re-post after ambiguous outcomes. Lost draft results are found by exact unique tag and fully verified. Lost edit commits are reconciled by re-reading the same order. A consumed edit claim never adds the balance again automatically. Only genuine unchanged paid orders can claim a new edit; mismatches, refunds, cancellations and unsupported modifications require review.
+
+A shop-scoped event setup uses the exact installed app offline client and the existing app URL. It subscribes to ORDERS_PAID, ORDERS_CANCELLED and REFUNDS_CREATE with identifier-only payload fields, and reads subscriptions back before providing a payable link. Webhooks use Shopify's authenticated handler and re-read current draft/order/transactions; payload money and browser success flags are not proof. Refund/cancellation processing stops financial edits and records review; it never initiates a refund or courier booking. Real native refund/cancel behavior, Nimbus cancellation propagation and actual stock restoration still require the controlled merchant test.
+
+## Activation and merchant test
+
+`NATIVE_CUSTOMER_PAYMENTS_ENABLED=false`. The public app-proxy endpoint exists but cannot create customer checkouts. Existing quoted payment status remains recoverable independently of the merchant ON/OFF switch. The duplicate theme and normal live prepaid flow are unchanged. No theme/extension publication is part of the pilot deployment. The full-feature branch replaces its selected storefront gateway SDK with native invoice navigation, durable request key/capability and provider-independent server status; that extension change is not published by the isolated backend pilot.
+
+The operator page selects the existing ₹400 Heart Shape LED Magic Mirror and requests the merchant's delivery address and phone. Prepare checkout performs calculations and creates a single unpaid native draft; it does not charge or send an email. The eventual order is tagged CARTWALA PILOT - DO NOT SHIP. The merchant must review the native checkout and perform its payment. After payment, verify the webhook result, same-order accounting, unchanged actual variant quantities/properties, tax, stock and the existing Nimbus record. Then use Shopify's native refund/cancellation workflow with the merchant to verify returned funds and stock restoration. Never reuse disconnected feasibility draft #D1 for this test.
+
+## Validation
+
+- Eight concurrent draft/paid-order callers; one draft and one begin/add/commit sequence.
+- Lost create/begin/add/commit, manual/wrong-amount/foreign payment, calculated-total mismatch, refund/cancellation review, shop isolation and metadata readback.
+- Whole-paise quantity allocation, artwork preservation, native tax rounding/rate/price tampering, zero discounts and no gateway credentials.
+- Storefront twelve-click quote/redirect guard, durable request key/capability, same-host native invoice URL, OFF/refresh/storage guards and server-only confirmation.
+- Full and isolated typecheck, scoped ESLint, isolated production build, migration exercised with PGlite, and all thirteen generated GraphQL operations validated against Shopify 2026-07.
+
+This is a merchant payment pilot, not a completed or activated customer feature. A real payment/refund and final merchant approval remain required before customer activation or publication.

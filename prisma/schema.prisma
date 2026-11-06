@@ -80,3 +80,18 @@ model CodThemeReviewSettings {
   updatedAt      DateTime @default(now()) @updatedAt
 }
 
+
+model NativeCodCheckout {
+  id           String   @id
+  shop         String
+  quote        Json
+  state        String   @default("creating")
+  draftId      String?  @unique
+  orderId      String?  @unique
+  editClaim    String?
+  calculatedId String?
+  fingerprint  String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@index([shop, state])
+}
