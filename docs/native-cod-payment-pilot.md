@@ -60,3 +60,11 @@ This proves genuine active-gateway payment and same-order accounting, supersedin
 ## NimbusPost merchant screenshot evidence
 
 The merchant supplied the #1037 NimbusPost order detail screenshot. It shows Order Value₹450, Payment ModeCOD, Collectable Amount₹320 and DO NOT SHIP pilot tag. This is screenshot evidence supplied by the merchant, not a direct API/browser read in that turn. Genuine native payment→same Shopify order→Nimbus COD320 is now confirmed for #1037. No shipment booking was performed. Refund/cancellation and stock restoration remain untested.
+
+## Recovery update deployment — 6 November 2026
+
+Code commit a5d0f51a716488bf5bc465cc964b7ad60f8180cb is live in Render deploy dep-dbmralu7bikc73bq9cq0, completed16:41:10IST. Deployed the isolated native pilot delta through Render specific-commit UI; auto-deploy remains off. Theme remains unpublished and customer native quote creation remains gated OFF.
+
+Post-live public app-proxy checks: cod-review ON/20%/₹50/revision5/paymentsEnabledfalse; native-cod checkoutAvailablefalse. A create_quote recovery request for existing intent bd544aeb-9b6c-4a45-b180-56b034e9f48f returned check_existing_payment, checkoutAvailablefalse and a signed recovery capability. No capability was logged or persisted. No new draft, payment, order or financial edit was initiated by these checks. The same ID is correctly recovered despite customer creation gating.
+
+Prepared the Shopify native Cancel order#1037 dialog for merchant handoff: Original payment method selected, displayed Refund₹130.00INR viaPaytm, ReasonOther, explanatory TEST staff note, Restock inventory checked, customer notification unchecked. Final Cancel order button has NOT been clicked. Refund/cancel/actualrestock and Nimbus cancellation are still pending. User must perform the final financial cancellation action, then independently verify Shopify transactions/status, inventory46→expected47 absentotherchanges, and Nimbus existingrecord. No publication or new customer activation.
