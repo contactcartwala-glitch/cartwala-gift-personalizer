@@ -16,7 +16,7 @@ The courier collection amount is not the invoice value. Original goods prices st
 
 Tests cover 10/20/30/50% and zero, ₹40/₹50/₹80/fractional charges. They reject provider read-backs containing the full goods total, the full total with charge, the advance instead of the balance, prepaid classification and one-paise discrepancies.
 
-This is draft code and mocked-provider validation, not proof that the current automatic Shopify-to-NimbusPost import uses the balance. Automatic import exclusion and provider read-back of the exact collectable amount remain release blockers. Do not create a second courier order alongside automatic import or book a shipment until those are resolved.
+The adapter arithmetic tests use mocked provider responses. Separate observed automatic-import evidence is recorded below. Do not create a second courier order alongside automatic import or book a shipment until the imported remaining balance has been checked.
 
 ## Observed automatic sync — 6 November 2026
 
@@ -29,4 +29,21 @@ The authenticated NimbusPost UI now independently shows the existing diagnostic 
 
 This is direct evidence that the current automatic Shopify channel imported the remaining balance as ordinary COD for this existing test order. The Shopify channel is Active. No channel settings, tags, order amounts, courier allocation or booking were changed. The incomplete status is consistent with the diagnostic's lack of a delivery address; this is not a bookable shipment test and did not collect real Paytm money.
 
-The earlier blanket statement that automatic remaining-balance sync was unverified is superseded for this exact test. A separate API-created courier order must not be added alongside this automatic import. The production design should use one shipping path and verify each imported order's exact remaining balance before booking. The current draft's mandatory automatic-sync exclusion/API-dispatch gate still needs to be revised around the observed channel behavior; it must not simply be enabled or marked end-to-end complete.
+The earlier blanket statement that automatic remaining-balance sync was unverified is superseded for this exact test. A separate API-created courier order must not be added alongside this automatic import. The production design should use one shipping path and verify each imported order's exact remaining balance before booking. The draft now requires the explicit single path ADVANCE_COD_SHIPPING_PATH=shopify_auto instead of mandatory automatic-sync exclusion. The checkout/order worker creates only the Shopify order and does not call the direct NimbusPost create/booking adapter. Missing, dual and direct-API paths fail closed. No environment setting has been changed and full production activation remains blocked. This is not end-to-end completion.
+
+## Merchant correction: existing Shopify gateways — 6 November 2026
+
+The merchant explicitly requires the advance to be collected through the Shopify checkout's currently active gateway, with no Paytm-specific setup or gateway-specific Advance COD integration. For ₹400 goods and no fee this means ₹400 prepaid, or ₹80 paid online and ₹320 ordinary COD at 20%. An upfront ₹50 fee would make the advance checkout ₹130 while the courier still collects ₹320.
+
+The historical Paytm-direct candidate is not the accepted final customer-payment path. No new test credentials were saved, no payment endpoint was enabled, no customer payment UI was deployed, and no order was submitted in response to this correction. The independent preview-admin routes, schema and migration are now included in the draft so a future backend release will preserve the already-live controls. Test order creation now bypasses variant inventory instead of decrementing real stock; production still obeys inventory policy.
+
+A fresh Admin API read confirmed Basic and shopifyPlus=false. Shopify's native DraftOrderInput.deposit requires Plus. A separate native advance checkout followed by reconciliation is an architecture candidate, not a completed implementation: it must preserve original merchandise/artwork, one correct sale, tax/accounting, exact payment proof, cancellation/refunds and the already-imported NimbusPost order without duplicates. Order-edit APIs can change a paid order total and expose an outstanding balance, but their suitability for this specific advance workflow and automatic NimbusPost updates has not been proven. Do not represent two independent full-value sales or a false discount as a completed solution.
+
+Official references checked:
+- https://shopify.dev/changelog/posts/draft-order-deposit-fields-now-available-in-the-admin-and-customer-account-graphql-apis
+- https://help.shopify.com/en/manual/fulfillment/managing-orders/editing-orders/considerations
+- https://shopify.dev/docs/api/admin-graphql/latest/mutations/orderEditCommit
+
+No new end-to-end test order or real payment has been made. Live theme and deployed app remain unchanged.
+
+Native gateway feasibility and the unpaid #D1 preview are documented in [native-cod-feasibility.md](native-cod-feasibility.md). No new end-to-end test order has been created.

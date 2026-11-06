@@ -4,6 +4,7 @@ import { authenticate, unauthenticated } from "../shopify.server";
 import { configuredPaytm, paytmDatabase, progressConfiguredCodCheckout } from "../lib/partial-cod-paytm-runtime.server";
 import { reconcilePaidCodOrder } from "../lib/partial-cod-order-store.server";
 import { canEnableAdvanceCod } from "../lib/partial-cod-settings";
+import { requireCodShippingPath } from "../lib/partial-cod-shipping-policy";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
@@ -27,7 +28,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
     if (form.get("intent") !== "adopt" || form.get("confirmed") !== "on") throw new Error();
     const connection = configuredPaytm(), candidate = String(form.get("candidate") || "");
-    if (connection.shop !== session.shop || process.env.ADVANCE_COD_SHOPIFY_SYNC_EXCLUDED !== "true" ||
+    requireCodShippingPath(process.env.ADVANCE_COD_SHIPPING_PATH);
+    if (connection.shop !== session.shop ||
         (connection.config.environment === "production" && !canEnableAdvanceCod()) ||
         !/^gid:\/\/shopify\/Order\/[1-9]\d*$/.test(candidate)) throw new Error();
     const { admin } = await unauthenticated.admin(session.shop);

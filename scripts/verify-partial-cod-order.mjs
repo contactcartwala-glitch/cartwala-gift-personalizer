@@ -1,3 +1,5 @@
+/* eslint-disable no-inner-declarations -- test fixtures share the isolated database scope */
+/* eslint-env node */
 import assert from "node:assert/strict";
 import { createHash, randomUUID } from "node:crypto";
 import { build } from "esbuild";
@@ -73,6 +75,11 @@ try {
   assert.equal("fulfillment" in expected.order, false);
   assert.equal("customer" in expected.order, false);
   assert.equal(expected.order.test, true);
+  assert.equal(expected.options.inventoryBehaviour, "BYPASS");
+  const liveContext = structuredClone(context);
+  liveContext.payment.environment = "production";
+  liveContext.payment.paymentFingerprint = `paytm:production:${account.mid}:${liveContext.payment.transactionId}`;
+  assert.equal(buildPaidCodOrder(liveContext).options.inventoryBehaviour, "DECREMENT_OBEYING_POLICY");
   assert.equal(expected.options.sendReceipt, false);
   assert.equal(expected.payloadHash, buildPaidCodOrder(context).payloadHash);
   const full = acknowledgment(context, "gid://shopify/Order/101");
@@ -139,7 +146,7 @@ try {
       mutations++;
       assert.equal(options.variables.options.sendReceipt, false);
       assert.equal(options.variables.options.sendFulfillmentReceipt, false);
-      assert.equal(options.variables.options.inventoryBehaviour, "DECREMENT_OBEYING_POLICY");
+      assert.equal(options.variables.options.inventoryBehaviour, "BYPASS");
       assert.equal(options.variables.order.test, true);
       if (mode === "reject") return Response.json({ data: { orderCreate: { order: null, userErrors: [{ field: ["lineItems"], message: "private upstream error" }] } } });
       const id = `gid://shopify/Order/${++sequence}`;
@@ -169,10 +176,13 @@ try {
       paidPaise: p.payableNowPaise, fingerprint: p.paymentFingerprint };
   } };
   const run = x => createCodOrderFromPaidIntent(db, admin, gateway, x.intent.id, x.intent.shop, account,
-    { shippingSyncExcluded: true });
+    { shippingPath: "shopify_auto" });
   const state = async x => (await pg.query(`SELECT * FROM "PartialCodOrderAttempt" WHERE "intentId"=$1`, [x.intent.id])).rows[0];
   await persist(context);
   await assert.rejects(createCodOrderFromPaidIntent(db, admin, gateway, context.intent.id, context.intent.shop, account));
+  for (const shippingPath of ["direct_api", "both", "", true]) {
+    await assert.rejects(createCodOrderFromPaidIntent(db, admin, gateway, context.intent.id, context.intent.shop, account, { shippingPath }));
+  }
   assert.equal(mutations, 0);
   const concurrent = await Promise.allSettled(Array.from({ length: 12 }, () => run(context)));
   assert.equal(mutations, 1);
@@ -209,7 +219,7 @@ try {
   await assert.rejects(createCodOrderFromPaidIntent(db, admin, gateway, pending.intent.id, "other.myshopify.com", account));
   const beforeLive = mutations;
   await assert.rejects(createCodOrderFromPaidIntent(db, admin, gateway, pending.intent.id, pending.intent.shop,
-    { ...account, environment: "production" }, { shippingSyncExcluded: true }));
+    { ...account, environment: "production" }, { shippingPath: "shopify_auto" }));
   assert.equal(mutations, beforeLive);
   const large = fixture({ count: 100, unit: 1000 }).context; await persist(large); const pageStart = linePages;
   await run(large); assert.equal(linePages - pageStart, 3);

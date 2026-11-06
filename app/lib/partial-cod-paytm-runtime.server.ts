@@ -6,6 +6,7 @@ import { unauthenticated } from "../shopify.server";
 import { createCodOrderFromPaidIntent, reconcilePaidCodOrder } from "./partial-cod-order-store.server";
 import { progressCodCheckout, startCodCheckout } from "./partial-cod-checkout.server";
 import type { AdvanceCodSettings } from "./partial-cod-settings";
+import { requireCodShippingPath } from "./partial-cod-shipping-policy";
 
 export const paytmDatabase: PaytmDatabase = {
   query: <T>(sql: string, parameters: unknown[]) => prisma.$queryRawUnsafe<T[]>(sql, ...parameters),
@@ -28,8 +29,7 @@ export function configuredPaytm() {
 /** Internal worker entry point only; shop/account are never taken from a public request. */
 export async function createConfiguredPaidCodOrder(intentId: string) {
   const connection = configuredPaytm();
-  if (process.env.ADVANCE_COD_SHOPIFY_SYNC_EXCLUDED !== "true")
-    throw new Error("Automatic shipping sync exclusion is not confirmed");
+  const shippingPath = requireCodShippingPath(process.env.ADVANCE_COD_SHIPPING_PATH);
   if (connection.config.environment === "production" && !canEnableAdvanceCod())
     throw new Error("Live Advance COD integration is not ready");
   const { admin } = await unauthenticated.admin(connection.shop);
@@ -44,14 +44,15 @@ export async function createConfiguredPaidCodOrder(intentId: string) {
   }
   return createCodOrderFromPaidIntent(paytmDatabase, admin, connection.gateway, intentId, connection.shop,
     connection.config, { allowLiveOrders: canEnableAdvanceCod(),
-      shippingSyncExcluded: process.env.ADVANCE_COD_SHOPIFY_SYNC_EXCLUDED === "true" });
+      shippingPath });
 }
 
 export function codCheckoutAvailable(shop: string, settings: AdvanceCodSettings) {
   if (!settings.enabled) return false;
   try {
     const connection = configuredPaytm();
-    if (shop !== connection.shop || process.env.ADVANCE_COD_SHOPIFY_SYNC_EXCLUDED !== "true" ||
+    requireCodShippingPath(process.env.ADVANCE_COD_SHIPPING_PATH);
+    if (shop !== connection.shop ||
         Buffer.byteLength(process.env.SHOPIFY_API_SECRET || "") < 32) return false;
     return connection.config.environment === "staging"
       ? process.env.ADVANCE_COD_STAGING_ENABLED === "true"

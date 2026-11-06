@@ -60,7 +60,7 @@ export function buildPaidCodOrder(context: PaidCodOrderContext) {
       } }],
   };
   // financialStatus is intentionally omitted: Shopify must derive it from the actual transaction.
-  const options = { inventoryBehaviour: "DECREMENT_OBEYING_POLICY", sendReceipt: false, sendFulfillmentReceipt: false };
+  const options = { inventoryBehaviour: test ? "BYPASS" : "DECREMENT_OBEYING_POLICY", sendReceipt: false, sendFulfillmentReceipt: false };
   return { order, options, tag, snapshot, attributes, payloadHash: createHash("sha256")
     .update(JSON.stringify({ order, options })).digest("hex") };
 }

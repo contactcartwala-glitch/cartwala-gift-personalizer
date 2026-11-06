@@ -1,3 +1,5 @@
+/* global globalThis */
+/* eslint-env node */
 import assert from "node:assert/strict";
 import { build } from "esbuild";
 import { PGlite } from "@electric-sql/pglite";
@@ -7,7 +9,7 @@ await mkdir(output, { recursive: true });
 const pg = new PGlite();
 const env = { PAYTM_SHOP: "test.myshopify.com", PAYTM_ENVIRONMENT: "staging", PAYTM_MID: "TESTMERCHANT1234567890",
   PAYTM_MERCHANT_KEY: "TESTONLYKEY12345", SHOPIFY_APP_URL: "https://example.test", SHOPIFY_API_SECRET: "TEST_ONLY_SIGNING_SECRET_32_CHARACTERS",
-  ADVANCE_COD_STAGING_ENABLED: "true", ADVANCE_COD_SHOPIFY_SYNC_EXCLUDED: "true" };
+  ADVANCE_COD_STAGING_ENABLED: "true", ADVANCE_COD_SHIPPING_PATH: "shopify_auto" };
 const saved = Object.fromEntries(Object.keys(env).map(name => [name, process.env[name]]));
 try {
   Object.assign(process.env, env);
@@ -63,6 +65,11 @@ try {
   m.COD_INTEGRATION_STATUS.forEach(item => { item.ready = true; });
   current = await m.saveCodSettings(shop, { ...current, enabled: true });
   assert.equal(m.codCheckoutAvailable(shop, current), true);
+  for (const path of ["direct_api", "both", ""]) {
+    process.env.ADVANCE_COD_SHIPPING_PATH = path;
+    assert.equal(m.codCheckoutAvailable(shop, current), false);
+  }
+  process.env.ADVANCE_COD_SHIPPING_PATH = "shopify_auto";
   assert.equal(m.codCheckoutAvailable("other.myshopify.com", current), false);
   m.COD_INTEGRATION_STATUS.forEach(item => { item.ready = false; });
   current = await m.saveCodSettings(shop, { ...current, enabled: false }); // OFF remains available when readiness is lost.

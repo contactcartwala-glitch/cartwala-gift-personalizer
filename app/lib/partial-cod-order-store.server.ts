@@ -3,6 +3,7 @@ import { buildPaidCodOrder, type PaidCodOrderContext } from "./partial-cod-order
 import { createPaidCodOrderOnce, readAndVerifyCodOrder, CodOrderRejected, type CodOrderAdmin } from "./partial-cod-order.server";
 import { recordPaytmProof, type PaytmDatabase } from "./partial-cod-paytm-store.server";
 import type { createPaytmClient } from "./partial-cod-paytm.server";
+import { requireCodShippingPath } from "./partial-cod-shipping-policy";
 
 type Account = { mid: string; environment: "staging" | "production" };
 type Gateway = Pick<ReturnType<typeof createPaytmClient>, "verify">;
@@ -86,9 +87,8 @@ async function finishOrder(db: PaytmDatabase, context: PaidCodOrderContext, atte
 /** Durable one-writer entry point. An uncertain mutation is never automatically submitted again. */
 export async function createCodOrderFromPaidIntent(db: PaytmDatabase, admin: CodOrderAdmin, gateway: Gateway,
   intentId: string, shop: string, account: Account,
-  options: { allowLiveOrders?: boolean; shippingSyncExcluded?: boolean } = {}) {
-  if (options.shippingSyncExcluded !== true)
-    throw new Error("Exclude these orders from automatic shipping sync before creating any order");
+  options: { allowLiveOrders?: boolean; shippingPath?: "shopify_auto" } = {}) {
+  requireCodShippingPath(options.shippingPath);
   if (account.environment === "production" && options.allowLiveOrders !== true) throw new Error("Live order creation is not enabled");
   const context = await loadPaidCodOrderContext(db, intentId, shop, account);
   const prior = await existingAttempt(db, intentId);
