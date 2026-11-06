@@ -1,0 +1,276 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Cartwala",
+    "theme_version": "1.0.0",
+    "theme_author": "Cartwala Gift Shop",
+    "theme_documentation_url": "https://cartwala.in",
+    "theme_support_url": "https://cartwala.in/pages/contact-us"
+  },
+  {
+    "name": "Logo",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo image"
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon",
+        "info": "Displayed at 32x32px"
+      }
+    ]
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Brand palette"
+      },
+      {
+        "type": "color",
+        "id": "color_background",
+        "label": "Background",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "color_foreground",
+        "label": "Foreground / text",
+        "default": "#2d2424"
+      },
+      {
+        "type": "color",
+        "id": "color_primary",
+        "label": "Primary (buttons, links)",
+        "default": "#e55b4d"
+      },
+      {
+        "type": "color",
+        "id": "color_primary_foreground",
+        "label": "Primary text (on primary)",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "color_secondary",
+        "label": "Secondary surface",
+        "default": "#fff4e6"
+      },
+      {
+        "type": "color",
+        "id": "color_secondary_foreground",
+        "label": "Secondary text",
+        "default": "#a3483e"
+      },
+      {
+        "type": "color",
+        "id": "color_accent",
+        "label": "Accent (badges, highlights)",
+        "default": "#ff9f43"
+      },
+      {
+        "type": "color",
+        "id": "color_muted",
+        "label": "Muted surface",
+        "default": "#eeeeee"
+      },
+      {
+        "type": "color",
+        "id": "color_border",
+        "label": "Border",
+        "default": "#e5e5e5"
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "This theme uses SUSE throughout, per brand guidelines. Font swapping is disabled to preserve brand consistency."
+      }
+    ]
+  },
+  {
+    "name": "Layout",
+    "settings": [
+      {
+        "type": "range",
+        "id": "page_width",
+        "label": "Page width",
+        "min": 1000,
+        "max": 1600,
+        "step": 20,
+        "default": 1280,
+        "unit": "px"
+      },
+      {
+        "type": "select",
+        "id": "text_direction",
+        "label": "Text direction",
+        "options": [
+          {
+            "value": "ltr",
+            "label": "Left to right"
+          },
+          {
+            "value": "rtl",
+            "label": "Right to left"
+          }
+        ],
+        "default": "ltr"
+      }
+    ]
+  },
+  {
+    "name": "Product cards",
+    "settings": [
+      {
+        "type": "select",
+        "id": "card_image_ratio",
+        "label": "Image ratio",
+        "options": [
+          {
+            "value": "1/1",
+            "label": "Square"
+          },
+          {
+            "value": "4/5",
+            "label": "Portrait"
+          }
+        ],
+        "default": "1/1"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_vendor",
+        "label": "Show vendor",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "show_quick_add",
+        "label": "Enable quick add",
+        "default": true
+      }
+    ]
+  },
+  {
+    "name": "Cart",
+    "settings": [
+      {
+        "type": "select",
+        "id": "cart_type",
+        "label": "Cart behavior",
+        "options": [
+          {
+            "value": "drawer",
+            "label": "Drawer"
+          },
+          {
+            "value": "page",
+            "label": "Page"
+          }
+        ],
+        "default": "drawer"
+      },
+      {
+        "type": "number",
+        "id": "free_shipping_threshold",
+        "label": "Free shipping threshold (₹)",
+        "default": 999
+      }
+    ]
+  },
+  {
+    "name": "Personalization",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Controls default copy for the personalization module shown on product pages. Individual products opt in via the 'personalization_enabled' metafield."
+      },
+      {
+        "type": "number",
+        "id": "default_production_days",
+        "label": "Default production time (days)",
+        "default": 2
+      },
+      {
+        "type": "number",
+        "id": "default_delivery_days",
+        "label": "Default delivery time (days)",
+        "default": 5
+      },
+      {
+        "type": "number",
+        "id": "max_upload_files",
+        "label": "Max photo uploads per product",
+        "default": 4
+      }
+    ]
+  },
+  {
+    "name": "Social media",
+    "settings": [
+      {
+        "type": "url",
+        "id": "social_instagram_link",
+        "label": "Instagram"
+      },
+      {
+        "type": "url",
+        "id": "social_facebook_link",
+        "label": "Facebook"
+      },
+      {
+        "type": "url",
+        "id": "social_whatsapp_link",
+        "label": "WhatsApp"
+      }
+    ]
+  },
+  {
+    "name": "Checkout",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Branding shown on checkout is configured under Online Store > Checkout."
+      }
+    ]
+  },
+  {
+    "name": "Advance COD review",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Layout review only. Advance payments and courier creation are disabled. Amount settings here are for this draft theme only; the server admin controls are not connected yet."
+      },
+      {
+        "type": "checkbox",
+        "id": "cw_cod_review_enabled",
+        "label": "Show payment choice review",
+        "default": false
+      },
+      {
+        "type": "range",
+        "id": "cw_cod_review_percent",
+        "label": "Preview advance percentage",
+        "min": 10,
+        "max": 50,
+        "step": 1,
+        "default": 20,
+        "unit": "%"
+      },
+      {
+        "type": "number",
+        "id": "cw_cod_review_fee",
+        "label": "Preview COD charge (₹)",
+        "default": 50
+      }
+    ]
+  }
+]

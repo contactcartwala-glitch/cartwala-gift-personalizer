@@ -1,0 +1,54 @@
+{
+  "current": {
+    "color_background": "#ffffff",
+    "color_foreground": "#111111",
+    "color_primary": "#FF6A00",
+    "color_primary_foreground": "#ffffff",
+    "color_secondary": "#FFF4EB",
+    "color_secondary_foreground": "#111111",
+    "color_accent": "#FF8A00",
+    "color_muted": "#F5F5F5",
+    "color_border": "#e5e5e5",
+    "page_width": 1280,
+    "text_direction": "ltr",
+    "card_image_ratio": "1/1",
+    "show_vendor": true,
+    "show_quick_add": true,
+    "cart_type": "drawer",
+    "free_shipping_threshold": 999,
+    "default_production_days": 2,
+    "default_delivery_days": 5,
+    "max_upload_files": 4,
+    "content_for_index": [],
+    "blocks": {
+      "3720565183479497137": {
+        "type": "shopify://apps/globo-product-options/blocks/app-embed-block/fdc9fad5-1a0f-4bd4-9c8a-1af6a6eef6b8",
+        "disabled": false,
+        "settings": {
+          "themeInfo": "{{ theme.id }}"
+        }
+      },
+      "1233098265808466390": {
+        "type": "shopify://apps/cartwala-gift-personalizer/blocks/cart-preview/01a08feb-4d53-7a86-a819-7557fee3a255",
+        "disabled": false,
+        "settings": {}
+      },
+      "2567389343055140935": {
+        "type": "shopify://apps/microsoft-clarity/blocks/clarity_js/31c3d126-8116-4b4a-8ba1-baeda7c4aeea",
+        "disabled": false,
+        "settings": {}
+      }
+    },
+    "cw_cod_review_enabled": true,
+    "cw_cod_review_percent": 20,
+    "cw_cod_review_fee": 50
+  },
+  "presets": {},
+  "platform_customizations": {
+    "custom_css": [
+      "a {transition: color 0.2s ease;}",
+      "button,.button,.btn {background-color: #ff6a00; color: #ffffff; border-color: #ff6a00;}",
+      "button:hover,.button:hover,.btn:hover {background-color: #111111; color: #ffffff; border-color: #111111;}"
+    ]
+  }
+}
