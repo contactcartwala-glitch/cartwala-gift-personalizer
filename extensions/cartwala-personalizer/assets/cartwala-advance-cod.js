@@ -6,9 +6,9 @@
   const messages = JSON.parse(root.querySelector("[data-cw-cod-i18n]").textContent);
   const form = root.querySelector("form"), status = root.querySelector("[data-cw-cod-status]"),
     pay = root.querySelector("[data-cw-cod-pay]"), recheck = root.querySelector("[data-cw-cod-recheck]");
-  const base = window.Shopify?.routes?.root || "/", endpoint = `${base}apps/cartwala-signature-day/partial-cod`;
+  const base = window.Shopify?.routes?.root || "/", endpoint = `${base}apps/cartwala-signature-day-1/native-cod`;
   const storageKey = "cartwala-advance-cod-v1";
-  let access = "", busy = false, scriptPromise;
+  let access = "", busy = false, checkoutUrl = "";
   const money = value => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(value / 100);
   const say = text => { status.textContent = text; };
   async function request(body) {
@@ -31,7 +31,7 @@
     }
   }
   function saveAccess(value) {
-    // Require recovery storage before initiating a payment. Never persist the Paytm transaction token.
+    // Require recovery storage before initiating a payment. No gateway credential is stored.
     sessionStorage.setItem(storageKey, value);
     if (sessionStorage.getItem(storageKey) !== value) throw new Error("Recovery storage unavailable");
     access = value;
@@ -41,27 +41,8 @@
     say(messages.checking);
     const data = await request({ intent: "payment_status", access });
     recheck.hidden = false;
-    say((messages[data.state] || messages.needs_review).replace('__BALANCE__', money(data.collectPaise)));
+    say((messages[data.state === "completed" ? "order_confirmed" : data.state === "awaiting_payment" ? "payment_pending" : data.state] || messages.needs_review).replace('__BALANCE__', money(data.collectPaise)));
     // Keep the capability to recover on refresh and prevent accidental payment repetition.
-  }
-  function loadPaytm(checkout) {
-    if (scriptPromise) return scriptPromise;
-    if (!/^[A-Za-z0-9]{10,40}$/.test(checkout.mid) || !["staging", "production"].includes(checkout.environment))
-      throw new Error("Invalid payment configuration");
-    const host = checkout.environment === "staging" ? "https://securestage.paytmpayments.com" : "https://secure.paytmpayments.com";
-    scriptPromise = new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = `${host}/merchantpgpui/checkoutjs/merchants/${checkout.mid}.js`;
-      const timeout = setTimeout(() => reject(new Error("Payment library unavailable")), 30000);
-      script.crossOrigin = "anonymous";
-      script.onload = () => {
-        if (!window.Paytm?.CheckoutJS?.onLoad) { clearTimeout(timeout); reject(new Error()); return; }
-        window.Paytm.CheckoutJS.onLoad(() => { clearTimeout(timeout); resolve(); });
-      };
-      script.onerror = () => { clearTimeout(timeout); reject(new Error()); };
-      document.head.append(script);
-    });
-    return scriptPromise;
   }
   form.addEventListener("submit", event => {
     event.preventDefault();
@@ -75,10 +56,13 @@
         throw new Error();
       const address = Object.fromEntries(new FormData(form));
       address.phone = `+91${address.phone}`; address.countryCode = "IN";
-      const quote = await request({ intent: "create_quote", requestKey: crypto.randomUUID(), address,
+      const quote = await request({ intent: "create_quote", requestKey: sessionStorage.getItem(`${storageKey}:request`) || (() => { const id = crypto.randomUUID(); sessionStorage.setItem(`${storageKey}:request`, id); return id; })(), themeId: root.dataset.themeId, address,
         lines: cart.items.map(item => ({ variantId: `gid://shopify/ProductVariant/${item.variant_id}`, quantity: item.quantity,
           properties: Object.entries(item.properties || {}).map(([name, value]) => ({ name, value: String(value) })) })) });
-      if (!quote.checkoutAvailable || !quote.access) throw new Error();
+      if (!quote.checkoutAvailable || !quote.access || !quote.checkoutUrl) throw new Error();
+      const target = new URL(quote.checkoutUrl);
+      if (target.protocol !== "https:" || target.hostname !== location.hostname || !/^\/[1-9]\d*\/invoices\/[a-z0-9]+$/.test(target.pathname)) throw new Error();
+      checkoutUrl = target.toString();
       saveAccess(quote.access);
       form.hidden = true; pay.hidden = false;
       say(messages.review.replace('__NOW__', money(quote.amounts.payableNowPaise)).replace('__BALANCE__', money(quote.amounts.collectOnDeliveryPaise)).replace('__CHARGE__', money(quote.amounts.feePaise)));
@@ -87,16 +71,8 @@
   pay.addEventListener("click", () => locked(async () => {
     pay.hidden = true; recheck.hidden = false;
     say(messages.opening);
-    const { checkout } = await request({ intent: "begin_payment", access });
-    await loadPaytm(checkout);
-    if (!window.Paytm?.CheckoutJS) throw new Error();
-    await window.Paytm.CheckoutJS.init({ root: "", flow: "DEFAULT",
-      data: { orderId: checkout.orderId, token: checkout.txnToken, tokenType: "TXN_TOKEN", amount: checkout.amount },
-      merchant: { redirect: false }, handler: {
-        transactionStatus: () => { locked(check); },
-        notifyMerchant: () => { say(messages.check_before_retry); },
-      } });
-    window.Paytm.CheckoutJS.invoke();
+    if (!checkoutUrl) return check();
+    window.location.assign(checkoutUrl);
     say(messages.complete);
   }));
   recheck.addEventListener("click", () => locked(check));

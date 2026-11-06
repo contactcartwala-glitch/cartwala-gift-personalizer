@@ -17,7 +17,7 @@ export type NativeCodContext = {
   initialTaxPaise: number; completedTaxPaise: number; balanceTaxable: boolean; lines: NativeAdvanceLine[];
 };
 export const NATIVE_COD_BALANCE_TITLE = "Remaining goods value — pay on delivery";
-export const NATIVE_COD_SCOPES = ["read_orders", "write_orders", "write_order_edits"];
+export const NATIVE_COD_SCOPES = ["read_orders", "write_orders", "write_order_edits", "write_draft_orders"];
 const uuid = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
 const orderId = /^gid:\/\/shopify\/Order\/[1-9]\d*$/;
 const safeText = (s: unknown, max: number) => typeof s === "string" && s.length <= max &&
@@ -96,6 +96,7 @@ type NativeGraphqlLine = Omit<NativeOrderLine, "variantId" | "attributes" | "amo
 };
 export type NativeOrder = {
   id: string; test: boolean; cancelledAt: string | null; displayFinancialStatus: string; currencyCode: string;
+  shippingAddress?: { countryCodeV2: string } | null;
   taxesIncluded: boolean; customAttributes: Array<{ key: string; value: string }>;
   currentTotalPriceSet: Money; totalReceivedSet: Money; totalOutstandingSet: Money; totalRefundedSet: Money;
   totalShippingPriceSet: Money; currentTotalDiscountsSet: Money; currentTotalTaxSet: Money;
@@ -107,7 +108,7 @@ export async function readNativeCodOrder(admin: NativeCodAdmin, context: NativeC
   nativeCodReference(context);
   const receiptQuery = `query ReadNativeCodReceipt($id: ID!, $draft: ID!) {
     draftOrder(id:$draft) { id order { id } }
-    order(id:$id) { id updatedAt test cancelledAt displayFinancialStatus currencyCode taxesIncluded customAttributes { key value }
+    order(id:$id) { id updatedAt test cancelledAt displayFinancialStatus currencyCode taxesIncluded shippingAddress { countryCodeV2 } customAttributes { key value }
       currentTotalPriceSet { shopMoney { amount currencyCode } } totalReceivedSet { shopMoney { amount currencyCode } }
       totalOutstandingSet { shopMoney { amount currencyCode } } totalRefundedSet { shopMoney { amount currencyCode } }
       totalShippingPriceSet { shopMoney { amount currencyCode } } currentTotalDiscountsSet { shopMoney { amount currencyCode } }
@@ -148,6 +149,7 @@ export async function readNativeCodOrder(admin: NativeCodAdmin, context: NativeC
 export function verifyNativeCodPayment(context: NativeCodContext, order: NativeOrder, phase: "advance" | "completed") {
   const reference = nativeCodReference(context), a = reference.amounts, completed = phase === "completed";
   if (order.id !== context.orderId || order.test !== context.test || order.cancelledAt || order.currencyCode !== "INR" ||
+      (!context.test && order.shippingAddress?.countryCodeV2 !== "IN") ||
       order.taxesIncluded !== context.taxesIncluded || order.displayFinancialStatus !== (completed ? "PARTIALLY_PAID" : "PAID") ||
       inrPaise(order.currentTotalPriceSet) !== (completed ? a.totalPaise : a.payableNowPaise) ||
       inrPaise(order.totalReceivedSet) !== a.payableNowPaise || inrPaise(order.totalOutstandingSet) !== (completed ? a.collectOnDeliveryPaise : 0) ||

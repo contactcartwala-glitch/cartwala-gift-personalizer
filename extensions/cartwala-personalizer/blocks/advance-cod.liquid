@@ -1,5 +1,5 @@
 {% if request.page_type == 'cart' %}
-  <section data-cw-advance-cod hidden aria-label="{{ 'advance_cod.title' | t | escape }}" {{ block.shopify_attributes }}>
+  <section data-cw-advance-cod data-theme-id="{{ theme.id }}" hidden aria-label="{{ 'advance_cod.title' | t | escape }}" {{ block.shopify_attributes }}>
     <script type="application/json" data-cw-cod-i18n>{
 "error": {{ 'advance_cod.messages.error' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }},
 "checking": {{ 'advance_cod.messages.checking' | t: now: '__NOW__', balance: '__BALANCE__', charge: '__CHARGE__' | json }},

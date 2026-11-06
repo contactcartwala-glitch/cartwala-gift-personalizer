@@ -42,7 +42,7 @@ assert.throws(()=>nativeCodQuoteReference({...quote,test:false,lines:[{...quote.
 const graphql = async(query,options)=>{
   assert.equal(options.tries,1);assert.ok(options.signal instanceof AbortSignal);
   assert.ok(query.trim().startsWith('query '),'Read-only helper must never mutate Shopify');
-  return new Response(JSON.stringify({data:{shop:{myshopifyDomain:context.shop},currentAppInstallation:{app:{apiKey:context.appClientId},accessScopes:[{handle:'read_orders'},{handle:'write_orders'}]}}}));
+  return new Response(JSON.stringify({data:{shop:{myshopifyDomain:context.shop},currentAppInstallation:{app:{apiKey:context.appClientId},accessScopes:[{handle:'read_orders'},{handle:'write_orders'},{handle:'write_draft_orders'}]}}}));
 };
 assert.deepEqual(await nativeCodPermissions({graphql},context),['write_order_edits']);
 await assert.rejects(()=>nativeCodPermissions({graphql}, {...context,shop:'other.myshopify.com'}));
