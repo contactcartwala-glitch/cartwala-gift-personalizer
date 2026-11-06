@@ -71,3 +71,12 @@ model CodAccountingDiagnostic {
   updatedAt  DateTime @updatedAt
 }
 
+model CodThemeReviewSettings {
+  shop           String   @id
+  enabled        Boolean  @default(false)
+  advancePercent Int      @default(20)
+  codFeePaise     Int      @default(5000)
+  revision       Int      @default(0)
+  updatedAt      DateTime @default(now()) @updatedAt
+}
+
