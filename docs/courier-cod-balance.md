@@ -47,3 +47,5 @@ Official references checked:
 No new end-to-end test order or real payment has been made. Live theme and deployed app remain unchanged.
 
 Native gateway feasibility and the unpaid #D1 preview are documented in [native-cod-feasibility.md](native-cod-feasibility.md). No new end-to-end test order has been created.
+
+A subsequent explicitly simulated TEST order #1035 independently confirmed the exact ₹400 goods + ₹50 shipping example: Shopify total ₹450, TEST received ₹130, outstanding ₹320; NimbusPost automatically imported ordinary COD with collectable ₹320. This is not a real native-checkout payment or a shipment test. Full proof is in [cod-exact-breakdown-test.md](cod-exact-breakdown-test.md).

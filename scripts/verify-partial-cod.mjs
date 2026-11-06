@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
-import { calculatePartialCod, acceptDeposit, buildDepositLine, buildCodShipment } from "../app/lib/partial-cod.ts";
+import { build } from "esbuild";
+import { Buffer } from "node:buffer";
+const bundle = await build({ entryPoints: ["app/lib/partial-cod.ts"], bundle: true, platform: "node", format: "esm", write: false });
+const { calculatePartialCod, acceptDeposit, buildDepositLine, buildCodShipment } = await import(
+  `data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString("base64")}`);
 
 const amounts = calculatePartialCod(100000);
 assert.deepEqual(amounts, {

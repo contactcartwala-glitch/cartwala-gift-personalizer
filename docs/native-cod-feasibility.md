@@ -16,7 +16,7 @@ The same unpaid draft was then updated to an explicit advance-only preview: one 
 
 ## What remains unresolved
 
-The preview does not prove full native-gateway payment, paid-order reconciliation, tax treatment, correct final merchandise invoice or automatic NimbusPost updates after a paid order changes. Native checkout's Total in the advance-only candidate is the amount being collected now (₹130), while full order ₹450 and balance ₹320 need clear explanation. Merchant review is needed before adopting this changed checkout representation. Do not invite a payment on the feasibility invoice.
+The preview does not prove full native-gateway payment, paid-order reconciliation, tax treatment, correct final merchandise invoice or automatic NimbusPost updates after a paid order changes. Native checkout's Total in the advance-only candidate is the amount being collected now (₹130), while full order ₹450 and balance ₹320 need clear explanation. The merchant subsequently confirmed that the final Shopify order must retain the full goods value plus charge, actual received advance plus charge, and remaining balance. An advance-only ₹80/₹130 fully-paid Shopify order is not the accepted final representation. Reconciliation remains required; no further decision about the final accounting representation is missing. Do not invite a payment on the feasibility invoice.
 
 A production implementation must freeze the actual full goods/artwork/address/tax quote, verify genuine payment through authenticated Shopify reads and the linked draft/order (not a browser success flag), preserve one correct net sale and the original goods invoice, implement idempotent reconciliation/recovery/refunds and verify the existing imported NimbusPost record as COD with the frozen balance before dispatch. It must not duplicate courier records, treat an unpaid amount as savings, charge a real test payment on a disconnected prototype, or mark the earlier #1034 imported test proof as a native checkout test.
 
@@ -28,3 +28,9 @@ The historical direct-Paytm candidate is not the selected customer-payment path.
 - https://help.shopify.com/en/manual/fulfillment/managing-orders/editing-orders/considerations
 - https://shopify.dev/docs/api/admin-graphql/2026-10/mutations/orderEditCommit
 - https://help.releas.it/en/article/cod-fee-missing-on-an-order-full-troubleshooting-checklist-1yc7w5b/ (vendor description of a Pay on Delivery line; not proof of its internal implementation or NimbusPost compatibility)
+
+## Confirmed final Shopify representation
+
+The merchant explicitly selected ₹400 goods / ₹80 Advance COD / ₹50 shipping-COD charge / ₹450 total / ₹130 actually received / ₹320 remaining. Shopify must show a full-value PARTIALLY_PAID order, while NimbusPost receives ordinary COD for ₹320. The payment gateway's prepaid collection of ₹130 does not mean the full ₹450 order is PAID. An independent exact-example diagnostic is prepared in PR24 using the installed app's offline client. This remains a simulated TEST transaction, not an actual native checkout payment.
+
+The confirmed final representation has now been demonstrated in TEST order #1035, with the existing NimbusPost channel automatically importing COD ₹320. See [cod-exact-breakdown-test.md](cod-exact-breakdown-test.md) for the independent Shopify/native UI/Nimbus evidence and limitations. No real native checkout payment has completed.
