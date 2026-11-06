@@ -496,7 +496,7 @@
   "cod_review": {
     "close": "Close payment choices",
     "heading": "Checkout",
-    "preview": "Duplicate theme preview. Advance COD payments remain disabled until final approval.",
+    "preview": "Duplicate theme payment test. No payment is taken until you choose to pay in secure checkout.",
     "prepaid": "Full payment",
     "prepaid_hint": "Pay online. No extra COD charge.",
     "cod": "Advance COD",
@@ -573,6 +573,8 @@
       "up": "Uttar Pradesh",
       "ut": "Uttarakhand",
       "wb": "West Bengal"
-    }
+    },
+    "continue_shopping": "Continue shopping",
+    "completed_cart_pending": "Payment confirmed. Do not pay again. Cart cleanup could not finish; check this payment again before ordering these items."
   }
 }

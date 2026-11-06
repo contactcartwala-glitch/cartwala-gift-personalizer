@@ -12,7 +12,7 @@
   const radios = [...dialog.querySelectorAll('input[name="cw_cod_choice"]')];
   const money = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(n / 100);
   let config, cart, cartKey = '', origin, loading = false, bypass = false, leaving = false, operation = 0;
-  let access = '', invoice = '', requestKey = '', confirmed = false, blocked = false;
+  let access = '', invoice = '', requestKey = '', confirmed = false, blocked = false, completed = false;
   async function configuration() {
     const response = await fetch(`${base}apps/cartwala-signature-day-1/cod-review`, {
       cache: 'no-store', credentials: 'same-origin', signal: AbortSignal.timeout(8000),
@@ -27,7 +27,7 @@
       const result = await fetch(endpoint, { cache: 'no-store', credentials: 'same-origin', signal: AbortSignal.timeout(8000) });
       if (result.ok) native = await result.json();
     } catch { /* Normal prepaid checkout remains available. */ }
-    return { ...value, canPay: native?.checkoutAvailable === true && native.enabled === true &&
+    return { ...value, previewOnly:native?.checkoutAvailable !== true, canPay: (native?.checkoutAvailable === true || (native?.previewCheckoutAvailable === true && native.themeId === dialog.dataset.themeId)) && native.enabled === true &&
       native.revision === value.revision && native.advancePercent === value.advancePercent && native.codFeePaise === value.codFeePaise };
   }
   config = { enabled: false, canPay: false };
@@ -36,14 +36,18 @@
   function setChoice() {
     const cod = isCod();
     const notice = dialog.querySelector('#cw-cod-review-notice');
-    if (notice) notice.hidden = config.canPay;
+    if (notice) notice.hidden = config.canPay && !config.previewOnly;
+    radios.forEach(r => { r.disabled = loading || !!requestKey || !!access || completed; });
+    next.hidden = completed;
+    const shopping = dialog.querySelector('[data-cod-shopping]');
+    if (shopping) shopping.hidden = !completed;
     address.hidden = !cod;
-    address.querySelectorAll('input,select').forEach(el => { el.disabled = !cod || loading || confirmed || blocked; });
+    address.querySelectorAll('input,select').forEach(el => { el.disabled = !cod || loading || confirmed || blocked || completed; });
     dialog.querySelector('[data-cod-breakdown]').hidden = !cod;
     recheck.hidden = !(access || requestKey);
     recheck.disabled = loading;
-    next.disabled = loading || leaving || (cod && ((!config.canPay && !confirmed) || blocked || !cart));
-    next.textContent = !cod ? labels.continue_prepaid : !config.canPay ? labels.not_connected : confirmed ? labels.confirm_cod : labels.continue_cod;
+    next.disabled = completed || loading || leaving || (!!(access || requestKey) && !confirmed) || (cod && ((!config.canPay && !confirmed) || blocked || !cart));
+    next.textContent = !cod ? labels.continue_prepaid : confirmed ? labels.confirm_cod : !config.canPay ? labels.not_connected : labels.continue_cod;
   }
   function close() {
     if (loading) return;
@@ -77,11 +81,11 @@
     dialog.querySelector('[data-cod-amounts]').hidden = false;
   }
   const cartFingerprint = c => JSON.stringify(c.items.map(i => [i.key, i.variant_id, i.quantity, i.final_line_price, i.properties]));
-  async function readCart() {
+  async function readCart(allowEmpty = false) {
     const response = await fetch(`${base}cart.js`, { cache: 'no-store', credentials: 'same-origin', signal: AbortSignal.timeout(8000) });
     if (!response.ok) throw new Error();
     const c = await response.json();
-    if (!Number.isSafeInteger(c.total_price) || c.total_price < 1 || !c.items?.length || c.currency !== 'INR') throw new Error();
+    if (!Number.isSafeInteger(c.total_price) || !Array.isArray(c.items) || (!allowEmpty && (c.total_price < 1 || !c.items.length)) || c.currency !== 'INR') throw new Error();
     return c;
   }
   function showItems(c) {
@@ -106,13 +110,13 @@
   function readRecovery() {
     access = sessionStorage.getItem(storageKey) || '';
     requestKey = sessionStorage.getItem(`${storageKey}:request`) || '';
-    if (access || requestKey) { blocked = true; status.textContent = labels.restore; }
+    if (access || requestKey) { blocked = true; status.textContent = labels.restore; radios.forEach(r => { r.checked = r.value === 'cod'; }); }
   }
   async function post(body) {
     const response = await fetch(endpoint, { method: 'POST', credentials: 'same-origin', cache: 'no-store',
       headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(45000) });
     const data = await response.json();
-    if (!response.ok || data.error) throw new Error();
+    if (!response.ok || data.error) { const error = new Error(); error.quoteNotCreated = data.quoteNotCreated === true; throw error; }
     return data;
   }
   async function digestCart(c) {
@@ -124,10 +128,11 @@
     if (!data.checkoutAvailable || target.protocol !== 'https:' || target.hostname !== location.hostname ||
       target.search || target.hash || !/^\/[1-9]\d*\/invoices\/[a-z0-9]+$/.test(target.pathname)) throw new Error();
     const a = data.amounts;
-    if (a.totalPaise !== a.orderPaise + a.feePaise || a.payableNowPaise !== a.advancePaise + a.feePaise ||
+    if (!Number.isInteger(data.advancePercent) || data.advancePercent < 10 || data.advancePercent > 50 ||
+      a.advancePaise !== Math.floor((a.orderPaise * data.advancePercent + 50) / 100) || a.totalPaise !== a.orderPaise + a.feePaise || a.payableNowPaise !== a.advancePaise + a.feePaise ||
       a.collectOnDeliveryPaise !== a.orderPaise - a.advancePaise || Object.values(a).some(n => !Number.isSafeInteger(n) || n < 0)) throw new Error();
     renderAmounts({ full:a.orderPaise,advance:a.advancePaise,fee:a.feePaise,now:a.payableNowPaise,balance:a.collectOnDeliveryPaise,total:a.totalPaise });
-    dialog.querySelector('[data-cod-percent]').textContent = `${Math.round(a.advancePaise * 100 / a.orderPaise)}%`;
+    dialog.querySelector('[data-cod-percent]').textContent = `${data.advancePercent}%`;
     invoice = target.toString(); confirmed = true; blocked = false; status.textContent = labels.saved;
   }
   async function recover() {
@@ -143,10 +148,27 @@
     if (data.state === 'check_existing_payment') { await check(); return; }
     acceptInvoice(data);
   }
+  async function finishPaidCart() {
+    completed = true; blocked = true;
+    const current = await readCart(true);
+    if (await digestCart(current) === sessionStorage.getItem(`${storageKey}:cart`)) {
+      const response = await fetch(`${base}cart/clear.js`, { method:'POST',credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(8000) });
+      if (!response.ok) throw new Error();
+      const empty = await response.json();
+      if (empty.item_count !== 0) throw new Error();
+    }
+    sessionStorage.removeItem(storageKey);
+    sessionStorage.removeItem(`${storageKey}:request`);
+    sessionStorage.removeItem(`${storageKey}:cart`);
+    access = ''; requestKey = ''; invoice = '';
+  }
   async function check() {
     const data = await post({ intent: 'payment_status', access });
     blocked = true; confirmed = false;
     status.textContent = data.state === 'completed' ? labels.completed : data.state === 'awaiting_payment' ? labels.pending : labels.review_required;
+    if (data.state === 'completed') {
+      try { await finishPaidCart(); } catch { status.textContent = labels.completed_cart_pending; }
+    }
     return data.state;
   }
   async function open(source) {
@@ -211,6 +233,7 @@
     event.preventDefault();
     if (next.disabled || loading) return;
     if (!isCod()) { resume(); return; }
+    const addressInput = Object.fromEntries(new FormData(form));
     loading = true; setChoice(); status.textContent = labels.opening;
     try {
       const current = await readCart();
@@ -220,7 +243,7 @@
       if (!fresh.enabled) { loading = false; resume(); return; }
       if (!fresh.canPay) throw new Error();
       if (access || requestKey) { blocked = true; throw new Error(); }
-      const input = Object.fromEntries(new FormData(form));
+      const input = addressInput;
       const phone = String(input.phone || '').replace(/[\s()-]/g, '');
       input.phone = /^[6-9]\d{9}$/.test(phone) ? `+91${phone}` : /^91[6-9]\d{9}$/.test(phone) ? `+${phone}` : phone;
       input.countryCode = 'IN';
@@ -242,12 +265,19 @@
         target.search || target.hash || !/^\/[1-9]\d*\/invoices\/[a-z0-9]+$/.test(target.pathname)) throw new Error();
       const a = data.amounts;
       if (a.orderPaise !== current.total_price || a.feePaise !== fresh.codFeePaise ||
-        a.advancePaise !== Math.floor((a.orderPaise * fresh.advancePercent + 50) / 100) ||
+        data.advancePercent !== fresh.advancePercent || a.advancePaise !== Math.floor((a.orderPaise * fresh.advancePercent + 50) / 100) ||
         a.payableNowPaise !== a.advancePaise + a.feePaise || a.collectOnDeliveryPaise !== a.orderPaise - a.advancePaise ||
         a.totalPaise !== a.orderPaise + a.feePaise) throw new Error();
       config = fresh;
       acceptInvoice(data);
-    } catch { status.textContent = requestKey || access ? labels.review_required : labels.unavailable; }
+    } catch (error) {
+      if (error.quoteNotCreated === true && !access) {
+        sessionStorage.removeItem(`${storageKey}:request`);
+        sessionStorage.removeItem(`${storageKey}:cart`);
+        requestKey = ''; blocked = false;
+      }
+      status.textContent = requestKey || access ? labels.review_required : labels.unavailable;
+    }
     finally { loading = false; setChoice(); }
   });
   setChoice(); dialog.dataset.ready = 'true';
