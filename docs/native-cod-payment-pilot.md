@@ -44,3 +44,7 @@ Post-deploy public app-proxy reads are used to verify both preview settings and 
 https://admin.shopify.com/store/0k9icg-ns/apps/gift-personalizer/app/cod-native-checkout
 
 The next dependent step is merchant-provided delivery details, followed by Prepare checkout. Review the resulting invoice and amount before the merchant performs the real payment. The earlier #1036 remains synthetic proof and must not be described as this genuine native payment test. Customer checkout placement/activation and final acceptance remain pending along with real payment/refund/cancellation/stock/courier checks. No theme or extension was published.
+
+## Prepare-checkout input correction
+
+The first merchant submit returned a generic error and the native checkout table remained empty. No invoice or payment was created by that attempt. The exact failing stage was not exposed by the old route. The pilot now accepts Indian ten-digit/91/+91 phone formats, offers named Indian states, preserves delivery inputs, quantity and the checkout reference on failure, and reports a sanitized stage without logging address, phone or upstream payloads. Local action fixtures verify normalization, retained inputs/reference, pre-draft failures and shop isolation. This correction alone does not establish successful native checkout creation or genuine payment.
