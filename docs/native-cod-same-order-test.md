@@ -28,10 +28,19 @@ This is a synthetic test of order-edit accounting and courier updates. It does *
 - Full-feature and isolated-base TypeScript checks; scoped ESLint; isolated production build.
 - Shopify AI Toolkit validates create/begin/add/commit/read/permission GraphQL against 2026-07. No external state is changed by validation.
 
-## Pending server execution
+## Server and NimbusPost execution confirmed
 
-Render service `srv-dasaieg473hc73fenaag` currently runs commit `1e75383547e87d2be5186751ca421130a0736917`; auto-deploy is off and its configured branch is master. Deploy this isolated candidate by its **specific commit**. Do not use an unqualified trigger-deploy action, which would deploy master. Do not deploy the unfinished full-feature PR17.
+The isolated candidate commit **04b23bb024b85e757628e12b17f7baca139c3161** was deployed to Render service `srv-dasaieg473hc73fenaag` by specific commit, deploy **dep-dbmp0re1egvs73d7uts0**, live **6 November 2026 14:03:35 IST**. Auto-deploy remains off. No schema, secret or dependency changes were needed.
 
-The connected Render browser returned a sign-in page during preparation. No deployment, new Shopify test order, order edit or new NimbusPost check has happened yet. Resume after Render login; verify the exact deployed commit is live, create the test, inspect its imported NimbusPost record, apply the one balance edit, and inspect that same record again. Do not ship or pay on this synthetic test.
+The authenticated operator route, using the installed Cartwala app offline client, created exactly one new TEST **#1036**, Shopify ID **gid://shopify/Order/18981407588537**. Before editing, an independent Shopify API read confirmed PAID, current total ₹130, received ₹130 and outstanding ₹0. NimbusPost automatically imported it at about 14:04 IST in channel Cartwala - 1 as **Prepaid ₹130**.
+
+The one edit action completed with calculated order **gid://shopify/CalculatedOrder/218338590905**. An independent Shopify API read then confirmed the same order ID/name, test=true, PARTIALLY_PAID, current subtotal ₹400, actual shipping row ₹50, current total ₹450, simulated received ₹130 and outstanding ₹320. There are two explicitly nonshipping, nontaxable TEST lines, ₹80 advance goods and ₹320 deferred balance. The durable edit row records observed.phase=completed; its generic state=processing denotes the retained claim, not an active second edit.
+
+After refreshing the NimbusPost order list, the **same record** `/order/details/a198f9b7-e696-40c5-a7df-110ae3d89833` changed automatically from Prepaid ₹130 to **Total ₹450 / Collectable ₹320 / COD**. The record URL was captured before and compared after; it is identical. There was no manual courier edit, duplicate Nimbus order, allocation, booking or wallet action. INCOMPLETE is expected because the test has no shipping address.
+
+Shopify: https://admin.shopify.com/store/0k9icg-ns/orders/18981407588537
+NimbusPost: https://app.nimbuspost.com/order/details/a198f9b7-e696-40c5-a7df-110ae3d89833
+
+This establishes same-order Shopify accounting and the existing channel's automatic Prepaid-to-COD update. It does **not** establish a real native payment, final invoice/tax treatment for actual variants, personalization/stock preservation, cancellation/refund behavior, or a complete customer checkout. The full customer feature remains disabled and the duplicate theme remains unpublished. Do not invite payment on the old disconnected #D1 preview.
 
 Primary Shopify reference: https://shopify.dev/docs/apps/build/orders-fulfillment/order-management-apps/edit-orders
