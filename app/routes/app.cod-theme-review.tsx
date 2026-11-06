@@ -1,11 +1,12 @@
 import { Form, useActionData, useLoaderData, useNavigation, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router";
+import { NATIVE_PREVIEW_PAYMENTS_ENABLED } from "../lib/native-cod-feature";
 import { authenticate } from "../shopify.server";
 import { COD_REVIEW_THEME, loadCodThemeReview, parseReviewCharge, requireReviewShop, saveCodThemeReview } from "../lib/cod-theme-review.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
   requireReviewShop(session.shop);
-  return { settings: await loadCodThemeReview(session.shop), themeId: COD_REVIEW_THEME };
+  return { settings: await loadCodThemeReview(session.shop), themeId: COD_REVIEW_THEME, previewPayments: NATIVE_PREVIEW_PAYMENTS_ENABLED };
 };
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { session } = await authenticate.admin(request);
@@ -28,7 +29,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       revision: Number(revision),
     });
     return { ok: true, message: intent === "toggle"
-      ? form.get("enabled") === "true" ? "Theme review is ON. Advance payments remain disabled." : "Theme review is OFF. Place Order goes directly to normal checkout."
+      ? form.get("enabled") === "true" ? NATIVE_PREVIEW_PAYMENTS_ENABLED ? "Advance COD is ON in the duplicate theme. Preparing a checkout does not charge; paying uses the active Shopify gateway." : "Theme review is ON. Advance payments remain disabled." : "Theme review is OFF. Place Order goes directly to normal checkout."
       : "Preview percentage and charge saved. Refresh the duplicate theme to see them." };
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : "Could not save preview settings." };
@@ -36,13 +37,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 const inr = (paise: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(paise / 100);
 export default function CodThemeReview() {
-  const { settings, themeId } = useLoaderData<typeof loader>();
+  const { settings, themeId, previewPayments } = useLoaderData<typeof loader>();
   const result = useActionData<typeof action>();
   const busy = useNavigation().state !== "idle";
   const advance = Math.floor((40000 * settings.advancePercent + 50) / 100);
   return <s-page heading="Advance COD — theme review">
     <s-section heading="Duplicate theme controls">
-      <p>These settings control only Cartwala Advance COD Review Nov6. They do not enable advance payments or courier orders.</p>
+      <p>These settings control Cartwala Advance COD Review Nov6. The live theme is unchanged. {previewPayments ? "ON allows real Advance COD payment testing in the duplicate theme." : "Advance payments are disabled."}</p>
       {result && <p role={result.ok ? "status" : "alert"}>{result.message}</p>}
       <p>Preview: <strong>{settings.enabled ? "ON" : "OFF"}</strong></p>
       <Form method="post">
@@ -72,7 +73,7 @@ export default function CodThemeReview() {
         <tr><th scope="row">Pay now</th><td>{inr(advance + settings.codFeePaise)}</td></tr>
         <tr><th scope="row">Courier: COD collection</th><td>{inr(40000 - advance)}</td></tr>
       </tbody></table>
-      <p>Actual advance payment, final order accounting and courier synchronization are not active in this review.</p>
+      <p>{previewPayments ? "After successful online payment, the same order shows the full value and remaining COD balance. No courier shipment is booked by this app." : "Advance payments are disabled in this review."}</p>
     </s-section>
   </s-page>;
 }
