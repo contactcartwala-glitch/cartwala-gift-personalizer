@@ -8,7 +8,6 @@
   const storageKey = 'cartwala-native-cod-review-v1';
   const form = dialog.querySelector('form'), status = dialog.querySelector('[role="status"]');
   const next = dialog.querySelector('[data-cod-next]'), recheck = dialog.querySelector('[data-cod-recheck]');
-  const address = dialog.querySelector('[data-cod-address]');
   const radios = [...dialog.querySelectorAll('input[name="cw_cod_choice"]')];
   const money = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(n / 100);
   let config, cart, cartKey = '', origin, loading = false, bypass = false, leaving = false, operation = 0;
@@ -27,7 +26,7 @@
       const result = await fetch(endpoint, { cache: 'no-store', credentials: 'same-origin', signal: AbortSignal.timeout(8000) });
       if (result.ok) native = await result.json();
     } catch { /* Normal prepaid checkout remains available. */ }
-    return { ...value, previewOnly:native?.checkoutAvailable !== true, canPay: (native?.checkoutAvailable === true || (native?.previewCheckoutAvailable === true && native.themeId === dialog.dataset.themeId)) && native.enabled === true &&
+    return { ...value, previewOnly:native?.checkoutAvailable !== true, canPay: native?.collectAddressAtCheckout === true && (native?.checkoutAvailable === true || (native?.previewCheckoutAvailable === true && native.themeId === dialog.dataset.themeId)) && native.enabled === true &&
       native.revision === value.revision && native.advancePercent === value.advancePercent && native.codFeePaise === value.codFeePaise };
   }
   config = { enabled: false, canPay: false };
@@ -41,8 +40,6 @@
     next.hidden = completed;
     const shopping = dialog.querySelector('[data-cod-shopping]');
     if (shopping) shopping.hidden = !completed;
-    address.hidden = !cod;
-    address.querySelectorAll('input,select').forEach(el => { el.disabled = !cod || loading || confirmed || blocked || completed; });
     dialog.querySelector('[data-cod-breakdown]').hidden = !cod;
     recheck.hidden = !(access || requestKey);
     recheck.disabled = loading;
@@ -231,9 +228,8 @@
   });
   form.addEventListener('submit', async event => {
     event.preventDefault();
-    if (next.disabled || loading) return;
+    if (next.disabled || loading || leaving) return;
     if (!isCod()) { resume(); return; }
-    const addressInput = Object.fromEntries(new FormData(form));
     loading = true; setChoice(); status.textContent = labels.opening;
     try {
       const current = await readCart();
@@ -243,17 +239,13 @@
       if (!fresh.enabled) { loading = false; resume(); return; }
       if (!fresh.canPay) throw new Error();
       if (access || requestKey) { blocked = true; throw new Error(); }
-      const input = addressInput;
-      const phone = String(input.phone || '').replace(/[\s()-]/g, '');
-      input.phone = /^[6-9]\d{9}$/.test(phone) ? `+91${phone}` : /^91[6-9]\d{9}$/.test(phone) ? `+${phone}` : phone;
-      input.countryCode = 'IN';
       const fingerprint = await digestCart(current);
       requestKey = crypto.randomUUID();
       sessionStorage.setItem(`${storageKey}:cart`, fingerprint);
       sessionStorage.setItem(`${storageKey}:request`, requestKey);
       if (sessionStorage.getItem(`${storageKey}:request`) !== requestKey) throw new Error();
       blocked = true;
-      const data = await post({ intent: 'create_quote', requestKey, themeId: dialog.dataset.themeId, address: input,
+      const data = await post({ intent: 'create_quote', requestKey, themeId: dialog.dataset.themeId, collectAddressAtCheckout: true,
         lines: current.items.map(i => ({ variantId: `gid://shopify/ProductVariant/${i.variant_id}`, quantity: i.quantity,
           properties: Object.entries(i.properties || {}).map(([name,value]) => ({ name, value: String(value) })) })) });
       if (typeof data.access !== 'string' || !data.access) throw new Error();
@@ -270,6 +262,7 @@
         a.totalPaise !== a.orderPaise + a.feePaise) throw new Error();
       config = fresh;
       acceptInvoice(data);
+      leaving = true; window.location.assign(invoice);
     } catch (error) {
       if (error.quoteNotCreated === true && !access) {
         sessionStorage.removeItem(`${storageKey}:request`);

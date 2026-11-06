@@ -35,7 +35,7 @@ async function scenario(initial, refreshed = initial, opts={}) {
       }
       if(url.endsWith("native-cod")){
         if(options.method==='POST')return {ok:true,json:async()=>opts.post?opts.post(JSON.parse(options.body)):({advancePercent:20,checkoutAvailable:true,access:'TEST_CAPABILITY',checkoutUrl:'https://cartwala.in/80379314361/invoices/test123',amounts:{orderPaise:40000,advancePaise:8000,feePaise:5000,payableNowPaise:13000,collectOnDeliveryPaise:32000,totalPaise:45000}})};
-        return {ok:true,json:async()=>({checkoutAvailable:!!opts.native,previewCheckoutAvailable:!!opts.preview,themeId:"188248228025",enabled:true,revision:initial.revision,advancePercent:refreshed.advancePercent,codFeePaise:refreshed.codFeePaise})};
+        return {ok:true,json:async()=>({collectAddressAtCheckout:opts.addressAtCheckout!==false,checkoutAvailable:!!opts.native,previewCheckoutAvailable:!!opts.preview,themeId:"188248228025",enabled:true,revision:initial.revision,advancePercent:refreshed.advancePercent,codFeePaise:refreshed.codFeePaise})};
       }
       if(url === "/cart/clear.js")return {ok:true,json:async()=>({item_count:0})};
       assert.equal(url, "/cart.js");
@@ -67,24 +67,24 @@ assert.equal(on.values['[data-cod-balance]'].textContent, "₹200.00");
 assert.equal(on.values['[data-cod-total]'].textContent, "₹480.00");
 on.radios[0].checked = false; on.radios[1].checked = true; on.events.cod();
 assert.equal(on.next.disabled, true);
-assert.equal(on.fields[0].disabled,false);
+
 await on.events.form({ preventDefault() {} });
 assert.deepEqual(on.locations, []);
 on.radios[0].checked = true; on.radios[1].checked = false; on.events.prepaid();
 await on.events.form({ preventDefault() {} });
 assert.deepEqual(on.locations, ["https://cartwala.in/checkout"]);
-assert.equal(on.fields[0].disabled,true);
+
 assert(on.calls.every(call => !call.options.method || call.options.method === "GET"));
-console.log("Theme scope, OFF/config failure bypass, refreshed percentage/charge, right-side summary, address field validity, normal prepaid continuation and gated advance payment checks passed.");
+console.log("Theme scope, OFF/config failure bypass, refreshed percentage/charge, right-side summary, no popup address fields, normal prepaid continuation and gated advance payment checks passed.");
 
 const payment=await scenario(valid,valid,{preview:true});await payment.click();
 payment.radios[0].checked=false;payment.radios[1].checked=true;payment.events.cod();
 await Promise.all(Array.from({length:12},()=>payment.events.form({preventDefault(){}})));
 assert.equal(payment.calls.filter(c=>c.options.method==='POST').length,1);
 const sent=JSON.parse(payment.calls.find(c=>c.options.method==='POST').options.body);
-assert.equal(sent.address.firstName,"TEST ONLY");assert.equal(sent.address.phone,'+919876543210');assert.equal(sent.lines[0].properties[0].value,'TEST_ONLY');
+assert.equal(sent.address,undefined);assert.equal(sent.collectAddressAtCheckout,true);assert.equal(sent.lines[0].properties[0].value,'TEST_ONLY');
 assert.equal(payment.values['[data-cod-now]'].textContent,'₹130.00');
-assert.deepEqual(payment.locations,[]);
+assert.deepEqual(payment.locations,['https://cartwala.in/80379314361/invoices/test123']);
 assert.equal(payment.radios[0].disabled,true);
 await payment.events.form({preventDefault(){}});
 assert.deepEqual(payment.locations,['https://cartwala.in/80379314361/invoices/test123']);
@@ -93,12 +93,16 @@ await restored.events.recheck();assert.deepEqual(restored.locations,[]);
 assert.equal(restored.storage.size,0);assert.equal(restored.next.hidden,true);assert.equal(restored.calls.filter(c=>c.url==='/cart/clear.js').length,1);
 assert.equal(restored.calls.filter(c=>c.options.method==='POST'&&c.options.body&&JSON.parse(c.options.body).intent==='create_quote').length,0);
 const foreign=await scenario(valid,valid,{native:true,post:()=>({advancePercent:20,checkoutAvailable:true,access:'TEST_CAPABILITY',checkoutUrl:'https://other.test/80379314361/invoices/test123',amounts:{}})});await foreign.click();foreign.radios[0].checked=false;foreign.radios[1].checked=true;foreign.events.cod();await foreign.events.form({preventDefault(){}});assert.deepEqual(foreign.locations,[]);assert.equal(foreign.next.disabled,true);
-console.log('Gated native integration: twelve-click guard, copied artwork, normalized phone, confirmed amounts, explicit invoice continuation, refresh recovery and foreign URL rejection passed. Fixture requests only.');
+console.log('Gated native integration: twelve-click guard, copied artwork, no address transmission, confirmed amounts, immediate secure checkout continuation, refresh recovery and foreign URL rejection passed. Fixture requests only.');
 
 const otherStorage=new Map(payment.storage);
 otherStorage.set('cartwala-native-cod-review-v1','TEST_CAPABILITY');otherStorage.set('cartwala-native-cod-review-v1:request','12345678-1234-1234-1234-123456789abc');otherStorage.set('cartwala-native-cod-review-v1:cart','different-hash');
 const otherCart=await scenario(valid,valid,{preview:true,storage:otherStorage,post:()=>({state:'completed'})});await otherCart.click();await otherCart.events.recheck();assert.equal(otherCart.calls.filter(c=>c.url==='/cart/clear.js').length,0);assert.equal(otherCart.storage.size,0);
-console.log('Preview-only activation, real disabled-field FormData behavior, locked payment choice, completed-cart cleanup and preservation of a different cart passed.');
+console.log('Preview-only activation, address collected only by Shopify checkout, locked payment choice, completed-cart cleanup and preservation of a different cart passed.');
 
-const invalid=await scenario(valid,valid,{preview:true,post:()=>({error:'Invalid address',quoteNotCreated:true})});await invalid.click();invalid.radios[0].checked=false;invalid.radios[1].checked=true;invalid.events.cod();await invalid.events.form({preventDefault(){}});assert.equal(invalid.storage.size,0);assert.equal(invalid.fields[0].disabled,false);invalid.radios[0].checked=true;invalid.radios[1].checked=false;invalid.events.prepaid();await invalid.events.form({preventDefault(){}});assert.deepEqual(invalid.locations,['https://cartwala.in/checkout']);
+const invalid=await scenario(valid,valid,{preview:true,post:()=>({error:'Invalid address',quoteNotCreated:true})});await invalid.click();invalid.radios[0].checked=false;invalid.radios[1].checked=true;invalid.events.cod();await invalid.events.form({preventDefault(){}});assert.equal(invalid.storage.size,0);invalid.radios[0].checked=true;invalid.radios[1].checked=false;invalid.events.prepaid();await invalid.events.form({preventDefault(){}});assert.deepEqual(invalid.locations,['https://cartwala.in/checkout']);
 console.log('Confirmed pre-draft validation failures release recovery locks and permit corrected address or prepaid; ambiguous invoice failures stay locked.');
+
+const snippet=await fs.readFile("docs/theme-review/preview-nov6/snippets/cw-cod-review.liquid","utf8");assert(!snippet.includes('data-cod-address'));assert(!snippet.includes('name="firstName"'));assert(!snippet.includes('name="phone"'));
+const oldBackend=await scenario(valid,valid,{preview:true,addressAtCheckout:false});await oldBackend.click();oldBackend.radios[0].checked=false;oldBackend.radios[1].checked=true;oldBackend.events.cod();assert.equal(oldBackend.next.disabled,true);
+console.log('Address-free UI waits for compatible backend; no customer name, phone or address inputs are rendered or transmitted.');

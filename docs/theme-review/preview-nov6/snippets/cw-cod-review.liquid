@@ -11,19 +11,6 @@
     <p class="cw-cod-note" id="cw-cod-review-notice">{{ 'cod_review.preview' | t }}</p>
     <form>
       <div class="cw-cod-columns">
-      <section data-cod-address hidden>
-        <h3>{{ 'cod_review.delivery' | t }}</h3>
-        <p>{{ 'cod_review.country' | t }}</p>
-        <div class="cw-cod-fields"><label>{{ 'cod_review.first_name' | t }} <input name="firstName" autocomplete="given-name" maxlength="100" required></label>
-<label>{{ 'cod_review.last_name' | t }} <input name="lastName" autocomplete="family-name" maxlength="100"></label>
-<label>{{ 'cod_review.address' | t }} <input name="address1" autocomplete="address-line1" maxlength="255" required></label>
-<label>{{ 'cod_review.apartment' | t }} <input name="address2" autocomplete="address-line2" maxlength="255"></label>
-<label>{{ 'cod_review.city' | t }} <input name="city" autocomplete="address-level2" maxlength="100" required></label>
-<label>{{ 'cod_review.pin' | t }} <input name="zip" autocomplete="postal-code" maxlength="6" inputmode="numeric" pattern="[1-9][0-9]{5}" required></label>
-<label>{{ 'cod_review.phone' | t }} <input name="phone" autocomplete="tel" maxlength="18" inputmode="tel" pattern="[+0-9 ()-]{10,18}" required></label>
-<label>{{ 'cod_review.state' | t }} <select name="provinceCode" autocomplete="address-level1" required><option value="">{{ 'cod_review.choose_state' | t }}</option><option value="AN">{{ 'cod_review.states.an' | t }}</option><option value="AP">{{ 'cod_review.states.ap' | t }}</option><option value="AR">{{ 'cod_review.states.ar' | t }}</option><option value="AS">{{ 'cod_review.states.as' | t }}</option><option value="BR">{{ 'cod_review.states.br' | t }}</option><option value="CH">{{ 'cod_review.states.ch' | t }}</option><option value="CT">{{ 'cod_review.states.ct' | t }}</option><option value="DH">{{ 'cod_review.states.dh' | t }}</option><option value="DL">{{ 'cod_review.states.dl' | t }}</option><option value="GA">{{ 'cod_review.states.ga' | t }}</option><option value="GJ">{{ 'cod_review.states.gj' | t }}</option><option value="HR">{{ 'cod_review.states.hr' | t }}</option><option value="HP">{{ 'cod_review.states.hp' | t }}</option><option value="JK">{{ 'cod_review.states.jk' | t }}</option><option value="JH">{{ 'cod_review.states.jh' | t }}</option><option value="KA">{{ 'cod_review.states.ka' | t }}</option><option value="KL">{{ 'cod_review.states.kl' | t }}</option><option value="LA">{{ 'cod_review.states.la' | t }}</option><option value="LD">{{ 'cod_review.states.ld' | t }}</option><option value="MP">{{ 'cod_review.states.mp' | t }}</option><option value="MH">{{ 'cod_review.states.mh' | t }}</option><option value="MN">{{ 'cod_review.states.mn' | t }}</option><option value="ML">{{ 'cod_review.states.ml' | t }}</option><option value="MZ">{{ 'cod_review.states.mz' | t }}</option><option value="NL">{{ 'cod_review.states.nl' | t }}</option><option value="OR">{{ 'cod_review.states.or' | t }}</option><option value="PY">{{ 'cod_review.states.py' | t }}</option><option value="PB">{{ 'cod_review.states.pb' | t }}</option><option value="RJ">{{ 'cod_review.states.rj' | t }}</option><option value="SK">{{ 'cod_review.states.sk' | t }}</option><option value="TN">{{ 'cod_review.states.tn' | t }}</option><option value="TS">{{ 'cod_review.states.ts' | t }}</option><option value="TR">{{ 'cod_review.states.tr' | t }}</option><option value="UP">{{ 'cod_review.states.up' | t }}</option><option value="UT">{{ 'cod_review.states.ut' | t }}</option><option value="WB">{{ 'cod_review.states.wb' | t }}</option></select></label>
-        </div>
-      </section>
       <section class="cw-cod-summary">
       <h3>{{ 'cod_review.summary' | t }}</h3>
       <ul data-cod-items class="cw-cod-items"></ul>
