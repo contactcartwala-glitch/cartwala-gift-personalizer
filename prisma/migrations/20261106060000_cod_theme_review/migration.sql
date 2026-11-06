@@ -1,0 +1,8 @@
+CREATE TABLE "CodThemeReviewSettings" (
+  "shop" TEXT PRIMARY KEY,
+  "enabled" BOOLEAN NOT NULL DEFAULT false,
+  "advancePercent" INTEGER NOT NULL DEFAULT 20 CHECK ("advancePercent" BETWEEN 10 AND 50),
+  "codFeePaise" INTEGER NOT NULL DEFAULT 5000 CHECK ("codFeePaise" BETWEEN 0 AND 1000000),
+  "revision" INTEGER NOT NULL DEFAULT 0 CHECK ("revision" >= 0),
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
