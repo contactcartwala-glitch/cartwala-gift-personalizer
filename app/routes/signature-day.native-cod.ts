@@ -15,7 +15,7 @@ export const loader=async({request}:LoaderFunctionArgs)=>{
  const {session}=await authenticate.public.appProxy(request);
  if(!session||session.shop!==COD_REVIEW_SHOP)return Response.json({checkoutAvailable:false},{status:404,headers});
  const settings=await loadCodThemeReview(session.shop);
- return Response.json({...settings,checkoutAvailable:NATIVE_CUSTOMER_PAYMENTS_ENABLED&&settings.enabled,previewCheckoutAvailable:NATIVE_PREVIEW_PAYMENTS_ENABLED&&settings.enabled,themeId:COD_REVIEW_THEME},{headers});
+ return Response.json({...settings,checkoutAvailable:NATIVE_CUSTOMER_PAYMENTS_ENABLED&&settings.enabled,previewCheckoutAvailable:NATIVE_PREVIEW_PAYMENTS_ENABLED&&settings.enabled,themeId:COD_REVIEW_THEME,collectAddressAtCheckout:true},{headers});
 };
 export const action=async({request}:ActionFunctionArgs)=>{
  const {session}=await authenticate.public.appProxy(request);
@@ -45,8 +45,9 @@ export const action=async({request}:ActionFunctionArgs)=>{
   quoteNotCreated=true;
   const recent=await db.query<{count:bigint}>(`SELECT COUNT(*) AS "count" FROM "NativeCodCheckout" WHERE "shop"=$1 AND "createdAt">CURRENT_TIMESTAMP-INTERVAL '1 minute'`,[session.shop]);
   if(Number(recent[0]?.count??60)>=60)return Response.json({error:"Try again shortly",quoteNotCreated:true},{status:429,headers});
-  const frozen=await calculateCodQuote(admin,input,settings.advancePercent,settings.codFeePaise);
-  const plan=await prepareNativeCodPlan(admin,{id,shop:session.shop,appClientId:"3879fe641910f37451baf743e76059ee",accounting:frozen.accountingSnapshot,address:frozen.shippingAddress,percent:settings.advancePercent,feePaise:settings.codFeePaise});
+  const collectAddressAtCheckout=input.collectAddressAtCheckout===true;
+  const frozen=await calculateCodQuote(admin,input,settings.advancePercent,settings.codFeePaise,collectAddressAtCheckout);
+  const plan=await prepareNativeCodPlan(admin,{id,shop:session.shop,appClientId:"3879fe641910f37451baf743e76059ee",accounting:frozen.accountingSnapshot,address:frozen.shippingAddress,collectAddressAtCheckout,percent:settings.advancePercent,feePaise:settings.codFeePaise});
   if(!NATIVE_CUSTOMER_PAYMENTS_ENABLED){
    const tags=plan.input.tags;if(!Array.isArray(tags)||tags.some(t=>typeof t!=="string"))throw new Error();
    plan.input.tags=[...tags,"CARTWALA PREVIEW - DO NOT SHIP"];

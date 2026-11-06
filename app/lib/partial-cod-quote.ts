@@ -19,8 +19,8 @@ function object(value: unknown): Record<string, unknown> {
 }
 
 /** Copies only supported fields. Client prices, taxes and discounts are never used. */
-export function buildCodQuoteInput(value: unknown) {
-  const data = object(value), address = object(data.address);
+export function buildCodQuoteInput(value: unknown, collectAddressAtCheckout = false) {
+  const data = object(value), address = collectAddressAtCheckout ? undefined : object(data.address);
   if (!Array.isArray(data.lines) || !data.lines.length || data.lines.length > 100)
     throw new Error("Choose between one and 100 cart lines");
   const lines: PersonalisedLine[] = data.lines.map(value => {
@@ -40,15 +40,15 @@ export function buildCodQuoteInput(value: unknown) {
       }),
     };
   });
-  const shippingAddress: CodAddress = {
+  const shippingAddress: CodAddress | undefined = address ? {
     firstName: text(address.firstName, 100), lastName: text(address.lastName ?? "", 100, false),
     address1: text(address.address1, 255), address2: text(address.address2 ?? "", 255, false),
     city: text(address.city, 100), provinceCode: text(address.provinceCode, 2),
     zip: text(address.zip, 6), phone: text(address.phone, 13), countryCode: "IN",
-  };
-  if (address.countryCode !== "IN" || !/^[1-9]\d{5}$/.test(shippingAddress.zip) ||
+  } : undefined;
+  if (shippingAddress && (address?.countryCode !== "IN" || !/^[1-9]\d{5}$/.test(shippingAddress.zip) ||
       !/^\+91[6-9]\d{9}$/.test(shippingAddress.phone) ||
-      !/^[A-Z]{2}$/.test(shippingAddress.provinceCode)) throw new Error("Enter a valid Indian delivery address and phone");
+      !/^[A-Z]{2}$/.test(shippingAddress.provinceCode))) throw new Error("Enter a valid Indian delivery address and phone");
   const discountCodes = data.discountCodes ?? [];
   if (!Array.isArray(discountCodes) || discountCodes.length > 5) throw new Error("Invalid discount codes");
   return {
@@ -56,7 +56,7 @@ export function buildCodQuoteInput(value: unknown) {
     input: {
       lineItems: lines.map(line => ({ uuid: randomUUID(), variantId: line.variantId, quantity: line.quantity,
         customAttributes: line.properties.map(property => ({ key: property.name, value: property.value })) })),
-      shippingAddress, presentmentCurrencyCode: "INR", acceptAutomaticDiscounts: true,
+      ...(shippingAddress ? { shippingAddress } : { useCustomerDefaultAddress: false }), presentmentCurrencyCode: "INR", acceptAutomaticDiscounts: true,
       discountCodes: discountCodes.map(code => text(code, 255)), allowDiscountCodesInCheckout: false,
       shippingLine: { title: "Free shipping", priceWithCurrency: { amount: "0.00", currencyCode: "INR" } },
     },

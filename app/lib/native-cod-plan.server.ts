@@ -6,7 +6,7 @@ import { codOrderBreakdown } from "./cod-order-breakdown";
 import { nativeCodGraphql, nativeCodQuoteReference, NATIVE_COD_BALANCE_TITLE,
   type NativeCodAdmin, type NativeCodContext, type NativeAdvanceLine } from "./native-cod-payment.server";
 export type NativeCodQuote = Omit<NativeCodContext,"draftId"|"orderId">;
-export type NativeCodPlan = {quote:NativeCodQuote;address:CodAddress;input:Record<string,unknown>};
+export type NativeCodPlan = {quote:NativeCodQuote;address:CodAddress | undefined;input:Record<string,unknown>};
 const rupees=(p:number)=>(p/100).toFixed(2);
 export const NATIVE_CALCULATE = `mutation NativeCodCalculate($input:DraftOrderInput!) { draftOrderCalculate(input:$input) {
  userErrors {field message} calculatedDraftOrder { currencyCode presentmentCurrencyCode taxesIncluded
@@ -51,10 +51,11 @@ async function calculate(admin:NativeCodAdmin,input:Record<string,unknown>,expec
  return {taxPaise:inrPaise(c.totalTaxSet),taxesIncluded:c.taxesIncluded as boolean,signatures,rates};
 }
 /** All source prices come from authenticated Shopify calculations, never browser prices. */
-export async function prepareNativeCodPlan(admin:NativeCodAdmin,source:{id:string;shop:string;appClientId:string;accounting:FrozenCodAccounting;address:CodAddress;percent:number;feePaise:number}):Promise<NativeCodPlan>{
+export async function prepareNativeCodPlan(admin:NativeCodAdmin,source:{id:string;shop:string;appClientId:string;accounting:FrozenCodAccounting;address?:CodAddress;collectAddressAtCheckout?:boolean;percent:number;feePaise:number}):Promise<NativeCodPlan>{
  const frozen=readCodAccounting(source.accounting),breakdown=codOrderBreakdown(frozen.orderPaise,source.percent,source.feePaise),a=breakdown.amounts;
- const address=buildCodQuoteInput({address:source.address,lines:frozen.lines.map(l=>({variantId:l.variantId,quantity:l.quantity,properties:l.properties}))}).shippingAddress;
- const common={presentmentCurrencyCode:"INR",acceptAutomaticDiscounts:false,allowDiscountCodesInCheckout:false,shippingAddress:address,
+ if(source.collectAddressAtCheckout && !frozen.taxesIncluded)throw new Error("Address-free checkout requires tax-inclusive pricing");
+ const address=buildCodQuoteInput({address:source.address,lines:frozen.lines.map(l=>({variantId:l.variantId,quantity:l.quantity,properties:l.properties}))},source.collectAddressAtCheckout).shippingAddress;
+ const common={presentmentCurrencyCode:"INR",acceptAutomaticDiscounts:false,allowDiscountCodesInCheckout:false,...(address?{shippingAddress:address}:{useCustomerDefaultAddress:false}),
   shippingLine:{title:"Shipping / COD charge",priceWithCurrency:{amount:rupees(source.feePaise),currencyCode:"INR"}}};
  const original:NativeAdvanceLine[]=frozen.lines.map(l=>({variantId:l.variantId,title:"Personalized goods",quantity:l.quantity,unitPaise:l.unitPaise,requiresShipping:l.requiresShipping,taxable:l.taxable,attributes:l.properties.map(p=>({key:p.name,value:p.value}))}));
  const full=await calculate(admin,{...common,lineItems:draftLines(original)},a.totalPaise,source.feePaise,original);
