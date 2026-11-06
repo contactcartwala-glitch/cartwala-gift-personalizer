@@ -31,7 +31,6 @@ export const action=async({request}:ActionFunctionArgs)=>{
    return Response.json(await reconcileNativeCheckout(db,admin,session.shop,id),{headers});
   }
   const settings=await loadCodThemeReview(session.shop);
-  if(!NATIVE_CUSTOMER_PAYMENTS_ENABLED||!settings.enabled||input.themeId!==COD_REVIEW_THEME)return Response.json({error:"Advance COD unavailable. Use full prepaid checkout."},{status:503,headers});
   if(input.intent!=="create_quote")throw new Error();
   if(typeof input.requestKey!=="string"||!/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(input.requestKey))throw new Error();
   const id=input.requestKey;
@@ -41,6 +40,7 @@ export const action=async({request}:ActionFunctionArgs)=>{
    if(link.paid)return Response.json({checkoutAvailable:false,state:"check_existing_payment",access:issueCodAccess(session.shop,id,process.env.SHOPIFY_API_SECRET||"")},{headers});
    return Response.json({checkoutAvailable:true,checkoutUrl:link.url,access:issueCodAccess(session.shop,id,process.env.SHOPIFY_API_SECRET||""),amounts:nativeCodQuoteReference(row.quote).amounts},{headers});
   }
+  if(!NATIVE_CUSTOMER_PAYMENTS_ENABLED||!settings.enabled||input.themeId!==COD_REVIEW_THEME)return Response.json({error:"Advance COD unavailable. Use full prepaid checkout."},{status:503,headers});
   const recent=await db.query<{count:bigint}>(`SELECT COUNT(*) AS "count" FROM "NativeCodCheckout" WHERE "shop"=$1 AND "createdAt">CURRENT_TIMESTAMP-INTERVAL '1 minute'`,[session.shop]);
   if(Number(recent[0]?.count??60)>=60)return Response.json({error:"Try again shortly"},{status:429,headers});
   const frozen=await calculateCodQuote(admin,input,settings.advancePercent,settings.codFeePaise);
