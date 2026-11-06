@@ -19,7 +19,7 @@ function object(value: unknown): Record<string, unknown> {
 }
 
 /** Copies only supported fields. Client prices, taxes and discounts are never used. */
-export function buildCodQuoteInput(value: unknown, collectAddressAtCheckout = false) {
+export function buildCodQuoteInput<Collect extends boolean = false>(value: unknown, collectAddressAtCheckout: Collect = false as Collect) {
   const data = object(value), address = collectAddressAtCheckout ? undefined : object(data.address);
   if (!Array.isArray(data.lines) || !data.lines.length || data.lines.length > 100)
     throw new Error("Choose between one and 100 cart lines");
@@ -52,7 +52,7 @@ export function buildCodQuoteInput(value: unknown, collectAddressAtCheckout = fa
   const discountCodes = data.discountCodes ?? [];
   if (!Array.isArray(discountCodes) || discountCodes.length > 5) throw new Error("Invalid discount codes");
   return {
-    lines, shippingAddress,
+    lines, shippingAddress: shippingAddress as Collect extends false ? CodAddress : CodAddress | undefined,
     input: {
       lineItems: lines.map(line => ({ uuid: randomUUID(), variantId: line.variantId, quantity: line.quantity,
         customAttributes: line.properties.map(property => ({ key: property.name, value: property.value })) })),
