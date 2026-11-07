@@ -10,6 +10,7 @@ const stubs={
  'cod-theme-review.server':`export const COD_REVIEW_SHOP=${JSON.stringify(shop)},COD_REVIEW_THEME='188248228025',loadCodThemeReview=(...a)=>globalThis.__nativeProxy.settings(...a);`,
  'partial-cod-quote.server':'export const calculateCodQuote=async(admin,input,percent,fee,collectAddressAtCheckout)=>{globalThis.__nativeProxy.addressAtCheckout=collectAddressAtCheckout;if(globalThis.__nativeProxy.failQuote)throw Error("invalid address");return {accountingSnapshot:{},shippingAddress:{},amounts:{payableNowPaise:13000}};};',
  'native-cod-plan.server':'export const prepareNativeCodPlan=async()=>({input:{tags:[]}});',
+ 'native-cod-discount.server':'export const hasNativeCodDiscountAccess=async()=>false,authorizeNativeCodDiscount=async(code)=>code;',
  'native-cod-hooks.server':'export const ensureNativeCodHooks=()=>{};',
  'native-cod-checkout.server':'export const createNativeCheckout=(...a)=>globalThis.__nativeProxy.create(...a),nativeCheckoutLink=(...a)=>globalThis.__nativeProxy.link(...a),readNativeCheckout=(...a)=>globalThis.__nativeProxy.read(...a),reconcileNativeCheckout=async()=>({state:"awaiting_payment"});',
  'native-cod-payment.server':'export const nativeCodQuoteReference=(...a)=>globalThis.__nativeProxy.reference(...a);',

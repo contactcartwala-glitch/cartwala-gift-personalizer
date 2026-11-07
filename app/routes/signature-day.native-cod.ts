@@ -8,6 +8,7 @@ import {prepareNativeCodPlan} from "../lib/native-cod-plan.server";
 import {ensureNativeCodHooks} from "../lib/native-cod-hooks.server";
 import {createNativeCheckout,reconcileNativeCheckout,nativeCheckoutLink,readNativeCheckout} from "../lib/native-cod-checkout.server";
 import {nativeCodQuoteReference} from "../lib/native-cod-payment.server";
+import {authorizeNativeCodDiscount,hasNativeCodDiscountAccess} from "../lib/native-cod-discount.server";
 import {issueCodAccess,readCodAccess} from "../lib/partial-cod-access.server";
 const db={query:<T,>(sql:string,p:unknown[])=>prisma.$queryRawUnsafe<T[]>(sql,...p)};
 const headers={"Cache-Control":"no-store"};
@@ -15,7 +16,11 @@ export const loader=async({request}:LoaderFunctionArgs)=>{
  const {session}=await authenticate.public.appProxy(request);
  if(!session||session.shop!==COD_REVIEW_SHOP)return Response.json({checkoutAvailable:false},{status:404,headers});
  const settings=await loadCodThemeReview(session.shop);
- return Response.json({...settings,checkoutAvailable:NATIVE_CUSTOMER_PAYMENTS_ENABLED&&settings.enabled,previewCheckoutAvailable:NATIVE_PREVIEW_PAYMENTS_ENABLED&&settings.enabled,themeId:COD_REVIEW_THEME,collectAddressAtCheckout:true},{headers});
+ let discountCodesAvailable=false;
+ if(settings.enabled){
+  try{const {admin}=await unauthenticated.admin(session.shop);discountCodesAvailable=await hasNativeCodDiscountAccess(admin,session.shop);}catch{/* Discount access is optional. */}
+ }
+ return Response.json({...settings,checkoutAvailable:NATIVE_CUSTOMER_PAYMENTS_ENABLED&&settings.enabled,previewCheckoutAvailable:NATIVE_PREVIEW_PAYMENTS_ENABLED&&settings.enabled,themeId:COD_REVIEW_THEME,collectAddressAtCheckout:true,discountCodesAvailable},{headers});
 };
 export const action=async({request}:ActionFunctionArgs)=>{
  const {session}=await authenticate.public.appProxy(request);
@@ -32,6 +37,15 @@ export const action=async({request}:ActionFunctionArgs)=>{
    return Response.json(await reconcileNativeCheckout(db,admin,session.shop,id),{headers});
   }
   const settings=await loadCodThemeReview(session.shop);
+  if(input.intent==="preview_discount"){
+   if(!NATIVE_PREVIEW_PAYMENTS_ENABLED||!settings.enabled||input.themeId!==COD_REVIEW_THEME)return Response.json({error:"Unavailable"},{status:503,headers});
+   try{
+    const code=await authorizeNativeCodDiscount(admin,input.discountCode);
+    const frozen=await calculateCodQuote(admin,{lines:input.lines},settings.advancePercent,settings.codFeePaise,true,code);
+    if(!frozen.accountingSnapshot.taxesIncluded)throw new Error();
+    return Response.json({discount:frozen.discount,advancePercent:settings.advancePercent,amounts:frozen.amounts},{headers});
+   }catch{return Response.json({error:"This discount cannot be applied to Advance COD. Try it in full payment checkout."},{status:400,headers});}
+  }
   if(input.intent!=="create_quote")throw new Error();
   if(typeof input.requestKey!=="string"||!/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(input.requestKey))throw new Error();
   const id=input.requestKey;
@@ -39,15 +53,19 @@ export const action=async({request}:ActionFunctionArgs)=>{
   if(existing.length){
    const row=await readNativeCheckout(db,session.shop,id),link=await nativeCheckoutLink(db,admin,session.shop,id);
    if(link.paid)return Response.json({checkoutAvailable:false,state:"check_existing_payment",access:issueCodAccess(session.shop,id,process.env.SHOPIFY_API_SECRET||"")},{headers});
-   return Response.json({checkoutAvailable:true,checkoutUrl:link.url,access:issueCodAccess(session.shop,id,process.env.SHOPIFY_API_SECRET||""),advancePercent:row.quote.advancePercent,amounts:nativeCodQuoteReference(row.quote).amounts},{headers});
+   return Response.json({checkoutAvailable:true,checkoutUrl:link.url,access:issueCodAccess(session.shop,id,process.env.SHOPIFY_API_SECRET||""),advancePercent:row.quote.advancePercent,discount:row.quote.discount,amounts:nativeCodQuoteReference(row.quote).amounts},{headers});
   }
   if(!(NATIVE_CUSTOMER_PAYMENTS_ENABLED||NATIVE_PREVIEW_PAYMENTS_ENABLED)||!settings.enabled||input.themeId!==COD_REVIEW_THEME)return Response.json({error:"Advance COD unavailable. Use full prepaid checkout.",quoteNotCreated:true},{status:503,headers});
   quoteNotCreated=true;
   const recent=await db.query<{count:bigint}>(`SELECT COUNT(*) AS "count" FROM "NativeCodCheckout" WHERE "shop"=$1 AND "createdAt">CURRENT_TIMESTAMP-INTERVAL '1 minute'`,[session.shop]);
   if(Number(recent[0]?.count??60)>=60)return Response.json({error:"Try again shortly",quoteNotCreated:true},{status:429,headers});
   const collectAddressAtCheckout=input.collectAddressAtCheckout===true;
-  const frozen=await calculateCodQuote(admin,input,settings.advancePercent,settings.codFeePaise,collectAddressAtCheckout);
-  const plan=await prepareNativeCodPlan(admin,{id,shop:session.shop,appClientId:"3879fe641910f37451baf743e76059ee",accounting:frozen.accountingSnapshot,address:frozen.shippingAddress,collectAddressAtCheckout,percent:settings.advancePercent,feePaise:settings.codFeePaise});
+  const code=input.discountCode===undefined?undefined:await authorizeNativeCodDiscount(admin,input.discountCode);
+  const frozen=await calculateCodQuote(admin,{...input,discountCodes:[]},settings.advancePercent,settings.codFeePaise,collectAddressAtCheckout,code);
+  if(code && (input.expectedGoodsPaise!==frozen.amounts.orderPaise || input.expectedAdvancePercent!==settings.advancePercent ||
+      input.expectedFeePaise!==settings.codFeePaise || input.expectedDiscountPaise!==frozen.discount?.discountPaise))
+   return Response.json({error:"Discount or amounts changed. Apply the code again.",quoteNotCreated:true,discountChanged:true},{status:409,headers});
+  const plan=await prepareNativeCodPlan(admin,{id,shop:session.shop,appClientId:"3879fe641910f37451baf743e76059ee",accounting:frozen.accountingSnapshot,address:frozen.shippingAddress,collectAddressAtCheckout,discount:frozen.discount,percent:settings.advancePercent,feePaise:settings.codFeePaise});
   if(!NATIVE_CUSTOMER_PAYMENTS_ENABLED){
    const tags=plan.input.tags;if(!Array.isArray(tags)||tags.some(t=>typeof t!=="string"))throw new Error();
    plan.input.tags=[...tags,"CARTWALA PREVIEW - DO NOT SHIP"];
@@ -56,6 +74,6 @@ export const action=async({request}:ActionFunctionArgs)=>{
   await ensureNativeCodHooks(admin);
   quoteNotCreated=false;
   const link=await createNativeCheckout(db,admin,plan);if(link.paid)throw new Error();
-  return Response.json({checkoutAvailable:true,checkoutUrl:link.url,access:issueCodAccess(session.shop,id,process.env.SHOPIFY_API_SECRET||""),advancePercent:settings.advancePercent,amounts:frozen.amounts},{headers});
+  return Response.json({checkoutAvailable:true,checkoutUrl:link.url,access:issueCodAccess(session.shop,id,process.env.SHOPIFY_API_SECRET||""),advancePercent:settings.advancePercent,discount:frozen.discount,amounts:frozen.amounts},{headers});
  }catch{return Response.json({quoteNotCreated,error:"Checkout could not be confirmed. Check the existing payment before paying again; use full prepaid for unsupported carts."},{status:400,headers});}
 };

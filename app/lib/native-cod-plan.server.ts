@@ -4,7 +4,7 @@ import { buildCodQuoteInput, type CodAddress } from "./partial-cod-quote";
 import { inrPaise } from "./partial-cod-payment";
 import { codOrderBreakdown } from "./cod-order-breakdown";
 import { nativeCodGraphql, nativeCodQuoteReference, NATIVE_COD_BALANCE_TITLE,
-  type NativeCodAdmin, type NativeCodContext, type NativeAdvanceLine } from "./native-cod-payment.server";
+  type NativeCodAdmin, type NativeCodContext, type NativeAdvanceLine, type NativeCodDiscount } from "./native-cod-payment.server";
 export type NativeCodQuote = Omit<NativeCodContext,"draftId"|"orderId">;
 export type NativeCodPlan = {quote:NativeCodQuote;address:CodAddress | undefined;input:Record<string,unknown>};
 const rupees=(p:number)=>(p/100).toFixed(2);
@@ -20,10 +20,11 @@ const attrs=(v:Array<{key:string;value:string}>)=>JSON.stringify([...v].sort((a,
 export function allocateNativeAdvance(frozen:FrozenCodAccounting,advancePaise:number):NativeAdvanceLine[]{
  const source=readCodAccounting(frozen);
  if(!source.taxesIncluded&&source.taxPaise!==0)throw new Error("Tax-exclusive native advance is unsupported");
- let allocated=0;
+ let allocated=0, goodsSoFar=0;
  return source.lines.flatMap((l,index)=>{
   if(l.properties.length>97)throw new Error("Too many artwork properties");
-  const budget=index===source.lines.length-1?advancePaise-allocated:Math.floor(advancePaise*l.unitPaise*l.quantity/source.orderPaise);
+  goodsSoFar+=l.unitPaise*l.quantity;
+  const budget=(index===source.lines.length-1?advancePaise:Math.floor(advancePaise*goodsSoFar/source.orderPaise))-allocated;
   allocated+=budget;
   const low=Math.floor(budget/l.quantity),highQuantity=budget%l.quantity;
   return [{unitPaise:low,quantity:l.quantity-highQuantity,chunk:"base"},{unitPaise:low+1,quantity:highQuantity,chunk:"rounding"}]
@@ -51,7 +52,7 @@ async function calculate(admin:NativeCodAdmin,input:Record<string,unknown>,expec
  return {taxPaise:inrPaise(c.totalTaxSet),taxesIncluded:c.taxesIncluded as boolean,signatures,rates};
 }
 /** All source prices come from authenticated Shopify calculations, never browser prices. */
-export async function prepareNativeCodPlan(admin:NativeCodAdmin,source:{id:string;shop:string;appClientId:string;accounting:FrozenCodAccounting;address?:CodAddress;collectAddressAtCheckout?:boolean;percent:number;feePaise:number}):Promise<NativeCodPlan>{
+export async function prepareNativeCodPlan(admin:NativeCodAdmin,source:{id:string;shop:string;appClientId:string;accounting:FrozenCodAccounting;address?:CodAddress;collectAddressAtCheckout?:boolean;discount?:NativeCodDiscount;percent:number;feePaise:number}):Promise<NativeCodPlan>{
  const frozen=readCodAccounting(source.accounting),breakdown=codOrderBreakdown(frozen.orderPaise,source.percent,source.feePaise),a=breakdown.amounts;
  if(source.collectAddressAtCheckout && !frozen.taxesIncluded)throw new Error("Address-free checkout requires tax-inclusive pricing");
  const address=buildCodQuoteInput({address:source.address,lines:frozen.lines.map(l=>({variantId:l.variantId,quantity:l.quantity,properties:l.properties}))},source.collectAddressAtCheckout).shippingAddress;
@@ -74,10 +75,12 @@ export async function prepareNativeCodPlan(admin:NativeCodAdmin,source:{id:strin
   [...initial.signatures,...completed.signatures].some(signature=>signature!==full.signatures[0])||
   Math.abs(completed.taxPaise-full.taxPaise)>roundingAllowance)
   throw new Error("Deferred balance tax differs from full goods invoice; use prepaid");
- const quote:NativeCodQuote={id:source.id,shop:source.shop,appClientId:source.appClientId,test:false,goodsPaise:a.orderPaise,advancePercent:source.percent,
+ const quote:NativeCodQuote={id:source.id,shop:source.shop,appClientId:source.appClientId,test:false,...(source.discount?{discount:source.discount}:{}),goodsPaise:a.orderPaise,advancePercent:source.percent,
   shippingPaise:source.feePaise,taxesIncluded:full.taxesIncluded,initialTaxPaise:initial.taxPaise,completedTaxPaise:completed.taxPaise,balanceTaxable,lines};
  const reference=nativeCodQuoteReference(quote);
  return {quote,address,input:{...common,lineItems:items,tags:[`CW-NATIVE-${source.id}`,"Advance COD"],
-  customAttributes:[...breakdown.attributes.filter(p=>p.key!=="Online amount received"),{key:"Pay now",value:`₹${rupees(a.payableNowPaise)}`},...reference.attributes],
+  customAttributes:[...(source.discount?[{key:"Discount code",value:source.discount.code},
+   {key:"Discount amount",value:`₹${rupees(source.discount.discountPaise)}`},
+   {key:"Original goods amount",value:`₹${rupees(source.discount.originalPaise)}`}]:[]),...breakdown.attributes.filter(p=>p.key!=="Online amount received"),{key:"Pay now",value:`₹${rupees(a.payableNowPaise)}`},...reference.attributes],
   note:`Advance COD: full order ₹${rupees(a.totalPaise)}. Pay ₹${rupees(a.payableNowPaise)} now, including ₹${rupees(source.feePaise)} shipping/COD charge. Pay ₹${rupees(a.collectOnDeliveryPaise)} on delivery. This is a partial payment, not a discount.`}};
 }

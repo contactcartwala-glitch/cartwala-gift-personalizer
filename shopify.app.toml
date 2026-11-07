@@ -26,6 +26,7 @@ api_version = "2026-07"
 
 [access_scopes]
 scopes = "read_files,read_orders,read_products,write_files,write_products,write_app_proxy,write_orders,write_draft_orders,write_order_edits"
+optional_scopes = ["read_discounts"]
 
 [app_proxy]
 url = "/signature-day"

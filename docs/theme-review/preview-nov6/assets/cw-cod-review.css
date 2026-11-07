@@ -25,3 +25,11 @@
 [data-cw-cod-review] .cw-cod-items img{width:48px;height:48px;object-fit:contain;border-radius:6px}
 [data-cw-cod-review] [data-cod-recheck]{width:100%;min-height:44px;margin-bottom:12px;border:1px solid #c54c00;background:#fff;color:#a33e00;border-radius:8px}
 @media(max-width:680px){[data-cw-cod-review] .cw-cod-columns{grid-template-columns:1fr;gap:16px}[data-cw-cod-review] .cw-cod-summary{grid-column:auto}[data-cw-cod-review]{padding:18px}}
+
+[data-cw-cod-review] [data-cod-next][aria-busy=true]::before{content:"";display:inline-block;width:16px;height:16px;margin-right:9px;vertical-align:-3px;border:2px solid #fff7;border-top-color:#fff;border-radius:50%;animation:cw-cod-spin .75s linear infinite}
+@keyframes cw-cod-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){[data-cw-cod-review] [data-cod-next][aria-busy=true]::before{animation:none}}
+[data-cw-cod-review] .cw-cod-discount{margin:16px 0}
+[data-cw-cod-review] .cw-cod-discount div{display:flex;gap:8px;align-items:center}
+[data-cw-cod-review] .cw-cod-discount input{flex:1;min-width:0;width:auto;height:42px;margin:0;padding:8px;border:1px solid #bbb;border-radius:8px}
+[data-cw-cod-review] .cw-cod-discount button{min-height:42px;padding:8px 14px;border:1px solid #c54c00;border-radius:8px;background:#fff;color:#a33e00}

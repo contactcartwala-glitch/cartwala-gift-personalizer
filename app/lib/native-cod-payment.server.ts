@@ -11,8 +11,10 @@ export type NativeAdvanceLine = { variantId: string | null; title: string; quant
 /** Internal frozen quote only. Never construct this from a browser payment-success payload.
  * Tax amounts must come from authenticated Shopify calculations before payment starts.
  */
+export type NativeCodDiscount = {code:string; discountPaise:number; originalPaise:number};
 export type NativeCodContext = {
   id: string; shop: string; appClientId: string; draftId: string; orderId: string; test: boolean;
+  discount?: NativeCodDiscount;
   goodsPaise: number; advancePercent: number; shippingPaise: number; taxesIncluded: boolean;
   initialTaxPaise: number; completedTaxPaise: number; balanceTaxable: boolean; lines: NativeAdvanceLine[];
 };
@@ -37,6 +39,10 @@ export function nativeCodQuoteReference(context: NativeCodQuote) {
       !Array.isArray(context.lines) || !context.lines.length || context.lines.length > 200)
     throw new Error("Invalid native checkout context");
   const amounts = calculatePartialCod(context.goodsPaise, context.advancePercent, context.shippingPaise);
+  const discount = context.discount;
+  if (discount && (!/^[A-Za-z0-9_-]{1,64}$/.test(discount.code) || !Number.isSafeInteger(discount.discountPaise) ||
+      discount.discountPaise <= 0 || !Number.isSafeInteger(discount.originalPaise) ||
+      discount.originalPaise !== context.goodsPaise + discount.discountPaise)) throw new Error("Invalid frozen discount");
   for (const line of context.lines) {
     if ((!context.test && !line.variantId) || (line.variantId && !/^gid:\/\/shopify\/ProductVariant\/[1-9]\d*$/.test(line.variantId)) ||
         !safeText(line.title, 255) || !Number.isSafeInteger(line.quantity) || line.quantity < 1 || line.quantity > 1000 ||
@@ -57,6 +63,7 @@ export function nativeCodQuoteReference(context: NativeCodQuote) {
     advancePercent: context.advancePercent, shippingPaise: context.shippingPaise,
     taxesIncluded: context.taxesIncluded, initialTaxPaise: context.initialTaxPaise,
     completedTaxPaise: context.completedTaxPaise, balanceTaxable: context.balanceTaxable,
+    ...(discount ? {discount:{code:discount.code,discountPaise:discount.discountPaise,originalPaise:discount.originalPaise}} : {}),
     lines: context.lines.map(l => ({ variantId: l.variantId, title: l.title, quantity: l.quantity,
       unitPaise: l.unitPaise, requiresShipping: l.requiresShipping, taxable: l.taxable,
       attributes: JSON.parse(propertyKey(l.attributes)) })) })).digest("hex");

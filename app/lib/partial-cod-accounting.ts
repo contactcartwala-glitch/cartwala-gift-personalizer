@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { calculatePartialCod, type PersonalisedLine } from "./partial-cod";
 import { inrPaise } from "./partial-cod-payment";
 
@@ -34,25 +35,32 @@ function propertyKey(properties: ReadonlyArray<{ name: string; value: string }>)
 
 /** Retain exact server prices/taxes. Unsupported discounts/bundles stop before payment. */
 export function freezeCodAccounting(calculated: CalculatedCodAccounting,
-  source: ReadonlyArray<PersonalisedLine>, lineIds: ReadonlyArray<string>): FrozenCodAccounting {
+  source: ReadonlyArray<PersonalisedLine>, lineIds: ReadonlyArray<string>, allowMerchandiseDiscount = false): FrozenCodAccounting {
   if (calculated.currencyCode !== "INR" || calculated.presentmentCurrencyCode !== "INR" ||
-      inrPaise(calculated.totalShippingPriceSet) !== 0 || inrPaise(calculated.totalDiscountsSet) !== 0 ||
+      inrPaise(calculated.totalShippingPriceSet) !== 0 || (!allowMerchandiseDiscount && inrPaise(calculated.totalDiscountsSet) !== 0) ||
       !Array.isArray(calculated.lineItems) || calculated.lineItems.length !== source.length ||
       source.length !== lineIds.length || new Set(lineIds).size !== lineIds.length) fail();
   const byId = new Map(calculated.lineItems.map(line => [line.uuid, line]));
   if (byId.size !== source.length) fail();
-  const lines = source.map((line, index) => {
+  let allocatedDiscount = 0;
+  const lines = source.flatMap((line, index) => {
     const priced = byId.get(lineIds[index]);
     if (!priced || priced.variant?.id !== line.variantId || priced.quantity !== line.quantity ||
         priced.custom || priced.isGiftCard || !Array.isArray(priced.components) || priced.components.length ||
-        inrPaise(priced.totalDiscountSet) !== 0 ||
-        inrPaise(priced.originalTotalSet) !== inrPaise(priced.discountedTotalSet) ||
         propertyKey(priced.customAttributes.map(p => ({ name: p.key, value: p.value }))) !== propertyKey(line.properties)) fail();
     const unitPaise = inrPaise(priced.originalUnitPriceSet);
-    if (unitPaise * line.quantity !== inrPaise(priced.originalTotalSet)) fail();
-    return { ...line, quoteLineId: lineIds[index], unitPaise,
+    const original = inrPaise(priced.originalTotalSet), discounted = inrPaise(priced.discountedTotalSet);
+    const discount = inrPaise(priced.totalDiscountSet);
+    if (unitPaise * line.quantity !== original || original - discounted !== discount ||
+        (!allowMerchandiseDiscount && discount !== 0)) fail();
+    allocatedDiscount += discount;
+    const low = Math.floor(discounted / line.quantity), extra = discounted % line.quantity;
+    const net = { ...line, quoteLineId: lineIds[index], unitPaise: low,
       taxable: priced.taxable, requiresShipping: priced.requiresShipping };
+    return extra ? [{ ...net, quantity: line.quantity - extra },
+      { ...net, quoteLineId: randomUUID(), unitPaise: low + 1, quantity: extra }] : [net];
   });
+  if (allocatedDiscount !== inrPaise(calculated.totalDiscountsSet)) fail();
   return readCodAccounting({ version: 1, orderPaise: inrPaise(calculated.totalPriceSet),
     taxesIncluded: calculated.taxesIncluded, taxPaise: inrPaise(calculated.totalTaxSet),
     taxLines: calculated.taxLines.map(t => ({ title: t.title, rate: t.rate, paise: inrPaise(t.priceSet),
