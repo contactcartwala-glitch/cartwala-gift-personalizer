@@ -1,0 +1,1 @@
+ALTER TABLE "CodThemeReviewSettings" ADD COLUMN "customerEnabled" BOOLEAN NOT NULL DEFAULT FALSE;

@@ -5,7 +5,9 @@
   const labels = JSON.parse(dialog.querySelector('script[type="application/json"]').textContent);
   const base = window.Shopify?.routes?.root || '/';
   const endpoint = `${base}apps/cartwala-signature-day-1/native-cod`;
-  const storageKey = 'cartwala-native-cod-review-v1';
+  const storefrontTheme = window.Shopify?.theme;
+  const mode = storefrontTheme?.role === 'main' && String(storefrontTheme.id) === dialog.dataset.themeId ? 'customer' : 'preview';
+  const storageKey = mode === 'customer' ? 'cartwala-native-cod-customer-v1' : 'cartwala-native-cod-review-v1';
   const form = dialog.querySelector('form'), status = dialog.querySelector('[role="status"]');
   const next = dialog.querySelector('[data-cod-next]'), recheck = dialog.querySelector('[data-cod-recheck]');
   const discountBox = dialog.querySelector('[data-cod-discount-box]'), discountInput = dialog.querySelector('[data-cod-code]'), applyCode = dialog.querySelector('[data-cod-apply]');
@@ -28,8 +30,11 @@
       const result = await fetch(endpoint, { cache: 'no-store', credentials: 'same-origin', signal: AbortSignal.timeout(8000) });
       if (result.ok) native = await result.json();
     } catch { /* Normal prepaid checkout remains available. */ }
-    return { ...value, discountCodesAvailable: native?.discountCodesAvailable === true, previewOnly:native?.checkoutAvailable !== true, canPay: native?.collectAddressAtCheckout === true && (native?.checkoutAvailable === true || (native?.previewCheckoutAvailable === true && native.themeId === dialog.dataset.themeId)) && native.enabled === true &&
-      native.revision === value.revision && native.advancePercent === value.advancePercent && native.codFeePaise === value.codFeePaise };
+    const canPay = native?.collectAddressAtCheckout === true && native.themeId === dialog.dataset.themeId &&
+      (mode === 'customer' ? native.checkoutAvailable === true : native.previewCheckoutAvailable === true) && native.enabled === true &&
+      native.revision === value.revision && native.advancePercent === value.advancePercent && native.codFeePaise === value.codFeePaise;
+    return { ...value, enabled: value.enabled && (mode !== 'customer' || canPay),
+      discountCodesAvailable: canPay && native.discountCodesAvailable === true, previewOnly:mode === 'preview', canPay };
   }
   config = { enabled: false, canPay: false };
   // Install the listener even when OFF so an already-open preview can observe a later ON.
@@ -280,7 +285,7 @@
     try {
       const current = await readCart();
       if (cartFingerprint(current) !== cartKey) throw new Error();
-      const data = await post({intent:'preview_discount',themeId:dialog.dataset.themeId,discountCode:code,lines:quoteLines(current)});
+      const data = await post({intent:'preview_discount',themeId:dialog.dataset.themeId,mode,discountCode:code,lines:quoteLines(current)});
       const d = data.discount, a = data.amounts;
       if (!d || d.code !== code || d.originalPaise !== current.total_price || !Number.isSafeInteger(d.discountPaise) || d.discountPaise <= 0 ||
         a.orderPaise !== d.originalPaise-d.discountPaise || a.orderPaise <= 0 || a.feePaise !== config.codFeePaise || data.advancePercent !== config.advancePercent ||
@@ -331,7 +336,7 @@
       sessionStorage.setItem(`${storageKey}:request`, requestKey);
       if (sessionStorage.getItem(`${storageKey}:request`) !== requestKey) throw new Error();
       blocked = true;
-      const data = await post({ intent: 'create_quote', requestKey, themeId: dialog.dataset.themeId, collectAddressAtCheckout: true,
+      const data = await post({ intent: 'create_quote', requestKey, themeId: dialog.dataset.themeId, mode, collectAddressAtCheckout: true,
         ...(appliedDiscount ? {discountCode:appliedDiscount.code,expectedDiscountPaise:appliedDiscount.discountPaise,
           expectedGoodsPaise:discountAmounts.orderPaise,expectedAdvancePercent:fresh.advancePercent,expectedFeePaise:fresh.codFeePaise} : {}),
         lines:quoteLines(current) });
