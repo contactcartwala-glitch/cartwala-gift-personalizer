@@ -8,17 +8,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session, admin } = await authenticate.admin(request);
   requireReviewShop(session.shop);
   const discountCodesAvailable = await hasNativeCodDiscountAccess(admin, session.shop).catch(() => false);
-  return { discountCodesAvailable, settings: await loadCodThemeReview(session.shop), themeId: COD_REVIEW_THEME, previewPayments: NATIVE_PREVIEW_PAYMENTS_ENABLED };
+  const consent = new URL(`https://${session.shop}/admin/oauth/install`);
+  consent.search = new URLSearchParams({client_id:"3879fe641910f37451baf743e76059ee",
+    scope:"read_files,read_orders,read_products,write_app_proxy,write_files,write_products,write_orders,write_draft_orders,write_order_edits",
+    optional_scopes:COD_DISCOUNT_SCOPE}).toString();
+  return { discountCodesAvailable, discountConsentUrl:consent.href, settings: await loadCodThemeReview(session.shop), themeId: COD_REVIEW_THEME, previewPayments: NATIVE_PREVIEW_PAYMENTS_ENABLED };
 };
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { session, scopes } = await authenticate.admin(request);
+  const { session } = await authenticate.admin(request);
   requireReviewShop(session.shop);
   if (request.method !== "POST") throw new Response("Method not allowed", { status: 405 });
   const form = await request.formData();
-  if (form.get("intent") === "enable-discounts") {
-    await scopes.request([COD_DISCOUNT_SCOPE]);
-    return { ok: true, message: "Discount access is ready. Refresh the duplicate theme." };
-  }
   try {
     const current = await loadCodThemeReview(session.shop);
     const revision = String(form.get("revision"));
@@ -43,7 +43,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 const inr = (paise: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(paise / 100);
 export default function CodThemeReview() {
-  const { settings, themeId, previewPayments, discountCodesAvailable } = useLoaderData<typeof loader>();
+  const { settings, themeId, previewPayments, discountCodesAvailable, discountConsentUrl } = useLoaderData<typeof loader>();
   const result = useActionData<typeof action>();
   const busy = useNavigation().state !== "idle";
   const advance = Math.floor((40000 * settings.advancePercent + 50) / 100);
@@ -74,7 +74,7 @@ export default function CodThemeReview() {
     </s-section>
     <s-section heading="Advance COD discounts">
       <p>{discountCodesAvailable ? "Eligible public merchandise codes can be applied before calculating the advance." : "Shopify must allow this app to read discount rules before customers can apply codes in Advance COD."}</p>
-      {!discountCodesAvailable && <Form method="post"><input type="hidden" name="intent" value="enable-discounts" /><button type="submit" disabled={busy}>Allow discount lookup</button></Form>}
+      {!discountCodesAvailable && <a href={discountConsentUrl} target="_blank" rel="noopener noreferrer">Allow discount lookup</a>}
     </s-section>
     <s-section heading="Saved example: ₹400 goods">
       <table><tbody>
