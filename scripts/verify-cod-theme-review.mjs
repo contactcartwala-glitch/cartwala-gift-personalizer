@@ -7,7 +7,8 @@ import { PGlite } from "@electric-sql/pglite";
 
 const db = new PGlite();
 await db.exec(await fs.readFile("prisma/migrations/20261106060000_cod_theme_review/migration.sql", "utf8"));
-globalThis.codReviewTest = { shop: "0k9icg-ns.myshopify.com", authorized: true,
+await db.exec(await fs.readFile("prisma/migrations/20261107070000_cod_customer_launch/migration.sql", "utf8"));
+globalThis.codReviewTest = { published:"188187869369", shop: "0k9icg-ns.myshopify.com", authorized: true,
   query: async (sql, values) => (await db.query(sql, values)).rows };
 async function compile(path) {
   const result = await build({ entryPoints: [path], bundle: true, write: false, platform: "node", format: "esm", plugins: [{
@@ -16,6 +17,8 @@ async function compile(path) {
       b.onLoad({ filter: /.*/, namespace: "review-test" }, args => ({ contents: args.path.includes("db.server")
         ? 'export default { $queryRawUnsafe: (sql,...values) => globalThis.codReviewTest.query(sql,values) };'
         : 'async function auth(){if(!globalThis.codReviewTest.authorized)throw new Response("Unauthorized",{status:401});return {session:{shop:globalThis.codReviewTest.shop}}} export const authenticate={admin:auth,public:{appProxy:auth}};', loader: "js" }));
+      b.onResolve({filter:/cod-published-theme\.server$/},()=>({path:"published",namespace:"review-published"}));
+      b.onLoad({filter:/.*/,namespace:"review-published"},()=>({contents:"export const readCodPublishedTheme=async()=>globalThis.codReviewTest.published;"}));
       b.onResolve({ filter: /^react-router$/ }, () => ({ path: "router", namespace: "review-router" }));
       b.onLoad({ filter: /.*/, namespace: "review-router" }, () => ({ contents: 'export const Form=()=>null; export const useLoaderData=()=>({}); export const useActionData=()=>({}); export const useNavigation=()=>({state:"idle"});', loader: "js" }));
     } }] });
@@ -29,23 +32,31 @@ const request = values => new Request("https://app.test/app/cod-theme-review", {
 });
 const act = values => route.action({ request: request(values) });
 const shop = settings.COD_REVIEW_SHOP;
-assert.deepEqual(await settings.loadCodThemeReview(shop), { enabled: false, advancePercent: 20, codFeePaise: 5000, revision: 0 });
+assert.deepEqual(await settings.loadCodThemeReview(shop), { enabled: false, customerEnabled:false, advancePercent: 20, codFeePaise: 5000, revision: 0 });
 for (const [input, expected] of [["0",0],["40",4000],["50",5000],["80",8000],["1.23",123]])
   assert.equal(settings.parseReviewCharge(input), expected);
 for (const bad of ["", "-1", "1.001", "1e2", "10000.01", null]) assert.throws(() => settings.parseReviewCharge(bad));
 assert.equal((await act({ intent: "save", revision: "0", advancePercent: "30", codCharge: "80" })).ok, true);
-assert.deepEqual(await settings.loadCodThemeReview(shop), { enabled: false, advancePercent: 30, codFeePaise: 8000, revision: 1 });
+assert.deepEqual(await settings.loadCodThemeReview(shop), { enabled: false, customerEnabled:false, advancePercent: 30, codFeePaise: 8000, revision: 1 });
 assert.equal((await act({ intent: "toggle", enabled: "true", revision: "1", advancePercent: "bad", codCharge: "bad" })).ok, true);
-assert.deepEqual(await settings.loadCodThemeReview(shop), { enabled: true, advancePercent: 30, codFeePaise: 8000, revision: 2 });
+assert.deepEqual(await settings.loadCodThemeReview(shop), { enabled: true, customerEnabled:false, advancePercent: 30, codFeePaise: 8000, revision: 2 });
 assert.equal((await act({ intent: "save", revision: "1", advancePercent: "20", codCharge: "50" })).ok, false);
 for (const [advancePercent, codCharge] of [["9","50"],["51","50"],["20.5","50"],["20","1.001"]])
   assert.equal((await act({ intent: "save", revision: "2", advancePercent, codCharge })).ok, false);
 assert.equal((await act({ intent: "toggle", enabled: "false", revision: "2" })).ok, true);
 const off = await settings.loadCodThemeReview(shop);
-assert.deepEqual(off, { enabled: false, advancePercent: 30, codFeePaise: 8000, revision: 3 });
+assert.deepEqual(off, { enabled: false, customerEnabled:false, advancePercent: 30, codFeePaise: 8000, revision: 3 });
 const response = await proxy.loader({ request: new Request("https://app.test/signature-day/cod-review") });
 assert.equal(response.headers.get("Cache-Control"), "no-store");
 assert.deepEqual(await response.json(), { available: true, themeId: "188248228025", ...off, paymentsEnabled: false });
+const launch = {intent:"customer-toggle",customerEnabled:"true",revision:"3"};
+assert.equal((await act(launch)).ok,false);
+assert.equal((await settings.loadCodThemeReview(shop)).customerEnabled,false);
+globalThis.codReviewTest.published="188248228025";
+assert.equal((await act(launch)).ok,true);
+assert.equal((await settings.loadCodThemeReview(shop)).customerEnabled,true);
+assert.equal((await act({intent:"customer-toggle",customerEnabled:"false",revision:"4"})).ok,true);
+assert.equal((await settings.loadCodThemeReview(shop)).customerEnabled,false);
 globalThis.codReviewTest.authorized = false;
 await assert.rejects(() => route.loader({ request: new Request("https://app.test/app/cod-theme-review") }), e => e.status === 401);
 await assert.rejects(() => act({ intent: "toggle", enabled: "true", revision: "3" }), e => e.status === 401);

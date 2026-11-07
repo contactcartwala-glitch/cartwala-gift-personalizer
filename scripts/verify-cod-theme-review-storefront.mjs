@@ -22,7 +22,7 @@ async function scenario(initial, refreshed = initial, opts={}) {
   };
   const location = { hostname:"cartwala.in", origin: "https://cartwala.in", href: "https://cartwala.in/cart", assign: value => locations.push(value) };
 
-  const window = { HTMLDialogElement: function () {}, Shopify: { routes: { root: "/" } }, location,
+  const window = { HTMLDialogElement: function () {}, Shopify: { routes: { root: "/" }, theme:{id:188248228025,role:opts.main?"main":"unpublished"} }, location,
     addEventListener: (name, handler) => { events[name] = handler; } };
   const document = { createElement:()=>({append(){}}), querySelector: () => dialog, addEventListener: (name, handler) => { events[name] = handler; } };
   await vm.runInNewContext(source, { window, document, location, URL, Intl, AbortSignal, AbortController, setTimeout, clearTimeout, sessionStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)}, crypto:webcrypto, TextEncoder, Uint8Array, FormData:class { *[Symbol.iterator](){for(const f of fields)if(!f.disabled)yield [f.name,f.value];} },
@@ -83,7 +83,7 @@ payment.radios[0].checked=false;payment.radios[1].checked=true;payment.events.co
 await Promise.all(Array.from({length:12},()=>payment.events.form({preventDefault(){}})));
 assert.equal(payment.calls.filter(c=>c.options.method==='POST').length,1);
 const sent=JSON.parse(payment.calls.find(c=>c.options.method==='POST').options.body);
-assert.equal(sent.address,undefined);assert.equal(sent.collectAddressAtCheckout,true);assert.equal(sent.lines[0].properties[0].value,'TEST_ONLY');
+assert.equal(sent.mode,"preview");assert.equal(sent.address,undefined);assert.equal(sent.collectAddressAtCheckout,true);assert.equal(sent.lines[0].properties[0].value,'TEST_ONLY');
 assert.equal(payment.values['[data-cod-now]'].textContent,'₹130.00');
 assert.deepEqual(payment.locations,['https://cartwala.in/80379314361/invoices/test123']);
 assert.equal(payment.radios[0].disabled,true);
@@ -120,3 +120,7 @@ const promo=await scenario(valid,valid,{preview:true,discount:true,post:i=>i.int
 const preparing=promo.events.form({preventDefault(){}});assert.equal(promo.next.attrs['aria-busy'],'true');await preparing;assert.deepEqual(promo.locations,[invoiceResponse.checkoutUrl]);
 assert.equal(JSON.parse(promo.calls.find(c=>c.options.body?.includes('create_quote')).options.body).expectedGoodsPaise,36000);
 console.log('Unpaid return offers both methods, pending payment stays protected, spinner appears immediately, and verified discount produces ₹122 now / ₹288 COD.');
+
+const publishedOff=await scenario(valid,valid,{main:true,preview:true});await publishedOff.click();assert.equal(publishedOff.dialog.open,false);assert.deepEqual(publishedOff.locations,['https://cartwala.in/checkout']);
+const publishedOn=await scenario(valid,valid,{main:true,native:true,storage:new Map(unpaidStorage)});await publishedOn.click();assert.equal(publishedOn.dialog.open,true);assert.equal(publishedOn.radios[0].disabled,false);publishedOn.radios[0].checked=false;publishedOn.radios[1].checked=true;publishedOn.events.cod();await publishedOn.events.form({preventDefault(){}});const p=publishedOn.calls.find(c=>c.options.body?.includes('create_quote'));assert.equal(JSON.parse(p.options.body).mode,'customer');assert.deepEqual(publishedOn.locations,[invoiceResponse.checkoutUrl]);
+console.log('Published-but-OFF keeps normal checkout; enabled customer mode never recovers old preview storage.');
