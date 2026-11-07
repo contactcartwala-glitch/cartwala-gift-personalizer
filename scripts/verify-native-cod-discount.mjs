@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {build} from 'esbuild';
+const built=await build({stdin:{contents:`export {authorizeNativeCodDiscount} from './app/lib/native-cod-discount.server';export {freezeCodAccounting} from './app/lib/partial-cod-accounting';export {allocateNativeAdvance} from './app/lib/native-cod-plan.server';`,resolveDir:process.cwd()},bundle:true,platform:'node',format:'esm',write:false});
+const {authorizeNativeCodDiscount,freezeCodAccounting,allocateNativeAdvance}=await import(`data:text/javascript;base64,${Buffer.from(built.outputFiles[0].text).toString('base64')}`);
+const rule={__typename:'DiscountCodeBasic',status:'ACTIVE',usageLimit:null,appliesOncePerCustomer:false,context:{__typename:'DiscountBuyerSelectionAll'}};
+const admin=d=>({graphql:async()=>Response.json({data:{codeDiscountNodeByCode:{codeDiscount:d}}})});
+assert.equal(await authorizeNativeCodDiscount(admin(rule),'TEST10'),'TEST10');
+for(const d of [{usageLimit:1},{appliesOncePerCustomer:true},{status:'EXPIRED'},{context:{__typename:'DiscountCustomers'}},{__typename:'DiscountCodeFreeShipping'}])await assert.rejects(()=>authorizeNativeCodDiscount(admin({...rule,...d}),'TEST10'));
+const money=p=>({shopMoney:{amount:(p/100).toFixed(2),currencyCode:'INR'}});
+const id='11111111-1111-1111-1111-111111111111',variantId='gid://shopify/ProductVariant/123',properties=[{name:'Artwork',value:'test-art'}];
+const source=[{variantId,quantity:3,properties}];
+const priced={currencyCode:'INR',presentmentCurrencyCode:'INR',taxesIncluded:true,totalPriceSet:money(35999),totalShippingPriceSet:money(0),totalDiscountsSet:money(4000),totalTaxSet:money(0),taxLines:[],lineItems:[{uuid:id,variant:{id:variantId},quantity:3,taxable:false,requiresShipping:true,isGiftCard:false,custom:false,components:[],originalUnitPriceSet:money(13333),originalTotalSet:money(39999),discountedTotalSet:money(35999),totalDiscountSet:money(4000),customAttributes:[{key:'Artwork',value:'test-art'}]}]};
+assert.throws(()=>freezeCodAccounting(priced,source,[id]));
+const frozen=freezeCodAccounting(priced,source,[id],true);
+assert.equal(frozen.orderPaise,35999);assert.equal(frozen.lines.reduce((n,l)=>n+l.quantity*l.unitPaise,0),35999);assert.equal(frozen.lines.reduce((n,l)=>n+l.quantity,0),3);
+const lines=allocateNativeAdvance(frozen,7200);assert.equal(lines.reduce((n,l)=>n+l.quantity*l.unitPaise,0),7200);assert.ok(lines.every(l=>l.attributes.some(a=>a.key==='Artwork'&&a.value==='test-art')));
+assert.throws(()=>freezeCodAccounting({...priced,totalDiscountsSet:money(4001)},source,[id],true));
+console.log('Discount rules, exact net pricing, uneven paise across quantities, artwork preservation, and rejecting inconsistent allocations passed.');

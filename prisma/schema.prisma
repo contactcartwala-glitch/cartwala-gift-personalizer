@@ -86,3 +86,118 @@ model PhotoOriginalArchiveOrder {
   @@id([archiveId, orderId])
   @@index([orderId])
 }
+
+model PartialCodIntent {
+  id                 String   @id @default(uuid())
+  shop               String
+  requestKey         String
+  state              String   @default("awaiting_payment")
+  currency           String   @default("INR")
+  orderPaise         Int
+  advancePercent     Int      @default(20)
+  codFeePaise        Int      @default(5000)
+  payableNowPaise    Int
+  collectPaise       Int
+  lines              Json
+  shippingAddress    Json
+  accountingSnapshot Json?
+  depositDraftId     String?  @unique
+  depositOrderId     String?  @unique
+  paymentFingerprint String?  @unique
+  codOrderId         String?  @unique
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  outbox             PartialCodOutbox?
+  paytmAttempt       PartialCodPaytmAttempt?
+  orderAttempt       PartialCodOrderAttempt?
+
+  @@unique([shop, requestKey])
+  @@index([shop, state, createdAt])
+}
+
+model PartialCodOutbox {
+  id         String   @id @default(uuid())
+  intentId   String   @unique
+  intent     PartialCodIntent @relation(fields: [intentId], references: [id], onDelete: Restrict)
+  state      String   @default("ready")
+  claimToken String?
+  result     Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model PartialCodSettings {
+  shop           String   @id
+  enabled        Boolean  @default(false)
+  advancePercent Int      @default(20)
+  codFeePaise    Int      @default(5000)
+  revision       Int      @default(1)
+  updatedAt      DateTime @updatedAt
+}
+
+model PartialCodPaytmAttempt {
+  intentId           String   @id
+  intent             PartialCodIntent @relation(fields: [intentId], references: [id], onDelete: Restrict)
+  orderId            String   @unique
+  environment        String
+  merchantId         String
+  payableNowPaise     Int
+  state              String   @default("created")
+  claimToken         String?
+  transactionId      String?
+  paymentFingerprint String?  @unique
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  lastCheckedAt      DateTime?
+}
+
+model PartialCodOrderAttempt {
+  intentId           String   @id
+  intent             PartialCodIntent @relation(fields: [intentId], references: [id], onDelete: Restrict)
+  orderReference     String   @unique
+  paymentFingerprint String   @unique
+  payloadHash        String
+  state              String   @default("processing")
+  claimToken         String
+  candidateOrderId   String?  @unique
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model CodAccountingDiagnostic {
+  id         String   @id
+  shop       String
+  state      String   @default("processing")
+  claimToken String
+  orderId    String?  @unique
+  observed   Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+
+model CodThemeReviewSettings {
+  shop           String   @id
+  enabled        Boolean  @default(false)
+  customerEnabled Boolean @default(false)
+  advancePercent Int      @default(20)
+  codFeePaise     Int      @default(5000)
+  revision       Int      @default(0)
+  updatedAt      DateTime @default(now()) @updatedAt
+}
+
+
+model NativeCodCheckout {
+  id           String   @id
+  shop         String
+  quote        Json
+  state        String   @default("creating")
+  draftId      String?  @unique
+  orderId      String?  @unique
+  editClaim    String?
+  calculatedId String?
+  fingerprint  String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@index([shop, state])
+}
