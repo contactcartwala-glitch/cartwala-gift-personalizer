@@ -1,6 +1,6 @@
 import { Form, useActionData, useLoaderData, useNavigation, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router";
 import { readCodPublishedTheme } from "../lib/cod-published-theme.server";
-import { NATIVE_PREVIEW_PAYMENTS_ENABLED } from "../lib/native-cod-feature";
+import { nativeCodThemeForPublication, NATIVE_PREVIEW_PAYMENTS_ENABLED } from "../lib/native-cod-feature";
 import { COD_DISCOUNT_SCOPE, hasNativeCodDiscountAccess } from "../lib/native-cod-discount.server";
 import { authenticate } from "../shopify.server";
 import { COD_REVIEW_THEME, loadCodThemeReview, parseReviewCharge, requireReviewShop, saveCodThemeReview } from "../lib/cod-theme-review.server";
@@ -13,7 +13,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   consent.search = new URLSearchParams({client_id:"3879fe641910f37451baf743e76059ee",
     scope:"read_files,read_orders,read_products,write_app_proxy,write_files,write_products,write_orders,write_draft_orders,write_order_edits",
     optional_scopes:COD_DISCOUNT_SCOPE}).toString();
-  return { discountCodesAvailable, discountConsentUrl:consent.href, settings: await loadCodThemeReview(session.shop), themeId: COD_REVIEW_THEME, previewPayments: NATIVE_PREVIEW_PAYMENTS_ENABLED };
+  const [settings, publishedTheme] = await Promise.all([loadCodThemeReview(session.shop), readCodPublishedTheme()]);
+  const themeId = nativeCodThemeForPublication(COD_REVIEW_THEME, publishedTheme);
+  return { discountCodesAvailable, discountConsentUrl:consent.href, settings, themeId, previewPayments: NATIVE_PREVIEW_PAYMENTS_ENABLED };
 };
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { session } = await authenticate.admin(request);
@@ -30,8 +32,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     if (intent === "customer-toggle") {
       if (!["true","false"].includes(String(form.get("customerEnabled")))) throw new Error("Invalid customer mode.");
       const enable = form.get("customerEnabled") === "true";
-      if (enable && await readCodPublishedTheme(true) !== COD_REVIEW_THEME)
-        throw new Error("Publish Cartwala Advance COD Review Nov6 first, then turn on customer checkout.");
+      if (enable) {
+        const publishedTheme = await readCodPublishedTheme(true);
+        if (publishedTheme !== nativeCodThemeForPublication(COD_REVIEW_THEME, publishedTheme))
+          throw new Error("Publish a supported Cartwala Advance COD theme first, then turn on customer checkout.");
+      }
       await saveCodThemeReview(session.shop,{...current,enabled:enable || current.enabled,customerEnabled:enable,revision:Number(revision)});
       return {ok:true,message:enable?"Customer Advance COD is ON.":"Customer Advance COD is OFF. Customers use normal checkout."};
     }
@@ -59,7 +64,7 @@ export default function CodThemeReview() {
   const advance = Math.floor((40000 * settings.advancePercent + 50) / 100);
   return <s-page heading="Advance COD — theme review">
     <s-section heading="Duplicate theme controls">
-      <p>These settings control Cartwala Advance COD Review Nov6. {previewPayments ? "Before publication, ON allows testing in the duplicate theme." : "Advance payments are disabled."}</p>
+      <p>These settings control the supported Cartwala Advance COD themes. {previewPayments ? "Customer checkout uses the supported theme that is published." : "Advance payments are disabled."}</p>
       {result && <p role={result.ok ? "status" : "alert"}>{result.message}</p>}
       <p>Advance COD switch: <strong>{settings.enabled ? "ON" : "OFF"}</strong></p>
       <Form method="post">

@@ -4,11 +4,11 @@ import {mkdir,rm} from 'node:fs/promises';
 const dir=new URL('../.qa-native-proxy/',import.meta.url),shop='0k9icg-ns.myshopify.com',id='12345678-1234-1234-1234-123456789abc';
 let existing=true,settingsOn=false,customerEnabled=false,publishedTheme="188187869369",creates=0;
 const f=globalThis.__nativeProxy={auth:async()=>({session:{shop}}),db:{$queryRawUnsafe:async sql=>sql.includes('COUNT')?[{count:0}]:sql.includes('SELECT "id"')&&existing?[{id}]:[]},settings:async()=>({enabled:settingsOn,customerEnabled,advancePercent:20,codFeePaise:5000,revision:1}),link:async()=>({paid:false,url:'https://cartwala.in/80379314361/invoices/test123'}),read:async()=>({id,quote:{advancePercent:30}}),reference:()=>({amounts:{payableNowPaise:13000}}),create:async(_db,_admin,plan)=>{f.tags=plan.input.tags;creates++;return {paid:false,url:'https://cartwala.in/80379314361/invoices/test123'};}};
-f.published=()=>publishedTheme;
+f.published=(fresh)=>fresh&&f.publishDuringQuote ? f.publishDuringQuote : publishedTheme;
 const stubs={
  'db.server':'export default globalThis.__nativeProxy.db;',
  'shopify.server':'export const authenticate={public:{appProxy:(...a)=>globalThis.__nativeProxy.auth(...a)}},unauthenticated={admin:async()=>({admin:{}})};',
- 'cod-published-theme.server':'export const readCodPublishedTheme=async()=>globalThis.__nativeProxy.published();',
+ 'cod-published-theme.server':'export const readCodPublishedTheme=async(fresh)=>globalThis.__nativeProxy.published(fresh);',
  'cod-theme-review.server':`export const COD_REVIEW_SHOP=${JSON.stringify(shop)},COD_REVIEW_THEME='188248228025',loadCodThemeReview=(...a)=>globalThis.__nativeProxy.settings(...a);`,
  'partial-cod-quote.server':'export const calculateCodQuote=async(admin,input,percent,fee,collectAddressAtCheckout)=>{globalThis.__nativeProxy.addressAtCheckout=collectAddressAtCheckout;if(globalThis.__nativeProxy.failQuote)throw Error("invalid address");return {accountingSnapshot:{},shippingAddress:{},amounts:{payableNowPaise:13000}};};',
  'native-cod-plan.server':'export const prepareNativeCodPlan=async()=>({input:{tags:[]}});',
@@ -38,6 +38,30 @@ try{
  assert.equal((await call({...input,mode:'customer',collectAddressAtCheckout:true})).status,200);
  assert.deepEqual(f.tags,[]);
  assert.equal(creates,2);
+ const replacement='188307243193', replacementInput={...input,themeId:replacement,mode:'customer',collectAddressAtCheckout:true};
+ const loadConfig=async()=> (await loader({request:new Request('https://example.test')})).json();
+ const liveConfig=await loadConfig();
+ assert.equal(liveConfig.themeId,input.themeId);
+ assert.equal(liveConfig.replacementThemeId,replacement);
+ assert.equal(liveConfig.checkoutAvailable,true);
+ assert.equal((await call(replacementInput)).status,503);
+ f.publishDuringQuote=replacement;
+ assert.equal((await call({...input,mode:'customer'})).status,409);
+ assert.equal(creates,2);
+ f.publishDuringQuote=null;
+ publishedTheme=replacement;
+ const replacementConfig=await loadConfig();
+ assert.equal(replacementConfig.themeId,replacement);
+ assert.equal(replacementConfig.checkoutAvailable,true);
+ assert.equal((await call({...input,mode:'customer'})).status,503);
+ assert.equal((await call(replacementInput)).status,200);
+ assert.equal(creates,3);
+ assert.deepEqual(f.tags,[]);
+ publishedTheme=input.themeId;
+ assert.equal((await loadConfig()).themeId,input.themeId);
+ assert.equal((await call(replacementInput)).status,503);
+ assert.equal((await call({...input,mode:'customer'})).status,200);
+ assert.equal(creates,4);
  publishedTheme='188187869369';assert.equal((await call({...input,mode:'customer'})).status,503);
  publishedTheme=null;assert.equal((await call({...input,mode:'customer'})).status,503);
  assert.equal((await call({intent:'payment_status',access:'TEST'})).status,200);

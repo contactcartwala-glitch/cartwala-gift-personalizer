@@ -2,7 +2,7 @@ import type {ActionFunctionArgs,LoaderFunctionArgs} from "react-router";
 import prisma from "../db.server";
 import {authenticate,unauthenticated} from "../shopify.server";
 import {COD_REVIEW_SHOP,COD_REVIEW_THEME,loadCodThemeReview} from "../lib/cod-theme-review.server";
-import {nativeCodAvailability} from "../lib/native-cod-feature";
+import {COD_PRODUCT_AMOUNT_THEME,nativeCodAvailability,nativeCodThemeForPublication} from "../lib/native-cod-feature";
 import {readCodPublishedTheme} from "../lib/cod-published-theme.server";
 import {calculateCodQuote} from "../lib/partial-cod-quote.server";
 import {prepareNativeCodPlan} from "../lib/native-cod-plan.server";
@@ -21,8 +21,9 @@ export const loader=async({request}:LoaderFunctionArgs)=>{
   settings.enabled?readCodPublishedTheme():Promise.resolve(null),
   settings.enabled?unauthenticated.admin(session.shop).then(({admin})=>hasNativeCodDiscountAccess(admin,session.shop)).catch(()=>false):Promise.resolve(false),
  ]);
- const availability=nativeCodAvailability(settings,COD_REVIEW_THEME,publishedTheme);
- return Response.json({...settings,...availability,themeId:COD_REVIEW_THEME,collectAddressAtCheckout:true,discountCodesAvailable},{headers});
+ const themeId=nativeCodThemeForPublication(COD_REVIEW_THEME,publishedTheme);
+ const availability=nativeCodAvailability(settings,themeId,publishedTheme);
+ return Response.json({...settings,...availability,themeId,replacementThemeId:COD_PRODUCT_AMOUNT_THEME,collectAddressAtCheckout:true,discountCodesAvailable},{headers});
 };
 export const action=async({request}:ActionFunctionArgs)=>{
  const {session}=await authenticate.public.appProxy(request);
@@ -40,8 +41,11 @@ export const action=async({request}:ActionFunctionArgs)=>{
   }
   const settings=await loadCodThemeReview(session.shop);
   const eligibleMode=async(current:typeof settings,verifyFresh=false)=>{
-   if(!current.enabled||input.themeId!==COD_REVIEW_THEME)return null;
-   const allowed=nativeCodAvailability(current,COD_REVIEW_THEME,await readCodPublishedTheme(verifyFresh));
+   if(!current.enabled)return null;
+   const publishedTheme=await readCodPublishedTheme(verifyFresh);
+   const themeId=nativeCodThemeForPublication(COD_REVIEW_THEME,publishedTheme);
+   if(input.themeId!==themeId)return null;
+   const allowed=nativeCodAvailability(current,themeId,publishedTheme);
    if(input.mode==="customer"&&allowed.checkoutAvailable)return "customer";
    if(input.mode==="preview"&&allowed.previewCheckoutAvailable)return "preview";
    return null;
