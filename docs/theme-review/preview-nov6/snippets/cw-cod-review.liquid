@@ -1,5 +1,5 @@
 {% doc %}
-  Renders payment choices in the unpublished checkout review.
+  Renders Full payment and Advance COD choices in the storefront checkout popup.
   @example
   {% render 'cw-cod-review' %}
 {% enddoc %}
@@ -14,7 +14,8 @@
       <section class="cw-cod-summary">
       <h3>{{ 'cod_review.summary' | t }}</h3>
       <ul data-cod-items class="cw-cod-items"></ul>
-      <dl><div><dt>{{ 'cod_review.goods' | t }}</dt><dd data-cod-full></dd></div><div><dt>{{ 'cod_review.discount' | t }}</dt><dd data-cod-discount></dd></div></dl>
+      <dl><div><dt>{{ 'cod_review.goods' | t }}</dt><dd data-cod-full></dd></div></dl>
+      <span data-cod-discount hidden></span>
       <fieldset>
         <legend class="visually-hidden">{{ 'cod_review.heading' | t }}</legend>
         <label class="cw-cod-option"><input type="radio" name="cw_cod_choice" value="prepaid" checked><span><strong>{{ 'cod_review.prepaid' | t }} <span data-cod-full></span></strong><span>{{ 'cod_review.prepaid_hint' | t }}</span></span></label>
@@ -47,3 +48,21 @@
   </dialog>
   <script src="{{ 'cw-cod-review.js' | asset_url }}" defer></script>
 {% endif %}
+
+{% stylesheet %}
+  [data-cw-cod-review] [data-cod-breakdown] .cw-cod-pay-now {
+    align-items: baseline;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid #edc09e;
+    border-radius: 8px;
+    background: #fff3e8;
+    color: #7a3000;
+    font-weight: 700;
+  }
+  [data-cw-cod-review] .cw-cod-pay-now [data-cod-now] {
+    font-size: 1.25em;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+{% endstylesheet %}
