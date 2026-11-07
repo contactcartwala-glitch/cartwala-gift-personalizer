@@ -1,6 +1,8 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { authenticate } from "../shopify.server";
 import { COD_REVIEW_SHOP, COD_REVIEW_THEME, loadCodThemeReview } from "../lib/cod-theme-review.server";
+import { nativeCodThemeForPublication } from "../lib/native-cod-feature";
+import { readCodPublishedTheme } from "../lib/cod-published-theme.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.public.appProxy(request);
@@ -9,7 +11,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     return Response.json({ available: false, enabled: false }, { status: 404, headers });
   try {
     const settings = await loadCodThemeReview(session.shop);
-    return Response.json({ available: true, themeId: COD_REVIEW_THEME, ...settings, paymentsEnabled: false }, { headers });
+    const publishedTheme = settings.enabled ? await readCodPublishedTheme() : null;
+    const themeId = nativeCodThemeForPublication(COD_REVIEW_THEME, publishedTheme);
+    return Response.json({ available: true, themeId, ...settings, paymentsEnabled: false }, { headers });
   } catch {
     return Response.json({ available: false, enabled: false, paymentsEnabled: false }, { status: 503, headers });
   }

@@ -1,0 +1,49 @@
+{% doc %}
+  Renders payment choices in the unpublished checkout review.
+  @example
+  {% render 'cw-cod-review' %}
+{% enddoc %}
+{% if settings.cw_cod_review_enabled %}
+  {{ 'cw-cod-review.css' | asset_url | stylesheet_tag }}
+  <dialog data-cw-cod-review data-theme-id="{{ theme.id }}" aria-labelledby="cw-cod-review-title" aria-describedby="cw-cod-review-notice">
+    <button type="button" class="cw-cod-close" data-cod-close aria-label="{{ 'cod_review.close' | t }}">×</button>
+    <h2 id="cw-cod-review-title">{{ 'cod_review.heading' | t }}</h2>
+    <p class="cw-cod-note" id="cw-cod-review-notice">{{ 'cod_review.preview' | t }}</p>
+    <form>
+      <div class="cw-cod-columns">
+      <section class="cw-cod-summary">
+      <h3>{{ 'cod_review.summary' | t }}</h3>
+      <ul data-cod-items class="cw-cod-items"></ul>
+      <dl><div><dt>{{ 'cod_review.goods' | t }}</dt><dd data-cod-full></dd></div><div><dt>{{ 'cod_review.discount' | t }}</dt><dd data-cod-discount></dd></div></dl>
+      <fieldset>
+        <legend class="visually-hidden">{{ 'cod_review.heading' | t }}</legend>
+        <label class="cw-cod-option"><input type="radio" name="cw_cod_choice" value="prepaid" checked><span><strong>{{ 'cod_review.prepaid' | t }} <span data-cod-full></span></strong><span>{{ 'cod_review.prepaid_hint' | t }}</span></span></label>
+        <label class="cw-cod-option"><input type="radio" name="cw_cod_choice" value="cod"><span><strong>{{ 'cod_review.cod' | t }}</strong><span>{{ 'cod_review.cod_hint' | t }}</span></span></label>
+      </fieldset>
+      <div class="cw-cod-discount" data-cod-discount-box hidden>
+        <label for="cw-cod-code">{{ 'cod_review.discount_code' | t }}</label>
+        <div><input id="cw-cod-code" data-cod-code type="text" maxlength="64" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <button type="button" data-cod-apply>{{ 'cod_review.discount_apply' | t }}</button></div>
+      </div>
+      <div data-cod-amounts hidden>
+        <dl data-cod-breakdown hidden>
+          <div><dt>{{ 'cod_review.goods' | t }}</dt><dd data-cod-full></dd></div>
+          <div><dt>{{ 'cod_review.advance' | t }} (<span data-cod-percent></span>)</dt><dd data-cod-advance></dd></div>
+          <div><dt>{{ 'cod_review.fee' | t }}</dt><dd data-cod-fee></dd></div>
+          <div class="cw-cod-pay-now"><dt>{{ 'cod_review.now' | t }}</dt><dd data-cod-now></dd></div>
+          <div><dt>{{ 'cod_review.balance' | t }}</dt><dd data-cod-balance></dd></div>
+          <div><dt>{{ 'cod_review.total' | t }}</dt><dd data-cod-total></dd></div>
+        </dl>
+        <p class="cw-cod-note">{{ 'cod_review.estimate' | t }}</p>
+      </div>
+      </section>
+      </div>
+      <p class="cw-cod-note" role="status" aria-live="polite"></p>
+      <button type="button" data-cod-recheck hidden>{{ 'cod_review.recheck' | t }}</button>
+      <button type="submit" data-cod-next disabled>{{ 'cod_review.continue_prepaid' | t }}</button>
+      <a data-cod-shopping href="{{ routes.all_products_collection_url }}" hidden>{{ 'cod_review.continue_shopping' | t }}</a>
+    </form>
+    <script type="application/json">{"loading":{{ 'cod_review.loading' | t | json }},"review_notice":{{ 'cod_review.review_notice' | t | json }},"unavailable":{{ 'cod_review.unavailable' | t | json }},"not_connected":{{ 'cod_review.not_connected' | t | json }},"continue_prepaid":{{ 'cod_review.continue_prepaid' | t | json }},"continue_cod":{{ 'cod_review.continue_cod' | t | json }},"confirm_cod":{{ 'cod_review.confirm_cod' | t | json }},"discount_checking":{{ 'cod_review.discount_checking' | t | json }},"discount_applied":{{ 'cod_review.discount_applied' | t | json }},"discount_rejected":{{ 'cod_review.discount_rejected' | t | json }},"discount_apply_first":{{ 'cod_review.discount_apply_first' | t | json }},"opening":{{ 'cod_review.opening' | t | json }},"pending":{{ 'cod_review.pending' | t | json }},"completed":{{ 'cod_review.completed' | t | json }},"review_required":{{ 'cod_review.review_required' | t | json }},"saved":{{ 'cod_review.saved' | t | json }},"cart_changed":{{ 'cod_review.cart_changed' | t | json }},"completed_cart_pending":{{ 'cod_review.completed_cart_pending' | t | json }},"restore":{{ 'cod_review.restore' | t | json }}}</script>
+  </dialog>
+  <script src="{{ 'cw-cod-review.js' | asset_url }}" defer></script>
+{% endif %}
