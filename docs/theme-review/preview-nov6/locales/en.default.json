@@ -529,10 +529,10 @@
     "continue_cod": "Continue to checkout",
     "confirm_cod": "Continue to checkout",
     "opening": "Preparing secure checkout…",
-    "recheck": "Check existing payment",
+    "recheck": "Try again",
     "pending": "Payment has not completed. Continue only with the existing checkout.",
     "completed": "Payment confirmed. The remaining balance is due on delivery.",
-    "review_required": "Payment needs review. Do not pay again. Contact Cartwala.",
+    "review_required": "Could not confirm payment status. Try again before paying.",
     "saved": "Secure checkout is ready. Continue to enter your contact and delivery details.",
     "cart_changed": "Your cart changed. Close this window and review it before continuing.",
     "restore": "An earlier Advance COD checkout exists. Check its payment before starting another.",
@@ -575,6 +575,12 @@
       "wb": "West Bengal"
     },
     "continue_shopping": "Continue shopping",
-    "completed_cart_pending": "Payment confirmed. Do not pay again. Cart cleanup could not finish; check this payment again before ordering these items."
+    "completed_cart_pending": "Payment confirmed. Do not pay again. Cart cleanup could not finish; check this payment again before ordering these items.",
+    "discount_code": "Discount code",
+    "discount_apply": "Apply",
+    "discount_checking": "Checking discount…",
+    "discount_applied": "Discount applied before calculating the advance.",
+    "discount_rejected": "This code is not available for Advance COD. You can try it in full payment checkout.",
+    "discount_apply_first": "Apply the discount code before continuing, or clear it."
   }
 }

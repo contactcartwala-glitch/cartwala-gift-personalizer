@@ -20,6 +20,11 @@
         <label class="cw-cod-option"><input type="radio" name="cw_cod_choice" value="prepaid" checked><span><strong>{{ 'cod_review.prepaid' | t }} <span data-cod-full></span></strong><span>{{ 'cod_review.prepaid_hint' | t }}</span></span></label>
         <label class="cw-cod-option"><input type="radio" name="cw_cod_choice" value="cod"><span><strong>{{ 'cod_review.cod' | t }}</strong><span>{{ 'cod_review.cod_hint' | t }}</span></span></label>
       </fieldset>
+      <div class="cw-cod-discount" data-cod-discount-box hidden>
+        <label for="cw-cod-code">{{ 'cod_review.discount_code' | t }}</label>
+        <div><input id="cw-cod-code" data-cod-code type="text" maxlength="64" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <button type="button" data-cod-apply>{{ 'cod_review.discount_apply' | t }}</button></div>
+      </div>
       <div data-cod-amounts hidden>
         <dl data-cod-breakdown hidden>
           <div><dt>{{ 'cod_review.goods' | t }}</dt><dd data-cod-full></dd></div>
@@ -38,7 +43,7 @@
       <button type="submit" data-cod-next disabled>{{ 'cod_review.continue_prepaid' | t }}</button>
       <a data-cod-shopping href="{{ routes.all_products_collection_url }}" hidden>{{ 'cod_review.continue_shopping' | t }}</a>
     </form>
-    <script type="application/json">{"loading":{{ 'cod_review.loading' | t | json }},"review_notice":{{ 'cod_review.review_notice' | t | json }},"unavailable":{{ 'cod_review.unavailable' | t | json }},"not_connected":{{ 'cod_review.not_connected' | t | json }},"continue_prepaid":{{ 'cod_review.continue_prepaid' | t | json }},"continue_cod":{{ 'cod_review.continue_cod' | t | json }},"confirm_cod":{{ 'cod_review.confirm_cod' | t | json }},"opening":{{ 'cod_review.opening' | t | json }},"pending":{{ 'cod_review.pending' | t | json }},"completed":{{ 'cod_review.completed' | t | json }},"review_required":{{ 'cod_review.review_required' | t | json }},"saved":{{ 'cod_review.saved' | t | json }},"cart_changed":{{ 'cod_review.cart_changed' | t | json }},"completed_cart_pending":{{ 'cod_review.completed_cart_pending' | t | json }},"restore":{{ 'cod_review.restore' | t | json }}}</script>
+    <script type="application/json">{"loading":{{ 'cod_review.loading' | t | json }},"review_notice":{{ 'cod_review.review_notice' | t | json }},"unavailable":{{ 'cod_review.unavailable' | t | json }},"not_connected":{{ 'cod_review.not_connected' | t | json }},"continue_prepaid":{{ 'cod_review.continue_prepaid' | t | json }},"continue_cod":{{ 'cod_review.continue_cod' | t | json }},"confirm_cod":{{ 'cod_review.confirm_cod' | t | json }},"discount_checking":{{ 'cod_review.discount_checking' | t | json }},"discount_applied":{{ 'cod_review.discount_applied' | t | json }},"discount_rejected":{{ 'cod_review.discount_rejected' | t | json }},"discount_apply_first":{{ 'cod_review.discount_apply_first' | t | json }},"opening":{{ 'cod_review.opening' | t | json }},"pending":{{ 'cod_review.pending' | t | json }},"completed":{{ 'cod_review.completed' | t | json }},"review_required":{{ 'cod_review.review_required' | t | json }},"saved":{{ 'cod_review.saved' | t | json }},"cart_changed":{{ 'cod_review.cart_changed' | t | json }},"completed_cart_pending":{{ 'cod_review.completed_cart_pending' | t | json }},"restore":{{ 'cod_review.restore' | t | json }}}</script>
   </dialog>
   <script src="{{ 'cw-cod-review.js' | asset_url }}" defer></script>
 {% endif %}
