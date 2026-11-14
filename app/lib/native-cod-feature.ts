@@ -1,10 +1,12 @@
 /** Customer mode is controlled separately in the authenticated Cartwala admin. */
 export const NATIVE_PREVIEW_PAYMENTS_ENABLED = true;
 
-// Keep the original theme working until the merchant publishes this specific copy.
+// Only explicitly reviewed Cartwala copies can accept new customer checkouts.
 export const COD_PRODUCT_AMOUNT_THEME = "188307243193";
+export const COD_MOBILE_SPEED_THEME = "188523839673";
 export function nativeCodThemeForPublication(originalTheme: string, publishedTheme: string | null) {
-  return publishedTheme === COD_PRODUCT_AMOUNT_THEME ? COD_PRODUCT_AMOUNT_THEME : originalTheme;
+  return publishedTheme === COD_PRODUCT_AMOUNT_THEME || publishedTheme === COD_MOBILE_SPEED_THEME
+    ? publishedTheme : originalTheme;
 }
 
 export type NativeCodMode = "preview" | "customer";
