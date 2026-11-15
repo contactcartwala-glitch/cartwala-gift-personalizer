@@ -1,0 +1,48 @@
+<!doctype html>
+<html class="no-js" lang="{{ request.locale.iso_code }}">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="canonical" href="{{ canonical_url }}"><title>{% if request.page_type == 'index' %}Personalised Gifts & Photo Frames Online | Cartwala{% else %}{{ page_title }}{% if current_tags %} – tagged "{{ current_tags | join: ', ' }}"{% endif %}{% if current_page != 1 %} – Page {{ current_page }}{% endif %}{% unless page_title contains shop.name %} – {{ shop.name }}{% endunless %}{% endif %}</title>{% render 'meta-tags' %}{% render 'cartwala-collection-schema' %}{% render 'cartwala-photobook-product-schema' %}{% render 'cartwala-generic-product-schema' %}{% render 'cartwala-site-identity-schema' %}{% if request.page_type == 'cart' or request.page_type == 'search' %}<meta name="robots" content="noindex,follow">{% endif %}{{ 'base.css' | asset_url | stylesheet_tag: preload: true }}
+{% if request.page_type == 'product' and product.tags contains 'cw-mug' %}<script src="{{ 'cartwala-mug-3d-review.js' | asset_url }}" defer data-cw-mug-studio-script="{{ 'cartwala-mug-studio.js' | asset_url }}" data-cw-mug-studio-model="{{ 'cartwala-white-mug.glb' | asset_url }}"></script>{% endif %}
+{% if request.page_type == 'product' %}
+{{ 'cartwala-save-progress.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'cartwala-app-personalizer-save-r2.js' | asset_url }}" defer></script>
+{% endif %}
+{{ content_for_header }}
+{% if request.page_type == 'product' and product.tags contains 'cw-mug' %}{{ 'cartwala-mug-3d-review.css' | asset_url | stylesheet_tag }}{% endif %}
+<script>document.documentElement.className=document.documentElement.className.replace('no-js','js');window.Cartwala={routes:{cart_add_url:'{{ routes.cart_add_url }}.js',cart_change_url:'{{ routes.cart_change_url }}.js',cart_url:'{{ routes.cart_url }}.js',predictive_search_url:'{{ routes.predictive_search_url }}.json'}};</script>
+{% if request.page_type == 'product' %}{{ 'cartwala-single-cta.css' | asset_url | stylesheet_tag }}{% endif %}
+{% if request.page_type == 'product' %}{{ 'cartwala-product-ux.css' | asset_url | stylesheet_tag }}{% endif %}
+{% if request.page_type == 'product' %}<script>(function(){try{if(new URLSearchParams(location.search).get('cw_start_design')==='1'){document.documentElement.classList.add('cw-mug-direct-pending')}}catch(e){}})();</script>{% endif %}
+{% if request.page_type == 'product' %}{{ 'cartwala-mug-direct-flow.css' | asset_url | stylesheet_tag }}{% endif %}
+{% if request.page_type == 'product' %}{{ 'cartwala-instant-cart-loading.css' | asset_url | stylesheet_tag }}{% endif %}
+<script>window.CartwalaSaveLabels={"saved":{{ 'cartwala_save.saved' | t | json }},"public_confirmation":{{ 'cartwala_save.public_confirmation' | t | json }},"confirmation_label":{{ 'cartwala_save.confirmation_label' | t | json }},"review_preview":{{ 'cartwala_save.review_preview' | t | json }},"progress_label":{{ 'cartwala_save.progress_label' | t | json }},"saving":{{ 'cartwala_save.saving' | t | json }},"photos_saved":{{ 'cartwala_save.photos_saved' | t | json }},"save_failed":{{ 'cartwala_save.save_failed' | t | json }},"retry":{{ 'cartwala_save.retry' | t | json }},"check_cart":{{ 'cartwala_save.check_cart' | t | json }},"saving_cart":{{ 'cartwala_save.saving_cart' | t | json }},"adding":{{ 'cartwala_save.adding' | t | json }},"opening":{{ 'cartwala_save.opening' | t | json }}};</script>
+</head><body><a class="skip-to-content-link" href="#MainContent">Skip to content</a>{% sections 'header-group' %}<main id="MainContent" role="main">{{ content_for_layout }}</main>{% sections 'footer-group' %}{% render 'cart-drawer' %}<div id="cw-toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="{{ 'theme.js' | asset_url }}" defer></script><script src="{{ 'cartwala-cart-flow-fix.js' | asset_url }}" defer></script>{% if request.page_type == 'product' %}<script src="{{ 'cartwala-personalizer-complete-fix.js' | asset_url }}" defer></script>{% endif %}<script src="{{ 'cartwala-cart-ui-fix.js' | asset_url }}" defer></script><script src="{{ 'cartwala-cart-open-fix.js' | asset_url }}" defer></script>
+{% capture cw_whatsapp_message %}Hi Cartwala, {% if product %}I need help with {{ product.title }}. Product: {{ shop.url }}{{ product.url }}{% elsif collection %}I need help choosing a gift from {{ collection.title }}. Page: {{ canonical_url }}{% else %}I need help choosing a personalised gift. Page: {{ canonical_url }}{% endif %}{% endcapture %}
+<a data-cw-whatsapp href="https://wa.me/919346830803?text={{ cw_whatsapp_message | strip | url_encode }}" title="Chat with Cartwala on WhatsApp" 
+   aria-label="{{ 'general.whatsapp_support' | t }}" target="_blank" 
+   rel="noopener noreferrer"
+   style="position:fixed;bottom:20px;right:20px;background-color:#25d366;color:#ffffff;border-radius:50px;text-align:center;font-size:30px;box-shadow:2px 2px 8px rgba(0,0,0,0.3);z-index:999999;width:55px;height:55px;display:flex;align-items:center;justify-content:center;text-decoration:none;">
+  <svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="white">
+    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+  </svg>
+</a>
+
+{% if request.page_type == 'product' %}<script src="{{ 'cartwala-single-cta.js' | asset_url }}" defer></script>{% endif %}
+{% if request.page_type == 'product' %}<script src="{{ 'cartwala-product-ux.js' | asset_url }}" defer></script>{% endif %}
+{% if request.page_type == 'product' or request.page_type == 'collection' %}<script src="{{ 'cartwala-mug-direct-flow.js' | asset_url }}" defer></script>{% endif %}
+{% if request.page_type == 'product' %}<script src="{{ 'cartwala-instant-cart-loading.js' | asset_url }}" defer></script>{% endif %}
+
+{% if request.page_type == 'product' %}
+<script src="{{ 'cartwala-bg-quality-qa.js' | asset_url }}" defer data-cw-background-quality
+ data-cw-bg-css="{{ 'cartwala-bg-quality-qa.css' | asset_url }}"
+ data-cw-bg-modnet="{{ 'cartwala-crystal-matting-worker.js' | asset_url }}"
+ data-cw-bg-q8="{{ 'cartwala-gift-photo-processing.js' | asset_url }}"
+ data-cw-bg-fp16="{{ 'cartwala-bg-quality-isnet-fp16.js' | asset_url }}"
+ data-cw-bg-smart="{{ 'cartwala-smart-cutout-qa.js' | asset_url }}"
+ data-cw-bg-repair="{{ 'cartwala-hand-edge-repair-qa.js' | asset_url }}"
+ data-cw-bg-repair-css="{{ 'cartwala-hand-edge-repair-qa.css' | asset_url }}"></script>
+{% endif %}
+{% render 'cw-cod-review' %}
+</body></html>
