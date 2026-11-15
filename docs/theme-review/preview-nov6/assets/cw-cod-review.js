@@ -276,7 +276,7 @@
     renderAmounts({full:a.orderPaise,advance:a.advancePaise,fee:a.feePaise,now:a.payableNowPaise,balance:a.collectOnDeliveryPaise,total:a.totalPaise});
   }
   function normalAmounts() {
-    if (!cart) return;
+    if (!cart || configFailed) return;
     const advance = Math.floor((cart.total_price * config.advancePercent + 50) / 100);
     showQuoteAmounts({orderPaise:cart.total_price,advancePaise:advance,feePaise:config.codFeePaise,payableNowPaise:advance+config.codFeePaise,collectOnDeliveryPaise:cart.total_price-advance,totalPaise:cart.total_price+config.codFeePaise});
     dialog.querySelector('[data-cod-discount]').textContent = money(cart.total_discount || 0);
@@ -293,7 +293,7 @@
       showQuoteAmounts(discountAmounts);
       dialog.querySelector('[data-cod-discount]').textContent = money(appliedDiscount.discountPaise);
     } else normalAmounts();
-    status.textContent = labels.review_notice;
+    status.textContent = configFailed ? labels.config_unavailable : labels.review_notice;
     setChoice();
   }));
   applyCode?.addEventListener('click', async () => {
