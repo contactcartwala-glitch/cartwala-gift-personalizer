@@ -10,31 +10,38 @@
   const storageKey = mode === 'customer' ? 'cartwala-native-cod-customer-v1' : 'cartwala-native-cod-review-v1';
   const form = dialog.querySelector('form'), status = dialog.querySelector('[role="status"]');
   const next = dialog.querySelector('[data-cod-next]'), recheck = dialog.querySelector('[data-cod-recheck]');
+  const retryConfig = dialog.querySelector('[data-cod-retry-config]');
   const discountBox = dialog.querySelector('[data-cod-discount-box]'), discountInput = dialog.querySelector('[data-cod-code]'), applyCode = dialog.querySelector('[data-cod-apply]');
   const radios = [...dialog.querySelectorAll('input[name="cw_cod_choice"]')];
   const money = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(n / 100);
   let config, cart, cartKey = '', origin, loading = false, bypass = false, leaving = false, operation = 0;
+  let configFailed = false, configRetryAfter = 0;
   let appliedDiscount, discountAmounts, invoiceAmounts, invoicePercent, preparing = false, retryNeeded = false;
   let access = '', invoice = '', requestKey = '', confirmed = false, blocked = false, completed = false;
   async function configuration() {
-    const response = await fetch(`${base}apps/cartwala-signature-day-1/cod-review`, {
-      cache: 'no-store', credentials: 'same-origin', signal: AbortSignal.timeout(8000),
+    const response = await fetch(endpoint, {
+      cache: 'no-store', credentials: 'same-origin', signal: AbortSignal.timeout(15000),
     });
-    if (!response.ok) throw new Error();
+    if (!response.ok) {
+      const raw = response.headers?.get('Retry-After');
+      const seconds = raw && /^\d+$/.test(raw) ? Number(raw) : raw ? Math.ceil((Date.parse(raw) - Date.now()) / 1000) : 0;
+      configRetryAfter = Date.now() + Math.max(response.status === 429 ? 30000 : 0, Number.isFinite(seconds) ? seconds * 1000 : 0);
+      throw new Error();
+    }
     const value = await response.json();
-    if (value.available !== true || value.themeId !== dialog.dataset.themeId ||
+    if (typeof value.enabled !== 'boolean' || typeof value.customerEnabled !== 'boolean') throw new Error();
+    const merchantOff = !value.enabled || (mode === 'customer' && !value.customerEnabled);
+    if (merchantOff) { configRetryAfter = 0; return { ...value, enabled:false, canPay:false, previewOnly:mode === 'preview' }; }
+    if (value.themeId !== dialog.dataset.themeId ||
       typeof value.enabled !== 'boolean' || !Number.isInteger(value.advancePercent) || value.advancePercent < 10 ||
       value.advancePercent > 50 || !Number.isSafeInteger(value.codFeePaise) || value.codFeePaise < 0 || value.codFeePaise > 1000000) throw new Error();
-    let native;
-    try {
-      const result = await fetch(endpoint, { cache: 'no-store', credentials: 'same-origin', signal: AbortSignal.timeout(8000) });
-      if (result.ok) native = await result.json();
-    } catch { /* Normal prepaid checkout remains available. */ }
-    const canPay = native?.collectAddressAtCheckout === true && native.themeId === dialog.dataset.themeId &&
-      (mode === 'customer' ? native.checkoutAvailable === true : native.previewCheckoutAvailable === true) && native.enabled === true &&
-      native.revision === value.revision && native.advancePercent === value.advancePercent && native.codFeePaise === value.codFeePaise;
-    return { ...value, enabled: value.enabled && (mode !== 'customer' || canPay),
-      discountCodesAvailable: canPay && native.discountCodesAvailable === true, previewOnly:mode === 'preview', canPay };
+    if (typeof value.customerEnabled !== 'boolean') throw new Error();
+    const canPay = value.collectAddressAtCheckout === true && value.enabled &&
+      (mode === 'customer' ? value.checkoutAvailable === true : value.previewCheckoutAvailable === true);
+    if (!merchantOff && mode === 'customer' && !canPay) throw new Error();
+    configRetryAfter = 0;
+    return { ...value, enabled: !merchantOff,
+      discountCodesAvailable: canPay && value.discountCodesAvailable === true, previewOnly:mode === 'preview', canPay };
   }
   config = { enabled: false, canPay: false };
   // Install the listener even when OFF so an already-open preview can observe a later ON.
@@ -45,6 +52,10 @@
     if (notice) notice.hidden = config.canPay && !config.previewOnly;
     const unresolved = !!(access || requestKey) && !confirmed;
     radios.forEach(r => { r.disabled = loading || leaving || unresolved || completed; });
+    if (retryConfig) {
+      retryConfig.hidden = !configFailed || completed || unresolved;
+      retryConfig.disabled = loading || leaving;
+    }
     if (discountBox) discountBox.hidden = !cod || !config.discountCodesAvailable || completed;
     if (applyCode) applyCode.disabled = loading || !!requestKey || !!access || blocked || !cart;
     if (discountInput) discountInput.disabled = loading || !!requestKey || !!access || blocked;
@@ -53,11 +64,11 @@
     next.hidden = completed;
     const shopping = dialog.querySelector('[data-cod-shopping]');
     if (shopping) shopping.hidden = !completed;
-    dialog.querySelector('[data-cod-breakdown]').hidden = !cod;
+    dialog.querySelector('[data-cod-breakdown]').hidden = !cod || configFailed;
     recheck.hidden = !retryNeeded || !(access || requestKey) || completed;
     recheck.disabled = loading;
     next.disabled = completed || loading || leaving || (!!(access || requestKey) && !confirmed) || (cod && ((!config.canPay && !confirmed) || blocked || !cart));
-    next.textContent = preparing || leaving ? labels.opening : !cod ? labels.continue_prepaid : confirmed ? labels.confirm_cod : !config.canPay ? labels.not_connected : labels.continue_cod;
+    next.textContent = preparing || leaving ? labels.opening : !cod ? labels.continue_prepaid : confirmed ? labels.confirm_cod : configFailed ? labels.retry_config : !config.canPay ? labels.not_connected : labels.continue_cod;
   }
   function close() {
     if (loading) return;
@@ -199,21 +210,30 @@
     if (discountInput) discountInput.value = '';
     const token = ++operation;
     readRecovery();
-    try { config = await configuration(); }
-    catch { config = { enabled:false, canPay:false, advancePercent:20, codFeePaise:0 }; }
-    if (!config.enabled && !access && !requestKey) { loading = false; resume(); return; }
+    configFailed = false;
+    const cartRequest = readCart().then(value=>({value}),()=>({error:true}));
+    try {
+      if (Date.now() < configRetryAfter) throw new Error();
+      config = await configuration();
+    }
+    catch { configFailed = true; config = { enabled:true, canPay:false, advancePercent:20, codFeePaise:0 }; }
+    if (!configFailed && !config.enabled && !access && !requestKey) { loading = false; resume(); return; }
     radios.forEach(r => { r.checked = r.value === 'prepaid'; r.disabled = true; });
     restoreOrigin();
     dialog.querySelector('[data-cod-amounts]').hidden = true;
     status.textContent = labels.loading; cart = undefined;
     setChoice(); dialog.showModal();
     try {
-      const c = await readCart(); if (token !== operation) return;
+      const loaded = await cartRequest;
+      if (loaded.error) throw new Error();
+      const c = loaded.value; if (token !== operation) return;
       cart = c; cartKey = cartFingerprint(c); showItems(c);
       const advance = Math.floor((c.total_price * config.advancePercent + 50) / 100);
-      renderAmounts({ full: c.total_price, advance, fee: config.codFeePaise, now: advance + config.codFeePaise,
+      if (configFailed) {
+        dialog.querySelectorAll('[data-cod-full]').forEach(el=>{el.textContent=money(c.total_price);});
+      } else renderAmounts({ full: c.total_price, advance, fee: config.codFeePaise, now: advance + config.codFeePaise,
         balance: c.total_price - advance, total: c.total_price + config.codFeePaise });
-      status.textContent = labels.review_notice;
+      status.textContent = configFailed ? labels.config_unavailable : labels.review_notice;
       readRecovery();
       if (c.total_discount || c.items.some(i => i.selling_plan_allocation)) { blocked = true; status.textContent = labels.unavailable; }
       if (access || requestKey) {
@@ -302,6 +322,12 @@
   });
   discountInput?.addEventListener('keydown', event => {if(event.key==='Enter'){event.preventDefault();applyCode?.click();}});
   dialog.querySelector('[data-cod-close]').addEventListener('click', close);
+  retryConfig?.addEventListener('click', async () => {
+    if (loading || leaving || access || requestKey) return;
+    if (Date.now() < configRetryAfter) { status.textContent = labels.config_wait; return; }
+    dialog.close();
+    await open(origin);
+  });
   dialog.addEventListener('cancel', event => { event.preventDefault(); close(); });
   recheck.addEventListener('click', async () => {
     if (loading || !(access || requestKey)) return;

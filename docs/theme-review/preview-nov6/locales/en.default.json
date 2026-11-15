@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "cartwala_save": {
     "saved": "Personalization saved. Your photos and preview are ready.",
@@ -481,6 +490,9 @@
     "delivery": "Pay on delivery",
     "shipping": "Free shipping. Final amounts are confirmed after any checkout taxes or discounts.",
     "review_notice": "Review preview only. Advance payment checkout is not enabled yet.",
+    "retry_config": "Try Advance COD again",
+    "config_unavailable": "Advance COD is taking longer than usual. Try again, or choose Full payment.",
+    "config_wait": "Please wait a little before trying Advance COD again. Full payment is available.",
     "update": "Update cart"
   },
   "gift_editor": {
@@ -582,5 +594,11 @@
     "discount_applied": "Discount applied before calculating the advance.",
     "discount_rejected": "This code is not available for Advance COD. You can try it in full payment checkout.",
     "discount_apply_first": "Apply the discount code before continuing, or clear it."
+  },
+  "google_reviews": {
+    "more": "Show more reviews",
+    "view_google": "Read reviews on Google",
+    "anonymous": "Google reviewer",
+    "label": "reviews"
   }
 }
