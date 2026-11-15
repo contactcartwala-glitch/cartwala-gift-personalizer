@@ -83,6 +83,16 @@ try{
  publishedTheme=replacement;
  assert.equal((await call(mobileInput)).status,503);
  assert.equal((await loadConfig()).themeId,replacement);
+ publishedTheme='188771434681';
+ const freeInput={...mobileInput,themeId:publishedTheme};
+ assert.equal((await loadConfig()).themeId,publishedTheme);
+ assert.equal((await loadConfig()).checkoutAvailable,true);
+ assert.equal((await call(mobileInput)).status,503);
+ assert.equal((await call(freeInput)).status,200);
+ assert.equal(creates,6);
+ settingsOn=false;
+ assert.equal((await call(freeInput)).status,503);
+ settingsOn=true;
  publishedTheme='188187869369';assert.equal((await call({...input,mode:'customer'})).status,503);
  publishedTheme=null;assert.equal((await call({...input,mode:'customer'})).status,503);
  assert.equal((await call({intent:'payment_status',access:'TEST'})).status,200);
