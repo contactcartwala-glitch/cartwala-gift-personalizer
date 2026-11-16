@@ -17,6 +17,8 @@ async function compile(path) {
       b.onLoad({ filter: /.*/, namespace: "review-test" }, args => ({ contents: args.path.includes("db.server")
         ? 'export default { $queryRawUnsafe: (sql,...values) => globalThis.codReviewTest.query(sql,values) };'
         : 'async function auth(){if(!globalThis.codReviewTest.authorized)throw new Response("Unauthorized",{status:401});return {session:{shop:globalThis.codReviewTest.shop}}} export const authenticate={admin:auth,public:{appProxy:auth}};', loader: "js" }));
+      b.onResolve({filter:/cod-display-settings\.server$/},()=>({path:"display",namespace:"display"}));
+      b.onLoad({filter:/.*/,namespace:"display"},()=>({contents:"export const syncCodDisplaySettings=async()=>{};"}));
       b.onResolve({filter:/cod-published-theme\.server$/},()=>({path:"published",namespace:"review-published"}));
       b.onLoad({filter:/.*/,namespace:"review-published"},()=>({contents:"export const readCodPublishedTheme=async()=>globalThis.codReviewTest.published;"}));
       b.onResolve({ filter: /^react-router$/ }, () => ({ path: "router", namespace: "review-router" }));

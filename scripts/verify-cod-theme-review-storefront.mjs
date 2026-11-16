@@ -7,16 +7,17 @@ const source = await fs.readFile("docs/theme-review/preview-nov6/assets/cw-cod-r
 async function scenario(initial, refreshed = initial, opts={}) {
   const events = {}, calls = [], locations = [], values = {}, storage=opts.storage||new Map();
   const next = { disabled: true, attrs:{}, setAttribute(k,v){this.attrs[k]=v;}, removeAttribute(k){delete this.attrs[k];} }, status = {}, amounts = {}, breakdown = {}, fields=[{name:"phone",value:"9876543210",disabled:false},{name:"provinceCode",value:"TS",disabled:false},{name:"firstName",value:"TEST ONLY",disabled:false}], address={querySelectorAll:()=>fields}, recheck={addEventListener:(name,handler)=>{events.recheck=handler;}}, items={replaceChildren(){},append(){}};
+  const retryConfig={addEventListener:(name,handler)=>{events.retryConfig=handler;}};
   const discountBox={}, discountInput={value:"",addEventListener:(name,handler)=>{events["discount:"+name]=handler;}}, applyCode={addEventListener:(name,handler)=>{events.apply=handler;}};
   const form = { addEventListener: (name, handler) => { events.form = handler; } };
   const radio = value => ({ value, checked: value === "prepaid", disabled: false, addEventListener: (name, handler) => { events[value] = handler; } });
   const radios = [radio("prepaid"), radio("cod")];
-  const dialog = { dataset: { themeId: "188248228025" }, open: false,
+  const dialog = { dataset: { themeId: "188248228025", ...(opts.snapshot ? {publicConfig:JSON.stringify(opts.snapshot)} : {}) }, open: false,
     showModal() { this.open = true; }, close() { this.open = false; }, contains: e => e === form,
     addEventListener: (name, handler) => { events[name] = handler; },
     querySelectorAll: selector => selector.startsWith("input") ? radios : [values[selector] ||= {}],
     querySelector: selector => ({ 'script[type="application/json"]': { textContent: JSON.stringify({}) },
-      form, '[role="status"]': status, '[data-cod-next]': next, '[data-cod-amounts]': amounts,
+      form, '[role="status"]': status, '[data-cod-next]': next, '[data-cod-amounts]': amounts, '[data-cod-retry-config]':retryConfig,
       '[data-cod-breakdown]': breakdown, '[data-cod-discount-box]':discountBox, '[data-cod-code]':discountInput, '[data-cod-apply]':applyCode, '[data-cod-address]': address, '[data-cod-recheck]':recheck, '[data-cod-items]':items, '[data-cod-discount]':values.discount||={}, '[data-cod-percent]': values.percent ||= {},
       '[data-cod-close]': { addEventListener: (name, handler) => { events.close = handler; } } })[selector],
   };
@@ -36,7 +37,9 @@ async function scenario(initial, refreshed = initial, opts={}) {
       }
       if(url.endsWith("native-cod")){
         if(options.method==='POST')return {ok:true,json:async()=>opts.post?opts.post(JSON.parse(options.body)):({advancePercent:20,checkoutAvailable:true,access:'TEST_CAPABILITY',checkoutUrl:'https://cartwala.in/80379314361/invoices/test123',amounts:{orderPaise:40000,advancePaise:8000,feePaise:5000,payableNowPaise:13000,collectOnDeliveryPaise:32000,totalPaise:45000}})};
-        return {ok:true,json:async()=>({collectAddressAtCheckout:opts.addressAtCheckout!==false,discountCodesAvailable:!!opts.discount,checkoutAvailable:!!opts.native,previewCheckoutAvailable:!!opts.preview,themeId:"188248228025",enabled:true,revision:initial.revision,advancePercent:refreshed.advancePercent,codFeePaise:refreshed.codFeePaise})};
+        if(refreshed instanceof Error)throw refreshed;
+        if(opts.nativeError) return {ok:false,status:opts.nativeError,headers:{get:()=>opts.retryAfter||null}};
+        return {ok:true,json:async()=>({...refreshed,collectAddressAtCheckout:opts.addressAtCheckout!==false,customerEnabled:opts.customerEnabled!==false,discountCodesAvailable:!!opts.discount,checkoutAvailable:!!opts.native,previewCheckoutAvailable:!!opts.preview})};
       }
       if(url === "/cart/clear.js")return {ok:true,json:async()=>({item_count:0})};
       assert.equal(url, "/cart.js");
@@ -47,19 +50,46 @@ async function scenario(initial, refreshed = initial, opts={}) {
     await events.click?.({ button: 0, target: element, preventDefault() {}, stopImmediatePropagation() {} });
     await new Promise(resolve => setImmediate(resolve));
   }
-  return { dialog, events, calls, locations, next, radios, values, fields, click, storage, recheck, discountInput, discountBox };
+  return { dialog, events, calls, locations, next, radios, values, fields, click, storage, recheck, retryConfig, amounts, breakdown, discountInput, discountBox };
 }
 const valid = { available: true, enabled: true, themeId: "188248228025", paymentsEnabled: false, advancePercent: 20, codFeePaise: 5000 };
-for (const initial of [{ ...valid, enabled: false }, { ...valid, themeId: "other" }, { ...valid, codFeePaise: -1 }, new Error("offline")]) {
+for (const initial of [{ ...valid, enabled: false }]) {
   const state = await scenario(initial);
   await state.click();assert.equal(state.dialog.open,false);assert.deepEqual(state.locations,["https://cartwala.in/checkout"]);
 }
-for (const refreshed of [{ ...valid, enabled: false }, new Error("offline")]) {
+for (const refreshed of [{ ...valid, enabled: false }]) {
   const state = await scenario(valid, refreshed);
   await state.click();
   assert.equal(state.dialog.open, false);
   assert.deepEqual(state.locations, ["https://cartwala.in/checkout"]);
 }
+for (const refreshed of [new Error("offline"),{...valid,themeId:"other"},{...valid,codFeePaise:-1}]) {
+  const state=await scenario(valid,refreshed,{main:true,native:true});
+  await state.click();
+  assert.equal(state.dialog.open,true);assert.deepEqual(state.locations,[]);
+  assert.equal(state.retryConfig.hidden,false);assert.equal(state.amounts.hidden,true);
+  state.radios[0].checked=false;state.radios[1].checked=true;state.events.cod();
+  assert.equal(state.next.disabled,true);assert.equal(state.breakdown.hidden,true);
+  assert.equal(state.calls.filter(c=>c.options.method==="POST").length,0);
+  state.radios[0].checked=true;state.radios[1].checked=false;state.events.prepaid();
+  await state.events.form({preventDefault(){}});
+  assert.deepEqual(state.locations,["https://cartwala.in/checkout"]);
+}
+for(const code of [429,502,503]){
+ const opts={main:true,native:true,nativeError:code,retryAfter:code===429?"60":null};
+ const state=await scenario(valid,valid,opts);await state.click();
+ assert.equal(state.dialog.open,true);assert.equal(state.retryConfig.hidden,false);
+ const before=state.calls.length;
+ await state.events.retryConfig();
+ if(code===429)assert.equal(state.calls.length,before);
+ opts.nativeError=0;
+ if(code!==429){await state.events.retryConfig();assert.equal(state.retryConfig.hidden,true);}
+ assert.equal(state.calls.filter(c=>c.url.endsWith("cod-review")).length,0);
+ assert.equal(state.calls.filter(c=>c.options.method==="POST").length,0);
+}
+const disabledCustomer=await scenario(valid,valid,{main:true,customerEnabled:false});
+await disabledCustomer.click();assert.deepEqual(disabledCustomer.locations,["https://cartwala.in/checkout"]);
+console.log("One settings request per open; offline, invalid, 429/502/503 show safe retry instead of disappearing; Retry-After honored; explicit merchant OFF alone bypasses.");
 const on = await scenario(valid, { ...valid, advancePercent: 50, codFeePaise: 8000 });
 await on.click();
 assert.equal(on.dialog.open, true);
@@ -121,6 +151,25 @@ const preparing=promo.events.form({preventDefault(){}});assert.equal(promo.next.
 assert.equal(JSON.parse(promo.calls.find(c=>c.options.body?.includes('create_quote')).options.body).expectedGoodsPaise,36000);
 console.log('Unpaid return offers both methods, pending payment stays protected, spinner appears immediately, and verified discount produces ₹122 now / ₹288 COD.');
 
-const publishedOff=await scenario(valid,valid,{main:true,preview:true});await publishedOff.click();assert.equal(publishedOff.dialog.open,false);assert.deepEqual(publishedOff.locations,['https://cartwala.in/checkout']);
+const publishedOff=await scenario(valid,valid,{main:true,preview:true,customerEnabled:false});await publishedOff.click();assert.equal(publishedOff.dialog.open,false);assert.deepEqual(publishedOff.locations,['https://cartwala.in/checkout']);
 const publishedOn=await scenario(valid,valid,{main:true,native:true,storage:new Map(unpaidStorage)});await publishedOn.click();assert.equal(publishedOn.dialog.open,true);assert.equal(publishedOn.radios[0].disabled,false);publishedOn.radios[0].checked=false;publishedOn.radios[1].checked=true;publishedOn.events.cod();await publishedOn.events.form({preventDefault(){}});const p=publishedOn.calls.find(c=>c.options.body?.includes('create_quote'));assert.equal(JSON.parse(p.options.body).mode,'customer');assert.deepEqual(publishedOn.locations,[invoiceResponse.checkoutUrl]);
 console.log('Published-but-OFF keeps normal checkout; enabled customer mode never recovers old preview storage.');
+
+const snapshot={schemaVersion:1,shop:'0k9icg-ns.myshopify.com',enabled:true,customerEnabled:true,advancePercent:30,codFeePaise:8000,revision:12,discountCodesAvailable:true};
+for(const nativeError of [429,503]){
+ const s=await scenario(valid,valid,{main:true,native:true,nativeError,snapshot});
+ await s.click();
+ assert.equal(s.dialog.open,true);
+ assert.equal(s.calls.filter(c=>c.url.endsWith('native-cod')).length,0);
+ s.radios.forEach(r=>r.checked=r.value==='cod');await s.events.cod();
+ assert.equal(s.next.disabled,false);assert.equal(s.breakdown.hidden,false);
+ assert.equal(s.values['[data-cod-now]'].textContent,'₹200.00');
+ await s.events.form({preventDefault(){}});
+ assert.equal(s.calls.filter(c=>c.options?.method==='POST').length,0);
+ assert.equal(s.locations.length,0);
+}
+const offSnapshot=await scenario(valid,valid,{main:true,nativeError:429,snapshot:{...snapshot,enabled:false}});
+await offSnapshot.click();assert.equal(offSnapshot.dialog.open,false);assert.equal(offSnapshot.calls.filter(c=>c.url.endsWith('native-cod')).length,0);
+const invalidSnapshot=await scenario(valid,valid,{main:true,nativeError:429,snapshot:{...snapshot,advancePercent:99}});
+await invalidSnapshot.click();assert.equal(invalidSnapshot.retryConfig.hidden,false);assert.equal(invalidSnapshot.next.disabled,false);
+console.log('Shopify snapshot: zero config requests on open; correct 30%/₹80 display while Render 429/503; OFF bypass; invalid snapshot fallback; checkout still requires server confirmation.');

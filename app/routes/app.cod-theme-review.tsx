@@ -1,3 +1,4 @@
+import { syncCodDisplaySettings } from "../lib/cod-display-settings.server";
 import { Form, useActionData, useLoaderData, useNavigation, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router";
 import { readCodPublishedTheme } from "../lib/cod-published-theme.server";
 import { nativeCodThemeForPublication, NATIVE_PREVIEW_PAYMENTS_ENABLED } from "../lib/native-cod-feature";
@@ -14,11 +15,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     scope:"read_files,read_orders,read_products,write_app_proxy,write_files,write_products,write_orders,write_draft_orders,write_order_edits",
     optional_scopes:COD_DISCOUNT_SCOPE}).toString();
   const [settings, publishedTheme] = await Promise.all([loadCodThemeReview(session.shop), readCodPublishedTheme()]);
+  let displaySyncError = "";
+  try { await syncCodDisplaySettings(admin, session.shop, settings, discountCodesAvailable); }
+  catch { displaySyncError = "Storefront settings sync pending. Reload this page to retry. Payment checks still use saved settings."; }
   const themeId = nativeCodThemeForPublication(COD_REVIEW_THEME, publishedTheme, settings.customerEnabled);
-  return { discountCodesAvailable, discountConsentUrl:consent.href, settings, themeId, previewPayments: NATIVE_PREVIEW_PAYMENTS_ENABLED };
+  return { displaySyncError, discountCodesAvailable, discountConsentUrl:consent.href, settings, themeId, previewPayments: NATIVE_PREVIEW_PAYMENTS_ENABLED };
 };
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
+  const { session, admin } = await authenticate.admin(request);
   requireReviewShop(session.shop);
   if (request.method !== "POST") throw new Response("Method not allowed", { status: 405 });
   const form = await request.formData();
@@ -37,18 +41,20 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         if (publishedTheme !== nativeCodThemeForPublication(COD_REVIEW_THEME, publishedTheme, true))
           throw new Error("Could not confirm the published Cartwala theme. Try again before turning on customer checkout.");
       }
-      await saveCodThemeReview(session.shop,{...current,enabled:enable || current.enabled,customerEnabled:enable,revision:Number(revision)});
+      const saved = await saveCodThemeReview(session.shop,{...current,enabled:enable || current.enabled,customerEnabled:enable,revision:Number(revision)});
+      await syncCodDisplaySettings(admin,session.shop,saved,await hasNativeCodDiscountAccess(admin,session.shop).catch(()=>false));
       return {ok:true,message:enable?"Customer Advance COD is ON.":"Customer Advance COD is OFF. Customers use normal checkout."};
     }
     const percent = String(form.get("advancePercent"));
     if (intent === "save" && !/^\d+$/.test(percent)) throw new Error("Enter a whole advance percentage from 10 to 50.");
-    await saveCodThemeReview(session.shop, {
+    const saved = await saveCodThemeReview(session.shop, {
       enabled: intent === "toggle" ? form.get("enabled") === "true" : current.enabled,
       customerEnabled: current.customerEnabled,
       advancePercent: intent === "save" ? Number(percent) : current.advancePercent,
       codFeePaise: intent === "save" ? parseReviewCharge(form.get("codCharge")) : current.codFeePaise,
       revision: Number(revision),
     });
+    await syncCodDisplaySettings(admin,session.shop,saved,await hasNativeCodDiscountAccess(admin,session.shop).catch(()=>false));
     return { ok: true, message: intent === "toggle"
       ? form.get("enabled") === "true" ? NATIVE_PREVIEW_PAYMENTS_ENABLED ? current.customerEnabled ? "Advance COD is ON for the published checkout." : "Advance COD is ON in the duplicate theme. Preparing a checkout does not charge; paying uses the active Shopify gateway." : "Theme review is ON. Advance payments remain disabled." : "Advance COD is OFF. Place Order goes directly to normal checkout."
       : "Preview percentage and charge saved. Refresh the duplicate theme to see them." };
@@ -58,13 +64,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 const inr = (paise: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(paise / 100);
 export default function CodThemeReview() {
-  const { settings, themeId, previewPayments, discountCodesAvailable, discountConsentUrl } = useLoaderData<typeof loader>();
+  const { settings, themeId, previewPayments, discountCodesAvailable, discountConsentUrl, displaySyncError } = useLoaderData<typeof loader>();
   const result = useActionData<typeof action>();
   const busy = useNavigation().state !== "idle";
   const advance = Math.floor((40000 * settings.advancePercent + 50) / 100);
   return <s-page heading="Advance COD — theme review">
     <s-section heading="Duplicate theme controls">
       <p>These settings control the supported Cartwala Advance COD themes. {previewPayments ? "Customer checkout uses the supported theme that is published." : "Advance payments are disabled."}</p>
+      {displaySyncError && <p role="alert">{displaySyncError}</p>}
       {result && <p role={result.ok ? "status" : "alert"}>{result.message}</p>}
       <p>Advance COD switch: <strong>{settings.enabled ? "ON" : "OFF"}</strong></p>
       <Form method="post">
