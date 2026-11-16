@@ -93,9 +93,36 @@ try{
  settingsOn=false;
  assert.equal((await call(freeInput)).status,503);
  settingsOn=true;
- publishedTheme='188187869369';assert.equal((await call({...input,mode:'customer'})).status,503);
+ // Every actual published Cartwala theme works without an ID allowlist.
+ for(const themeId of ['188806496441','199999999999','188187869369']) {
+  publishedTheme=themeId;
+  const cfg=await loadConfig();
+  assert.equal(cfg.themeId,themeId);assert.equal(cfg.checkoutAvailable,true);
+  assert.equal((await call({...input,themeId,mode:'customer'})).status,200);
+  assert.equal((await call({...input,themeId:replacement,mode:'customer'})).status,503);
+  assert.equal((await call({...input,themeId,mode:'preview'})).status,503);
+  assert.deepEqual(f.tags,[]);
+ }
+ for(const invalid of [null,'','0','-1','invalid','188806496441x','9007199254740992']) {
+  publishedTheme=invalid;
+  assert.equal((await loadConfig()).checkoutAvailable,false);
+  assert.equal((await call({...input,themeId:invalid,mode:'customer'})).status,503);
+  assert.equal((await call({...input,mode:'customer'})).status,503);
+ }
+ publishedTheme='188806496441';
+ settingsOn=false;assert.equal((await loadConfig()).checkoutAvailable,false);
+ assert.equal((await call({...input,themeId:publishedTheme,mode:'customer'})).status,503);
+ settingsOn=true;customerEnabled=false;
+ assert.equal((await call({...input,themeId:publishedTheme,mode:'customer'})).status,503);
+ assert.equal((await call({...input,collectAddressAtCheckout:true})).status,200);
+ assert.deepEqual(f.tags,['CARTWALA PREVIEW - DO NOT SHIP']);
+ customerEnabled=true;
+ f.publishDuringQuote='199999999998';
+ const beforeChange=creates;
+ assert.equal((await call({...input,themeId:publishedTheme,mode:'customer'})).status,409);
+ assert.equal(creates,beforeChange);f.publishDuringQuote=null;
  publishedTheme=null;assert.equal((await call({...input,mode:'customer'})).status,503);
  assert.equal((await call({intent:'payment_status',access:'TEST'})).status,200);
  f.auth=async()=>({session:{shop:'other.myshopify.com'}});assert.equal((await call(input)).status,404);
- console.log('Publish/customer switch, preview tags, production exclusion, rollback, fail-closed and legacy recovery. Native proxy: existing invoice recovery while OFF or customer-gated, OFF/main-theme new checkout rejection, allowed duplicate preview, frozen percentage, recoverable signed status and shop isolation passed. No external writes.');
+ console.log('Publish/customer switch, preview tags, dynamic published themes, stale/draft rejection, rollback, fail-closed and legacy recovery. Native proxy: existing invoice recovery while OFF or customer-gated, OFF/main-theme new checkout rejection, allowed duplicate preview, frozen percentage, recoverable signed status and shop isolation passed. No external writes.');
 }finally{delete globalThis.__nativeProxy;await rm(dir,{recursive:true,force:true});}

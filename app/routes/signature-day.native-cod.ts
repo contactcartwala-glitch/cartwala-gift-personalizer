@@ -21,7 +21,7 @@ export const loader=async({request}:LoaderFunctionArgs)=>{
   settings.enabled?readCodPublishedTheme():Promise.resolve(null),
   settings.enabled?unauthenticated.admin(session.shop).then(({admin})=>hasNativeCodDiscountAccess(admin,session.shop)).catch(()=>false):Promise.resolve(false),
  ]);
- const themeId=nativeCodThemeForPublication(COD_REVIEW_THEME,publishedTheme);
+ const themeId=nativeCodThemeForPublication(COD_REVIEW_THEME,publishedTheme,settings.customerEnabled);
  const availability=nativeCodAvailability(settings,themeId,publishedTheme);
  return Response.json({...settings,...availability,themeId,replacementThemeId:COD_PRODUCT_AMOUNT_THEME,collectAddressAtCheckout:true,discountCodesAvailable},{headers});
 };
@@ -43,7 +43,7 @@ export const action=async({request}:ActionFunctionArgs)=>{
   const eligibleMode=async(current:typeof settings,verifyFresh=false)=>{
    if(!current.enabled)return null;
    const publishedTheme=await readCodPublishedTheme(verifyFresh);
-   const themeId=nativeCodThemeForPublication(COD_REVIEW_THEME,publishedTheme);
+   const themeId=nativeCodThemeForPublication(COD_REVIEW_THEME,publishedTheme,current.customerEnabled);
    if(input.themeId!==themeId)return null;
    const allowed=nativeCodAvailability(current,themeId,publishedTheme);
    if(input.mode==="customer"&&allowed.checkoutAvailable)return "customer";

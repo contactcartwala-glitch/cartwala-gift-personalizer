@@ -14,7 +14,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     scope:"read_files,read_orders,read_products,write_app_proxy,write_files,write_products,write_orders,write_draft_orders,write_order_edits",
     optional_scopes:COD_DISCOUNT_SCOPE}).toString();
   const [settings, publishedTheme] = await Promise.all([loadCodThemeReview(session.shop), readCodPublishedTheme()]);
-  const themeId = nativeCodThemeForPublication(COD_REVIEW_THEME, publishedTheme);
+  const themeId = nativeCodThemeForPublication(COD_REVIEW_THEME, publishedTheme, settings.customerEnabled);
   return { discountCodesAvailable, discountConsentUrl:consent.href, settings, themeId, previewPayments: NATIVE_PREVIEW_PAYMENTS_ENABLED };
 };
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -34,8 +34,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       const enable = form.get("customerEnabled") === "true";
       if (enable) {
         const publishedTheme = await readCodPublishedTheme(true);
-        if (publishedTheme !== nativeCodThemeForPublication(COD_REVIEW_THEME, publishedTheme))
-          throw new Error("Publish a supported Cartwala Advance COD theme first, then turn on customer checkout.");
+        if (publishedTheme !== nativeCodThemeForPublication(COD_REVIEW_THEME, publishedTheme, true))
+          throw new Error("Could not confirm the published Cartwala theme. Try again before turning on customer checkout.");
       }
       await saveCodThemeReview(session.shop,{...current,enabled:enable || current.enabled,customerEnabled:enable,revision:Number(revision)});
       return {ok:true,message:enable?"Customer Advance COD is ON.":"Customer Advance COD is OFF. Customers use normal checkout."};

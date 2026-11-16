@@ -50,9 +50,10 @@ const response = await proxy.loader({ request: new Request("https://app.test/sig
 assert.equal(response.headers.get("Cache-Control"), "no-store");
 assert.deepEqual(await response.json(), { available: true, themeId: "188248228025", ...off, paymentsEnabled: false });
 const launch = {intent:"customer-toggle",customerEnabled:"true",revision:"3"};
+globalThis.codReviewTest.published=null;
 assert.equal((await act(launch)).ok,false);
 assert.equal((await settings.loadCodThemeReview(shop)).customerEnabled,false);
-globalThis.codReviewTest.published="188248228025";
+globalThis.codReviewTest.published="188806496441";
 assert.equal((await act(launch)).ok,true);
 assert.equal((await settings.loadCodThemeReview(shop)).customerEnabled,true);
 assert.equal((await act({intent:"customer-toggle",customerEnabled:"false",revision:"4"})).ok,true);

@@ -12,7 +12,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
     const settings = await loadCodThemeReview(session.shop);
     const publishedTheme = settings.enabled ? await readCodPublishedTheme() : null;
-    const themeId = nativeCodThemeForPublication(COD_REVIEW_THEME, publishedTheme);
+    const themeId = nativeCodThemeForPublication(COD_REVIEW_THEME, publishedTheme, settings.customerEnabled);
     return Response.json({ available: true, themeId, ...settings, paymentsEnabled: false }, { headers });
   } catch {
     return Response.json({ available: false, enabled: false, paymentsEnabled: false }, { status: 503, headers });
