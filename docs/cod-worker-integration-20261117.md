@@ -3,6 +3,18 @@
 Status: isolated integration code prepared; NOT approved or ready for customer traffic.
 Production source baseline: a0169e943dcf66fb53be3c1d9436574bbe808da6.
 
+## Connection checkpoint, 17 November 2026 17:27 IST
+
+- Merchant explicitly authorized transfer of the existing DATABASE_URL and SHOPIFY_API_SECRET into encrypted Cloudflare secrets, then reconnected Chrome.
+- Created a separate Free Worker `cartwala-cod-native-pilot` in the existing Cartwala Cloudflare account and deployed the native integration bundle.
+- Existing Render database URL uses a private internal hostname. Read the SAME database's external URL from its Render database Info UI and confirmed username, password and database match without printing any of them. No database credential was rotated or original environment value edited.
+- Stored DATABASE_URL as a Cloudflare Secret. Submitted SHOPIFY_API_SECRET as a Secret with SHOPIFY_API_KEY, WORKER_ORIGIN, CHECKOUT_ENABLED=false, PREFLIGHT_ENABLED=true. No credentials are recorded in this document or repository.
+- Chrome control timed out while reading final settings confirmation, and a connection recovery attempt also timed out. Do not repeat secret creation blindly; inspect existing Worker variables first.
+- Independent GET https://cartwala-cod-native-pilot.contact-cartwala.workers.dev/health returned HTTP 200 with checkoutEnabled:false at 11:56 UTC.
+- Independent unsigned GET /pilot/preflight returned HTTP 401 at 11:57 UTC. This confirms the preflight route and authentication configuration are active, while customer checkout remains OFF. It does NOT prove database connectivity or secret equivalence with Shopify.
+- Signed real database/session preflight has NOT yet run. No production app URL, proxy, webhook, theme, billing setting, payment or customer order was changed.
+- Next: restore browser connection, inspect settings without displaying secrets, run a short-lived signed read-only preflight. Continue remaining release gates below; never treat unsigned 401 as a database test.
+
 ## Completed
 
 - Reuses the existing COD loader/action, draft creation, same-order reconciliation, and webhook handler through build-time adapters. No production source edits.
