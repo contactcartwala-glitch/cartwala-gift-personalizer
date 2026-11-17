@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {createHmac} from 'node:crypto';
 import {runRequest, requestContext} from './request-context';
-import {authenticate, unauthenticated, SHOP, APP_KEY, readLimitedBody} from './shopify';
+import {authenticate, unauthenticated, SHOP, APP_KEY, readLimitedBody,configuredApi} from './shopify';
 import nativeWorker from './native-worker';
 const secret = 'FICTIONAL_WORKER_FIXTURE_SECRET_'.repeat(2);
 const env = {SHOPIFY_API_KEY: APP_KEY, SHOPIFY_API_SECRET: secret,
@@ -47,6 +47,14 @@ export async function runSecurityFixture() {
     await assert.rejects(() => readLimitedBody(new Request('https://example.com', {method:'POST',body:'x'.repeat(100)}), 50));
   });
   assert.throws(() => requestContext());
+  await runRequest({env:{...env,SHOPIFY_API_SECRET:'ROTATED_FICTIONAL_SECRET_'.repeat(3)},database},async()=>{
+    assert.ok(configuredApi());
+    await assert.rejects(()=>authenticate.public.appProxy(signedProxy()));
+  });
+  await runRequest({env,database},async()=>{
+    assert.equal((await authenticate.public.appProxy(signedProxy())).session.shop,SHOP);
+    const configured=configuredApi();assert.equal(configuredApi(),configured);
+  });
   await Promise.all(Array.from({length: 16}, (_, i) => runRequest({env:{CHECKOUT_ENABLED:String(i)},database}, async () => {
     await Promise.resolve(); assert.equal(requestContext().env.CHECKOUT_ENABLED, String(i));
   })));

@@ -3,6 +3,9 @@ import {shopifyApi, ApiVersion, LogSeverity} from '@shopify/shopify-api';
 import {requestContext} from './request-context';
 export const SHOP = '0k9icg-ns.myshopify.com';
 export const APP_KEY = '3879fe641910f37451baf743e76059ee';
+// Cache configuration only. Tokens, database clients and request authentication
+// remain request-local; no socket, response or in-flight promise is shared.
+let cachedApi: {secret:string; origin:string; api:ReturnType<typeof shopifyApi>} | undefined;
 export function configuredApi() {
   const {env} = requestContext();
   if (env.SHOPIFY_API_KEY !== APP_KEY || !env.SHOPIFY_API_SECRET ||
@@ -12,9 +15,12 @@ export function configuredApi() {
   const origin = new URL(env.WORKER_ORIGIN);
   if (origin.protocol !== 'https:' || origin.username || origin.password ||
       origin.pathname !== '/' || origin.search || origin.hash) throw new Error('Invalid Worker origin');
-  return shopifyApi({apiKey: APP_KEY, apiSecretKey: env.SHOPIFY_API_SECRET,
+  if(cachedApi?.secret===env.SHOPIFY_API_SECRET&&cachedApi.origin===origin.origin)return cachedApi.api;
+  const api=shopifyApi({apiKey: APP_KEY, apiSecretKey: env.SHOPIFY_API_SECRET,
     apiVersion: ApiVersion.July26, hostName: origin.hostname, isEmbeddedApp: true,
     logger: {level: LogSeverity.Error, log: () => {}}});
+  cachedApi={secret:env.SHOPIFY_API_SECRET,origin:origin.origin,api};
+  return api;
 }
 export async function readLimitedBody(request: Request, maximum: number) {
   if (!request.body) return '';

@@ -2,6 +2,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import type { NativeCodDatabase } from '../../../app/lib/native-cod-checkout.server';
 export type WorkerEnv = {
   DATABASE_URL?: string;
+  HYPERDRIVE?: {connectionString:string};
   SHOPIFY_API_KEY?: string;
   SHOPIFY_API_SECRET?: string;
   WORKER_ORIGIN?: string;

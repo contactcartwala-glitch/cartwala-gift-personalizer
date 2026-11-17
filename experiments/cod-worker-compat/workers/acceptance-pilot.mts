@@ -12,7 +12,7 @@ export default {async fetch(request:Request,env:WorkerEnv){
  if(!['/pilot/preflight','/pilot/checkout-fixture','/pilot/receipt-check','/pilot/prepare-checkout','/pilot/webhook'].includes(path))return new Response(null,{status:404});
  if(!['GET','POST'].includes(request.method)||path==='/pilot/webhook'&&request.method!=='POST')return new Response(null,{status:405});
  if(env.CHECKOUT_ENABLED==='true'||env.PREFLIGHT_ENABLED!=='true')return new Response(null,{status:503});
- const connection=openDatabase(env.DATABASE_URL);
+ const connection=openDatabase(env.DATABASE_URL,env.HYPERDRIVE);
  try{return await runRequest({env,database:connection.database},async()=>{
   if(path==='/pilot/webhook'){
    const verified=await authenticate.webhook(request.clone());
@@ -22,13 +22,14 @@ export default {async fetch(request:Request,env:WorkerEnv){
    const {requestContext}=await import('./request-context');requestContext().env={...env,CHECKOUT_ENABLED:'true'};
    return paidWebhook({request,params:{},context:{}});
   }
+  // These read-only handlers authenticate their own request exactly once.
+  if(path==='/pilot/preflight')return readOnlyPreflight(request);
+  if(path==='/pilot/receipt-check')return Response.json(await verifyExistingReceipt(request),{headers});
   await authenticate.public.appProxy(request);
   if(path==='/pilot/prepare-checkout'){
    if(request.method==='GET')return new Response('<!doctype html><meta name="viewport" content="width=device-width"><h1>Cartwala Cloudflare merchant pilot</h1><p>Customer checkout stays OFF. Preparing creates one tagged draft, never a payment or shipment.</p><form method="post"><button>Prepare checkout — no charge</button></form>',{headers:{...headers,'Content-Type':'text/html;charset=utf-8'}});
    return Response.json(await prepareMerchantPilot(request),{headers});
   }
-  if(path==='/pilot/preflight')return readOnlyPreflight(request);
-  if(path==='/pilot/receipt-check')return Response.json(await verifyExistingReceipt(request),{headers});
   return Response.json(await runHostedScenario(connection.database,new URL(request.url).searchParams.get('scenario')),{headers});
  });}catch(e){if(e instanceof Response)return e;return Response.json({passed:false,error:'Acceptance check failed',checkoutEnabled:false},{status:503,headers});}
  finally{await connection.close().catch(()=>{});}

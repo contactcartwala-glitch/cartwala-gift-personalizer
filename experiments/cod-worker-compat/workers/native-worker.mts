@@ -12,7 +12,7 @@ export default {
       return Response.json({service: 'cartwala-cod-isolated-pilot', checkoutEnabled: env.CHECKOUT_ENABLED === 'true'}, {headers});
     }
     if (path === '/pilot/preflight' && request.method === 'GET' && env.PREFLIGHT_ENABLED === 'true' && env.CHECKOUT_ENABLED !== 'true') {
-      const connection = openDatabase(env.DATABASE_URL);
+      const connection = openDatabase(env.DATABASE_URL,env.HYPERDRIVE);
       try {return await runRequest({env,database:connection.database}, () => readOnlyPreflight(request));}
       catch (error) {
         if (error instanceof Response) return error;
@@ -32,7 +32,7 @@ export default {
     if (!['GET', 'POST'].includes(request.method) || path.startsWith('/webhooks/') && request.method !== 'POST') {
       return new Response(null, {status: 405, headers});
     }
-    const connection = openDatabase(env.DATABASE_URL);
+    const connection = openDatabase(env.DATABASE_URL,env.HYPERDRIVE);
     try {
       return await runRequest({env, database: connection.database}, async () => {
         const args = {request, params: {}, context: {}};

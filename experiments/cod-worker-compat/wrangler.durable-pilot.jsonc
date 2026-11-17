@@ -1,0 +1,20 @@
+{
+  "name": "cartwala-cod-native-pilot",
+  "account_id": "cac117f634814b39e61d44fd92e48f4b",
+  "main": "dist/durable-runtime.mjs",
+  "compatibility_date": "2026-11-17",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "keep_vars": true,
+  "durable_objects": {"bindings": [{"name": "COD_RUNTIME", "class_name": "NativeCodRuntime"}]},
+  "exports": {"NativeCodRuntime": {"type": "durable-object", "storage": "sqlite"}},
+  "hyperdrive": [{"binding": "HYPERDRIVE", "id": "5822d26c40db4d38b054334cbbe79808"}],
+  "vars": {
+    "SHOPIFY_API_KEY": "3879fe641910f37451baf743e76059ee",
+    "WORKER_ORIGIN": "https://cartwala-cod-native-pilot.contact-cartwala.workers.dev",
+    "CHECKOUT_ENABLED": "false",
+    "PREFLIGHT_ENABLED": "true",
+    "PILOT_RUNTIME": "true"
+  },
+  "observability": {"enabled": true}
+}

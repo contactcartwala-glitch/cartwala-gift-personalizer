@@ -3,19 +3,23 @@ import { requestContext } from './request-context';
 import type { NativeCodDatabase } from '../../../app/lib/native-cod-checkout.server';
 
 /** One lazy connection per request. No cross-request pool, migrations, or schema changes. */
-export function openDatabase(connectionString?: string) {
+export function openDatabase(connectionString?: string, hyperdrive?: {connectionString:string}) {
   let client: pg.Client | undefined;
   let connecting: Promise<void> | undefined;
   const database: NativeCodDatabase = {
     async query<T>(sql: string, parameters: unknown[]): Promise<T[]> {
-      if (!connectionString) throw new Error('Database connection not configured');
+      if (!connectionString && !hyperdrive) throw new Error('Database connection not configured');
       if (!client) {
-        const url = new URL(connectionString);
+        const url = new URL(hyperdrive?.connectionString ?? connectionString!);
         if (!['postgres:', 'postgresql:'].includes(url.protocol) || !url.hostname ||
-            url.searchParams.has('sslmode') || url.searchParams.has('ssl')) {
+            !hyperdrive && (url.searchParams.has('sslmode') || url.searchParams.has('ssl'))) {
           throw new Error('Use a PostgreSQL URL without TLS overrides');
         }
-        client = new pg.Client({connectionString, ssl: {rejectUnauthorized: true},
+        // A Hyperdrive binding is a runtime-provided tunnel, not a public plaintext
+        // database connection. Hyperdrive validates origin TLS and owns its pool.
+        // Never accept this binding or a connection URL from an HTTP payload.
+        client = new pg.Client({connectionString:hyperdrive?.connectionString ?? connectionString,
+          ...(!hyperdrive ? {ssl: {rejectUnauthorized: true}} : {}),
           connectionTimeoutMillis: 5000, statement_timeout: 15000,
           application_name: 'cartwala-cod-worker-pilot'});
         connecting = client.connect();

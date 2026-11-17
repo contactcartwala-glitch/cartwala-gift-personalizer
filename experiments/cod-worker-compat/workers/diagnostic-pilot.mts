@@ -8,7 +8,7 @@ export default {async fetch(request:Request,env:WorkerEnv) {
   if(path==='/health')return Response.json({service:'cartwala-cod-readonly-pilot',checkoutEnabled:false},{headers});
   if(path!=='/pilot/preflight'||request.method!=='GET')return new Response(null,{status:404});
   if(env.CHECKOUT_ENABLED==='true'||env.PREFLIGHT_ENABLED!=='true')return new Response(null,{status:503});
-  const connection=openDatabase(env.DATABASE_URL);let phase='authentication';
+  const connection=openDatabase(env.DATABASE_URL,env.HYPERDRIVE);let phase='authentication';
   const database={async query<T>(sql:string,params:unknown[]):Promise<T[]> {
     if(sql==='BEGIN READ ONLY')phase='database_connection';
     else if(sql.includes('CodThemeReviewSettings'))phase='database_settings';
