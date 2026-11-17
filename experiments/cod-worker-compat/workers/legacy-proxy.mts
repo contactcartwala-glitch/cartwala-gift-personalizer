@@ -11,5 +11,5 @@ export async function forwardLegacyProxy(request:Request):Promise<Response>{
   const headers=new Headers(request.headers);
   for(const name of ['host','cookie','authorization','content-length','connection'])headers.delete(name);
   return fetch(target,{method:request.method,headers,body:request.method==='POST'?request.body:undefined,
-    redirect:'manual',signal:AbortSignal.timeout(25000)});
+    redirect:'manual',signal:AbortSignal.timeout(120000)});
 }

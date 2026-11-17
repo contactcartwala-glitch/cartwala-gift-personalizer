@@ -19,6 +19,9 @@ for(const [pilot,enabled] of [['true','false'],['false','false'],['false','true'
     assert.equal((await mf.dispatchFetch('https://fixture.example/health',{method:'DELETE'})).status,405);
     assert.equal((await mf.dispatchFetch('https://fixture.example/signature-day/native-cod')).status,pilot==='true'?404:enabled==='true'?401:503);
     assert.equal((await mf.dispatchFetch('https://fixture.example/pilot/preflight')).status,pilot==='true'?401:401);
+    for(const path of ['native-quote','legacy-check','register-hooks','theme-api-check']){
+      assert.equal((await mf.dispatchFetch(`https://fixture.example/pilot/${path}`,{method:'POST',body:''})).status,401);
+    }
     if(pilot==='true')assert.equal((await mf.dispatchFetch('https://fixture.example/pilot/webhook',{method:'POST',body:'{}'})).status,401);
     assert.equal(outbound,0);
     console.log(`SQLite Durable Object ${pilot==='true'?'pilot':'native'}: routing, method limits, authentication and customer OFF verified; no external requests.`);

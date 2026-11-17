@@ -16,7 +16,12 @@ export class NativeCodRuntime extends DurableObject<RuntimeEnv> {
     const isPilot=this.env.PILOT_RUNTIME==='true'||new URL(request.url).pathname.startsWith('/pilot/');
     // Signed pilot receipt/preflight recovery remains separate from the customer
     // activation flag. These handlers still enforce their own authentication.
-    return isPilot?pilot.fetch(request,{...this.env,CHECKOUT_ENABLED:'false'}):native.fetch(request,this.env);
+    if(isPilot)return pilot.fetch(request,{...this.env,CHECKOUT_ENABLED:'false'});
+    const result=await native.fetch(request,this.env);
+    if(request.method==='GET'&&new URL(request.url).pathname==='/signature-day/native-cod'&&result.ok){
+      return Response.json({...await result.json(),backend:'cloudflare-durable-free'},{status:result.status,headers:result.headers});
+    }
+    return result;
   }
 }
 export default {
@@ -25,7 +30,7 @@ export default {
     const known=path==='/health'||path==='/signature-day'||path.startsWith('/signature-day/')||
       path==='/webhooks/orders/native-cod'||[
         '/pilot/preflight','/pilot/checkout-fixture','/pilot/receipt-check',
-        '/pilot/prepare-checkout','/pilot/register-hooks','/pilot/theme-check','/pilot/theme-api-check','/pilot/webhook',
+        '/pilot/prepare-checkout','/pilot/register-hooks','/pilot/theme-check','/pilot/theme-api-check','/pilot/native-quote','/pilot/legacy-check','/pilot/webhook',
       ].includes(path);
     if(!known)return new Response(null,{status:404});
     if(!['GET','POST'].includes(request.method))return new Response(null,{status:405});

@@ -7,11 +7,12 @@ import {verifyExistingReceipt} from './receipt-preflight';
 import {prepareMerchantPilot,PILOT_ID} from './merchant-pilot';
 import {registerNativeHooks} from './register-native-hooks';
 import {probeCodPublishedTheme,probeCodThemeApi} from './published-theme';
+import {prepareNativeRoutePilot,verifyLegacyRoutes} from './native-route-pilot';
 import {action as paidWebhook} from '../../../app/routes/webhooks.orders.native-cod';
 export default {async fetch(request:Request,env:WorkerEnv){
  const path=new URL(request.url).pathname,headers={'Cache-Control':'no-store'};
  if(path==='/health')return Response.json({checkoutEnabled:false,pilot:'acceptance-only'},{headers});
- if(!['/pilot/preflight','/pilot/checkout-fixture','/pilot/receipt-check','/pilot/prepare-checkout','/pilot/register-hooks','/pilot/theme-check','/pilot/theme-api-check','/pilot/webhook'].includes(path))return new Response(null,{status:404});
+ if(!['/pilot/preflight','/pilot/checkout-fixture','/pilot/receipt-check','/pilot/prepare-checkout','/pilot/register-hooks','/pilot/theme-check','/pilot/theme-api-check','/pilot/native-quote','/pilot/legacy-check','/pilot/webhook'].includes(path))return new Response(null,{status:404});
  if(!['GET','POST'].includes(request.method)||path==='/pilot/webhook'&&request.method!=='POST')return new Response(null,{status:405});
  if(env.CHECKOUT_ENABLED==='true'||env.PREFLIGHT_ENABLED!=='true')return new Response(null,{status:503});
  const connection=openDatabase(env.DATABASE_URL,env.HYPERDRIVE);
@@ -28,6 +29,10 @@ export default {async fetch(request:Request,env:WorkerEnv){
   if(path==='/pilot/preflight')return readOnlyPreflight(request);
   if(path==='/pilot/receipt-check')return Response.json(await verifyExistingReceipt(request),{headers});
   await authenticate.public.appProxy(request);
+  if(path==='/pilot/native-quote'||path==='/pilot/legacy-check'){
+   if(request.method==='GET')return new Response('<!doctype html><meta name="viewport" content="width=device-width"><h1>Cartwala checkout verification</h1><p>Merchant verification only. No payment or shipment. Do not pay any resulting verification draft.</p><form method="post"><button>'+ (path==='/pilot/native-quote'?'Verify customer quote and duplicate-request recovery':'Check existing routes without uploading')+'</button></form>',{headers:{...headers,'Content-Type':'text/html;charset=utf-8'}});
+   return path==='/pilot/native-quote'?prepareNativeRoutePilot(request):Response.json(await verifyLegacyRoutes(request),{headers});
+  }
   if(path==='/pilot/theme-api-check')return Response.json(await probeCodThemeApi(),{headers});
   if(path==='/pilot/theme-check')return Response.json({readOnly:true,probes:await Promise.all([probeCodPublishedTheme('/'),probeCodPublishedTheme('/cart')])},{headers});
   if(path==='/pilot/register-hooks'){
