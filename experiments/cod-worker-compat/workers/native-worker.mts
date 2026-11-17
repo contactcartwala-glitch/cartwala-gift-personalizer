@@ -3,6 +3,7 @@ import {openDatabase} from './database';
 import {loader, action} from '../../../app/routes/signature-day.native-cod';
 import {action as webhook} from '../../../app/routes/webhooks.orders.native-cod';
 import {readOnlyPreflight} from './preflight';
+import {forwardLegacyProxy} from './legacy-proxy';
 const headers = {'Cache-Control': 'no-store'};
 export default {
   async fetch(request: Request, env: WorkerEnv): Promise<Response> {
@@ -19,6 +20,10 @@ export default {
       } finally {await connection.close().catch(() => {});}
     }
     if (!['/signature-day/native-cod', '/webhooks/orders/native-cod'].includes(path)) {
+      if(env.LEGACY_PROXY_ENABLED==='true'&&(path==='/signature-day'||path.startsWith('/signature-day/'))){
+        try{return await runRequest({env,database:{async query(){throw new Error('Legacy routing cannot query the database');}}},()=>forwardLegacyProxy(request));}
+        catch(error){return error instanceof Response?error:new Response(null,{status:503,headers});}
+      }
       return new Response(null, {status: 404, headers});
     }
     if (env.CHECKOUT_ENABLED !== 'true') {

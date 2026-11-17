@@ -7,6 +7,7 @@ export type WorkerEnv = {
   WORKER_ORIGIN?: string;
   CHECKOUT_ENABLED?: string;
   PREFLIGHT_ENABLED?: string;
+  LEGACY_PROXY_ENABLED?: string;
 };
 export type RequestContext = {
   env: WorkerEnv;

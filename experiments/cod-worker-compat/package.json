@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Isolated Cartwala COD Worker compatibility fixtures; no live checkout",
   "scripts": {
-    "test": "node scripts/verify-worker-compat.mjs && node scripts/verify-worker-security.mjs && node scripts/verify-worker-preflight.mjs && node scripts/verify-worker-availability.mjs",
+    "test": "node scripts/verify-worker-compat.mjs && node scripts/verify-worker-security.mjs && node scripts/verify-worker-preflight.mjs && node scripts/verify-worker-availability.mjs && node scripts/verify-worker-legacy.mjs",
     "build:native": "node scripts/build-native-worker.mjs"
   },
   "keywords": [],

@@ -3,6 +3,17 @@
 Status: isolated integration code prepared; NOT approved or ready for customer traffic.
 Production source baseline: a0169e943dcf66fb53be3c1d9436574bbe808da6.
 
+## Verified connection and routing checkpoint
+
+- The merchant approved adding exactly 2a06:98c0:3600::103/128 to the app allowlist. Saved it alongside the two original Render ranges, with enforcement still ON. The unsaved-policy test reported 0 of 11,054 recent requests blocked.
+- Subsequent signed Cloudflare preflight returned databaseReady=true, sessionReady=true, appIdentityVerified=true, permissionsReady=true, missingScopes=[], checkoutEnabled=false. No customer/order/payment record was changed.
+- Root cause of the prior hosted 403 is confirmed: Shopify's JSON response explicitly reported that the app's IP restrictions rejected the Cloudflare Workers client address. Header experiments did not resolve the restriction; the approved allowlist addition did.
+- Current hosted native pilot is diagnostic-pilot.mts: it exposes authenticated read-only preflight and health only. It does NOT expose checkout/order mutation handlers. The full native-worker bundle remains a separate prepared artifact, not a live customer service.
+- Added an OFF-by-default legacy proxy gateway to preserve the other existing /signature-day routes at cutover. It authenticates Shopify app-proxy signatures, uses a fixed Render destination, strips cookies/authorization, preserves body/query and never forwards the COD endpoint or unrelated paths. LEGACY_PROXY_ENABLED is not enabled on production.
+- New workerd gateway tests pass for signed GET/POST, unsigned rejection, native endpoint isolation, unrelated path rejection and OFF gating, with synthetic outbound transport only.
+- Re-ran existing route tests: OFF/recovery, published-theme switching, stale-theme rejection and publication-during-quote race pass. Native plan tests pass. Durable checkout replay/concurrency tests are run separately against disposable PostgreSQL/PGlite.
+- Remaining gates: full hosted quote and reconciliation CPU/subrequest measurement, Worker-bound paid-webhook/replay integration, recovery verification, and a reviewed proxy/webhook cutover preserving admin/personality routes. No real customer checkout has been switched to Cloudflare. No real payment or shipment was made.
+
 ## Connection checkpoint, 17 November 2026 17:27 IST
 
 - Merchant explicitly authorized transfer of the existing DATABASE_URL and SHOPIFY_API_SECRET into encrypted Cloudflare secrets, then reconnected Chrome.

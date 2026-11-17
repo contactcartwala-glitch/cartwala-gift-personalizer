@@ -65,11 +65,30 @@ async function adminForShop(shop: string) {
         throw new Error('Pilot writes disabled');
       }
       if (options.tries !== undefined && options.tries !== 1) throw new Error('Automatic retries disabled');
-      return fetch(`https://${shop}/admin/api/2026-07/graphql.json`, {
+      const response = await fetch(`https://${shop}/admin/api/2026-07/graphql.json`, {
         method: 'POST', redirect: 'manual', signal: options.signal ?? AbortSignal.timeout(20000),
-        headers: {'Content-Type': 'application/json', 'X-Shopify-Access-Token': session.accessToken},
+        headers: {'Content-Type': 'application/json', 'Accept':'application/json',
+          'User-Agent':'Cartwala COD | Shopify API Library v15.1.1 | Web API',
+          'X-Shopify-Access-Token': session.accessToken},
         body: JSON.stringify({query, variables: options.variables ?? {}}),
       });
+      if (!response.ok) {
+        const format=response.headers.get('Content-Type')?.includes('json')?'JSON':response.headers.get('Content-Type')?.includes('html')?'HTML':'OTHER';
+        let detail='';
+        if(format==='JSON'){
+          const failed=await response.clone().json() as {errors?:unknown};
+          detail=JSON.stringify(failed.errors??'').replaceAll(session.accessToken,'[redacted]');
+          for(const secret of [context.env.SHOPIFY_API_SECRET,context.env.DATABASE_URL])if(secret)detail=detail.replaceAll(secret,'[redacted]');
+          detail=detail.replace(/https?:\/\/[^\s"']+/g,'[URL]').slice(0,240);
+        }
+        throw Object.assign(new Error('Shopify request failed'), {code:`SHOPIFY_HTTP_${response.status}_${format}`,safeDetail:detail});
+      }
+      const preview = await response.clone().json() as {errors?:Array<{extensions?:{code?:string}}>};
+      if (preview.errors?.length) {
+        const code=preview.errors[0]?.extensions?.code;
+        throw Object.assign(new Error('Shopify response could not be verified'), {code:`SHOPIFY_GRAPHQL_${typeof code==='string'&&/^[A-Z_]{1,50}$/.test(code)?code:'ERROR'}`});
+      }
+      return response;
     },
   }};
 }
