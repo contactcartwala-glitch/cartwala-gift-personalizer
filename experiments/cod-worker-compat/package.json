@@ -1,0 +1,17 @@
+{
+  "name": "cod-worker-compat",
+  "version": "1.0.0",
+  "description": "Isolated Cartwala COD Worker compatibility fixtures; no live checkout",
+  "scripts": {
+    "test": "node scripts/verify-worker-compat.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "miniflare": "^4.20260730.0"
+  },
+  "private": true
+}
