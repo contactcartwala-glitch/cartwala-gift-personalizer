@@ -13,8 +13,10 @@ type RuntimeEnv = WorkerEnv & {
  */
 export class NativeCodRuntime extends DurableObject<RuntimeEnv> {
   async fetch(request:Request):Promise<Response> {
-    const handler=this.env.PILOT_RUNTIME==='true'?pilot:native;
-    return handler.fetch(request,this.env);
+    const isPilot=this.env.PILOT_RUNTIME==='true'||new URL(request.url).pathname.startsWith('/pilot/');
+    // Signed pilot receipt/preflight recovery remains separate from the customer
+    // activation flag. These handlers still enforce their own authentication.
+    return isPilot?pilot.fetch(request,{...this.env,CHECKOUT_ENABLED:'false'}):native.fetch(request,this.env);
   }
 }
 export default {
@@ -23,7 +25,7 @@ export default {
     const known=path==='/health'||path==='/signature-day'||path.startsWith('/signature-day/')||
       path==='/webhooks/orders/native-cod'||[
         '/pilot/preflight','/pilot/checkout-fixture','/pilot/receipt-check',
-        '/pilot/prepare-checkout','/pilot/webhook',
+        '/pilot/prepare-checkout','/pilot/register-hooks','/pilot/theme-check','/pilot/theme-api-check','/pilot/webhook',
       ].includes(path);
     if(!known)return new Response(null,{status:404});
     if(!['GET','POST'].includes(request.method))return new Response(null,{status:405});

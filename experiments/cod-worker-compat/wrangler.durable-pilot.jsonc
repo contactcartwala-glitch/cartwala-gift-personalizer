@@ -5,6 +5,7 @@
   "compatibility_date": "2026-11-17",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
+  "preview_urls": false,
   "keep_vars": true,
   "durable_objects": {"bindings": [{"name": "COD_RUNTIME", "class_name": "NativeCodRuntime"}]},
   "exports": {"NativeCodRuntime": {"type": "durable-object", "storage": "sqlite"}},
@@ -12,9 +13,10 @@
   "vars": {
     "SHOPIFY_API_KEY": "3879fe641910f37451baf743e76059ee",
     "WORKER_ORIGIN": "https://cartwala-cod-native-pilot.contact-cartwala.workers.dev",
-    "CHECKOUT_ENABLED": "false",
+    "CHECKOUT_ENABLED": "true",
     "PREFLIGHT_ENABLED": "true",
-    "PILOT_RUNTIME": "true"
+    "PILOT_RUNTIME": "false",
+    "LEGACY_PROXY_ENABLED": "true"
   },
   "observability": {"enabled": true}
 }

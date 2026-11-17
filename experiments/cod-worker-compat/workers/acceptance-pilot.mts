@@ -5,11 +5,13 @@ import {readOnlyPreflight} from './preflight';
 import {runHostedScenario} from './hosted-checkout-fixture';
 import {verifyExistingReceipt} from './receipt-preflight';
 import {prepareMerchantPilot,PILOT_ID} from './merchant-pilot';
+import {registerNativeHooks} from './register-native-hooks';
+import {probeCodPublishedTheme,probeCodThemeApi} from './published-theme';
 import {action as paidWebhook} from '../../../app/routes/webhooks.orders.native-cod';
 export default {async fetch(request:Request,env:WorkerEnv){
  const path=new URL(request.url).pathname,headers={'Cache-Control':'no-store'};
  if(path==='/health')return Response.json({checkoutEnabled:false,pilot:'acceptance-only'},{headers});
- if(!['/pilot/preflight','/pilot/checkout-fixture','/pilot/receipt-check','/pilot/prepare-checkout','/pilot/webhook'].includes(path))return new Response(null,{status:404});
+ if(!['/pilot/preflight','/pilot/checkout-fixture','/pilot/receipt-check','/pilot/prepare-checkout','/pilot/register-hooks','/pilot/theme-check','/pilot/theme-api-check','/pilot/webhook'].includes(path))return new Response(null,{status:404});
  if(!['GET','POST'].includes(request.method)||path==='/pilot/webhook'&&request.method!=='POST')return new Response(null,{status:405});
  if(env.CHECKOUT_ENABLED==='true'||env.PREFLIGHT_ENABLED!=='true')return new Response(null,{status:503});
  const connection=openDatabase(env.DATABASE_URL,env.HYPERDRIVE);
@@ -26,6 +28,12 @@ export default {async fetch(request:Request,env:WorkerEnv){
   if(path==='/pilot/preflight')return readOnlyPreflight(request);
   if(path==='/pilot/receipt-check')return Response.json(await verifyExistingReceipt(request),{headers});
   await authenticate.public.appProxy(request);
+  if(path==='/pilot/theme-api-check')return Response.json(await probeCodThemeApi(),{headers});
+  if(path==='/pilot/theme-check')return Response.json({readOnly:true,probes:await Promise.all([probeCodPublishedTheme('/'),probeCodPublishedTheme('/cart')])},{headers});
+  if(path==='/pilot/register-hooks'){
+   if(request.method==='GET')return new Response('<!doctype html><meta name="viewport" content="width=device-width"><h1>Cartwala native COD event setup</h1><p>Registers the three fixed Cloudflare order event destinations. Existing Render hooks stay unchanged. No payment or shipment.</p><form method="post"><button>Register native COD event destinations</button></form>',{headers:{...headers,'Content-Type':'text/html;charset=utf-8'}});
+   return Response.json(await registerNativeHooks(),{headers});
+  }
   if(path==='/pilot/prepare-checkout'){
    if(request.method==='GET')return new Response('<!doctype html><meta name="viewport" content="width=device-width"><h1>Cartwala Cloudflare merchant pilot</h1><p>Customer checkout stays OFF. Preparing creates one tagged draft, never a payment or shipment.</p><form method="post"><button>Prepare checkout — no charge</button></form>',{headers:{...headers,'Content-Type':'text/html;charset=utf-8'}});
    return Response.json(await prepareMerchantPilot(request),{headers});
