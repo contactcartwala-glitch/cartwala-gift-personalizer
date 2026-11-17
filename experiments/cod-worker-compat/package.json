@@ -3,15 +3,21 @@
   "version": "1.0.0",
   "description": "Isolated Cartwala COD Worker compatibility fixtures; no live checkout",
   "scripts": {
-    "test": "node scripts/verify-worker-compat.mjs"
+    "test": "node scripts/verify-worker-compat.mjs && node scripts/verify-worker-security.mjs && node scripts/verify-worker-preflight.mjs && node scripts/verify-worker-availability.mjs",
+    "build:native": "node scripts/build-native-worker.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.15",
     "esbuild": "^0.28.2",
     "miniflare": "^4.20260730.0"
   },
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@shopify/shopify-api": "15.1.1",
+    "pg": "8.23.1"
+  }
 }

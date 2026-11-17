@@ -1,0 +1,8 @@
+{
+  "name": "cartwala-cod-native-pilot",
+  "main": "dist/native-worker.mjs",
+  "compatibility_date": "2026-08-06",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "vars": {"CHECKOUT_ENABLED": "false", "PREFLIGHT_ENABLED": "false"}
+}
