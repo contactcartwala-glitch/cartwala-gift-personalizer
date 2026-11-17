@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import {build} from 'esbuild';
+const settings={enabled:true,customerEnabled:true,advancePercent:20,codFeePaise:5000,revision:12};
+globalThis.codDisplayFixture={fresh:settings};
+const output=await build({entryPoints:['app/lib/cod-display-settings.server.ts'],bundle:true,write:false,platform:'node',format:'esm',plugins:[{name:'stub',setup(b){b.onResolve({filter:/cod-theme-review.server$/},()=>({path:'fixture',namespace:'fixture'}));b.onLoad({filter:/.*/,namespace:'fixture'},()=>({contents:`export const COD_REVIEW_SHOP='0k9icg-ns.myshopify.com';export const loadCodThemeReview=async()=>globalThis.codDisplayFixture.fresh;`}));}}]});
+const {syncCodDisplaySettings}=await import('data:text/javascript;base64,'+Buffer.from(output.outputFiles[0].text).toString('base64'));
+let field=null,writes=[],fail=false;
+const admin={graphql:async(q,o)=>{
+ if(!o)return Response.json({data:{shop:{id:'gid://shopify/Shop/80379314361',metafield:field}}});
+ writes.push(o.variables.metafields[0]);return Response.json({data:{metafieldsSet:{userErrors:fail?[{message:'conflict'}]:[]}}});
+}};
+const shop='0k9icg-ns.myshopify.com';
+await syncCodDisplaySettings(admin,shop,settings,true);
+assert.equal(writes[0].compareDigest,null);assert.equal(JSON.parse(writes[0].value).codFeePaise,5000);
+field={value:writes[0].value,compareDigest:'digest'};
+await syncCodDisplaySettings(admin,shop,settings,true);assert.equal(writes.length,1);
+await syncCodDisplaySettings(admin,shop,{...settings,revision:11},true);assert.equal(writes.length,1);
+globalThis.codDisplayFixture.fresh={...settings,revision:13};
+await assert.rejects(()=>syncCodDisplaySettings(admin,shop,settings,false));assert.equal(writes.length,1);
+globalThis.codDisplayFixture.fresh=settings;fail=true;
+await assert.rejects(()=>syncCodDisplaySettings(admin,shop,settings,false));assert.equal(writes[1].compareDigest,'digest');
+await assert.rejects(()=>syncCodDisplaySettings(admin,'other.myshopify.com',settings,true));
+delete globalThis.codDisplayFixture;
+console.log('Display sync: shop isolation, no-op, monotonic revisions, DB freshness, compare-and-set and visible sync failure passed. No external requests.');
