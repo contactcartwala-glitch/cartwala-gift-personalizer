@@ -14,6 +14,17 @@ Production source baseline: a0169e943dcf66fb53be3c1d9436574bbe808da6.
 - Re-ran existing route tests: OFF/recovery, published-theme switching, stale-theme rejection and publication-during-quote race pass. Native plan tests pass. Durable checkout replay/concurrency tests are run separately against disposable PostgreSQL/PGlite.
 - Remaining gates: full hosted quote and reconciliation CPU/subrequest measurement, Worker-bound paid-webhook/replay integration, recovery verification, and a reviewed proxy/webhook cutover preserving admin/personality routes. No real customer checkout has been switched to Cloudflare. No real payment or shipment was made.
 
+## Hosted checkout acceptance checkpoint
+
+- Deployed acceptance-pilot.mts to the isolated native pilot, CHECKOUT_ENABLED remains false. The pilot has no payable checkout or live webhook mutation route.
+- All 11 hosted scenarios returned passed=true: normal, create_lost, begin_lost, add_lost, commit_lost, wrong_calculation, manual, wrong_amount, foreign, refund, cancel.
+- These execute unmodified production createNativeCheckout/reconcileNativeCheckout with deterministic, invented Shopify transport and the existing PostgreSQL server. Each request creates a TEMP table, explicitly qualifies every checkout SQL statement with pg_temp, and ROLLBACKs afterwards. No Shopify API request, real payment, order, shipment, or persistent checkout write occurs.
+- Before deployment, the same harness passed all 11 scenarios against disposable PostgreSQL/PGlite with an existing public NativeCodCheckout sentinel row; after every run the persistent sentinel was unchanged.
+- This proves hosted core workflow compatibility and concurrent claim/replay behavior with fixture receipts. It is not a fresh real Shopify checkout/payment/webhook test and is not a complete CPU benchmark for the real Shopify API path.
+- Added an authenticated read-only existing-receipt check. Latest five saved drafts did not yield a verified paid receipt. The offline session is confirmed non-expiring. Do not ask the merchant to pay again based solely on this result.
+- A targeted historical receipt check supports an explicitly selected, signed UUID. Its last deployment attempt needs confirmation if browser control timed out. No draft, order, payment or shipment was created for that check.
+- Remaining: verify historical receipt if still available, create/validate a properly isolated merchant payable pilot with its webhook integration, have the merchant perform any required final payment themselves, then verify the same order's full value and remaining COD. Live proxy/webhook cutover remains pending and must preserve other app paths.
+
 ## Connection checkpoint, 17 November 2026 17:27 IST
 
 - Merchant explicitly authorized transfer of the existing DATABASE_URL and SHOPIFY_API_SECRET into encrypted Cloudflare secrets, then reconnected Chrome.
