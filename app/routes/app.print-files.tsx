@@ -10,6 +10,7 @@ import { printPngWithDpi } from "../lib/png-print-density.client";
 import { DESIGN_ATTRIBUTE } from "../lib/signature-day.server";
 import { buildSignatureDayPrintPdf } from "../lib/signature-day-print-pdf.client";
 import { orderedShirts } from "../lib/signature-day-print-order";
+import { CARTWALA_SHOP, isCartwalaPhotoPrint, polaroidZipUrls } from "../lib/polaroid-print-layout";
 type Attribute = { key: string; value: string };
 type PrintItem = {
   orderId: string;
@@ -21,6 +22,7 @@ type PrintItem = {
   quantity: number;
   attributes: Attribute[];
   config: unknown;
+  cartwalaPhotoPrint?: boolean;
 };
 type PhotoDesign = {
   i: string;
@@ -95,6 +97,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     loadError = orderLookupMessage(error);
   }
   const items: PrintItem[] = [];
+  const cartwalaPhotoPrintEnabled = session.shop === CARTWALA_SHOP;
   const signatureOrders: Array<{ orderName: string; createdAt: string; financialStatus: string;
     productTitle: string; designId: string }> = [];
   for (const order of payload?.data?.orders?.nodes || [])
@@ -106,7 +109,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       if (signatureId) signatureOrders.push({ orderName: order.name, createdAt: order.createdAt,
         financialStatus: order.displayFinancialStatus || "UNKNOWN", productTitle: line.title || line.name,
         designId: signatureId });
+      const isPhotoPrint = cartwalaPhotoPrintEnabled &&
+        isCartwalaPhotoPrint(Object.fromEntries(attributes.map(({ key, value }) => [key, value])), line.product?.id);
       if (
+        !isPhotoPrint &&
         !attributes.some((a) =>
           [
             "_Cartwala Personalization",
@@ -131,6 +137,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         quantity: line.quantity || 1,
         attributes,
         config: line.product?.metafield?.jsonValue || null,
+        ...(isPhotoPrint ? { cartwalaPhotoPrint: true } : {}),
       });
     }
   const uniqueSignatureOrders = [...new Map(signatureOrders.map((order) =>
@@ -752,6 +759,21 @@ export default function PrintFilesPage() {
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
   };
+  const downloadPhotoPrints = async (item: PrintItem) => {
+    const { buildPolaroidPrintExport } = await import("../lib/polaroid-print-export.client");
+    const loadPart = async (index: number) => {
+      const query = new URLSearchParams({ order: item.orderId, line: item.lineItemId, part: String(index) });
+      const response = await fetch(`/app/polaroid-print-part?${query}`, {
+        headers: { Accept: "application/zip" }, cache: "no-store",
+      });
+      if (!response.ok || !/^application\/zip\b/i.test(response.headers.get("Content-Type") || ""))
+        throw new Error(`Saved print ZIP part ${index} could not be opened. No sheets were exported.`);
+      return response.arrayBuffer();
+    };
+    const bytes = await buildPolaroidPrintExport(attrMap(item.attributes), loadPart, item.quantity, setAlbumProgress);
+    downloadBlob(new Blob([new Uint8Array(bytes)], { type: "application/zip" }),
+      `${safeFile(`${item.orderName}-${item.productTitle}`)}-photos-and-13x19-sheets.zip`);
+  };
   return (
     <s-page heading="Print Files">
       {loadError && <s-section heading="Print Files needs attention"><s-paragraph>{loadError}</s-paragraph></s-section>}
@@ -800,6 +822,22 @@ export default function PrintFilesPage() {
             heading={`${orderName} · ${new Date(orderItems[0].createdAt).toLocaleString()}`}
           >
             {orderItems.map((item) => {
+              const rawAttributes = attrMap(item.attributes);
+              if (item.cartwalaPhotoPrint) {
+                let problem = "";
+                try {
+                  if (!polaroidZipUrls(rawAttributes).length) problem = "No saved print ZIP files were found.";
+                } catch (error) { problem = error instanceof Error ? error.message : "Invalid saved print files."; }
+                const key = `${item.lineItemId}:photo-prints`;
+                return <div key={item.lineItemId} style={{ border: "1px solid #ddd", borderRadius: 12, padding: 16, marginBottom: 12 }}>
+                  <strong>{item.productTitle}</strong>
+                  <p>{problem || `${rawAttributes["Number of prints"] || "?"} prints per pack · ${rawAttributes["Print size"] || "size unavailable"} · 13 × 19 in · 300 DPI`}</p>
+                  <button type="button" disabled={Boolean(working || problem)}
+                    onClick={() => run(key, () => downloadPhotoPrints(item))}>
+                    {working === key ? albumProgress || "Preparing print ZIP…" : "Download Photos + 13 × 19 Sheets (ZIP)"}
+                  </button>
+                </div>;
+              }
               const { design, exact, attributes } = getDesign(item);
               const albumPages = albumPrintPages(attributes);
               const isAlbum = albumPages.length > 0 || Boolean(attributes["Album print pages"]);

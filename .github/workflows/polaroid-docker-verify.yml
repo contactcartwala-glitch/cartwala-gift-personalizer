@@ -1,0 +1,62 @@
+name: Verify isolated Polaroid Docker image
+on:
+  push:
+    branches: [qa/cartwala-polaroid-docker-20261123]
+permissions:
+  contents: read
+concurrency:
+  group: isolated-polaroid-docker-check
+  cancel-in-progress: false
+jobs:
+  build-only:
+    if: github.repository == 'contactcartwala-glitch/cartwala-gift-personalizer' && github.ref == 'refs/heads/qa/cartwala-polaroid-docker-20261123'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # verified v4 ref
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify exact base and reviewed scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=a0169e943dcf66fb53be3c1d9436574bbe808da6
+          git merge-base --is-ancestor "$base" HEAD
+          git diff --name-only "$base" HEAD | while IFS= read -r file; do
+            case "$file" in
+              app/routes/app.print-files.tsx|app/routes/app.polaroid-print-part.tsx|app/lib/polaroid-print-layout.ts|app/lib/polaroid-print-export.client.ts|scripts/verify-polaroid-print.mjs|scripts/verify-polaroid-part.mjs|scripts/verify-polaroid-browser.ts|.github/workflows/polaroid-docker-verify.yml) ;;
+              *) echo "Unreviewed path: $file"; exit 1 ;;
+            esac
+          done
+          sha256sum --check <<'EXPECTED'
+          8705df7baeb4233ddc621c1b71d86dde97d444f79c137009f294ed0687002699  app/routes/app.print-files.tsx
+          0deeb450a2f9c9c892f6eb5fb31f8296a22083f9cec5b2046e6389b105bb8830  app/routes/app.polaroid-print-part.tsx
+          e3ece0410ef06b420dc5a812e8dd4c738e07a54f87dc407a09f9d6fe8341dfac  app/lib/polaroid-print-layout.ts
+          92c22ad5d40409222063b2d2d47579b867e4992adff291107c9e258872843666  app/lib/polaroid-print-export.client.ts
+          eadb9dfc0a156d49197399480ce96fe7122f29f4b10fa9f7b7d9d65b1606f780  scripts/verify-polaroid-print.mjs
+          df2205b791bc6a75feee87a96259ffc04b70d9791fbb4652b88b12016e7bec26  scripts/verify-polaroid-part.mjs
+          d29383220a69358156c3b0997467226f6e21c310a203f11b4e74d73cabeb6800  scripts/verify-polaroid-browser.ts
+          EXPECTED
+      - name: Record base image and build unchanged Dockerfile
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull node:20-alpine
+          docker image inspect node:20-alpine --format '{{json .RepoDigests}}'
+          docker build --pull=false --progress=plain --tag cartwala-polaroid-check:local .
+      - name: Offline image and Prisma generator check
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --network none --entrypoint sh cartwala-polaroid-check:local -lc '
+            set -eu
+            node --version
+            npm --version
+            openssl version
+            test -s build/server/index.js
+            ./node_modules/.bin/prisma generate --schema prisma/schema.prisma
+          '
+          docker image inspect cartwala-polaroid-check:local --format '{{.Id}}'
+# No application start, migration, registry push, artifact upload, deploy hook,
+# production secret, environment mutation, or paid/larger runner.
