@@ -1,0 +1,64 @@
+name: Verify isolated Signature Day Docker image
+on:
+  push:
+    branches: [qa/cartwala-signature-docker-20261124]
+permissions:
+  contents: read
+concurrency:
+  group: isolated-signature-day-docker-check
+  cancel-in-progress: false
+jobs:
+  build-only:
+    if: github.repository == 'contactcartwala-glitch/cartwala-gift-personalizer' && github.ref == 'refs/heads/qa/cartwala-signature-docker-20261124'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Verify exact base, candidate and unchanged Dockerfile
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=c7b694514bcdbdc65379443f19251ab64be238ad
+          test "$(git show -s --format=%P HEAD)" = "$base"
+          test -z "$(git diff --name-only "$base" HEAD -- Dockerfile .dockerignore)"
+          git diff --name-only "$base" HEAD | while IFS= read -r file; do
+            case "$file" in
+              .github/workflows/signature-day-docker-verify.yml|app/lib/print-files-recovery-db.server.ts|app/lib/print-files-recovery.server.ts|app/lib/signature-checkout-confirm.server.ts|app/lib/signature-day-jpg-plan.ts|app/lib/signature-day-print-jpg.client.ts|app/routes/app.print-files.tsx|app/routes/signature-day.confirm-checkout.ts|package-lock.json|package.json|scripts/verify-signature-release.mjs|shopify-theme/assets/signature-canonical-guard.js|shopify-theme/sections/signature-day-editor.liquid|tests/fixtures/signature-published-cart.txt|tests/helpers/signature-save-read.mjs|tests/print-files-recovery.test.mjs|tests/signature-canonical-flow.test.mjs|tests/signature-checkout-guard.test.mjs|tests/signature-jpg.test.mjs|tests/signature-loader.test.mjs) ;;
+              *) echo "Unreviewed path: $file"; exit 1 ;;
+            esac
+          done
+          sha256sum --check <<'EXPECTED'
+          be7b770c4f507feff6d392e24db9e577f9fcbcb0fa1d68a743c28cbcde3062c4  app/lib/print-files-recovery-db.server.ts
+          0ded97db3af5b1bec33c0459acc26468b96917749a5a78f4b48777880278a3f2  app/lib/print-files-recovery.server.ts
+          516f33364e3324f29d626fe6967b44942765d92ae4697854a77bf2a00511761b  app/lib/signature-checkout-confirm.server.ts
+          36b90f30f04b164ec774c03cf2862aa438ccfba29e3f0c274793e12878dd525b  app/lib/signature-day-jpg-plan.ts
+          00c885a76b611022249fb565d84a0ddbbbbcab942a0d4474f7f78a90d9a7007b  app/lib/signature-day-print-jpg.client.ts
+          bd205dd336a545a7b9566dcd1f91742c3a101ee482d47e12ca65378cefcbf6ae  app/routes/app.print-files.tsx
+          70240f3c64ac71dfba59da3eeaf4bf07b378391bf961652922e6538451bf768a  app/routes/signature-day.confirm-checkout.ts
+          5169616ba06c90b6470915723f79e727b3125d1d3d8d863ebf0e58058b63986a  package-lock.json
+          0cbe061d98df38201fc1428ed91c375f0e6f11a018bd342ec92b36ec29ad2e68  package.json
+          72799ba126809984d6e435771029812f0cb2a6b7a274fbba5a574592a7e38029  scripts/verify-signature-release.mjs
+          36993eef6caf5c91b94cc5394b5aaad95eb248c3fd04a084925d980da312a76b  shopify-theme/assets/signature-canonical-guard.js
+          a1c9b28016dd6b3b80cc38c3b18d65abcbcab8d6b6d5e2ed0cd3b055b820c63b  shopify-theme/sections/signature-day-editor.liquid
+          0dadfc68587a58e5cfac13fe4c2cbe24eff8932674955a2a16f456e1ca8b6260  tests/fixtures/signature-published-cart.txt
+          bfe6c288429b6c6c55d42ef14de8d4e65d19384ec34d9514e605331cac002cb9  tests/helpers/signature-save-read.mjs
+          7d54dee511e67866433cc65e0dc16cfc35d7839e8ffe467c7c6bd9b2ff139ccd  tests/print-files-recovery.test.mjs
+          61c11db7db0774ca3b6efd4fc6a0f00f260d88b01107ba8d8f02a46e751fd254  tests/signature-canonical-flow.test.mjs
+          63132cd1a1028286470b795f1044f1771bd93e3ace551d1dc4ecf8bf2b313443  tests/signature-checkout-guard.test.mjs
+          f4b5eb37044c34580aa6de43ffade7304d1edcaad04df0bd09ee3da090fa04b9  tests/signature-jpg.test.mjs
+          45297454e74d88a7fd65cbe081a15157e4ec9c415d1cc969e63f582680ae5f71  tests/signature-loader.test.mjs
+          EXPECTED
+      - name: Build production Dockerfile once without starting the app
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          git archive HEAD | tar -x -C "$tmp"
+          docker pull node:20-alpine
+          docker image inspect node:20-alpine --format '{{json .RepoDigests}}'
+          docker build --pull=false --progress=plain --tag cartwala-signature-build-only:local "$tmp"
+          docker image inspect cartwala-signature-build-only:local --format '{{.Id}}'

@@ -162,6 +162,7 @@ button[aria-pressed=true],button:hover{border-color:#ed7100;background:#fff2e8}
 }
 </style>
 <script type="application/json" id="signatureDayVariants">{{ product.variants | json }}</script>
+{{ 'signature-canonical-guard.js' | asset_url | script_tag }}
 <script>
 (()=>{const root=document.getElementById('signature-day-store');if(!root)return;
 
@@ -439,10 +440,15 @@ root.querySelector('#confirmOrder').onclick=async()=>{
    }
   }finally{if(base)base.width=base.height=0}
   orderStatus.textContent='Connecting previews and print files to your order…';
-  let designId=printCache.designId;
-  if(!designId){const response=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({previewUrls,printUrls,sourceUrls,shirtSizes:people.map(person=>person.size),backPrint:includeBack})});const saved=await response.json();if(!response.ok||!saved.designId)throw new Error(saved.error||'Could not save design');designId=saved.designId;printCache.designId=designId;await saveDraft().catch(()=>{})}
+  if(typeof globalThis.cartwalaEnsureSignatureDesign!=='function')throw new Error('Print confirmation is not ready. Re-open this editor before adding T-shirts.');
+  const designId=await globalThis.cartwalaEnsureSignatureDesign({
+    shop:window.Shopify?.shop,proxy:PROXY,cache:printCache,
+    payload:{previewUrls,printUrls,sourceUrls,shirtSizes:people.map(person=>person.size),backPrint:includeBack},
+    variantIds,editableAvailable:people.every(person=>person.sourceFile||person.sourceUrl),fetch,saveDraft
+  });
   const grouped=new Map();people.forEach((person,i)=>{const id=variantIds[i];if(!grouped.has(id))grouped.set(id,{id,quantity:0,properties:{'_Cartwala Signature Day Design':designId,'T-shirt size':person.size,'_T-shirt preview':previewUrls[i].front,'_Cartwala Preview':previewUrls[i].front}});grouped.get(id).quantity++});
   const cartResponse=await fetch('/cart.js');if(!cartResponse.ok)throw new Error('Could not check the cart. Please try again.');const cart=await cartResponse.json();
+  if(printCache.replacedDesignId&&(cart.items||[]).some(line=>line.properties?.['_Cartwala Signature Day Design']===printCache.replacedDesignId))throw new Error('Your cart contains the earlier saved version of this design. Review and remove those earlier T-shirts before adding this confirmed version. No extra T-shirts were added.');
   const items=[...grouped.values()].map(item=>{const existing=(cart.items||[]).filter(line=>String(line.variant_id)===String(item.id)&&line.properties?.['_Cartwala Signature Day Design']===designId).reduce((sum,line)=>sum+line.quantity,0);return {...item,quantity:item.quantity-existing}});
   if(items.some(item=>item.quantity<0))throw new Error('This design already has extra T-shirts in the cart. Review the cart before adding again.');
   const missing=items.filter(item=>item.quantity>0);

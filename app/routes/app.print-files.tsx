@@ -9,7 +9,10 @@ import { orderedPrintSize } from "../lib/print-dimensions";
 import { printPngWithDpi } from "../lib/png-print-density.client";
 import { DESIGN_ATTRIBUTE } from "../lib/signature-day.server";
 import { buildSignatureDayPrintPdf } from "../lib/signature-day-print-pdf.client";
+import { buildSignatureDayJpgZip } from "../lib/signature-day-print-jpg.client";
 import { orderedShirts } from "../lib/signature-day-print-order";
+import { recoverMissingPrintDesigns } from "../lib/print-files-recovery.server";
+import { readRecoveryPrintDesigns } from "../lib/print-files-recovery-db.server";
 import { CARTWALA_SHOP, isCartwalaPhotoPrint, polaroidZipUrls } from "../lib/polaroid-print-layout";
 type Attribute = { key: string; value: string };
 type PrintItem = {
@@ -99,7 +102,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const items: PrintItem[] = [];
   const cartwalaPhotoPrintEnabled = session.shop === CARTWALA_SHOP;
   const signatureOrders: Array<{ orderName: string; createdAt: string; financialStatus: string;
-    productTitle: string; designId: string }> = [];
+    productTitle: string; designId: string; quantity: number }> = [];
   for (const order of payload?.data?.orders?.nodes || [])
     for (const line of order?.lineItems?.nodes || []) {
       const attributes: Attribute[] = Array.isArray(line.customAttributes)
@@ -108,7 +111,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       const signatureId = attributes.find((a) => a.key === DESIGN_ATTRIBUTE)?.value;
       if (signatureId) signatureOrders.push({ orderName: order.name, createdAt: order.createdAt,
         financialStatus: order.displayFinancialStatus || "UNKNOWN", productTitle: line.title || line.name,
-        designId: signatureId });
+        designId: signatureId, quantity: line.quantity || 0 });
       const isPhotoPrint = cartwalaPhotoPrintEnabled &&
         isCartwalaPhotoPrint(Object.fromEntries(attributes.map(({ key, value }) => [key, value])), line.product?.id);
       if (
@@ -143,10 +146,22 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const uniqueSignatureOrders = [...new Map(signatureOrders.map((order) =>
     [`${order.orderName}:${order.designId}`, order])).values()];
   let saved: Awaited<ReturnType<typeof prisma.signatureDayDesign.findMany>> = [];
+  const quantities = new Map<string, { id: string; count: number }>();
+  for (const order of signatureOrders) {
+    const key = `${order.orderName}:${order.designId}`;
+    quantities.set(key, { id: order.designId, count: (quantities.get(key)?.count || 0) + order.quantity });
+  }
+  const expectedCounts: Record<string, number[]> = {};
+  for (const { id, count } of quantities.values()) (expectedCounts[id] ??= []).push(count);
   if (signatureOrders.length) try {
     saved = await prisma.signatureDayDesign.findMany({
       where: { shop: session.shop, id: { in: signatureOrders.map((o) => o.designId) } },
     });
+    const recovered = await recoverMissingPrintDesigns(session.shop,
+      signatureOrders.map(order => order.designId), saved, readRecoveryPrintDesigns, expectedCounts);
+    // Projection below needs only these fields; primary records remain untouched.
+    saved = recovered.rows as typeof saved;
+    if (recovered.warning) loadError = [loadError, recovered.warning].filter(Boolean).join(" ");
   } catch (error) {
     console.error("Print Files design lookup failed", error);
     loadError = "Orders loaded, but saved designs could not be read. Check the app database and migration log.";
@@ -157,7 +172,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     sourceUrls: design.sourceUrls as string[],
     shirtSizes: design.shirtSizes as string[],
   }]));
-  return { items, signatureOrders: uniqueSignatureOrders, designs, loadError };
+  return { items, signatureOrders: uniqueSignatureOrders, designs, loadError,
+    signatureJpgEnabled: session.shop === "0k9icg-ns.myshopify.com" };
 };
 // Shopify file properties can be serialized [thumbnail, original] pairs.
 // Preserve other JSON properties (especially the saved layer layout).
@@ -714,7 +730,7 @@ async function downloadPsd(item: PrintItem) {
   );
 }
 export default function PrintFilesPage() {
-  const { items, signatureOrders, designs, loadError } = useLoaderData<typeof loader>();
+  const { items, signatureOrders, designs, loadError, signatureJpgEnabled } = useLoaderData<typeof loader>();
   const [working, setWorking] = useState("");
   const [albumProgress, setAlbumProgress] = useState("");
   const grouped = useMemo(() => {
@@ -759,6 +775,11 @@ export default function PrintFilesPage() {
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
   };
+  const downloadSignatureJpg = async (orderName: string, design: typeof designs[string]) => {
+    const bytes = await buildSignatureDayJpgZip(design);
+    downloadBlob(new Blob([new Uint8Array(bytes)], { type: "application/zip" }),
+      `${safeFile(orderName)}-signature-day-A4-300dpi-JPG.zip`);
+  };
   const downloadPhotoPrints = async (item: PrintItem) => {
     const { buildPolaroidPrintExport } = await import("../lib/polaroid-print-export.client");
     const loadPart = async (index: number) => {
@@ -789,6 +810,10 @@ export default function PrintFilesPage() {
                   {working === `${order.orderName}:${order.designId}` ? "Preparing A4 PDF…" : "Download A4 print PDF (S–XXL)"}
                 </button>
                 <p>Full-page front, followed by the back print for each T-shirt. Sizes are grouped from S to XXL.</p>
+                {signatureJpgEnabled && <button type="button" disabled={Boolean(working)} onClick={() =>
+                  run(`${order.orderName}:${order.designId}:jpg`, () => downloadSignatureJpg(order.orderName, design))}>
+                  {working === `${order.orderName}:${order.designId}:jpg` ? "Preparing A4 JPG ZIP." : "Download A4 JPG ZIP (300 DPI)"}
+                </button>}
                 {orderedShirts(design).map(({shirt, index, size}) =>
                   <div key={index} style={{marginBottom: 14, borderBottom: "1px solid #eee", paddingBottom: 8}}>
                     <strong>{size} · Shirt {index + 1}</strong>
