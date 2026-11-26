@@ -84,10 +84,11 @@ test('dedicated reader uses read-only transaction and exact scoped SELECT',async
   assert.deepEqual(events[1].where,{shop,id:{in:[A]}});
   assert.deepEqual(Object.keys(events[1].select).sort(),['id','shop','printUrls','previewUrls','sourceUrls','shirtSizes','backPrint'].sort());
 });
-test('route retains authentication, PAID guard, companion links and generic exports',()=>{
+test('staff route retains authentication, saved-artwork downloads for COD, companion links and generic exports',()=>{
   const route=fs.readFileSync(new URL('../app/routes/app.print-files.tsx',import.meta.url),'utf8');
   assert.ok(route.indexOf('await authenticate.admin(request)')<route.indexOf('await recoverMissingPrintDesigns'));
-  assert.match(route,/order.financialStatus === "PAID"/);
+  assert.doesNotMatch(route,/order.financialStatus === "PAID"/);
+  assert.match(route,/design && design.printUrls.length > 0/);
   for(const label of ['Front A4 print','Back A4 print','T-shirt preview','Original photo','Download PSD','Download PNG']) assert.ok(route.includes(label));
   assert.ok(!route.includes('process.env.DATABASE_URL ='));
   const client=fs.readFileSync(new URL('../app/lib/signature-day-print-pdf.client.ts',import.meta.url),'utf8');
