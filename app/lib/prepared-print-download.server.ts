@@ -32,7 +32,9 @@ export async function preparePrintDownload(request: Request, shop: string) {
   const format = formats[extension];
   if (!format || !request.body) return new Response("Unsupported print file", { status:400 });
   if (Number(request.headers.get("content-length")) > MAX_BYTES) return new Response("Print file exceeds 256 MB", { status:413 });
-  if ([...files.values()].filter(f => f.shop === shop).length >= 8) return new Response("Download limit reached. Please retry in 15 minutes.", { status:429 });
+  if ([...files.values()].filter(f => f.shop === shop).length >= 32) return new Response("Download limit reached. Please retry in 15 minutes.", { status:429 });
+  if ([...files.values()].reduce((sum, file) => sum + file.size, 0) + MAX_BYTES > 768 * 1024 * 1024)
+    return new Response("Temporary download storage is full. Please retry in 15 minutes.", { status:429 });
   directory ??= mkdtemp(join(tmpdir(),"cartwala-print-downloads-"));
   const token = randomBytes(32).toString("hex"), path = join(await directory, token);
   let size = 0;

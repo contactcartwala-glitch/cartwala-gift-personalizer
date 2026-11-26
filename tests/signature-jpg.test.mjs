@@ -111,3 +111,22 @@ test('missing shared PDF page fails instead of silently substituting a page', as
   globalThis.fetch=async()=>new Response(pdfBytes);
   await assert.rejects(buildSignatureDayJpgZip({printUrls:[{front:shared+'#page=99'}],shirtSizes:['M']}),/missing/);
 });
+test('interleaved source PDFs retain final page order while fetching each source only once', async () => {
+  const counts=new Map();
+  globalThis.fetch=async url=>{const file=new URL('https://test.invalid'+url).searchParams.get('url');counts.set(file,(counts.get(file)||0)+1);return new Response(pdfBytes);};
+  const d={shirtSizes:['M','M','M','M'],printUrls:[
+    {front:shared+'#page=1'},{front:shared.replace('.pdf','-second.pdf')+'#page=2'},
+    {front:shared+'#page=3'},{front:shared.replace('.pdf','-second.pdf')+'#page=4'},
+  ]};
+  const progress=[];
+  const files=unzipSync(await buildSignatureDayJpgZip(d,(done,total)=>progress.push([done,total])));
+  const names=Object.keys(files),plan=signatureJpgPlan(d);
+  assert.deepEqual(names,plan.map(p=>'Signature-Day-A4-300dpi/'+p.filename));
+  assert.deepEqual([...counts.values()],[1,1]);
+  assert.deepEqual(progress.at(-1),[4,4]);
+  for(let i=0;i<4;i++){
+    const image=await loadImage(Buffer.from(files[names[i]]));const c=createCanvas(1,1),ctx=c.getContext('2d');
+    ctx.drawImage(image,1240,1754,1,1,0,0,1,1);const actual=ctx.getImageData(0,0,1,1).data;
+    colors[i].forEach((v,j)=>assert.ok(Math.abs(actual[j]-v*255)<6));
+  }
+});

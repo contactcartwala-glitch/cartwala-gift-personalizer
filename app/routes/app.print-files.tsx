@@ -745,6 +745,7 @@ export default function PrintFilesPage() {
   const { items, signatureOrders, designs, loadError, signatureJpgEnabled } = useLoaderData<typeof loader>();
   const [working, setWorking] = useState("");
   const [albumProgress, setAlbumProgress] = useState("");
+  const [exportError, setExportError] = useState("");
   const grouped = useMemo(() => {
     const m = new Map<string, PrintItem[]>();
     for (const i of items)
@@ -754,12 +755,11 @@ export default function PrintFilesPage() {
   const run = async (k: string, task: () => Promise<void>) => {
     if (working) return;
     setWorking(k);
+    setExportError("");
     try {
       await task();
     } catch (e) {
-      window.alert(
-        e instanceof Error ? e.message : "Print file generation failed.",
-      );
+      setExportError(e instanceof Error ? e.message : "Print file generation failed.");
     } finally {
       setWorking("");
       setAlbumProgress("");
@@ -782,7 +782,8 @@ export default function PrintFilesPage() {
       `${safeFile(orderName)}-signature-day-front-A4-print.pdf`);
   };
   const downloadSignatureJpg = async (orderName: string, design: typeof designs[string]) => {
-    const bytes = await buildSignatureDayJpgZip({ ...design, printUrls: design.printUrls.map(({ front }) => ({ front })) });
+    const bytes = await buildSignatureDayJpgZip({ ...design, printUrls: design.printUrls.map(({ front }) => ({ front })) },
+      (done, total) => setAlbumProgress(`Preparing ${done}/${total} JPG print files…`));
     await downloadBlob(new Blob([new Uint8Array(bytes)], { type: "application/zip" }),
       `${safeFile(orderName)}-signature-day-front-A4-300dpi-JPG.zip`);
   };
@@ -803,6 +804,8 @@ export default function PrintFilesPage() {
   };
   return (
     <s-page heading="Print Files">
+      {exportError && <s-section heading="Print file export failed"><s-paragraph>{exportError}</s-paragraph></s-section>}
+      {working && albumProgress && <s-section heading="Preparing print files"><s-paragraph>{albumProgress}</s-paragraph></s-section>}
       {loadError && <s-section heading="Print Files needs attention"><s-paragraph>{loadError}</s-paragraph></s-section>}
       <s-section heading="Signature Day T-shirts">
         {signatureOrders.length === 0 ? <s-paragraph>No Signature Day orders yet.</s-paragraph> :
