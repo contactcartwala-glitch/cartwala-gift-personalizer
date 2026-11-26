@@ -769,20 +769,20 @@ export default function PrintFilesPage() {
     }), `${safeFile(`${item.orderName}-${item.productTitle}`)}-print-pages.${format}`);
   };
   const downloadSignaturePdf = async (orderName: string, design: typeof designs[string]) => {
-    const pdf = await buildSignatureDayPrintPdf(design);
+    const pdf = await buildSignatureDayPrintPdf({ ...design, printUrls: design.printUrls.map(({ front }) => ({ front })) });
     const url = URL.createObjectURL(new Blob([new Uint8Array(pdf)], { type: "application/pdf" }));
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${safeFile(orderName)}-signature-day-A4-print.pdf`;
+    link.download = `${safeFile(orderName)}-signature-day-front-A4-print.pdf`;
     document.body.append(link);
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
   };
   const downloadSignatureJpg = async (orderName: string, design: typeof designs[string]) => {
-    const bytes = await buildSignatureDayJpgZip(design);
+    const bytes = await buildSignatureDayJpgZip({ ...design, printUrls: design.printUrls.map(({ front }) => ({ front })) });
     downloadBlob(new Blob([new Uint8Array(bytes)], { type: "application/zip" }),
-      `${safeFile(orderName)}-signature-day-A4-300dpi-JPG.zip`);
+      `${safeFile(orderName)}-signature-day-front-A4-300dpi-JPG.zip`);
   };
   const downloadPhotoPrints = async (item: PrintItem) => {
     const { buildPolaroidPrintExport } = await import("../lib/polaroid-print-export.client");
@@ -811,12 +811,12 @@ export default function PrintFilesPage() {
               <p>{order.financialStatus} · {design?.printUrls.length || 0} T-shirts</p>
               {design && design.printUrls.length > 0 ? <>
                 <button type="button" disabled={Boolean(working)} onClick={() => run(`${order.orderName}:${order.designId}`, () => downloadSignaturePdf(order.orderName, design))}>
-                  {working === `${order.orderName}:${order.designId}` ? "Preparing A4 PDF…" : "Download A4 print PDF (S–XXL)"}
+                  {working === `${order.orderName}:${order.designId}` ? "Preparing A4 PDF…" : "Download Front A4 print PDF (S–XXL)"}
                 </button>
-                <p>Full-page front, followed by the back print for each T-shirt. Sizes are grouped from S to XXL.</p>
+                <p>Front artwork only, without T-shirt mockups or back prints. Sizes are grouped from S to XXL.</p>
                 {signatureJpgEnabled && <button type="button" disabled={Boolean(working)} onClick={() =>
                   run(`${order.orderName}:${order.designId}:jpg`, () => downloadSignatureJpg(order.orderName, design))}>
-                  {working === `${order.orderName}:${order.designId}:jpg` ? "Preparing A4 JPG ZIP." : "Download A4 JPG ZIP (300 DPI)"}
+                  {working === `${order.orderName}:${order.designId}:jpg` ? "Preparing A4 JPG ZIP." : "Download Front A4 JPG ZIP (300 DPI)"}
                 </button>}
                 {orderedShirts(design).map(({shirt, index, size}) =>
                   <div key={index} style={{marginBottom: 14, borderBottom: "1px solid #eee", paddingBottom: 8}}>
