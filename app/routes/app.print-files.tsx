@@ -616,20 +616,22 @@ const canvasBlob = (
       quality,
     ),
   );
-let preparedDownload: { url: string; link: HTMLAnchorElement } | undefined;
-const downloadBlob = (blob: Blob, filename: string) => {
-  if (preparedDownload) {
-    preparedDownload.link.remove();
-    URL.revokeObjectURL(preparedDownload.url);
-  }
-  const url = URL.createObjectURL(blob), link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.textContent = `Download prepared file: ${filename}`;
-  link.setAttribute("aria-label", `Download prepared file: ${filename}`);
+let preparedDownloadLink: HTMLAnchorElement | undefined;
+const downloadBlob = async (blob: Blob, filename: string) => {
+  const response = await fetch(`/app/print-download?name=${encodeURIComponent(filename)}`, {
+    method: "POST", headers: { "Content-Type": blob.type || "application/octet-stream" }, body: blob,
+  });
+  if (!response.ok) throw new Error(await response.text() || "Could not prepare the download");
+  const prepared = await response.json() as { href: string; name: string };
+  preparedDownloadLink?.remove();
+  const link = document.createElement("a");
+  link.href = prepared.href;
+  link.download = prepared.name;
+  link.textContent = `Download prepared file: ${prepared.name} (available for 15 minutes)`;
+  link.setAttribute("aria-label", `Download prepared file: ${prepared.name}`);
   Object.assign(link.style, { display: "block", padding: "16px", background: "#fff3e0", color: "#111", fontWeight: "bold" });
   document.body.appendChild(link);
-  preparedDownload = { url, link };
+  preparedDownloadLink = link;
   link.click();
 };
 async function downloadPng(item: PrintItem) {
@@ -638,14 +640,14 @@ async function downloadPng(item: PrintItem) {
   if ((!saved.exact || incomplete) && printSourceUrl(saved.attributes["_Personalised Preview"])) {
     const r = await fetch(assetUrl(saved.attributes["_Personalised Preview"]));
     if (!r.ok) throw new Error("Saved preview could not be downloaded.");
-    downloadBlob(
+    await downloadBlob(
       await r.blob(),
       `${safeFile(`${item.orderName}-${item.productTitle}`)}-saved-preview.png`,
     );
     return;
   }
   const p = await buildPrint(item, false);
-  downloadBlob(
+  await downloadBlob(
     await printPngWithDpi(await canvasBlob(p.composite)),
     `${safeFile(`${item.orderName}-${item.productTitle}`)}.png`,
   );
@@ -734,7 +736,7 @@ async function downloadPsd(item: PrintItem) {
       view.byteOffset,
       view.byteOffset + view.byteLength,
     ) as ArrayBuffer;
-  downloadBlob(
+  await downloadBlob(
     new Blob([buffer], { type: "image/vnd.adobe.photoshop" }),
     `${safeFile(`${item.orderName}-${item.productTitle}`)}.psd`,
   );
@@ -770,18 +772,18 @@ export default function PrintFilesPage() {
     const { buildAlbumPrintExport } = await import("../lib/album-print-export.client");
     const bytes = await buildAlbumPrintExport(pages, format, `${item.orderName} ${item.productTitle}`,
       (done, total) => setAlbumProgress(`Preparing ${done}/${total} pages…`));
-    downloadBlob(new Blob([new Uint8Array(bytes)], {
+    await downloadBlob(new Blob([new Uint8Array(bytes)], {
       type: format === "zip" ? "application/zip" : "application/pdf",
     }), `${safeFile(`${item.orderName}-${item.productTitle}`)}-print-pages.${format}`);
   };
   const downloadSignaturePdf = async (orderName: string, design: typeof designs[string]) => {
     const pdf = await buildSignatureDayPrintPdf({ ...design, printUrls: design.printUrls.map(({ front }) => ({ front })) });
-    downloadBlob(new Blob([new Uint8Array(pdf)], { type: "application/pdf" }),
+    await downloadBlob(new Blob([new Uint8Array(pdf)], { type: "application/pdf" }),
       `${safeFile(orderName)}-signature-day-front-A4-print.pdf`);
   };
   const downloadSignatureJpg = async (orderName: string, design: typeof designs[string]) => {
     const bytes = await buildSignatureDayJpgZip({ ...design, printUrls: design.printUrls.map(({ front }) => ({ front })) });
-    downloadBlob(new Blob([new Uint8Array(bytes)], { type: "application/zip" }),
+    await downloadBlob(new Blob([new Uint8Array(bytes)], { type: "application/zip" }),
       `${safeFile(orderName)}-signature-day-front-A4-300dpi-JPG.zip`);
   };
   const downloadPhotoPrints = async (item: PrintItem) => {
@@ -796,7 +798,7 @@ export default function PrintFilesPage() {
       return response.arrayBuffer();
     };
     const bytes = await buildPolaroidPrintExport(attrMap(item.attributes), loadPart, item.quantity, setAlbumProgress);
-    downloadBlob(new Blob([new Uint8Array(bytes)], { type: "application/zip" }),
+    await downloadBlob(new Blob([new Uint8Array(bytes)], { type: "application/zip" }),
       `${safeFile(`${item.orderName}-${item.productTitle}`)}-photos-and-13x19-sheets.zip`);
   };
   return (
@@ -868,8 +870,11 @@ export default function PrintFilesPage() {
                     const response = await fetch(assetUrl(rawAttributes["Original photo"]));
                     if (!response.ok) throw new Error("Original photo could not be loaded.");
                     const original = await response.blob();
-                    const extension = original.type.includes("png") ? "png" : original.type.includes("webp") ? "webp" : "jpg";
-                    downloadBlob(original, `${safeFile(item.orderName + "-" + item.productTitle)}-original.${extension}`);
+                    const signature = new Uint8Array(await original.slice(0, 12).arrayBuffer());
+                    const extension = signature[0] === 137 && signature[1] === 80 ? "png"
+                      : signature[0] === 255 && signature[1] === 216 ? "jpg"
+                      : signature[0] === 82 && signature[8] === 87 ? "webp" : "jpg";
+                    await downloadBlob(original, `${safeFile(item.orderName + "-" + item.productTitle)}-original.${extension}`);
                   })}>Download Original Photo</button>
                 </div>;
               }
