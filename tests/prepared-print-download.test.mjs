@@ -33,3 +33,18 @@ test('capabilities expire and cannot read the file after fifteen minutes',async(
     assert.equal((await readPreparedPrintDownload(new Request(new URL(prepared.href,base)))).status,404);
   } finally {Date.now=now;}
 });
+test('chunk upload is scoped, ordered and byte-exact; partial uploads cannot be downloaded',async()=>{
+  const start=await preparePrintDownload(new Request(base+'?start=1&name=chunked.png&size='+png.length,{method:'POST'}),'shop-A');
+  const info=await start.json();assert.equal(info.chunkBytes,8*1024*1024);
+  const url=base+'?upload='+info.upload;
+  assert.equal((await readPreparedPrintDownload(new Request(base+'?file='+info.upload))).status,404);
+  assert.equal((await preparePrintDownload(new Request(url+'&offset=0',{method:'POST',body:png.slice(0,5)}),'shop-B')).status,404);
+  const first=await preparePrintDownload(new Request(url+'&offset=0',{method:'POST',body:png.slice(0,5)}),'shop-A');
+  assert.deepEqual(await first.json(),{offset:5});
+  const replay=await preparePrintDownload(new Request(url+'&offset=0',{method:'POST',body:png.slice(0,5)}),'shop-A');
+  assert.equal(replay.status,409);assert.deepEqual(await replay.json(),{offset:5});
+  const last=await preparePrintDownload(new Request(url+'&offset=5',{method:'POST',body:png.slice(5)}),'shop-A');
+  const complete=await last.json();assert.equal(last.status,200);
+  const file=await readPreparedPrintDownload(new Request(new URL(complete.href,base)));
+  assert.deepEqual(new Uint8Array(await file.arrayBuffer()),png);
+});

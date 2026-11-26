@@ -618,11 +618,21 @@ const canvasBlob = (
   );
 let preparedDownloadLink: HTMLAnchorElement | undefined;
 const downloadBlob = async (blob: Blob, filename: string) => {
-  const response = await fetch(`/app/print-download?name=${encodeURIComponent(filename)}`, {
-    method: "POST", headers: { "Content-Type": blob.type || "application/octet-stream" }, body: blob,
-  });
-  if (!response.ok) throw new Error(await response.text() || "Could not prepare the download");
-  const prepared = await response.json() as { href: string; name: string };
+  const started = await fetch(`/app/print-download?start=1&name=${encodeURIComponent(filename)}&size=${blob.size}`, { method: "POST" });
+  if (!started.ok) throw new Error(await started.text() || "Could not prepare the download");
+  const upload = await started.json() as { upload: string; offset: number; chunkBytes: number };
+  let offset = 0, prepared: { href: string; name: string } | undefined;
+  while (offset < blob.size) {
+    const end = Math.min(offset + upload.chunkBytes, blob.size);
+    const response = await fetch(`/app/print-download?upload=${upload.upload}&offset=${offset}`, {
+      method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: blob.slice(offset, end),
+    });
+    if (!response.ok) throw new Error(await response.text() || "Could not prepare the download");
+    const part = await response.json() as { offset?: number; href?: string; name?: string };
+    offset = part.offset ?? end;
+    if (part.href && part.name) prepared = { href: part.href, name: part.name };
+  }
+  if (!prepared) throw new Error("Print download was not completed. Please retry.");
   preparedDownloadLink?.remove();
   const link = document.createElement("a");
   link.href = prepared.href;
