@@ -616,15 +616,21 @@ const canvasBlob = (
       quality,
     ),
   );
+let preparedDownload: { url: string; link: HTMLAnchorElement } | undefined;
 const downloadBlob = (blob: Blob, filename: string) => {
-  const u = URL.createObjectURL(blob),
-    a = document.createElement("a");
-  a.href = u;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(u), 60_000);
+  if (preparedDownload) {
+    preparedDownload.link.remove();
+    URL.revokeObjectURL(preparedDownload.url);
+  }
+  const url = URL.createObjectURL(blob), link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.textContent = `Download prepared file: ${filename}`;
+  link.setAttribute("aria-label", `Download prepared file: ${filename}`);
+  Object.assign(link.style, { display: "block", padding: "16px", background: "#fff3e0", color: "#111", fontWeight: "bold" });
+  document.body.appendChild(link);
+  preparedDownload = { url, link };
+  link.click();
 };
 async function downloadPng(item: PrintItem) {
   const saved = getDesign(item);
@@ -770,14 +776,8 @@ export default function PrintFilesPage() {
   };
   const downloadSignaturePdf = async (orderName: string, design: typeof designs[string]) => {
     const pdf = await buildSignatureDayPrintPdf({ ...design, printUrls: design.printUrls.map(({ front }) => ({ front })) });
-    const url = URL.createObjectURL(new Blob([new Uint8Array(pdf)], { type: "application/pdf" }));
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${safeFile(orderName)}-signature-day-front-A4-print.pdf`;
-    document.body.append(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    downloadBlob(new Blob([new Uint8Array(pdf)], { type: "application/pdf" }),
+      `${safeFile(orderName)}-signature-day-front-A4-print.pdf`);
   };
   const downloadSignatureJpg = async (orderName: string, design: typeof designs[string]) => {
     const bytes = await buildSignatureDayJpgZip({ ...design, printUrls: design.printUrls.map(({ front }) => ({ front })) });
