@@ -10,6 +10,7 @@ import { printPngWithDpi } from "../lib/png-print-density.client";
 import { DESIGN_ATTRIBUTE } from "../lib/signature-day.server";
 import { buildSignatureDayPrintPdf } from "../lib/signature-day-print-pdf.client";
 import { buildSignatureDayJpgZip } from "../lib/signature-day-print-jpg.client";
+import { crystalPrintFile, crystalPrintSpec } from "../lib/crystal-print.client";
 import { orderedShirts } from "../lib/signature-day-print-order";
 import { recoverMissingPrintDesigns } from "../lib/print-files-recovery.server";
 import { readRecoveryPrintDesigns } from "../lib/print-files-recovery-db.server";
@@ -91,7 +92,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       loadError = "The app has not been granted read_orders. Deploy the Shopify app configuration, then reopen the app and approve the updated permissions.";
     } else {
       const response = await admin.graphql(`#graphql
- query CartwalaPrintOrders($after: String) { orders(first: 50, after: $after, reverse: true, sortKey: CREATED_AT) { nodes { id name createdAt displayFinancialStatus lineItems(first: 100) { nodes { id name title quantity customAttributes { key value } product { id title metafield(namespace: "$app", key: "personalizer_config") { jsonValue } } } } } pageInfo { hasNextPage endCursor } } }`);
+ query CartwalaPrintOrders($after: String) { orders(first: 50, after: $after, reverse: true, sortKey: CREATED_AT) { nodes { id name createdAt displayFinancialStatus lineItems(first: 100) { nodes { id name title quantity customAttributes { key value } product { id title templateSuffix metafield(namespace: "$app", key: "personalizer_config") { jsonValue } } } } } pageInfo { hasNextPage endCursor } } }`);
       payload = (await response.json()) as any;
       if (payload.errors?.length) throw new Error(payload.errors[0].message);
     }
@@ -112,10 +113,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       if (signatureId) signatureOrders.push({ orderName: order.name, createdAt: order.createdAt,
         financialStatus: order.displayFinancialStatus || "UNKNOWN", productTitle: line.title || line.name,
         designId: signatureId, quantity: line.quantity || 0 });
+      const isCrystal = /^crystal(?:-heart)?$/.test(line.product?.templateSuffix || "") || attributes.some(a => ["_Cartwala Crystal", "_Crystal crop", "_Crystal Print JSON"].includes(a.key));
+      if (isCrystal && !attributes.some(a => a.key === "_Cartwala Crystal")) attributes.push({key: "_Cartwala Crystal", value: "true"});
       const isPhotoPrint = cartwalaPhotoPrintEnabled &&
         isCartwalaPhotoPrint(Object.fromEntries(attributes.map(({ key, value }) => [key, value])), line.product?.id);
       if (
-        !isPhotoPrint &&
+        !isPhotoPrint && !isCrystal &&
         !attributes.some((a) =>
           [
             "_Cartwala Personalization",
@@ -805,7 +808,7 @@ export default function PrintFilesPage() {
             return <div key={`${order.orderName}:${order.designId}`} style={{padding: 16, border: "1px solid #ddd", marginBottom: 12}}>
               <strong>{order.orderName} · {order.productTitle}</strong>
               <p>{order.financialStatus} · {design?.printUrls.length || 0} T-shirts</p>
-              {design && order.financialStatus === "PAID" ? <>
+              {design && design.printUrls.length > 0 ? <>
                 <button type="button" disabled={Boolean(working)} onClick={() => run(`${order.orderName}:${order.designId}`, () => downloadSignaturePdf(order.orderName, design))}>
                   {working === `${order.orderName}:${order.designId}` ? "Preparing A4 PDF…" : "Download A4 print PDF (S–XXL)"}
                 </button>
@@ -822,7 +825,7 @@ export default function PrintFilesPage() {
                     {shirt.back && <div><a href={shirt.back} target="_blank" rel="noreferrer">Back A4 print</a></div>}
                     <a href={design.sourceUrls[index]} target="_blank" rel="noreferrer">Original photo</a>
                   </div>)}
-              </> : <p>{!design ? "Saved print files not found." : "Files appear after payment."}</p>}
+              </> : <p>{!design ? "Saved print files not found." : "Saved print files are incomplete."}</p>}
             </div>;
           })}
       </s-section>
@@ -848,6 +851,27 @@ export default function PrintFilesPage() {
           >
             {orderItems.map((item) => {
               const rawAttributes = attrMap(item.attributes);
+              if (rawAttributes["_Cartwala Crystal"] === "true" || rawAttributes["_Crystal crop"] || rawAttributes["_Crystal Print JSON"]) {
+                const previewReady = Boolean(originalAssetUrl(rawAttributes["_Personalised Preview"]));
+                const specReady = Boolean(crystalPrintSpec(rawAttributes) && originalAssetUrl(rawAttributes["_Background removed photo"]));
+                const originalReady = Boolean(originalAssetUrl(rawAttributes["Original photo"]));
+                return <div key={item.lineItemId} style={{border: "1px solid #ddd", borderRadius: 12, padding: 16, marginBottom: 12}}>
+                  <strong>{item.productTitle}</strong>
+                  <p>{!previewReady ? "Saved crystal preview missing." : !specReady ? "JPG available; saved PSD layer data incomplete." : "Crystal artwork ready for export."}</p>
+                  {(["jpg", "psd"] as const).map(format => <button key={format} type="button"
+                    disabled={Boolean(working) || !previewReady || (format === "psd" && !specReady)}
+                    onClick={() => run(`${item.lineItemId}:${format}`, async () => downloadBlob(await crystalPrintFile(rawAttributes, format), `${safeFile(item.orderName + "-" + item.productTitle)}-300dpi.${format}`))}>
+                    {working === `${item.lineItemId}:${format}` ? "Preparing artwork…" : `Download ${format.toUpperCase()}`}
+                  </button>)}
+                  <button type="button" disabled={Boolean(working) || !originalReady} onClick={() => run(`${item.lineItemId}:original`, async () => {
+                    const response = await fetch(assetUrl(rawAttributes["Original photo"]));
+                    if (!response.ok) throw new Error("Original photo could not be loaded.");
+                    const original = await response.blob();
+                    const extension = original.type.includes("png") ? "png" : original.type.includes("webp") ? "webp" : "jpg";
+                    downloadBlob(original, `${safeFile(item.orderName + "-" + item.productTitle)}-original.${extension}`);
+                  })}>Download Original Photo</button>
+                </div>;
+              }
               if (item.cartwalaPhotoPrint) {
                 let problem = "";
                 try {
